@@ -19,17 +19,17 @@ const GenerationResults = () => {
   const [generatedImages, setGeneratedImages] = useState<GeneratedImage[]>([
     {
       id: "gen1",
-      url: "https://images.unsplash.com/photo-1482881497185-d4a9ddbe4151",
+      url: "https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=400&h=400&fit=crop",
       selected: false,
     },
     {
       id: "gen2",
-      url: "https://images.unsplash.com/photo-1482881497185-d4a9ddbe4151",
+      url: "https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=400&h=400&fit=crop",
       selected: false,
     },
     {
       id: "gen3",
-      url: "https://images.unsplash.com/photo-1482881497185-d4a9ddbe4151",
+      url: "https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=400&h=400&fit=crop",
       selected: false,
     },
   ]);

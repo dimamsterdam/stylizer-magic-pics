@@ -17,11 +17,11 @@ const Publish = () => {
   const [selectedImages] = useState<PublishImage[]>([
     {
       id: "gen1",
-      url: "https://images.unsplash.com/photo-1482881497185-d4a9ddbe4151",
+      url: "https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=400&h=400&fit=crop",
     },
     {
       id: "gen2",
-      url: "https://images.unsplash.com/photo-1482881497185-d4a9ddbe4151",
+      url: "https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=400&h=400&fit=crop",
     },
   ]);
 
