@@ -1,13 +1,14 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Check } from "lucide-react";
+import { Check, Trash, Robot } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "@/components/ui/use-toast";
 
 interface PublishImage {
   id: string;
   url: string;
+  isAiGenerated?: boolean;
 }
 
 const Publish = () => {
@@ -17,11 +18,23 @@ const Publish = () => {
   const [selectedImages] = useState<PublishImage[]>([
     {
       id: "gen1",
-      url: "https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=400&h=400&fit=crop",
+      url: "https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?w=400&h=400&fit=crop",
+      isAiGenerated: true,
     },
     {
       id: "gen2",
+      url: "https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?w=400&h=400&fit=crop",
+      isAiGenerated: true,
+    },
+    {
+      id: "original1",
       url: "https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=400&h=400&fit=crop",
+      isAiGenerated: false,
+    },
+    {
+      id: "original2",
+      url: "https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=400&h=400&fit=crop",
+      isAiGenerated: false,
     },
   ]);
 
@@ -43,9 +56,30 @@ const Publish = () => {
     navigate("/generation-results");
   };
 
+  const handleDelete = (imageId: string) => {
+    toast({
+      title: "Image removed",
+      description: "The image has been removed from the selection.",
+    });
+  };
+
   return (
     <div className="min-h-screen bg-polaris-background">
       <div className="max-w-7xl mx-auto px-4 py-8">
+        <Card className="mb-8">
+          <CardHeader className="flex flex-row items-center gap-4">
+            <img
+              src="https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=100&h=100&fit=crop"
+              alt="Original product"
+              className="w-16 h-16 object-cover rounded-md border border-polaris-border"
+            />
+            <div>
+              <CardTitle>Classic White T-Shirt</CardTitle>
+              <p className="text-polaris-secondary">SKU: WHT-CLASSIC-001</p>
+            </div>
+          </CardHeader>
+        </Card>
+
         <Card className="mb-8">
           <CardHeader>
             <CardTitle>Review and Publish</CardTitle>
@@ -54,23 +88,32 @@ const Publish = () => {
             <p className="text-polaris-secondary mb-4">
               Review your selected images before publishing them to your store.
             </p>
-          </CardContent>
-        </Card>
-
-        <Card className="mb-8">
-          <CardHeader>
-            <CardTitle>Selected Images</CardTitle>
-          </CardHeader>
-          <CardContent>
             <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
               {selectedImages.map((image) => (
-                <div key={image.id} className="relative">
+                <div key={image.id} className="relative group">
                   <img
                     src={image.url}
-                    alt="Generated product"
-                    className="w-full h-48 object-cover rounded-lg"
+                    alt="Product"
+                    className="w-full h-48 object-cover rounded-lg border border-polaris-border"
                   />
-                  <div className="absolute top-2 right-2">
+                  <div className="absolute top-2 right-2 space-x-2">
+                    <Button
+                      variant="destructive"
+                      size="icon"
+                      className="h-8 w-8"
+                      onClick={() => handleDelete(image.id)}
+                    >
+                      <Trash className="h-4 w-4" />
+                    </Button>
+                  </div>
+                  {image.isAiGenerated && (
+                    <div className="absolute top-2 left-2">
+                      <div className="bg-polaris-teal text-white p-1 rounded-full">
+                        <Robot className="h-4 w-4" />
+                      </div>
+                    </div>
+                  )}
+                  <div className="absolute bottom-2 right-2">
                     <div className="bg-polaris-green text-white p-1 rounded-full">
                       <Check className="h-4 w-4" />
                     </div>
