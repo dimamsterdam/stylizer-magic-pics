@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Search } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { productImages } from "@/data/images";
 
 interface Product {
   id: string;
@@ -14,20 +15,12 @@ interface ProductPickerProps {
   onSelect: (product: Product) => void;
 }
 
-const dummyProducts: Product[] = [
-  {
-    id: "4",
-    title: "Classic Cream Sweater",
-    sku: "CS004",
-    image: "/lovable-uploads/9bac9fd0-2115-4bae-8108-0b973f83db37.png",
-  },
-  {
-    id: "5",
-    title: "Cream Button-Up Shirt",
-    sku: "CBS005",
-    image: "/lovable-uploads/0f0a212c-5edc-4c90-a258-6b43222bac06.png",
-  },
-];
+const dummyProducts: Product[] = Object.values(productImages).map(product => ({
+  id: product.id,
+  title: product.title,
+  sku: product.id,
+  image: product.main,
+}));
 
 export const ProductPicker = ({ onSelect }: ProductPickerProps) => {
   const [searchTerm, setSearchTerm] = useState("");

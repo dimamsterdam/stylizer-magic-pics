@@ -7,6 +7,7 @@ import { useNavigate, useLocation, Link } from "react-router-dom";
 import { useToast } from "@/components/ui/use-toast";
 import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { productImages, ProductKey } from "@/data/images";
 
 interface GeneratedImage {
   id: string;
@@ -32,44 +33,28 @@ const GenerationResults = () => {
   const state = location.state as LocationState;
   const selectedProduct = state?.selectedProduct;
 
-  console.log("Location state:", location.state);
-  console.log("Selected product:", selectedProduct);
-
   if (!selectedProduct) {
     console.log("No product selected, redirecting to index");
     navigate("/");
     return null;
   }
 
+  // Find the corresponding product in our image mapping
+  const productKey = Object.keys(productImages).find(
+    key => productImages[key as ProductKey].id === selectedProduct.id
+  ) as ProductKey | undefined;
+
+  const productData = productKey ? productImages[productKey] : null;
+
   const [selectedImageUrl, setSelectedImageUrl] = useState<string | null>(null);
   const [prompt, setPrompt] = useState("Professional model wearing the shirt in an urban setting");
-  const [generatedImages, setGeneratedImages] = useState<GeneratedImage[]>([
-    {
-      id: "gen1",
-      url: "/lovable-uploads/af88ce94-30e1-4875-b411-1c07060016c2.png",
+  const [generatedImages, setGeneratedImages] = useState<GeneratedImage[]>(
+    productData?.generated.map(img => ({
+      id: img.id,
+      url: img.url,
       selected: false,
-    },
-    {
-      id: "gen2",
-      url: "/lovable-uploads/61d9b435-6552-49b0-a269-25c905ba18c9.png",
-      selected: false,
-    },
-    {
-      id: "gen3",
-      url: "/lovable-uploads/047c9307-af3c-47c6-b2e6-ea9d51a0c8cc.png",
-      selected: false,
-    },
-    {
-      id: "gen4",
-      url: "/lovable-uploads/01c51803-441a-4b90-ad49-fc25ca184153.png",
-      selected: false,
-    },
-    {
-      id: "gen5",
-      url: "/lovable-uploads/12022501-6211-4169-ad19-4d93700c8c9f.png",
-      selected: false,
-    },
-  ]);
+    })) || []
+  );
 
   const handleImageSelect = (id: string) => {
     setGeneratedImages(
