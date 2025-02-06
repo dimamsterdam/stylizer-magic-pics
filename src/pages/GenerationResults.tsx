@@ -135,13 +135,11 @@ const GenerationResults = () => {
           <CardHeader>
             <div className="flex flex-col space-y-6">
               <div className="flex items-center gap-4">
-                {selectedProduct?.image && (
-                  <img
-                    src={selectedProduct.image}
-                    alt={selectedProduct.title}
-                    className="w-16 h-16 object-cover rounded-md border border-polaris-border"
-                  />
-                )}
+                <img
+                  src={selectedProduct?.image || "/placeholder.svg"}
+                  alt={selectedProduct?.title || "Product placeholder"}
+                  className="w-16 h-16 object-cover rounded-md border border-polaris-border"
+                />
                 <div className="flex items-center gap-2">
                   <div>
                     <h1 className="text-display-lg text-polaris-text">
