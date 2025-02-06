@@ -5,7 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Check, RefreshCw, Trash, ZoomIn } from "lucide-react";
 import { useNavigate, useLocation, Link } from "react-router-dom";
 import { useToast } from "@/components/ui/use-toast";
-import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { useIsMobile } from "@/hooks/use-mobile";
 
 interface GeneratedImage {
@@ -135,15 +135,21 @@ const GenerationResults = () => {
           <CardHeader>
             <div className="flex flex-col space-y-6">
               <div className="flex items-center gap-4">
-                <img
-                  src={selectedProduct?.image || "/placeholder.svg"}
-                  alt={selectedProduct?.title || "Product placeholder"}
-                  className="w-16 h-16 object-cover rounded-md border border-polaris-border"
-                />
+                {selectedProduct ? (
+                  <img
+                    src={selectedProduct.image}
+                    alt={selectedProduct.title}
+                    className="w-16 h-16 object-cover rounded-md border border-polaris-border"
+                  />
+                ) : (
+                  <div className="w-16 h-16 bg-gray-100 rounded-md border border-polaris-border flex items-center justify-center">
+                    <span className="text-polaris-secondary text-sm">No image</span>
+                  </div>
+                )}
                 <div className="flex items-center gap-2">
                   <div>
                     <h1 className="text-display-lg text-polaris-text">
-                      Selected product
+                      {selectedProduct?.title || "Selected product"}
                     </h1>
                     <p className="text-body-md text-polaris-secondary">
                       SKU: {selectedProduct?.sku || "N/A"}
