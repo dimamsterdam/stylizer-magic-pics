@@ -20,8 +20,8 @@ export const productImages = {
   'cream-sweater': {
     id: 'CS004',
     title: 'Classic Cream Sweater',
-    main: '/lovable-uploads/0f0a212c-5edc-4c90-a258-6b43222bac06.png',
-    details: '/lovable-uploads/9bac9fd0-2115-4bae-8108-0b973f83db37.png',
+    main: '/lovable-uploads/047c9307-af3c-47c6-b2e6-ea9d51a0c8cc.png',
+    details: '/lovable-uploads/01c51803-441a-4b90-ad49-fc25ca184153.png',
     generated: [
       {
         id: '047c9307',
