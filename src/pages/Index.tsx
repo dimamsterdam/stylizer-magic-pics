@@ -3,6 +3,7 @@ import { ProductPicker } from "@/components/ProductPicker";
 import { ImageGallery } from "@/components/ImageGallery";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { useNavigate } from "react-router-dom";
 
 interface Product {
   id: string;
@@ -18,6 +19,7 @@ interface Image {
 }
 
 const Index = () => {
+  const navigate = useNavigate();
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const [images, setImages] = useState<Image[]>([]);
   const [prompt, setPrompt] = useState("");
@@ -52,6 +54,12 @@ const Index = () => {
   };
 
   const canStartGeneration = selectedProduct && images.some((img) => img.selected) && prompt.trim();
+
+  const handleStartGeneration = () => {
+    if (canStartGeneration) {
+      navigate("/generation-results");
+    }
+  };
 
   return (
     <div className="min-h-screen bg-polaris-background">
@@ -100,6 +108,7 @@ const Index = () => {
               <Button
                 className="bg-polaris-green hover:bg-polaris-teal text-white"
                 disabled={!canStartGeneration}
+                onClick={handleStartGeneration}
               >
                 Start Generation
               </Button>
