@@ -8,7 +8,7 @@ const NavBar = () => {
         <div className="h-16 flex items-center justify-between">
           <div className="flex items-center">
             <Link to="/">
-              <span className="font-inter font-medium text-polaris-text tracking-[-0.03em] text-sm">
+              <span className="font-inter font-medium text-polaris-text tracking-[-0.03em] text-base">
                 brandmachine
               </span>
             </Link>
