@@ -17,7 +17,6 @@ const Publish = () => {
   const { toast } = useToast();
   const [isPublishing, setIsPublishing] = useState(false);
   
-  // Get selected images from navigation state, fallback to empty array if none
   const [selectedImages, setSelectedImages] = useState<PublishImage[]>(
     location.state?.selectedImages || []
   );
@@ -81,7 +80,7 @@ const Publish = () => {
                     alt="Product"
                     className="w-full h-48 object-cover rounded-lg border border-polaris-border"
                   />
-                  <div className="absolute top-2 right-2 space-x-2">
+                  <div className="absolute top-2 right-2">
                     <Button
                       variant="destructive"
                       size="icon"
