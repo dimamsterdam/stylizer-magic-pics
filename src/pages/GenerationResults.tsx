@@ -28,7 +28,11 @@ const GenerationResults = () => {
   const location = useLocation();
   const { toast } = useToast();
   const isMobile = useIsMobile();
-  const { selectedProduct } = (location.state as LocationState) || {};
+  const state = location.state as LocationState;
+  const selectedProduct = state?.selectedProduct;
+
+  console.log("Selected product:", selectedProduct); // Debug log
+
   const [selectedImageUrl, setSelectedImageUrl] = useState<string | null>(null);
   const [prompt, setPrompt] = useState("Professional model wearing the shirt in an urban setting");
   const [generatedImages, setGeneratedImages] = useState<GeneratedImage[]>([
@@ -135,7 +139,7 @@ const GenerationResults = () => {
           <CardHeader>
             <div className="flex flex-col space-y-6">
               <div className="flex items-center gap-4">
-                {selectedProduct ? (
+                {selectedProduct?.image ? (
                   <img
                     src={selectedProduct.image}
                     alt={selectedProduct.title}
