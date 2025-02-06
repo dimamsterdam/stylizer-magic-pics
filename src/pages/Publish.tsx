@@ -1,14 +1,13 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Check, Trash, Bot } from "lucide-react";
+import { Check, Trash } from "lucide-react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useToast } from "@/components/ui/use-toast";
 
 interface PublishImage {
   id: string;
   url: string;
-  isAiGenerated?: boolean;
 }
 
 const Publish = () => {
@@ -90,13 +89,6 @@ const Publish = () => {
                       <Trash className="h-4 w-4" />
                     </Button>
                   </div>
-                  {image.isAiGenerated && (
-                    <div className="absolute top-2 left-2">
-                      <div className="bg-polaris-teal text-white p-1 rounded-full">
-                        <Bot className="h-4 w-4" />
-                      </div>
-                    </div>
-                  )}
                   <div className="absolute bottom-2 right-2">
                     <div className="bg-polaris-green text-white p-1 rounded-full">
                       <Check className="h-4 w-4" />
