@@ -46,32 +46,27 @@ const GenerationResults = () => {
   const [generatedImages, setGeneratedImages] = useState<GeneratedImage[]>([
     {
       id: "gen1",
-      url: "/lovable-uploads/01c51803-441a-4b90-ad49-fc25ca184153.png",
+      url: "/lovable-uploads/af88ce94-30e1-4875-b411-1c07060016c2.png",
       selected: false,
     },
     {
       id: "gen2",
-      url: "/lovable-uploads/12022501-6211-4169-ad19-4d93700c8c9f.png",
+      url: "/lovable-uploads/61d9b435-6552-49b0-a269-25c905ba18c9.png",
       selected: false,
     },
     {
       id: "gen3",
-      url: "https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=400&h=400&fit=crop",
+      url: "/lovable-uploads/047c9307-af3c-47c6-b2e6-ea9d51a0c8cc.png",
       selected: false,
     },
     {
       id: "gen4",
-      url: "https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=400&h=400&fit=crop",
+      url: "/lovable-uploads/01c51803-441a-4b90-ad49-fc25ca184153.png",
       selected: false,
     },
     {
       id: "gen5",
-      url: "https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=400&h=400&fit=crop",
-      selected: false,
-    },
-    {
-      id: "gen6",
-      url: "https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=400&h=400&fit=crop",
+      url: "/lovable-uploads/12022501-6211-4169-ad19-4d93700c8c9f.png",
       selected: false,
     },
   ]);
