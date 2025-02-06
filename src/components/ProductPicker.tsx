@@ -16,24 +16,6 @@ interface ProductPickerProps {
 
 const dummyProducts: Product[] = [
   {
-    id: "1",
-    title: "Classic White T-Shirt",
-    sku: "WT001",
-    image: "https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=200&h=200&fit=crop",
-  },
-  {
-    id: "2",
-    title: "Denim Jeans",
-    sku: "DJ002",
-    image: "https://images.unsplash.com/photo-1542272604-787c3835535d?w=200&h=200&fit=crop",
-  },
-  {
-    id: "3",
-    title: "Summer Dress",
-    sku: "SD003",
-    image: "https://images.unsplash.com/photo-1515372039744-b8f02a3ae446?w=200&h=200&fit=crop",
-  },
-  {
     id: "4",
     title: "Classic Cream Sweater",
     sku: "CS004",
