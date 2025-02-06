@@ -37,9 +37,11 @@ const Breadcrumbs = () => {
   const currentPath = location.pathname.split("/").filter(Boolean)[0] || "";
   const fullPath = getFullPath(currentPath);
 
+  if (currentPath === "") return null;
+
   return (
     <div className="border-b border-polaris-border bg-white">
-      <div className="max-w-7xl mx-auto px-4 py-2">
+      <div className="max-w-7xl mx-auto px-4 lg:px-8 py-2">
         <Breadcrumb>
           <BreadcrumbList>
             {fullPath.map((segment, index) => {
