@@ -18,7 +18,7 @@ const Publish = () => {
   const [isPublishing, setIsPublishing] = useState(false);
   
   // Get selected images from navigation state, fallback to empty array if none
-  const [selectedImages] = useState<PublishImage[]>(
+  const [selectedImages, setSelectedImages] = useState<PublishImage[]>(
     location.state?.selectedImages || []
   );
 
@@ -41,6 +41,7 @@ const Publish = () => {
   };
 
   const handleDelete = (imageId: string) => {
+    setSelectedImages(selectedImages.filter(img => img.id !== imageId));
     toast({
       title: "Image removed",
       description: "The image has been removed from the selection.",
