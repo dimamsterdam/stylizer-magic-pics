@@ -1,72 +1,72 @@
-import React from "react";
 import { Link, useLocation } from "react-router-dom";
 import {
   Breadcrumb,
   BreadcrumbItem,
   BreadcrumbLink,
+  BreadcrumbList,
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
 
-const routes = [
-  { path: "/", label: "Home" },
-  { path: "/generation-results", label: "Generation Results" },
-  { path: "/publish", label: "Publish" },
-];
+const getBreadcrumbLabel = (path: string) => {
+  switch (path) {
+    case "":
+      return "Home";
+    case "generation-results":
+      return "Generation Results";
+    case "publish":
+      return "Publish";
+    default:
+      return path;
+  }
+};
 
-const getBreadcrumbs = (pathname: string) => {
-  const paths = pathname.split("/").filter(Boolean);
-  let currentPath = "";
-
-  return [
-    { path: "/", label: "Home" },
-    ...paths.map((segment) => {
-      currentPath += `/${segment}`;
-      const route = routes.find((r) => r.path === currentPath);
-      return {
-        path: currentPath,
-        label: route ? route.label : segment,
-      };
-    }),
+const getFullPath = (currentPath: string) => {
+  const paths = [
+    { path: "", label: "Home" },
+    { path: "generation-results", label: "Generation Results" },
+    { path: "publish", label: "Publish" },
   ];
+
+  const currentIndex = paths.findIndex((p) => currentPath.includes(p.path));
+  return paths.slice(0, currentIndex + 1);
 };
 
 const Breadcrumbs = () => {
   const location = useLocation();
-  const breadcrumbs = getBreadcrumbs(location.pathname);
-
-  // Show breadcrumbs on all pages except home
-  if (location.pathname === "/") {
-    return null;
-  }
+  const currentPath = location.pathname.split("/").filter(Boolean)[0] || "";
+  const fullPath = getFullPath(currentPath);
 
   return (
-    <div className="border-b border-polaris-border">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <Breadcrumb className="py-4">
-          {breadcrumbs.map((segment, index) => {
-            const isLast = index === breadcrumbs.length - 1;
+    <div className="border-b border-polaris-border bg-white">
+      <div className="max-w-7xl mx-auto px-4 py-2">
+        <Breadcrumb>
+          <BreadcrumbList>
+            {fullPath.map((segment, index) => {
+              const path = segment.path === "" ? "/" : `/${segment.path}`;
+              const isLast = index === fullPath.length - 1;
 
-            return (
-              <BreadcrumbItem key={segment.path}>
-                {index > 0 && <BreadcrumbSeparator />}
-                {isLast ? (
-                  <BreadcrumbPage className="text-polaris-text font-semibold">
-                    {segment.label}
-                  </BreadcrumbPage>
-                ) : (
-                  <BreadcrumbLink asChild>
-                    <Link
-                      to={segment.path}
-                      className="text-polaris-secondary hover:text-polaris-teal"
-                    >
+              return (
+                <BreadcrumbItem key={path}>
+                  {index > 0 && <BreadcrumbSeparator />}
+                  {isLast ? (
+                    <BreadcrumbPage className="text-polaris-text font-semibold">
                       {segment.label}
-                    </Link>
-                  </BreadcrumbLink>
-                )}
-              </BreadcrumbItem>
-            );
-          })}
+                    </BreadcrumbPage>
+                  ) : (
+                    <BreadcrumbLink asChild>
+                      <Link
+                        to={path}
+                        className="text-polaris-secondary hover:text-polaris-teal"
+                      >
+                        {segment.label}
+                      </Link>
+                    </BreadcrumbLink>
+                  )}
+                </BreadcrumbItem>
+              );
+            })}
+          </BreadcrumbList>
         </Breadcrumb>
       </div>
     </div>
