@@ -35,6 +35,7 @@ const Breadcrumbs = () => {
   const location = useLocation();
   const breadcrumbs = getBreadcrumbs(location.pathname);
 
+  // Show breadcrumbs on all pages except home
   if (location.pathname === "/") {
     return null;
   }
@@ -44,11 +45,10 @@ const Breadcrumbs = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <Breadcrumb className="py-4">
           {breadcrumbs.map((segment, index) => {
-            const path = segment.path;
             const isLast = index === breadcrumbs.length - 1;
 
             return (
-              <BreadcrumbItem key={path}>
+              <BreadcrumbItem key={segment.path}>
                 {index > 0 && <BreadcrumbSeparator />}
                 {isLast ? (
                   <BreadcrumbPage className="text-polaris-text font-semibold">
@@ -57,7 +57,7 @@ const Breadcrumbs = () => {
                 ) : (
                   <BreadcrumbLink asChild>
                     <Link
-                      to={path}
+                      to={segment.path}
                       className="text-polaris-secondary hover:text-polaris-teal"
                     >
                       {segment.label}
