@@ -169,7 +169,7 @@ const GenerationResults = () => {
 
   return (
     <div className="min-h-screen bg-polaris-background">
-      <div className="max-w-7xl mx-auto px-4 py-8">
+      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <Card className="mb-8">
           <CardHeader>
             <div className="flex flex-col space-y-6">
