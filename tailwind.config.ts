@@ -64,6 +64,17 @@ export default {
       fontFamily: {
         sans: ["Inter", "sans-serif"],
       },
+      fontSize: {
+        // Polaris typography scale
+        'display-xl': ['28px', { lineHeight: '32px', fontWeight: '600' }],
+        'display-lg': ['24px', { lineHeight: '28px', fontWeight: '600' }],
+        'display-md': ['20px', { lineHeight: '24px', fontWeight: '600' }],
+        'display-sm': ['16px', { lineHeight: '20px', fontWeight: '600' }],
+        'body-lg': ['16px', { lineHeight: '24px', fontWeight: '400' }],
+        'body-md': ['14px', { lineHeight: '20px', fontWeight: '400' }],
+        'body-sm': ['13px', { lineHeight: '20px', fontWeight: '400' }],
+        'body-xs': ['12px', { lineHeight: '16px', fontWeight: '400' }],
+      },
       borderRadius: {
         lg: "var(--radius)",
         md: "calc(var(--radius) - 2px)",

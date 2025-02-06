@@ -106,15 +106,15 @@ const GenerationResults = () => {
               className="w-16 h-16 object-cover rounded-md border border-polaris-border"
             />
             <div>
-              <CardTitle>Classic White T-Shirt</CardTitle>
-              <p className="text-polaris-secondary">SKU: WHT-CLASSIC-001</p>
+              <h1 className="text-display-lg text-polaris-text">Classic White T-Shirt</h1>
+              <p className="text-body-md text-polaris-secondary">SKU: WHT-CLASSIC-001</p>
             </div>
           </CardHeader>
         </Card>
 
         <Card className="mb-8">
           <CardHeader>
-            <CardTitle>Generation Prompt</CardTitle>
+            <h2 className="text-display-md text-polaris-text">Generation Prompt</h2>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="flex gap-4">
@@ -135,7 +135,7 @@ const GenerationResults = () => {
 
         <Card>
           <CardHeader>
-            <CardTitle>Generated Images</CardTitle>
+            <h2 className="text-display-md text-polaris-text">Generated Images</h2>
           </CardHeader>
           <CardContent>
             <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
