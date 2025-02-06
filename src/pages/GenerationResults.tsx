@@ -132,40 +132,39 @@ const GenerationResults = () => {
     <div className="min-h-screen bg-polaris-background">
       <div className="max-w-7xl mx-auto px-4 py-8">
         <Card className="mb-8">
-          <CardHeader className="flex flex-row items-center gap-4">
-            {selectedProduct?.image && (
-              <img
-                src={selectedProduct.image}
-                alt={selectedProduct.title}
-                className="w-16 h-16 object-cover rounded-md border border-polaris-border"
-              />
-            )}
-            <div className="flex items-center gap-2">
-              <div>
-                <h1 className="text-display-lg text-polaris-text">
-                  Selected product
-                </h1>
-                <p className="text-body-md text-polaris-secondary">
-                  SKU: {selectedProduct?.sku || "N/A"}
-                </p>
+          <CardHeader>
+            <div className="flex flex-col space-y-6">
+              <div className="flex items-center gap-4">
+                {selectedProduct?.image && (
+                  <img
+                    src={selectedProduct.image}
+                    alt={selectedProduct.title}
+                    className="w-16 h-16 object-cover rounded-md border border-polaris-border"
+                  />
+                )}
+                <div className="flex items-center gap-2">
+                  <div>
+                    <h1 className="text-display-lg text-polaris-text">
+                      Selected product
+                    </h1>
+                    <p className="text-body-md text-polaris-secondary">
+                      SKU: {selectedProduct?.sku || "N/A"}
+                    </p>
+                  </div>
+                  <Link 
+                    to="/" 
+                    className="text-sm text-polaris-teal hover:text-polaris-green ml-2"
+                  >
+                    change
+                  </Link>
+                </div>
               </div>
-              <Link 
-                to="/" 
-                className="text-sm text-polaris-teal hover:text-polaris-green ml-2"
-              >
-                change
-              </Link>
+              <div className="space-y-2">
+                <h2 className="text-display-sm text-polaris-text">Generation Prompt</h2>
+                {renderPromptInput()}
+              </div>
             </div>
           </CardHeader>
-        </Card>
-
-        <Card className="mb-8">
-          <CardHeader>
-            <h2 className="text-display-md text-polaris-text">Generation Prompt</h2>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            {renderPromptInput()}
-          </CardContent>
         </Card>
 
         <Card>
