@@ -33,8 +33,8 @@ const GenerationResults = () => {
   const state = location.state as LocationState;
   const selectedProduct = state?.selectedProduct;
 
-  console.log("Location state:", location.state); // Debug entire state
-  console.log("Selected product:", selectedProduct); // Debug product
+  console.log("Location state:", location.state);
+  console.log("Selected product:", selectedProduct);
 
   // If no product data, redirect back to index
   if (!selectedProduct) {
@@ -119,7 +119,8 @@ const GenerationResults = () => {
           id: img.id,
           url: img.url,
           isAiGenerated: true
-        }))
+        })),
+        selectedProduct // Pass the selected product to the publish page
       } 
     });
   };

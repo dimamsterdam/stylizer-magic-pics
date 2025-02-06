@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Check, Trash } from "lucide-react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useToast } from "@/components/ui/use-toast";
@@ -10,15 +10,34 @@ interface PublishImage {
   url: string;
 }
 
+interface LocationState {
+  selectedImages: PublishImage[];
+  selectedProduct?: {
+    id: string;
+    title: string;
+    sku: string;
+    image: string;
+  };
+}
+
 const Publish = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const { toast } = useToast();
   const [isPublishing, setIsPublishing] = useState(false);
   
+  const state = location.state as LocationState;
+  const selectedProduct = state?.selectedProduct;
   const [selectedImages, setSelectedImages] = useState<PublishImage[]>(
-    location.state?.selectedImages || []
+    state?.selectedImages || []
   );
+
+  // If no product data, redirect back
+  if (!selectedProduct) {
+    console.log("No product data in Publish, redirecting back");
+    navigate("/");
+    return null;
+  }
 
   const handlePublish = async () => {
     setIsPublishing(true);
@@ -35,7 +54,9 @@ const Publish = () => {
   };
 
   const handleBack = () => {
-    navigate("/generation-results");
+    navigate("/generation-results", {
+      state: { selectedProduct }
+    });
   };
 
   const handleDelete = (imageId: string) => {
@@ -52,13 +73,13 @@ const Publish = () => {
         <Card className="mb-8">
           <CardHeader className="flex flex-row items-center gap-4">
             <img
-              src="https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=100&h=100&fit=crop"
-              alt="Original product"
+              src={selectedProduct.image}
+              alt={selectedProduct.title}
               className="w-16 h-16 object-cover rounded-md border border-polaris-border"
             />
             <div>
-              <h1 className="text-display-lg text-polaris-text">Classic White T-Shirt</h1>
-              <p className="text-body-md text-polaris-secondary">SKU: WHT-CLASSIC-001</p>
+              <h1 className="text-display-lg text-polaris-text">{selectedProduct.title}</h1>
+              <p className="text-body-md text-polaris-secondary">SKU: {selectedProduct.sku}</p>
             </div>
           </CardHeader>
         </Card>
