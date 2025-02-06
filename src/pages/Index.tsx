@@ -99,9 +99,10 @@ const Index = () => {
             </div>
 
             <div className="bg-white p-6 rounded-lg shadow-sm">
-              <h2 className="text-xl font-semibold text-polaris-text mb-4">
+              <h2 className="text-xl font-semibold text-polaris-text mb-2">
                 Product Images
               </h2>
+              <p className="text-polaris-secondary mb-4">Select the product image to use</p>
               <ImageGallery
                 images={images}
                 onSelect={handleImageSelect}
