@@ -24,10 +24,15 @@ const dummyProducts: Product[] = Object.values(productImages).map(product => ({
 
 export const ProductPicker = ({ onSelect }: ProductPickerProps) => {
   const [searchTerm, setSearchTerm] = useState("");
-  const [results, setResults] = useState<Product[]>(dummyProducts);
+  const [results, setResults] = useState<Product[]>([]);
 
   const handleSearch = (term: string) => {
     setSearchTerm(term);
+    if (term.trim() === "") {
+      setResults([]);
+      return;
+    }
+    
     const filtered = dummyProducts.filter(
       (product) =>
         product.title.toLowerCase().includes(term.toLowerCase()) ||
