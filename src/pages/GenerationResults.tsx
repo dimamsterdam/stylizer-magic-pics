@@ -5,7 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Check, RefreshCw, Trash, ZoomIn } from "lucide-react";
 import { useNavigate, useLocation, Link } from "react-router-dom";
 import { useToast } from "@/components/ui/use-toast";
-import { Dialog, DialogContent, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
 import { useIsMobile } from "@/hooks/use-mobile";
 
 interface GeneratedImage {
@@ -28,10 +28,13 @@ const GenerationResults = () => {
   const location = useLocation();
   const { toast } = useToast();
   const isMobile = useIsMobile();
+  
+  // Ensure we have the product data
   const state = location.state as LocationState;
   const selectedProduct = state?.selectedProduct;
 
-  console.log("Selected product:", selectedProduct); // Debug log
+  console.log("Location state:", location.state); // Debug entire state
+  console.log("Selected product:", selectedProduct); // Debug product
 
   const [selectedImageUrl, setSelectedImageUrl] = useState<string | null>(null);
   const [prompt, setPrompt] = useState("Professional model wearing the shirt in an urban setting");
@@ -132,6 +135,30 @@ const GenerationResults = () => {
     </div>
   );
 
+  const renderProductImage = () => {
+    // First try to use the product image
+    if (selectedProduct?.image) {
+      return (
+        <img
+          src={selectedProduct.image}
+          alt={selectedProduct.title}
+          className="w-16 h-16 object-cover rounded-md border border-polaris-border"
+        />
+      );
+    }
+
+    // If no product image, use a placeholder
+    return (
+      <div className="w-16 h-16 bg-polaris-background rounded-md border border-polaris-border flex items-center justify-center">
+        <img
+          src="/placeholder.svg"
+          alt="Product placeholder"
+          className="w-8 h-8 opacity-50"
+        />
+      </div>
+    );
+  };
+
   return (
     <div className="min-h-screen bg-polaris-background">
       <div className="max-w-7xl mx-auto px-4 py-8">
@@ -139,17 +166,7 @@ const GenerationResults = () => {
           <CardHeader>
             <div className="flex flex-col space-y-6">
               <div className="flex items-center gap-4">
-                {selectedProduct?.image ? (
-                  <img
-                    src={selectedProduct.image}
-                    alt={selectedProduct.title}
-                    className="w-16 h-16 object-cover rounded-md border border-polaris-border"
-                  />
-                ) : (
-                  <div className="w-16 h-16 bg-gray-100 rounded-md border border-polaris-border flex items-center justify-center">
-                    <span className="text-polaris-secondary text-sm">No image</span>
-                  </div>
-                )}
+                {renderProductImage()}
                 <div className="flex items-center gap-2">
                   <div>
                     <h1 className="text-display-lg text-polaris-text">
