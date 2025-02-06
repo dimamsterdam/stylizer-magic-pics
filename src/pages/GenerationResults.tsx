@@ -5,6 +5,11 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Check, Plus, Trash } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "@/components/ui/use-toast";
+import {
+  Dialog,
+  DialogContent,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 
 interface GeneratedImage {
   id: string;
@@ -15,6 +20,7 @@ interface GeneratedImage {
 const GenerationResults = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
+  const [selectedImageUrl, setSelectedImageUrl] = useState<string | null>(null);
   const [prompt, setPrompt] = useState("Professional model wearing the shirt in an urban setting");
   const [generatedImages, setGeneratedImages] = useState<GeneratedImage[]>([
     {
@@ -29,6 +35,21 @@ const GenerationResults = () => {
     },
     {
       id: "gen3",
+      url: "https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=400&h=400&fit=crop",
+      selected: false,
+    },
+    {
+      id: "gen4",
+      url: "https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=400&h=400&fit=crop",
+      selected: false,
+    },
+    {
+      id: "gen5",
+      url: "https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=400&h=400&fit=crop",
+      selected: false,
+    },
+    {
+      id: "gen6",
       url: "https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=400&h=400&fit=crop",
       selected: false,
     },
@@ -51,7 +72,6 @@ const GenerationResults = () => {
   };
 
   const handleRegenerateImage = (id: string) => {
-    // In a real implementation, this would trigger a new AI generation
     console.log("Regenerating image:", id);
     toast({
       title: "Regenerating image",
@@ -60,7 +80,6 @@ const GenerationResults = () => {
   };
 
   const handlePromptUpdate = () => {
-    // In a real implementation, this would trigger new generations with the updated prompt
     console.log("Updating prompt:", prompt);
     toast({
       title: "Updating generations",
@@ -121,48 +140,67 @@ const GenerationResults = () => {
           <CardContent>
             <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
               {generatedImages.map((image) => (
-                <div
-                  key={image.id}
-                  className={`relative group ${
-                    image.selected ? "ring-2 ring-polaris-teal" : ""
-                  }`}
-                >
-                  <img
-                    src={image.url}
-                    alt="Generated product"
-                    className="w-full h-48 object-cover rounded-lg"
-                  />
-                  <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-30 transition-opacity rounded-lg">
-                    <div className="absolute top-2 right-2 space-x-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                      <Button
-                        variant="destructive"
-                        size="icon"
-                        className="h-8 w-8"
-                        onClick={() => handleImageRemove(image.id)}
-                      >
-                        <Trash className="h-4 w-4" />
-                      </Button>
-                      <Button
-                        variant="secondary"
-                        size="icon"
-                        className="h-8 w-8 bg-white"
-                        onClick={() => handleRegenerateImage(image.id)}
-                      >
-                        <Plus className="h-4 w-4" />
-                      </Button>
+                <Dialog key={image.id}>
+                  <DialogTrigger asChild>
+                    <div
+                      className={`relative group cursor-pointer ${
+                        image.selected ? "ring-2 ring-polaris-teal" : ""
+                      }`}
+                    >
+                      <img
+                        src={image.url}
+                        alt="Generated product"
+                        className="w-full h-32 object-cover rounded-lg"
+                      />
+                      <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-30 transition-opacity rounded-lg">
+                        <div className="absolute top-2 right-2 space-x-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                          <Button
+                            variant="destructive"
+                            size="icon"
+                            className="h-8 w-8"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleImageRemove(image.id);
+                            }}
+                          >
+                            <Trash className="h-4 w-4" />
+                          </Button>
+                          <Button
+                            variant="secondary"
+                            size="icon"
+                            className="h-8 w-8 bg-white"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleRegenerateImage(image.id);
+                            }}
+                          >
+                            <Plus className="h-4 w-4" />
+                          </Button>
+                        </div>
+                        <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                          <Button
+                            variant="secondary"
+                            className="bg-white text-polaris-text hover:bg-polaris-teal hover:text-white"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleImageSelect(image.id);
+                            }}
+                          >
+                            <Check className="mr-2 h-4 w-4" />
+                            {image.selected ? "Selected" : "Select"}
+                          </Button>
+                        </div>
+                      </div>
                     </div>
-                    <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                      <Button
-                        variant="secondary"
-                        className="bg-white text-polaris-text hover:bg-polaris-teal hover:text-white"
-                        onClick={() => handleImageSelect(image.id)}
-                      >
-                        <Check className="mr-2 h-4 w-4" />
-                        {image.selected ? "Selected" : "Select"}
-                      </Button>
-                    </div>
-                  </div>
-                </div>
+                  </DialogTrigger>
+                  <DialogContent className="max-w-3xl">
+                    <img
+                      src={image.url}
+                      alt="Generated product"
+                      className="w-full h-auto rounded-lg"
+                    />
+                  </DialogContent>
+                </Dialog>
               ))}
             </div>
           </CardContent>
