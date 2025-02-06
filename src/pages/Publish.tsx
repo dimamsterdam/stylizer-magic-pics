@@ -167,6 +167,19 @@ const Publish = () => {
                   </div>
                 </div>
               ))}
+              {/* Original Shopify Product Image */}
+              <div className="relative">
+                <img
+                  src={selectedProduct.image}
+                  alt={selectedProduct.title}
+                  className="w-full h-48 md:h-64 object-cover rounded-lg border border-polaris-border opacity-50"
+                />
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <span className="bg-polaris-background/80 px-3 py-1 rounded-full text-sm text-polaris-text">
+                    Original Image
+                  </span>
+                </div>
+              </div>
             </div>
           </CardContent>
         </Card>
