@@ -21,32 +21,37 @@ const getBreadcrumbLabel = (path: string) => {
   }
 };
 
+const getFullPath = (currentPath: string) => {
+  const paths = [
+    { path: "", label: "Home" },
+    { path: "generation-results", label: "Generation Results" },
+    { path: "publish", label: "Publish" },
+  ];
+
+  const currentIndex = paths.findIndex((p) => currentPath.includes(p.path));
+  return paths.slice(0, currentIndex + 1);
+};
+
 const Breadcrumbs = () => {
   const location = useLocation();
-  const pathSegments = location.pathname.split("/").filter(Boolean);
+  const currentPath = location.pathname.split("/").filter(Boolean)[0] || "";
+  const fullPath = getFullPath(currentPath);
 
   return (
     <div className="border-b border-polaris-border bg-white">
       <div className="max-w-7xl mx-auto px-4 py-2">
         <Breadcrumb>
           <BreadcrumbList>
-            <BreadcrumbItem>
-              <BreadcrumbLink asChild>
-                <Link to="/" className="text-polaris-text hover:text-polaris-teal">
-                  Home
-                </Link>
-              </BreadcrumbLink>
-            </BreadcrumbItem>
-            {pathSegments.map((segment, index) => {
-              const path = `/${pathSegments.slice(0, index + 1).join("/")}`;
-              const isLast = index === pathSegments.length - 1;
+            {fullPath.map((segment, index) => {
+              const path = segment.path === "" ? "/" : `/${segment.path}`;
+              const isLast = index === fullPath.length - 1;
 
               return (
                 <BreadcrumbItem key={path}>
-                  <BreadcrumbSeparator />
+                  {index > 0 && <BreadcrumbSeparator />}
                   {isLast ? (
                     <BreadcrumbPage className="text-polaris-text">
-                      {getBreadcrumbLabel(segment)}
+                      {segment.label}
                     </BreadcrumbPage>
                   ) : (
                     <BreadcrumbLink asChild>
@@ -54,7 +59,7 @@ const Breadcrumbs = () => {
                         to={path}
                         className="text-polaris-text hover:text-polaris-teal"
                       >
-                        {getBreadcrumbLabel(segment)}
+                        {segment.label}
                       </Link>
                     </BreadcrumbLink>
                   )}
