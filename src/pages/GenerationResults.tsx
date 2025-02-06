@@ -5,11 +5,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Check, RefreshCw, Trash, ZoomIn } from "lucide-react";
 import { useNavigate, useLocation, Link } from "react-router-dom";
 import { useToast } from "@/components/ui/use-toast";
-import {
-  Dialog,
-  DialogContent,
-  DialogTrigger,
-} from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 interface GeneratedImage {
   id: string;
@@ -30,6 +27,7 @@ const GenerationResults = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const { toast } = useToast();
+  const isMobile = useIsMobile();
   const { selectedProduct } = (location.state as LocationState) || {};
   const [selectedImageUrl, setSelectedImageUrl] = useState<string | null>(null);
   const [prompt, setPrompt] = useState("Professional model wearing the shirt in an urban setting");
@@ -114,6 +112,22 @@ const GenerationResults = () => {
 
   const selectedCount = generatedImages.filter((img) => img.selected).length;
 
+  const renderPromptInput = () => (
+    <div className="flex gap-4">
+      <Input
+        value={prompt}
+        onChange={(e) => setPrompt(e.target.value)}
+        className="flex-1"
+      />
+      <Button
+        onClick={handlePromptUpdate}
+        className="bg-polaris-green hover:bg-polaris-teal text-white whitespace-nowrap"
+      >
+        Update Prompt
+      </Button>
+    </div>
+  );
+
   return (
     <div className="min-h-screen bg-polaris-background">
       <div className="max-w-7xl mx-auto px-4 py-8">
@@ -147,26 +161,16 @@ const GenerationResults = () => {
           </CardHeader>
         </Card>
 
-        <Card className="mb-8">
-          <CardHeader>
-            <h2 className="text-display-md text-polaris-text">Generation Prompt</h2>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="flex gap-4">
-              <Input
-                value={prompt}
-                onChange={(e) => setPrompt(e.target.value)}
-                className="flex-1"
-              />
-              <Button
-                onClick={handlePromptUpdate}
-                className="bg-polaris-green hover:bg-polaris-teal text-white"
-              >
-                Update Prompt
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
+        {isMobile && selectedCount > 0 && (
+          <Card className="mb-8">
+            <CardHeader>
+              <h2 className="text-display-md text-polaris-text">Generation Prompt</h2>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              {renderPromptInput()}
+            </CardContent>
+          </Card>
+        )}
 
         <Card>
           <CardHeader>
@@ -244,6 +248,17 @@ const GenerationResults = () => {
             </div>
           </CardContent>
         </Card>
+
+        {!isMobile && (
+          <Card className="mt-8">
+            <CardHeader>
+              <h2 className="text-display-md text-polaris-text">Generation Prompt</h2>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              {renderPromptInput()}
+            </CardContent>
+          </Card>
+        )}
 
         {selectedCount > 0 && (
           <div className="mt-8 flex justify-end">
