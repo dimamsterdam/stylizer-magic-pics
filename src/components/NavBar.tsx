@@ -1,4 +1,5 @@
 import React from "react";
+import { Link } from "react-router-dom";
 
 const NavBar = () => {
   return (
@@ -6,9 +7,11 @@ const NavBar = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="h-16 flex items-center justify-between">
           <div className="flex items-center">
-            <span className="font-inter text-polaris-text tracking-[-0.03em] uppercase">
-              brandmachine
-            </span>
+            <Link to="/">
+              <span className="font-inter font-medium text-polaris-text tracking-[-0.03em] uppercase">
+                brandmachine
+              </span>
+            </Link>
           </div>
         </div>
       </div>
