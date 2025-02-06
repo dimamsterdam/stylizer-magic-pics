@@ -1,13 +1,12 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Check, RefreshCw, Trash, ZoomIn } from "lucide-react";
-import { useNavigate, useLocation, Link } from "react-router-dom";
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
+import { useNavigate, useLocation } from "react-router-dom";
 import { useToast } from "@/components/ui/use-toast";
-import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
-import { useIsMobile } from "@/hooks/use-mobile";
 import { productImages, ProductKey } from "@/data/images";
+import { ProductHeader } from "@/components/ProductHeader";
+import { GeneratedImageCard } from "@/components/GeneratedImageCard";
 
 interface GeneratedImage {
   id: string;
@@ -28,7 +27,6 @@ const GenerationResults = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const { toast } = useToast();
-  const isMobile = useIsMobile();
   
   const state = location.state as LocationState;
   const selectedProduct = state?.selectedProduct;
@@ -39,14 +37,12 @@ const GenerationResults = () => {
     return null;
   }
 
-  // Find the corresponding product in our image mapping
   const productKey = Object.keys(productImages).find(
     key => productImages[key as ProductKey].id === selectedProduct.id
   ) as ProductKey | undefined;
 
   const productData = productKey ? productImages[productKey] : null;
 
-  const [selectedImageUrl, setSelectedImageUrl] = useState<string | null>(null);
   const [prompt, setPrompt] = useState("Professional model wearing the shirt in an urban setting");
   const [generatedImages, setGeneratedImages] = useState<GeneratedImage[]>(
     productData?.generated.map(img => ({
@@ -90,7 +86,6 @@ const GenerationResults = () => {
 
   const handlePublish = () => {
     const selectedImages = generatedImages.filter((img) => img.selected);
-    console.log("Publishing images:", selectedImages);
     navigate("/publish", { 
       state: { 
         selectedImages: selectedImages.map(img => ({
@@ -98,52 +93,12 @@ const GenerationResults = () => {
           url: img.url,
           isAiGenerated: true
         })),
-        selectedProduct // Pass the selected product to the publish page
+        selectedProduct
       } 
     });
   };
 
   const selectedCount = generatedImages.filter((img) => img.selected).length;
-
-  const renderPromptInput = () => (
-    <div className="flex gap-4">
-      <Input
-        value={prompt}
-        onChange={(e) => setPrompt(e.target.value)}
-        className="flex-1"
-      />
-      <Button
-        onClick={handlePromptUpdate}
-        className="bg-polaris-green hover:bg-polaris-teal text-white whitespace-nowrap"
-      >
-        Update Prompt
-      </Button>
-    </div>
-  );
-
-  const renderProductImage = () => {
-    if (selectedProduct?.image) {
-      console.log("Rendering product image:", selectedProduct.image);
-      return (
-        <img
-          src={selectedProduct.image}
-          alt={selectedProduct.title}
-          className="w-16 h-16 object-cover rounded-md border border-polaris-border"
-        />
-    );
-    }
-
-    console.log("No product image, using placeholder");
-    return (
-      <div className="w-16 h-16 bg-polaris-background rounded-md border border-polaris-border flex items-center justify-center">
-        <img
-          src="/placeholder.svg"
-          alt="Product placeholder"
-          className="w-8 h-8 opacity-50"
-        />
-      </div>
-    );
-  };
 
   return (
     <div className="min-h-screen bg-polaris-background">
@@ -151,28 +106,26 @@ const GenerationResults = () => {
         <Card className="mb-8">
           <CardHeader>
             <div className="flex flex-col space-y-6">
-              <div className="flex items-center gap-4">
-                {renderProductImage()}
-                <div className="flex items-center gap-2">
-                  <div>
-                    <h1 className="text-display-lg text-polaris-text">
-                      {selectedProduct?.title || "Selected product"}
-                    </h1>
-                    <p className="text-body-md text-polaris-secondary">
-                      SKU: {selectedProduct?.sku || "N/A"}
-                    </p>
-                  </div>
-                  <Link 
-                    to="/" 
-                    className="text-sm text-polaris-teal hover:text-polaris-green ml-2"
-                  >
-                    change
-                  </Link>
-                </div>
-              </div>
+              <ProductHeader
+                image={selectedProduct.image}
+                title={selectedProduct.title}
+                sku={selectedProduct.sku}
+              />
               <div className="space-y-2">
                 <h2 className="text-display-sm text-polaris-text">Generation Prompt</h2>
-                {renderPromptInput()}
+                <div className="flex gap-4">
+                  <Input
+                    value={prompt}
+                    onChange={(e) => setPrompt(e.target.value)}
+                    className="flex-1"
+                  />
+                  <Button
+                    onClick={handlePromptUpdate}
+                    className="bg-polaris-green hover:bg-polaris-teal text-white whitespace-nowrap"
+                  >
+                    Update Prompt
+                  </Button>
+                </div>
               </div>
             </div>
           </CardHeader>
@@ -181,76 +134,20 @@ const GenerationResults = () => {
         <Card>
           <CardHeader>
             <h2 className="text-display-md text-polaris-text">Generated Images</h2>
-            <p className="text-body-md text-polaris-secondary mb-4">Select the ones you want to publish</p>
+            <p className="text-body-md text-polaris-secondary mb-4">
+              Select the ones you want to publish
+            </p>
           </CardHeader>
           <CardContent>
             <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
               {generatedImages.map((image) => (
-                <div
+                <GeneratedImageCard
                   key={image.id}
-                  className={`relative group cursor-pointer ${
-                    image.selected ? "ring-2 ring-polaris-teal rounded-lg" : ""
-                  }`}
-                  onClick={() => handleImageSelect(image.id)}
-                >
-                  <img
-                    src={image.url}
-                    alt="Generated product"
-                    className="w-full h-48 md:h-64 object-cover rounded-lg"
-                  />
-                  <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-30 transition-opacity rounded-lg">
-                    <div className="absolute top-2 right-2 space-x-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                      <Button
-                        variant="destructive"
-                        size="icon"
-                        className="h-8 w-8"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleImageRemove(image.id);
-                        }}
-                      >
-                        <Trash className="h-4 w-4" />
-                      </Button>
-                      <Button
-                        variant="secondary"
-                        size="icon"
-                        className="h-8 w-8 bg-white"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleRegenerateImage(image.id);
-                        }}
-                      >
-                        <RefreshCw className="h-4 w-4" />
-                      </Button>
-                      <Dialog>
-                        <DialogTrigger asChild>
-                          <Button
-                            variant="secondary"
-                            size="icon"
-                            className="h-8 w-8 bg-white"
-                            onClick={(e) => e.stopPropagation()}
-                          >
-                            <ZoomIn className="h-4 w-4" />
-                          </Button>
-                        </DialogTrigger>
-                        <DialogContent className="max-w-3xl">
-                          <img
-                            src={image.url}
-                            alt="Generated product"
-                            className="w-full h-auto rounded-lg"
-                          />
-                        </DialogContent>
-                      </Dialog>
-                    </div>
-                    {image.selected && (
-                      <div className="absolute top-2 left-2">
-                        <div className="bg-polaris-teal rounded-full p-1">
-                          <Check className="h-4 w-4 text-white" />
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                </div>
+                  {...image}
+                  onSelect={handleImageSelect}
+                  onRemove={handleImageRemove}
+                  onRegenerate={handleRegenerateImage}
+                />
               ))}
             </div>
           </CardContent>
