@@ -24,11 +24,6 @@ export const productImages = {
     details: '/lovable-uploads/01c51803-441a-4b90-ad49-fc25ca184153.png',
     generated: [
       {
-        id: '047c9307',
-        url: '/lovable-uploads/047c9307-af3c-47c6-b2e6-ea9d51a0c8cc.png',
-        type: 'lifestyle'
-      },
-      {
         id: '01c51803',
         url: '/lovable-uploads/01c51803-441a-4b90-ad49-fc25ca184153.png',
         type: 'lifestyle'
