@@ -146,6 +146,7 @@ const GenerationResults = () => {
                       className={`relative group cursor-pointer ${
                         image.selected ? "ring-2 ring-polaris-teal rounded-lg" : ""
                       }`}
+                      onClick={() => handleImageSelect(image.id)}
                     >
                       <img
                         src={image.url}
@@ -177,21 +178,13 @@ const GenerationResults = () => {
                             <RefreshCw className="h-4 w-4" />
                           </Button>
                         </div>
-                        <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                          <Button
-                            variant="secondary"
-                            className={`bg-white text-polaris-text hover:bg-polaris-teal hover:text-white ${
-                              image.selected ? "bg-polaris-teal text-white" : ""
-                            }`}
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              handleImageSelect(image.id);
-                            }}
-                          >
-                            <Check className={`mr-2 h-4 w-4 ${image.selected ? "opacity-100" : "opacity-0"}`} />
-                            {image.selected ? "Selected" : "Select"}
-                          </Button>
-                        </div>
+                        {image.selected && (
+                          <div className="absolute top-2 left-2">
+                            <div className="bg-polaris-teal rounded-full p-1">
+                              <Check className="h-4 w-4 text-white" />
+                            </div>
+                          </div>
+                        )}
                       </div>
                     </div>
                   </DialogTrigger>
