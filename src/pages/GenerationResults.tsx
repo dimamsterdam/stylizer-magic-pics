@@ -180,13 +180,15 @@ const GenerationResults = () => {
                         <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
                           <Button
                             variant="secondary"
-                            className="bg-white text-polaris-text hover:bg-polaris-teal hover:text-white"
+                            className={`bg-white text-polaris-text hover:bg-polaris-teal hover:text-white ${
+                              image.selected ? "bg-polaris-teal text-white" : ""
+                            }`}
                             onClick={(e) => {
                               e.stopPropagation();
                               handleImageSelect(image.id);
                             }}
                           >
-                            <Check className="mr-2 h-4 w-4" />
+                            <Check className={`mr-2 h-4 w-4 ${image.selected ? "opacity-100" : "opacity-0"}`} />
                             {image.selected ? "Selected" : "Select"}
                           </Button>
                         </div>
