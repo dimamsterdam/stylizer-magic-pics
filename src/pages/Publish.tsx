@@ -1,13 +1,14 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
-import { Check, Trash } from "lucide-react";
+import { Check, Trash, X } from "lucide-react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useToast } from "@/components/ui/use-toast";
 
 interface PublishImage {
   id: string;
   url: string;
+  selected?: boolean;
 }
 
 interface LocationState {
@@ -29,7 +30,7 @@ const Publish = () => {
   const state = location.state as LocationState;
   const selectedProduct = state?.selectedProduct;
   const [selectedImages, setSelectedImages] = useState<PublishImage[]>(
-    state?.selectedImages || []
+    (state?.selectedImages || []).map(img => ({ ...img, selected: true }))
   );
 
   // If no product data, redirect back
@@ -65,6 +66,16 @@ const Publish = () => {
       title: "Image removed",
       description: "The image has been removed from the selection.",
     });
+  };
+
+  const handleToggleSelect = (imageId: string) => {
+    setSelectedImages(images => 
+      images.map(img => 
+        img.id === imageId 
+          ? { ...img, selected: !img.selected }
+          : img
+      )
+    );
   };
 
   // If no images left, show placeholder
@@ -117,7 +128,11 @@ const Publish = () => {
             </p>
             <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
               {selectedImages.map((image) => (
-                <div key={image.id} className="relative group">
+                <div 
+                  key={image.id} 
+                  className="relative group cursor-pointer"
+                  onClick={() => handleToggleSelect(image.id)}
+                >
                   <img
                     src={image.url}
                     alt="Product"
@@ -128,14 +143,26 @@ const Publish = () => {
                       variant="destructive"
                       size="icon"
                       className="h-8 w-8"
-                      onClick={() => handleDelete(image.id)}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleDelete(image.id);
+                      }}
                     >
                       <Trash className="h-4 w-4" />
                     </Button>
                   </div>
                   <div className="absolute bottom-2 right-2">
-                    <div className="bg-polaris-green text-white p-1 rounded-full">
-                      <Check className="h-4 w-4" />
+                    <div className={`${
+                      image.selected 
+                        ? "bg-polaris-green" 
+                        : "bg-polaris-background border border-polaris-border"
+                      } p-1 rounded-full`}
+                    >
+                      {image.selected ? (
+                        <Check className="h-4 w-4 text-white" />
+                      ) : (
+                        <X className="h-4 w-4 text-polaris-text" />
+                      )}
                     </div>
                   </div>
                 </div>
@@ -154,7 +181,7 @@ const Publish = () => {
           </Button>
           <Button
             onClick={handlePublish}
-            disabled={isPublishing || selectedImages.length === 0}
+            disabled={isPublishing || !selectedImages.some(img => img.selected)}
             className="bg-polaris-green hover:bg-polaris-teal text-white"
           >
             {isPublishing ? "Publishing..." : "Publish to Store"}
