@@ -159,16 +159,14 @@ const GenerationResults = () => {
           </CardHeader>
         </Card>
 
-        {isMobile && selectedCount > 0 && (
-          <Card className="mb-8">
-            <CardHeader>
-              <h2 className="text-display-md text-polaris-text">Generation Prompt</h2>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              {renderPromptInput()}
-            </CardContent>
-          </Card>
-        )}
+        <Card className="mb-8">
+          <CardHeader>
+            <h2 className="text-display-md text-polaris-text">Generation Prompt</h2>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            {renderPromptInput()}
+          </CardContent>
+        </Card>
 
         <Card>
           <CardHeader>
@@ -247,17 +245,6 @@ const GenerationResults = () => {
             </div>
           </CardContent>
         </Card>
-
-        {!isMobile && (
-          <Card className="mt-8">
-            <CardHeader>
-              <h2 className="text-display-md text-polaris-text">Generation Prompt</h2>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              {renderPromptInput()}
-            </CardContent>
-          </Card>
-        )}
 
         {selectedCount > 0 && (
           <div className="mt-8 flex justify-end">
