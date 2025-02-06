@@ -36,6 +36,13 @@ const GenerationResults = () => {
   console.log("Location state:", location.state); // Debug entire state
   console.log("Selected product:", selectedProduct); // Debug product
 
+  // If no product data, redirect back to index
+  if (!selectedProduct) {
+    console.log("No product selected, redirecting to index");
+    navigate("/");
+    return null;
+  }
+
   const [selectedImageUrl, setSelectedImageUrl] = useState<string | null>(null);
   const [prompt, setPrompt] = useState("Professional model wearing the shirt in an urban setting");
   const [generatedImages, setGeneratedImages] = useState<GeneratedImage[]>([
@@ -136,8 +143,8 @@ const GenerationResults = () => {
   );
 
   const renderProductImage = () => {
-    // First try to use the product image
     if (selectedProduct?.image) {
+      console.log("Rendering product image:", selectedProduct.image);
       return (
         <img
           src={selectedProduct.image}
@@ -147,7 +154,7 @@ const GenerationResults = () => {
       );
     }
 
-    // If no product image, use a placeholder
+    console.log("No product image, using placeholder");
     return (
       <div className="w-16 h-16 bg-polaris-background rounded-md border border-polaris-border flex items-center justify-center">
         <img

@@ -67,7 +67,11 @@ const Index = () => {
 
   const handleStartGeneration = () => {
     if (canStartGeneration) {
-      navigate("/generation-results");
+      navigate("/generation-results", {
+        state: {
+          selectedProduct: selectedProduct // Explicitly pass the selected product
+        }
+      });
       toast({
         title: "Starting generation",
         description: "Your images are being generated...",
