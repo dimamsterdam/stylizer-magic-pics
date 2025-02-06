@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Check, RefreshCw, Trash, ZoomIn } from "lucide-react";
-import { useNavigate, useLocation } from "react-router-dom";
+import { useNavigate, useLocation, Link } from "react-router-dom";
 import { useToast } from "@/components/ui/use-toast";
 import {
   Dialog,
@@ -119,7 +119,7 @@ const GenerationResults = () => {
       <div className="max-w-7xl mx-auto px-4 py-8">
         <Card className="mb-8">
           <CardHeader className="flex flex-row items-center gap-4">
-            {selectedProduct ? (
+            {selectedProduct?.image ? (
               <img
                 src={selectedProduct.image}
                 alt={selectedProduct.title}
@@ -128,13 +128,21 @@ const GenerationResults = () => {
             ) : (
               <div className="w-16 h-16 bg-gray-200 rounded-md border border-polaris-border" />
             )}
-            <div>
-              <h1 className="text-display-lg text-polaris-text">
-                {selectedProduct?.title || "Product"}
-              </h1>
-              <p className="text-body-md text-polaris-secondary">
-                SKU: {selectedProduct?.sku || "N/A"}
-              </p>
+            <div className="flex items-center gap-2">
+              <div>
+                <h1 className="text-display-lg text-polaris-text">
+                  Selected product
+                </h1>
+                <p className="text-body-md text-polaris-secondary">
+                  SKU: {selectedProduct?.sku || "N/A"}
+                </p>
+              </div>
+              <Link 
+                to="/" 
+                className="text-sm text-polaris-teal hover:text-polaris-green ml-2"
+              >
+                change
+              </Link>
             </div>
           </CardHeader>
         </Card>
