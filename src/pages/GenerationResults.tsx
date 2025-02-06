@@ -3,7 +3,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Check, Plus, Trash } from "lucide-react";
-import { ImageGallery } from "@/components/ImageGallery";
+import { useNavigate } from "react-router-dom";
+import { useToast } from "@/components/ui/use-toast";
 
 interface GeneratedImage {
   id: string;
@@ -12,6 +13,8 @@ interface GeneratedImage {
 }
 
 const GenerationResults = () => {
+  const navigate = useNavigate();
+  const { toast } = useToast();
   const [prompt, setPrompt] = useState("Professional model wearing the shirt in an urban setting");
   const [generatedImages, setGeneratedImages] = useState<GeneratedImage[]>([
     {
@@ -41,16 +44,34 @@ const GenerationResults = () => {
 
   const handleImageRemove = (id: string) => {
     setGeneratedImages(generatedImages.filter((img) => img.id !== id));
+    toast({
+      title: "Image removed",
+      description: "The generated image has been removed.",
+    });
   };
 
   const handleRegenerateImage = (id: string) => {
     // In a real implementation, this would trigger a new AI generation
     console.log("Regenerating image:", id);
+    toast({
+      title: "Regenerating image",
+      description: "A new image is being generated...",
+    });
   };
 
   const handlePromptUpdate = () => {
     // In a real implementation, this would trigger new generations with the updated prompt
     console.log("Updating prompt:", prompt);
+    toast({
+      title: "Updating generations",
+      description: "New images are being generated with the updated prompt...",
+    });
+  };
+
+  const handlePublish = () => {
+    const selectedImages = generatedImages.filter((img) => img.selected);
+    console.log("Publishing images:", selectedImages);
+    navigate("/publish");
   };
 
   const selectedCount = generatedImages.filter((img) => img.selected).length;
@@ -80,7 +101,7 @@ const GenerationResults = () => {
               />
               <Button
                 onClick={handlePromptUpdate}
-                className="bg-polaris-green hover:bg-polaris-teal"
+                className="bg-polaris-green hover:bg-polaris-teal text-white"
               >
                 Update Prompt
               </Button>
@@ -145,8 +166,9 @@ const GenerationResults = () => {
         {selectedCount > 0 && (
           <div className="mt-8 flex justify-end">
             <Button
-              className="bg-polaris-green hover:bg-polaris-teal"
+              className="bg-polaris-green hover:bg-polaris-teal text-white"
               size="lg"
+              onClick={handlePublish}
             >
               Publish {selectedCount} Selected {selectedCount === 1 ? "Image" : "Images"}
             </Button>

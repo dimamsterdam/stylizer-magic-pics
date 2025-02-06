@@ -4,6 +4,7 @@ import { ImageGallery } from "@/components/ImageGallery";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useNavigate } from "react-router-dom";
+import { useToast } from "@/components/ui/use-toast";
 
 interface Product {
   id: string;
@@ -20,6 +21,7 @@ interface Image {
 
 const Index = () => {
   const navigate = useNavigate();
+  const { toast } = useToast();
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const [images, setImages] = useState<Image[]>([]);
   const [prompt, setPrompt] = useState("");
@@ -39,6 +41,10 @@ const Index = () => {
         selected: false,
       },
     ]);
+    toast({
+      title: "Product selected",
+      description: "Product images have been loaded.",
+    });
   };
 
   const handleImageSelect = (id: string) => {
@@ -51,6 +57,10 @@ const Index = () => {
 
   const handleImageRemove = (id: string) => {
     setImages(images.filter((img) => img.id !== id));
+    toast({
+      title: "Image removed",
+      description: "The image has been removed from selection.",
+    });
   };
 
   const canStartGeneration = selectedProduct && images.some((img) => img.selected) && prompt.trim();
@@ -58,6 +68,10 @@ const Index = () => {
   const handleStartGeneration = () => {
     if (canStartGeneration) {
       navigate("/generation-results");
+      toast({
+        title: "Starting generation",
+        description: "Your images are being generated...",
+      });
     }
   };
 
