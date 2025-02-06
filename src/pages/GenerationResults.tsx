@@ -145,7 +145,7 @@ const GenerationResults = () => {
           alt={selectedProduct.title}
           className="w-16 h-16 object-cover rounded-md border border-polaris-border"
         />
-      );
+    );
     }
 
     console.log("No product image, using placeholder");
@@ -211,7 +211,7 @@ const GenerationResults = () => {
                   <img
                     src={image.url}
                     alt="Generated product"
-                    className="w-full h-32 object-cover rounded-lg"
+                    className="w-full h-48 md:h-64 object-cover rounded-lg"
                   />
                   <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-30 transition-opacity rounded-lg">
                     <div className="absolute top-2 right-2 space-x-2 opacity-0 group-hover:opacity-100 transition-opacity">

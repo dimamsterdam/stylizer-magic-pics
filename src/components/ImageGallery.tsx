@@ -33,7 +33,7 @@ export const ImageGallery = ({ images, onSelect, onRemove }: ImageGalleryProps) 
           <img
             src={image.url}
             alt="Product"
-            className="w-full h-32 object-cover rounded-lg"
+            className="w-full h-48 md:h-64 object-cover rounded-lg"
           />
           <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-30 transition-opacity rounded-lg">
             <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity flex gap-2">
@@ -54,7 +54,7 @@ export const ImageGallery = ({ images, onSelect, onRemove }: ImageGalleryProps) 
                   <img
                     src={image.url}
                     alt="Product zoom"
-                    className="w-full h-80 object-cover rounded-md"
+                    className="w-full h-96 object-cover rounded-md"
                   />
                 </HoverCardContent>
               </HoverCard>

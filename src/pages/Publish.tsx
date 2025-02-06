@@ -136,7 +136,7 @@ const Publish = () => {
                   <img
                     src={image.url}
                     alt="Product"
-                    className="w-full h-48 object-cover rounded-lg border border-polaris-border"
+                    className="w-full h-48 md:h-64 object-cover rounded-lg border border-polaris-border"
                   />
                   <div className="absolute top-2 right-2">
                     <Button
