@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Check, Plus, Trash } from "lucide-react";
+import { Check, RefreshCw, Trash } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "@/components/ui/use-toast";
 import {
@@ -174,7 +174,7 @@ const GenerationResults = () => {
                               handleRegenerateImage(image.id);
                             }}
                           >
-                            <Plus className="h-4 w-4" />
+                            <RefreshCw className="h-4 w-4" />
                           </Button>
                         </div>
                         <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
