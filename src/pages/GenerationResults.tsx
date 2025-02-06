@@ -80,12 +80,17 @@ const GenerationResults = () => {
     <div className="min-h-screen bg-polaris-background">
       <div className="max-w-7xl mx-auto px-4 py-8">
         <Card className="mb-8">
-          <CardHeader>
-            <CardTitle>Selected Product: Classic White T-Shirt</CardTitle>
+          <CardHeader className="flex flex-row items-center gap-4">
+            <img
+              src="https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=100&h=100&fit=crop"
+              alt="Original product"
+              className="w-16 h-16 object-cover rounded-md border border-polaris-border"
+            />
+            <div>
+              <CardTitle>Classic White T-Shirt</CardTitle>
+              <p className="text-polaris-secondary">SKU: WHT-CLASSIC-001</p>
+            </div>
           </CardHeader>
-          <CardContent>
-            <p className="text-polaris-secondary">SKU: WHT-CLASSIC-001</p>
-          </CardContent>
         </Card>
 
         <Card className="mb-8">
