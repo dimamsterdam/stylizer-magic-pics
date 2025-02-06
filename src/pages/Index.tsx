@@ -32,7 +32,7 @@ const Index = () => {
     setImages([
       {
         id: "1",
-        url: "https://images.unsplash.com/photo-1482881497185-d4a9ddbe4151",
+        url: "https://images.unsplash.com/photo-1581091226825-a6a2a5aee158",
         selected: false,
       },
       {
