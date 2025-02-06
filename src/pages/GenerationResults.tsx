@@ -144,7 +144,7 @@ const GenerationResults = () => {
                   <DialogTrigger asChild>
                     <div
                       className={`relative group cursor-pointer ${
-                        image.selected ? "ring-2 ring-polaris-teal" : ""
+                        image.selected ? "ring-2 ring-polaris-teal rounded-lg" : ""
                       }`}
                     >
                       <img
