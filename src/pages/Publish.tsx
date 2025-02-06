@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Check, Trash, Bot } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { useToast } from "@/components/ui/use-toast";
 
 interface PublishImage {
@@ -13,30 +13,14 @@ interface PublishImage {
 
 const Publish = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const { toast } = useToast();
   const [isPublishing, setIsPublishing] = useState(false);
-  const [selectedImages] = useState<PublishImage[]>([
-    {
-      id: "gen1",
-      url: "https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?w=400&h=400&fit=crop",
-      isAiGenerated: true,
-    },
-    {
-      id: "gen2",
-      url: "https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?w=400&h=400&fit=crop",
-      isAiGenerated: true,
-    },
-    {
-      id: "original1",
-      url: "https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=400&h=400&fit=crop",
-      isAiGenerated: false,
-    },
-    {
-      id: "original2",
-      url: "https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=400&h=400&fit=crop",
-      isAiGenerated: false,
-    },
-  ]);
+  
+  // Get selected images from navigation state, fallback to empty array if none
+  const [selectedImages] = useState<PublishImage[]>(
+    location.state?.selectedImages || []
+  );
 
   const handlePublish = async () => {
     setIsPublishing(true);
@@ -74,18 +58,18 @@ const Publish = () => {
               className="w-16 h-16 object-cover rounded-md border border-polaris-border"
             />
             <div>
-              <CardTitle>Classic White T-Shirt</CardTitle>
-              <p className="text-polaris-secondary">SKU: WHT-CLASSIC-001</p>
+              <h1 className="text-display-lg text-polaris-text">Classic White T-Shirt</h1>
+              <p className="text-body-md text-polaris-secondary">SKU: WHT-CLASSIC-001</p>
             </div>
           </CardHeader>
         </Card>
 
         <Card className="mb-8">
           <CardHeader>
-            <CardTitle>Review and Publish</CardTitle>
+            <h2 className="text-display-md text-polaris-text">Review and Publish</h2>
           </CardHeader>
           <CardContent>
-            <p className="text-polaris-secondary mb-4">
+            <p className="text-body-md text-polaris-secondary mb-4">
               Review your selected images before publishing them to your store.
             </p>
             <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
@@ -134,7 +118,7 @@ const Publish = () => {
           </Button>
           <Button
             onClick={handlePublish}
-            disabled={isPublishing}
+            disabled={isPublishing || selectedImages.length === 0}
             className="bg-polaris-green hover:bg-polaris-teal text-white"
           >
             {isPublishing ? "Publishing..." : "Publish to Store"}

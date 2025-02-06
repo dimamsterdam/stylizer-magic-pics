@@ -90,7 +90,15 @@ const GenerationResults = () => {
   const handlePublish = () => {
     const selectedImages = generatedImages.filter((img) => img.selected);
     console.log("Publishing images:", selectedImages);
-    navigate("/publish");
+    navigate("/publish", { 
+      state: { 
+        selectedImages: selectedImages.map(img => ({
+          id: img.id,
+          url: img.url,
+          isAiGenerated: true
+        }))
+      } 
+    });
   };
 
   const selectedCount = generatedImages.filter((img) => img.selected).length;
