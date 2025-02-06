@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Check, Trash, Robot } from "lucide-react";
+import { Check, Trash, Bot } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "@/components/ui/use-toast";
 
@@ -109,7 +109,7 @@ const Publish = () => {
                   {image.isAiGenerated && (
                     <div className="absolute top-2 left-2">
                       <div className="bg-polaris-teal text-white p-1 rounded-full">
-                        <Robot className="h-4 w-4" />
+                        <Bot className="h-4 w-4" />
                       </div>
                     </div>
                   )}
