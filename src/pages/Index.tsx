@@ -77,9 +77,24 @@ const Index = () => {
   return (
     <div className="min-h-screen bg-polaris-background">
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {!selectedProduct ? (
-          <ProductPicker onSelect={handleProductSelect} />
-        ) : (
+        {!selectedProduct && (
+          <>
+            <Card className="mb-8">
+              <CardHeader>
+                <h1 className="text-display-xl text-polaris-text mb-2">
+                  Welcome to Stylizer
+                </h1>
+                <p className="text-body-lg text-polaris-secondary">
+                  Transform your product photos into professional lifestyle images using AI. 
+                  Start by selecting a product below to enhance its visual appeal.
+                </p>
+              </CardHeader>
+            </Card>
+            <ProductPicker onSelect={handleProductSelect} />
+          </>
+        )}
+        
+        {selectedProduct && (
           <div className="space-y-8">
             <Card>
               <CardHeader>
