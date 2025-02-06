@@ -50,14 +50,14 @@ const Breadcrumbs = () => {
                 <BreadcrumbItem key={path}>
                   {index > 0 && <BreadcrumbSeparator />}
                   {isLast ? (
-                    <BreadcrumbPage className="text-polaris-text">
+                    <BreadcrumbPage className="text-polaris-text font-semibold">
                       {segment.label}
                     </BreadcrumbPage>
                   ) : (
                     <BreadcrumbLink asChild>
                       <Link
                         to={path}
-                        className="text-polaris-text hover:text-polaris-teal"
+                        className="text-polaris-secondary hover:text-polaris-teal"
                       >
                         {segment.label}
                       </Link>
