@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Check, RefreshCw, Trash } from "lucide-react";
+import { Check, RefreshCw, Trash, ZoomIn } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "@/components/ui/use-toast";
 import {
@@ -140,62 +140,71 @@ const GenerationResults = () => {
           <CardContent>
             <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
               {generatedImages.map((image) => (
-                <Dialog key={image.id}>
-                  <DialogTrigger asChild>
-                    <div
-                      className={`relative group cursor-pointer ${
-                        image.selected ? "ring-2 ring-polaris-teal rounded-lg" : ""
-                      }`}
-                      onClick={() => handleImageSelect(image.id)}
-                    >
-                      <img
-                        src={image.url}
-                        alt="Generated product"
-                        className="w-full h-32 object-cover rounded-lg"
-                      />
-                      <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-30 transition-opacity rounded-lg">
-                        <div className="absolute top-2 right-2 space-x-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                          <Button
-                            variant="destructive"
-                            size="icon"
-                            className="h-8 w-8"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              handleImageRemove(image.id);
-                            }}
-                          >
-                            <Trash className="h-4 w-4" />
-                          </Button>
+                <div
+                  key={image.id}
+                  className={`relative group cursor-pointer ${
+                    image.selected ? "ring-2 ring-polaris-teal rounded-lg" : ""
+                  }`}
+                  onClick={() => handleImageSelect(image.id)}
+                >
+                  <img
+                    src={image.url}
+                    alt="Generated product"
+                    className="w-full h-32 object-cover rounded-lg"
+                  />
+                  <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-30 transition-opacity rounded-lg">
+                    <div className="absolute top-2 right-2 space-x-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                      <Button
+                        variant="destructive"
+                        size="icon"
+                        className="h-8 w-8"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleImageRemove(image.id);
+                        }}
+                      >
+                        <Trash className="h-4 w-4" />
+                      </Button>
+                      <Button
+                        variant="secondary"
+                        size="icon"
+                        className="h-8 w-8 bg-white"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleRegenerateImage(image.id);
+                        }}
+                      >
+                        <RefreshCw className="h-4 w-4" />
+                      </Button>
+                      <Dialog>
+                        <DialogTrigger asChild>
                           <Button
                             variant="secondary"
                             size="icon"
                             className="h-8 w-8 bg-white"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              handleRegenerateImage(image.id);
-                            }}
+                            onClick={(e) => e.stopPropagation()}
                           >
-                            <RefreshCw className="h-4 w-4" />
+                            <ZoomIn className="h-4 w-4" />
                           </Button>
-                        </div>
-                        {image.selected && (
-                          <div className="absolute top-2 left-2">
-                            <div className="bg-polaris-teal rounded-full p-1">
-                              <Check className="h-4 w-4 text-white" />
-                            </div>
-                          </div>
-                        )}
-                      </div>
+                        </DialogTrigger>
+                        <DialogContent className="max-w-3xl">
+                          <img
+                            src={image.url}
+                            alt="Generated product"
+                            className="w-full h-auto rounded-lg"
+                          />
+                        </DialogContent>
+                      </Dialog>
                     </div>
-                  </DialogTrigger>
-                  <DialogContent className="max-w-3xl">
-                    <img
-                      src={image.url}
-                      alt="Generated product"
-                      className="w-full h-auto rounded-lg"
-                    />
-                  </DialogContent>
-                </Dialog>
+                    {image.selected && (
+                      <div className="absolute top-2 left-2">
+                        <div className="bg-polaris-teal rounded-full p-1">
+                          <Check className="h-4 w-4 text-white" />
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </div>
               ))}
             </div>
           </CardContent>
