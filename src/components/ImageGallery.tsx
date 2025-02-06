@@ -16,18 +16,19 @@ interface ImageGalleryProps {
 
 export const ImageGallery = ({ images, onSelect, onRemove }: ImageGalleryProps) => {
   return (
-    <div className="grid grid-cols-2 md:grid-cols-3 gap-4 p-4">
+    <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
       {images.map((image) => (
         <div
           key={image.id}
-          className={`relative group ${
-            image.selected ? "ring-2 ring-polaris-teal" : ""
+          className={`relative group cursor-pointer ${
+            image.selected ? "ring-2 ring-polaris-teal rounded-lg" : ""
           }`}
+          onClick={() => onSelect(image.id)}
         >
           <img
             src={image.url}
             alt="Product"
-            className="w-full h-48 object-cover rounded-lg"
+            className="w-full h-32 object-cover rounded-lg"
           />
           <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-30 transition-opacity rounded-lg">
             <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
@@ -35,20 +36,21 @@ export const ImageGallery = ({ images, onSelect, onRemove }: ImageGalleryProps) 
                 variant="destructive"
                 size="icon"
                 className="h-8 w-8"
-                onClick={() => onRemove(image.id)}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onRemove(image.id);
+                }}
               >
                 <X className="h-4 w-4" />
               </Button>
             </div>
-            <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-              <Button
-                variant="secondary"
-                className="bg-white text-polaris-text hover:bg-polaris-teal hover:text-white"
-                onClick={() => onSelect(image.id)}
-              >
-                {image.selected ? "Deselect" : "Select"}
-              </Button>
-            </div>
+            {image.selected && (
+              <div className="absolute top-2 left-2">
+                <div className="bg-polaris-teal rounded-full p-1">
+                  <Check className="h-4 w-4 text-white" />
+                </div>
+              </div>
+            )}
           </div>
         </div>
       ))}
