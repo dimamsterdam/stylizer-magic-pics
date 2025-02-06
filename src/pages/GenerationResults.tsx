@@ -29,14 +29,12 @@ const GenerationResults = () => {
   const { toast } = useToast();
   const isMobile = useIsMobile();
   
-  // Ensure we have the product data
   const state = location.state as LocationState;
   const selectedProduct = state?.selectedProduct;
 
   console.log("Location state:", location.state);
   console.log("Selected product:", selectedProduct);
 
-  // If no product data, redirect back to index
   if (!selectedProduct) {
     console.log("No product selected, redirecting to index");
     navigate("/");
@@ -48,7 +46,7 @@ const GenerationResults = () => {
   const [generatedImages, setGeneratedImages] = useState<GeneratedImage[]>([
     {
       id: "gen1",
-      url: "https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=400&h=400&fit=crop",
+      url: "/lovable-uploads/12022501-6211-4169-ad19-4d93700c8c9f.png",
       selected: false,
     },
     {
