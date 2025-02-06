@@ -52,26 +52,15 @@ const GenerationResults = () => {
     })) || []
   );
 
-  // Add original product image to the list
-  const allImages = [
-    ...generatedImages,
-    {
-      id: 'original',
-      url: selectedProduct.image,
-      selected: false,
-    }
-  ];
-
   const handleImageSelect = (id: string) => {
     setGeneratedImages(
-      allImages.map((img) =>
+      generatedImages.map((img) =>
         img.id === id ? { ...img, selected: !img.selected } : img
-      ).filter(img => img.id !== 'original') // Keep original image unselectable
+      )
     );
   };
 
   const handleImageRemove = (id: string) => {
-    if (id === 'original') return; // Prevent removing original image
     setGeneratedImages(generatedImages.filter((img) => img.id !== id));
     toast({
       title: "Image removed",
@@ -80,7 +69,6 @@ const GenerationResults = () => {
   };
 
   const handleRegenerateImage = (id: string) => {
-    if (id === 'original') return; // Prevent regenerating original image
     console.log("Regenerating image:", id);
     toast({
       title: "Regenerating image",
@@ -152,7 +140,7 @@ const GenerationResults = () => {
           </CardHeader>
           <CardContent>
             <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-              {allImages.map((image) => (
+              {generatedImages.map((image) => (
                 <GeneratedImageCard
                   key={image.id}
                   {...image}
