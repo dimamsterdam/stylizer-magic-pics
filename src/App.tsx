@@ -4,6 +4,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import NavBar from "./components/NavBar";
+import Breadcrumbs from "./components/Breadcrumbs";
 import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
 import GenerationResults from "./pages/GenerationResults";
@@ -17,6 +18,7 @@ const App = () => (
       <div className="min-h-screen bg-polaris-background">
         <BrowserRouter>
           <NavBar />
+          <Breadcrumbs />
           <Toaster />
           <Sonner />
           <Routes>
