@@ -133,14 +133,12 @@ const GenerationResults = () => {
       <div className="max-w-7xl mx-auto px-4 py-8">
         <Card className="mb-8">
           <CardHeader className="flex flex-row items-center gap-4">
-            {selectedProduct?.image ? (
+            {selectedProduct?.image && (
               <img
                 src={selectedProduct.image}
                 alt={selectedProduct.title}
                 className="w-16 h-16 object-cover rounded-md border border-polaris-border"
               />
-            ) : (
-              <div className="w-16 h-16 bg-gray-200 rounded-md border border-polaris-border" />
             )}
             <div className="flex items-center gap-2">
               <div>
