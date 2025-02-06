@@ -39,6 +39,12 @@ const dummyProducts: Product[] = [
     sku: "CS004",
     image: "/lovable-uploads/9bac9fd0-2115-4bae-8108-0b973f83db37.png",
   },
+  {
+    id: "5",
+    title: "Cream Button-Up Shirt",
+    sku: "CBS005",
+    image: "/lovable-uploads/0f0a212c-5edc-4c90-a258-6b43222bac06.png",
+  },
 ];
 
 export const ProductPicker = ({ onSelect }: ProductPickerProps) => {
