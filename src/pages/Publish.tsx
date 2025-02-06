@@ -67,6 +67,29 @@ const Publish = () => {
     });
   };
 
+  // If no images left, show placeholder
+  if (selectedImages.length === 0) {
+    return (
+      <div className="min-h-screen bg-polaris-background">
+        <div className="max-w-7xl mx-auto px-4 py-8">
+          <Card>
+            <CardContent className="flex flex-col items-center justify-center py-16">
+              <p className="text-display-md text-polaris-text mb-4">
+                No images left to publish. Go back to home
+              </p>
+              <Button
+                onClick={() => navigate("/")}
+                className="bg-polaris-green hover:bg-polaris-teal text-white"
+              >
+                Back to Home
+              </Button>
+            </CardContent>
+          </Card>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-polaris-background">
       <div className="max-w-7xl mx-auto px-4 py-8">
