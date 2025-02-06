@@ -33,6 +33,12 @@ const dummyProducts: Product[] = [
     sku: "SD003",
     image: "https://images.unsplash.com/photo-1515372039744-b8f02a3ae446?w=200&h=200&fit=crop",
   },
+  {
+    id: "4",
+    title: "Classic Cream Sweater",
+    sku: "CS004",
+    image: "/lovable-uploads/9bac9fd0-2115-4bae-8108-0b973f83db37.png",
+  },
 ];
 
 export const ProductPicker = ({ onSelect }: ProductPickerProps) => {
