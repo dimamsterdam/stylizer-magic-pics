@@ -2,8 +2,8 @@ export const productImages = {
   'cream-button-up': {
     id: 'CBS005',
     title: 'Cream Button-Up Shirt',
-    main: '/products/cream-button-up/main.png',
-    details: '/products/cream-button-up/details.png',
+    main: '/lovable-uploads/0f0a212c-5edc-4c90-a258-6b43222bac06.png',
+    details: '/lovable-uploads/9bac9fd0-2115-4bae-8108-0b973f83db37.png',
     generated: [
       {
         id: 'af88ce94',
@@ -20,8 +20,8 @@ export const productImages = {
   'cream-sweater': {
     id: 'CS004',
     title: 'Classic Cream Sweater',
-    main: '/products/cream-sweater/main.png',
-    details: '/products/cream-sweater/details.png',
+    main: '/lovable-uploads/0f0a212c-5edc-4c90-a258-6b43222bac06.png',
+    details: '/lovable-uploads/9bac9fd0-2115-4bae-8108-0b973f83db37.png',
     generated: [
       {
         id: '047c9307',
