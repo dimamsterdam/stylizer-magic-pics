@@ -7,12 +7,12 @@ export const productImages = {
     generated: [
       {
         id: 'af88ce94',
-        url: '/generated/cream-button-up/urban-001.png',
+        url: '/lovable-uploads/af88ce94-30e1-4875-b411-1c07060016c2.png',
         type: 'urban'
       },
       {
         id: '61d9b435',
-        url: '/generated/cream-button-up/urban-002.png',
+        url: '/lovable-uploads/61d9b435-6552-49b0-a269-25c905ba18c9.png',
         type: 'urban'
       }
     ]
@@ -25,17 +25,17 @@ export const productImages = {
     generated: [
       {
         id: '047c9307',
-        url: '/generated/cream-sweater/lifestyle-001.png',
+        url: '/lovable-uploads/047c9307-af3c-47c6-b2e6-ea9d51a0c8cc.png',
         type: 'lifestyle'
       },
       {
         id: '01c51803',
-        url: '/generated/cream-sweater/lifestyle-002.png',
+        url: '/lovable-uploads/01c51803-441a-4b90-ad49-fc25ca184153.png',
         type: 'lifestyle'
       },
       {
         id: '12022501',
-        url: '/generated/cream-sweater/urban-001.png',
+        url: '/lovable-uploads/12022501-6211-4169-ad19-4d93700c8c9f.png',
         type: 'urban'
       }
     ]

@@ -24,7 +24,7 @@ const dummyProducts: Product[] = Object.values(productImages).map(product => ({
 
 export const ProductPicker = ({ onSelect }: ProductPickerProps) => {
   const [searchTerm, setSearchTerm] = useState("");
-  const [results, setResults] = useState<Product[]>([]);
+  const [results, setResults] = useState<Product[]>(dummyProducts);
 
   const handleSearch = (term: string) => {
     setSearchTerm(term);
