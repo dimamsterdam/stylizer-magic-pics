@@ -1,0 +1,57 @@
+import { useState } from "react";
+import { X } from "lucide-react";
+import { Button } from "@/components/ui/button";
+
+interface Image {
+  id: string;
+  url: string;
+  selected: boolean;
+}
+
+interface ImageGalleryProps {
+  images: Image[];
+  onSelect: (id: string) => void;
+  onRemove: (id: string) => void;
+}
+
+export const ImageGallery = ({ images, onSelect, onRemove }: ImageGalleryProps) => {
+  return (
+    <div className="grid grid-cols-2 md:grid-cols-3 gap-4 p-4">
+      {images.map((image) => (
+        <div
+          key={image.id}
+          className={`relative group ${
+            image.selected ? "ring-2 ring-polaris-teal" : ""
+          }`}
+        >
+          <img
+            src={image.url}
+            alt="Product"
+            className="w-full h-48 object-cover rounded-lg"
+          />
+          <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-30 transition-opacity rounded-lg">
+            <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
+              <Button
+                variant="destructive"
+                size="icon"
+                className="h-8 w-8"
+                onClick={() => onRemove(image.id)}
+              >
+                <X className="h-4 w-4" />
+              </Button>
+            </div>
+            <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+              <Button
+                variant="secondary"
+                className="bg-white text-polaris-text hover:bg-polaris-teal hover:text-white"
+                onClick={() => onSelect(image.id)}
+              >
+                {image.selected ? "Deselect" : "Select"}
+              </Button>
+            </div>
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+};
