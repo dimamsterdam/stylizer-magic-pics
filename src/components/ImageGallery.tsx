@@ -1,6 +1,11 @@
 import { useState } from "react";
-import { X, Check } from "lucide-react";
+import { X, Check, ZoomIn } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import {
+  HoverCard,
+  HoverCardContent,
+  HoverCardTrigger,
+} from "@/components/ui/hover-card";
 
 interface Image {
   id: string;
@@ -31,7 +36,28 @@ export const ImageGallery = ({ images, onSelect, onRemove }: ImageGalleryProps) 
             className="w-full h-32 object-cover rounded-lg"
           />
           <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-30 transition-opacity rounded-lg">
-            <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
+            <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity flex gap-2">
+              <HoverCard>
+                <HoverCardTrigger asChild>
+                  <Button
+                    variant="secondary"
+                    size="icon"
+                    className="h-8 w-8 bg-white hover:bg-gray-100"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                    }}
+                  >
+                    <ZoomIn className="h-4 w-4 text-polaris-text" />
+                  </Button>
+                </HoverCardTrigger>
+                <HoverCardContent className="w-80 p-0">
+                  <img
+                    src={image.url}
+                    alt="Product zoom"
+                    className="w-full h-80 object-cover rounded-md"
+                  />
+                </HoverCardContent>
+              </HoverCard>
               <Button
                 variant="destructive"
                 size="icon"
