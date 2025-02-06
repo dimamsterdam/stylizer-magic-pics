@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Check, RefreshCw, Trash, ZoomIn } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { useToast } from "@/components/ui/use-toast";
 import {
   Dialog,
@@ -17,9 +17,20 @@ interface GeneratedImage {
   selected: boolean;
 }
 
+interface LocationState {
+  selectedProduct?: {
+    id: string;
+    title: string;
+    sku: string;
+    image: string;
+  };
+}
+
 const GenerationResults = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const { toast } = useToast();
+  const { selectedProduct } = (location.state as LocationState) || {};
   const [selectedImageUrl, setSelectedImageUrl] = useState<string | null>(null);
   const [prompt, setPrompt] = useState("Professional model wearing the shirt in an urban setting");
   const [generatedImages, setGeneratedImages] = useState<GeneratedImage[]>([
@@ -108,14 +119,22 @@ const GenerationResults = () => {
       <div className="max-w-7xl mx-auto px-4 py-8">
         <Card className="mb-8">
           <CardHeader className="flex flex-row items-center gap-4">
-            <img
-              src="https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=100&h=100&fit=crop"
-              alt="Original product"
-              className="w-16 h-16 object-cover rounded-md border border-polaris-border"
-            />
+            {selectedProduct ? (
+              <img
+                src={selectedProduct.image}
+                alt={selectedProduct.title}
+                className="w-16 h-16 object-cover rounded-md border border-polaris-border"
+              />
+            ) : (
+              <div className="w-16 h-16 bg-gray-200 rounded-md border border-polaris-border" />
+            )}
             <div>
-              <h1 className="text-display-lg text-polaris-text">Classic White T-Shirt</h1>
-              <p className="text-body-md text-polaris-secondary">SKU: WHT-CLASSIC-001</p>
+              <h1 className="text-display-lg text-polaris-text">
+                {selectedProduct?.title || "Product"}
+              </h1>
+              <p className="text-body-md text-polaris-secondary">
+                SKU: {selectedProduct?.sku || "N/A"}
+              </p>
             </div>
           </CardHeader>
         </Card>
