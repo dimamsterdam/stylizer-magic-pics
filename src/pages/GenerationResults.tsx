@@ -175,6 +175,7 @@ const GenerationResults = () => {
         <Card>
           <CardHeader>
             <h2 className="text-display-md text-polaris-text">Generated Images</h2>
+            <p className="text-body-md text-polaris-secondary mb-4">Select the ones you want to publish</p>
           </CardHeader>
           <CardContent>
             <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
