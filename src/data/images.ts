@@ -32,11 +32,6 @@ export const productImages = {
         id: '01c51803',
         url: '/lovable-uploads/01c51803-441a-4b90-ad49-fc25ca184153.png',
         type: 'lifestyle'
-      },
-      {
-        id: '12022501',
-        url: '/lovable-uploads/12022501-6211-4169-ad19-4d93700c8c9f.png',
-        type: 'urban'
       }
     ]
   }
