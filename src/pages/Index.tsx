@@ -29,7 +29,6 @@ const Index = () => {
 
   const handleProductSelect = (product: Product) => {
     setSelectedProduct(product);
-    // Simulate loading product images
     setImages([
       {
         id: "1",
@@ -82,13 +81,13 @@ const Index = () => {
 
   return (
     <div className="min-h-screen bg-polaris-background">
-      <div className="max-w-7xl mx-auto px-4 py-8">
+      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <Card className="mb-8">
           <CardHeader>
             <h1 className="text-display-xl text-polaris-text">
               Welcome to Stylizer
             </h1>
-            <p className="text-body-md text-polaris-secondary max-w-2xl">
+            <p className="text-body-md text-polaris-secondary max-w-2xl mx-auto">
               Transform your product pack shots into stunning fashion photography with AI.
               Select a product, choose your pack shots, and let our AI create
               beautiful styled images for your store.
