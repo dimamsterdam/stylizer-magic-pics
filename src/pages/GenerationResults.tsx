@@ -46,12 +46,12 @@ const GenerationResults = () => {
   const [generatedImages, setGeneratedImages] = useState<GeneratedImage[]>([
     {
       id: "gen1",
-      url: "/lovable-uploads/12022501-6211-4169-ad19-4d93700c8c9f.png",
+      url: "/lovable-uploads/01c51803-441a-4b90-ad49-fc25ca184153.png",
       selected: false,
     },
     {
       id: "gen2",
-      url: "https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=400&h=400&fit=crop",
+      url: "/lovable-uploads/12022501-6211-4169-ad19-4d93700c8c9f.png",
       selected: false,
     },
     {
