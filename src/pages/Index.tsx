@@ -31,11 +31,6 @@ const Index = () => {
     setSelectedProduct(product);
     setImages([
       {
-        id: "1",
-        url: "https://images.unsplash.com/photo-1581091226825-a6a2a5aee158",
-        selected: false,
-      },
-      {
         id: "2",
         url: product.image,
         selected: false,
