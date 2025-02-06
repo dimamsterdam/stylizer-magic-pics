@@ -15,10 +15,10 @@ const App = () => (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
       <div className="min-h-screen bg-polaris-background">
-        <NavBar />
-        <Toaster />
-        <Sonner />
         <BrowserRouter>
+          <NavBar />
+          <Toaster />
+          <Sonner />
           <Routes>
             <Route path="/" element={<Index />} />
             <Route path="/generation-results" element={<GenerationResults />} />
