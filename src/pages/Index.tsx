@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "@/components/ui/use-toast";
 import { Card, CardHeader, CardContent } from "@/components/ui/card";
+import { Separator } from "@/components/ui/separator";
 
 interface Product {
   id: string;
@@ -133,14 +134,15 @@ const Index = () => {
           <div className="space-y-8">
             <Card className="bg-white/80 backdrop-blur-sm border-0 shadow-lg">
               <CardHeader>
-                <div className="pb-4 border-b border-polaris-border">
+                <div className="pb-4">
                   <div className="flex items-baseline gap-2 mb-4">
                     <span className="text-display-sm text-[#1A1F2C]">{selectedProduct.title}</span>
                     <span className="text-body-md text-[#6D7175]">SKU: {selectedProduct.sku}</span>
                   </div>
-                  <h2 className="text-display-lg text-[#1A1F2C] tracking-tight">
+                  <Separator className="mb-4" />
+                  <h4 className="text-display-sm text-[#1A1F2C] tracking-tight">
                     Product Images
-                  </h2>
+                  </h4>
                 </div>
                 <p className="text-body-md text-[#6D7175] mt-4">Select the product image to use</p>
               </CardHeader>
