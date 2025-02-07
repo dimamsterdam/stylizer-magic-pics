@@ -134,17 +134,17 @@ const Index = () => {
           <div className="space-y-8">
             <Card className="bg-white/80 backdrop-blur-sm border-0 shadow-lg">
               <CardHeader>
-                <div className="pb-4">
+                <div>
                   <div className="flex items-baseline gap-2 mb-4">
                     <span className="text-display-sm text-[#1A1F2C]">{selectedProduct.title}</span>
                     <span className="text-body-md text-[#6D7175]">SKU: {selectedProduct.sku}</span>
                   </div>
                   <Separator className="mb-4" />
-                  <h4 className="text-display-sm text-[#1A1F2C] tracking-tight">
+                  <h5 className="text-display-sm text-[#1A1F2C] tracking-tight">
                     Product Images
-                  </h4>
+                  </h5>
+                  <p className="text-body-md text-[#6D7175]">Select the product image to use for styling</p>
                 </div>
-                <p className="text-body-md text-[#6D7175] mt-4">Select the product image to use</p>
               </CardHeader>
               <CardContent>
                 <ImageGallery
