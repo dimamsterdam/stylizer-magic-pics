@@ -18,24 +18,46 @@ export const ImageEditor = ({ imageUrl, onSave, onClose }: ImageEditorProps) => 
   useEffect(() => {
     if (!canvasRef.current) return;
 
+    // Create canvas with initial dimensions
     const canvas = new FabricCanvas(canvasRef.current, {
       width: 512,
       height: 512,
       isDrawingMode: true,
     });
 
-    // Initialize the brush first
+    // Initialize the brush
     canvas.freeDrawingBrush = new PencilBrush(canvas);
     canvas.freeDrawingBrush.color = "rgba(255, 0, 0, 0.3)";
     canvas.freeDrawingBrush.width = 20;
 
-    // Load the image using the fabric Image class
+    // Load and set the background image while maintaining aspect ratio
     Image.fromURL(imageUrl, {
       crossOrigin: "anonymous",
     }).then((img) => {
+      // Calculate scaling factors to maintain aspect ratio while fitting within 512x512
+      const imgAspectRatio = img.width! / img.height!;
+      const canvasAspectRatio = canvas.width! / canvas.height!;
+      
+      let scaleX, scaleY;
+      if (imgAspectRatio > canvasAspectRatio) {
+        // Image is wider than canvas ratio
+        scaleX = canvas.width! / img.width!;
+        scaleY = scaleX;
+      } else {
+        // Image is taller than canvas ratio
+        scaleY = canvas.height! / img.height!;
+        scaleX = scaleY;
+      }
+
+      // Center the image
+      img.scaleX = scaleX;
+      img.scaleY = scaleY;
+      img.left = (canvas.width! - (img.width! * scaleX)) / 2;
+      img.top = (canvas.height! - (img.height! * scaleY)) / 2;
+      img.selectable = false;
+      
+      // Set as background
       canvas.backgroundImage = img;
-      img.scaleX = canvas.width! / img.width!;
-      img.scaleY = canvas.height! / img.height!;
       canvas.renderAll();
     });
 
