@@ -115,6 +115,10 @@ const Index = () => {
                       src={image.src}
                       alt={image.alt}
                       className="w-full h-40 object-cover rounded-lg transform transition-transform duration-300 group-hover:scale-110"
+                      onError={(e) => {
+                        console.error(`Failed to load image: ${image.src}`);
+                        e.currentTarget.src = '/placeholder.svg';
+                      }}
                     />
                     <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                   </div>
