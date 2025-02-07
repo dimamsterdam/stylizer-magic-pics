@@ -33,10 +33,9 @@ export const ImageEditor = ({ imageUrl, onSave, onClose }: ImageEditorProps) => 
     Image.fromURL(imageUrl, {
       crossOrigin: "anonymous",
     }).then((img) => {
-      canvas.setBackgroundImage(img, canvas.renderAll.bind(canvas), {
-        scaleX: canvas.width! / img.width!,
-        scaleY: canvas.height! / img.height!,
-      });
+      canvas.backgroundImage = img;
+      img.scaleX = canvas.width! / img.width!;
+      img.scaleY = canvas.height! / img.height!;
       canvas.renderAll();
     });
 
