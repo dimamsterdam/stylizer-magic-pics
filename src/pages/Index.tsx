@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { ProductPicker } from "@/components/ProductPicker";
 import { ImageGallery } from "@/components/ImageGallery";
@@ -75,16 +76,16 @@ const Index = () => {
   };
 
   return (
-    <div className="min-h-screen bg-polaris-background">
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div className="min-h-screen bg-gradient-to-br from-[#F6F6F7] to-[#E5DEFF]">
+      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         {!selectedProduct && (
           <>
-            <Card className="mb-8">
+            <Card className="mb-8 bg-white/80 backdrop-blur-sm border-0 shadow-lg">
               <CardHeader>
-                <h1 className="text-display-xl text-polaris-text mb-2">
+                <h1 className="text-display-xl text-[#1A1F2C] mb-4 tracking-tight">
                   Welcome to Stylizer
                 </h1>
-                <p className="text-body-lg text-polaris-secondary">
+                <p className="text-body-lg text-[#6D7175] max-w-2xl">
                   Transform your product photos into professional lifestyle images using AI. 
                   Start by selecting a product below to enhance its visual appeal.
                 </p>
@@ -96,21 +97,21 @@ const Index = () => {
         
         {selectedProduct && (
           <div className="space-y-8">
-            <Card>
+            <Card className="bg-white/80 backdrop-blur-sm border-0 shadow-lg">
               <CardHeader>
-                <h2 className="text-display-lg text-polaris-text">
-                  Selected Product: {selectedProduct.title}
+                <h2 className="text-display-lg text-[#1A1F2C] tracking-tight">
+                  {selectedProduct.title}
                 </h2>
-                <p className="text-body-md text-polaris-secondary">SKU: {selectedProduct.sku}</p>
+                <p className="text-body-md text-[#6D7175]">SKU: {selectedProduct.sku}</p>
               </CardHeader>
             </Card>
 
-            <Card>
+            <Card className="bg-white/80 backdrop-blur-sm border-0 shadow-lg">
               <CardHeader>
-                <h2 className="text-display-md text-polaris-text">
+                <h2 className="text-display-md text-[#1A1F2C] tracking-tight">
                   Product Images
                 </h2>
-                <p className="text-body-md text-polaris-secondary">Select the product image to use</p>
+                <p className="text-body-md text-[#6D7175]">Select the product image to use</p>
               </CardHeader>
               <CardContent>
                 <ImageGallery
@@ -121,9 +122,9 @@ const Index = () => {
               </CardContent>
             </Card>
 
-            <Card>
+            <Card className="bg-white/80 backdrop-blur-sm border-0 shadow-lg">
               <CardHeader>
-                <h2 className="text-display-md text-polaris-text">
+                <h2 className="text-display-md text-[#1A1F2C] tracking-tight">
                   Style Prompt
                 </h2>
               </CardHeader>
@@ -135,7 +136,7 @@ const Index = () => {
                   className="mb-4"
                 />
                 <Button
-                  className="bg-polaris-green hover:bg-polaris-teal text-white"
+                  className="bg-[#9b87f5] hover:bg-[#7E69AB] text-white font-medium px-6 py-2 rounded-lg transition-colors"
                   disabled={!canStartGeneration}
                   onClick={handleStartGeneration}
                 >

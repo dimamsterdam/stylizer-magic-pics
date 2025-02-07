@@ -1,3 +1,4 @@
+
 import { Link, useLocation } from "react-router-dom";
 import {
   Breadcrumb,
@@ -39,7 +40,7 @@ const Breadcrumbs = () => {
   });
 
   return (
-    <div className="border-b border-polaris-border bg-white">
+    <div className="border-b border-polaris-border bg-white/80 backdrop-blur-sm">
       <div className="max-w-7xl mx-auto px-4 lg:px-8 py-2">
         <Breadcrumb>
           <BreadcrumbList>
@@ -48,7 +49,7 @@ const Breadcrumbs = () => {
               <BreadcrumbLink asChild>
                 <Link
                   to="/"
-                  className="text-polaris-secondary hover:text-polaris-teal"
+                  className="text-[#6D7175] hover:text-[#9b87f5] transition-colors"
                 >
                   Home
                 </Link>
@@ -59,14 +60,14 @@ const Breadcrumbs = () => {
               <BreadcrumbItem key={path}>
                 <BreadcrumbSeparator />
                 {isLast ? (
-                  <BreadcrumbPage className="text-polaris-text font-semibold">
+                  <BreadcrumbPage className="text-[#1A1F2C] font-semibold">
                     {label}
                   </BreadcrumbPage>
                 ) : (
                   <BreadcrumbLink asChild>
                     <Link
                       to={path}
-                      className="text-polaris-secondary hover:text-polaris-teal"
+                      className="text-[#6D7175] hover:text-[#9b87f5] transition-colors"
                     >
                       {label}
                     </Link>
