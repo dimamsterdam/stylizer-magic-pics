@@ -22,14 +22,14 @@ interface Image {
 }
 
 const fashionImages = [
-  { src: "/lovable-uploads/01c51803-441a-4b90-ad49-fc25ca184153.png", alt: "Fashion 1" },
-  { src: "/lovable-uploads/047c9307-af3c-47c6-b2e6-ea9d51a0c8cc.png", alt: "Fashion 2" },
-  { src: "/lovable-uploads/0f0a212c-5edc-4c90-a258-6b43222bac06.png", alt: "Fashion 3" },
-  { src: "/lovable-uploads/12022501-6211-4169-ad19-4d93700c8c9f.png", alt: "Fashion 4" },
-  { src: "/lovable-uploads/61d9b435-6552-49b0-a269-25c905ba18c9.png", alt: "Fashion 5" },
-  { src: "/lovable-uploads/85ad1b88-47a8-4226-bc2e-63fa2dcf049a.png", alt: "Fashion 6" },
-  { src: "/lovable-uploads/9bac9fd0-2115-4bae-8108-0b973f83db37.png", alt: "Fashion 7" },
-  { src: "/lovable-uploads/af88ce94-30e1-4875-b411-1c07060016c2.png", alt: "Fashion 8" },
+  { src: "https://images.unsplash.com/photo-1539109136881-3be0616acf4b?auto=format&fit=crop&w=800&q=80", alt: "Fashion model in urban setting" },
+  { src: "https://images.unsplash.com/photo-1496747611176-843222e1e57c?auto=format&fit=crop&w=800&q=80", alt: "Street fashion portrait" },
+  { src: "https://images.unsplash.com/photo-1483985988355-763728e1935b?auto=format&fit=crop&w=800&q=80", alt: "Fashion shopping" },
+  { src: "https://images.unsplash.com/photo-1485230895905-ec40ba36b9bc?auto=format&fit=crop&w=800&q=80", alt: "Fashion editorial" },
+  { src: "https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?auto=format&fit=crop&w=800&q=80", alt: "Model in modern outfit" },
+  { src: "https://images.unsplash.com/photo-1492707892479-7bc8d5a4ee93?auto=format&fit=crop&w=800&q=80", alt: "Contemporary fashion" },
+  { src: "https://images.unsplash.com/photo-1469334031218-e382a71b716b?auto=format&fit=crop&w=800&q=80", alt: "Street style fashion" },
+  { src: "https://images.unsplash.com/photo-1475180098004-ca77a66827be?auto=format&fit=crop&w=800&q=80", alt: "Fashion lifestyle" }
 ];
 
 const Index = () => {
@@ -90,43 +90,43 @@ const Index = () => {
     <div className="min-h-screen bg-gradient-to-br from-[#F6F6F7] to-[#E5DEFF]">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         {!selectedProduct && (
-          <>
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
-              <div className="space-y-8">
-                <Card className="mb-8 bg-white/80 backdrop-blur-sm border-0 shadow-lg">
-                  <CardHeader>
-                    <h1 className="text-display-xl text-[#1A1F2C] mb-4 tracking-tight">
+          <div className="mb-8">
+            <Card className="bg-white/80 backdrop-blur-sm border-0 shadow-lg">
+              <CardHeader>
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-start">
+                  <div className="space-y-4">
+                    <h1 className="text-display-xl text-[#1A1F2C] tracking-tight">
                       Welcome to Stylizer
                     </h1>
                     <p className="text-body-lg text-[#6D7175] max-w-2xl">
                       Transform your product photos into professional lifestyle images using AI. 
                       Start by selecting a product below to enhance its visual appeal.
                     </p>
-                  </CardHeader>
-                </Card>
-              </div>
-              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-                {fashionImages.map((image, index) => (
-                  <div 
-                    key={index}
-                    className="relative group overflow-hidden rounded-lg shadow-lg transition-transform duration-300 hover:scale-105"
-                  >
-                    <img
-                      src={image.src}
-                      alt={image.alt}
-                      className="w-full h-40 object-cover rounded-lg transform transition-transform duration-300 group-hover:scale-110"
-                      onError={(e) => {
-                        console.error(`Failed to load image: ${image.src}`);
-                        e.currentTarget.src = '/placeholder.svg';
-                      }}
-                    />
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                   </div>
-                ))}
-              </div>
-            </div>
+                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
+                    {fashionImages.slice(0, 6).map((image, index) => (
+                      <div 
+                        key={index}
+                        className="relative group overflow-hidden rounded-lg shadow-lg transition-transform duration-300 hover:scale-105"
+                      >
+                        <img
+                          src={image.src}
+                          alt={image.alt}
+                          className="w-full h-32 object-cover rounded-lg transform transition-transform duration-300 group-hover:scale-110"
+                          onError={(e) => {
+                            console.error(`Failed to load image: ${image.src}`);
+                            e.currentTarget.src = '/placeholder.svg';
+                          }}
+                        />
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </CardHeader>
+            </Card>
             <ProductPicker onSelect={handleProductSelect} />
-          </>
+          </div>
         )}
         
         {selectedProduct && (
