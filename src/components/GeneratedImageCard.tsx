@@ -1,6 +1,10 @@
+
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
-import { Check, Trash, RefreshCw, ZoomIn } from "lucide-react";
+import { Check, Trash, RefreshCw, ZoomIn, Brush } from "lucide-react";
+import { useState } from "react";
+import { ImageEditor } from "./ImageEditor";
+import { useToast } from "@/hooks/use-toast";
 
 interface GeneratedImageProps {
   id: string;
@@ -8,7 +12,7 @@ interface GeneratedImageProps {
   selected: boolean;
   onSelect: (id: string) => void;
   onRemove: (id: string) => void;
-  onRegenerate: (id: string) => void;
+  onRegenerate: (id: string, maskDataUrl?: string) => void;
 }
 
 export const GeneratedImageCard = ({
@@ -19,6 +23,18 @@ export const GeneratedImageCard = ({
   onRemove,
   onRegenerate,
 }: GeneratedImageProps) => {
+  const { toast } = useToast();
+  const [isEditorOpen, setIsEditorOpen] = useState(false);
+
+  const handleSaveMask = (maskDataUrl: string) => {
+    onRegenerate(id, maskDataUrl);
+    setIsEditorOpen(false);
+    toast({
+      title: "Processing marked areas",
+      description: "Regenerating the image with your marked areas...",
+    });
+  };
+
   return (
     <div
       className={`relative group cursor-pointer ${
@@ -73,6 +89,26 @@ export const GeneratedImageCard = ({
                 className="w-full h-auto rounded-lg"
               />
             </DialogContent>
+          </Dialog>
+          <Dialog open={isEditorOpen} onOpenChange={setIsEditorOpen}>
+            <DialogTrigger asChild>
+              <Button
+                variant="secondary"
+                size="icon"
+                className="h-8 w-8 bg-white"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setIsEditorOpen(true);
+                }}
+              >
+                <Brush className="h-4 w-4" />
+              </Button>
+            </DialogTrigger>
+            <ImageEditor
+              imageUrl={url}
+              onSave={handleSaveMask}
+              onClose={() => setIsEditorOpen(false)}
+            />
           </Dialog>
         </div>
         {selected && (

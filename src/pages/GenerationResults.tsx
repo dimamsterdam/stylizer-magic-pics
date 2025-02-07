@@ -68,11 +68,13 @@ const GenerationResults = () => {
     });
   };
 
-  const handleRegenerateImage = (id: string) => {
-    console.log("Regenerating image:", id);
+  const handleRegenerateImage = (id: string, maskDataUrl?: string) => {
+    console.log("Regenerating image:", id, "with mask:", maskDataUrl);
     toast({
-      title: "Regenerating image",
-      description: "A new image is being generated...",
+      title: maskDataUrl ? "Processing marked areas" : "Regenerating image",
+      description: maskDataUrl 
+        ? "A new image is being generated with your marked areas..."
+        : "A new image is being generated...",
     });
   };
 
