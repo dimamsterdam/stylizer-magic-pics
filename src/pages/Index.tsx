@@ -140,7 +140,7 @@ const Index = () => {
                     <span className="text-body-md text-[#6D7175]">SKU: {selectedProduct.sku}</span>
                   </div>
                   <Separator className="mb-4" />
-                  <h5 className="text-display-sm text-[#1A1F2C] tracking-tight">
+                  <h5 className="text-body-lg text-[#1A1F2C] tracking-tight">
                     Product Images
                   </h5>
                   <p className="text-body-md text-[#6D7175]">Select the product image to use for styling</p>
