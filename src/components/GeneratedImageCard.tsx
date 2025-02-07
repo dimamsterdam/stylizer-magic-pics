@@ -90,26 +90,17 @@ export const GeneratedImageCard = ({
               />
             </DialogContent>
           </Dialog>
-          <Dialog open={isEditorOpen} onOpenChange={setIsEditorOpen}>
-            <DialogTrigger asChild>
-              <Button
-                variant="secondary"
-                size="icon"
-                className="h-8 w-8 bg-white"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setIsEditorOpen(true);
-                }}
-              >
-                <Brush className="h-4 w-4" />
-              </Button>
-            </DialogTrigger>
-            <ImageEditor
-              imageUrl={url}
-              onSave={handleSaveMask}
-              onClose={() => setIsEditorOpen(false)}
-            />
-          </Dialog>
+          <Button
+            variant="secondary"
+            size="icon"
+            className="h-8 w-8 bg-white"
+            onClick={(e) => {
+              e.stopPropagation();
+              setIsEditorOpen(true);
+            }}
+          >
+            <Brush className="h-4 w-4" />
+          </Button>
         </div>
         {selected && (
           <div className="absolute top-2 left-2">
@@ -119,6 +110,13 @@ export const GeneratedImageCard = ({
           </div>
         )}
       </div>
+      {isEditorOpen && (
+        <ImageEditor
+          imageUrl={url}
+          onSave={handleSaveMask}
+          onClose={() => setIsEditorOpen(false)}
+        />
+      )}
     </div>
   );
 };
