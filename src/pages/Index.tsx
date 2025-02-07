@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { ProductPicker } from "@/components/ProductPicker";
 import { ImageGallery } from "@/components/ImageGallery";
@@ -133,19 +132,16 @@ const Index = () => {
           <div className="space-y-8">
             <Card className="bg-white/80 backdrop-blur-sm border-0 shadow-lg">
               <CardHeader>
-                <h2 className="text-display-lg text-[#1A1F2C] tracking-tight">
-                  {selectedProduct.title}
-                </h2>
-                <p className="text-body-md text-[#6D7175]">SKU: {selectedProduct.sku}</p>
-              </CardHeader>
-            </Card>
-
-            <Card className="bg-white/80 backdrop-blur-sm border-0 shadow-lg">
-              <CardHeader>
-                <h2 className="text-display-md text-[#1A1F2C] tracking-tight">
-                  Product Images
-                </h2>
-                <p className="text-body-md text-[#6D7175]">Select the product image to use</p>
+                <div className="pb-4 border-b border-polaris-border">
+                  <h2 className="text-display-lg text-[#1A1F2C] tracking-tight">
+                    Product Images
+                  </h2>
+                  <div className="mt-2 flex items-baseline gap-2">
+                    <span className="text-display-md text-[#1A1F2C]">{selectedProduct.title}</span>
+                    <span className="text-body-md text-[#6D7175]">SKU: {selectedProduct.sku}</span>
+                  </div>
+                </div>
+                <p className="text-body-md text-[#6D7175] mt-4">Select the product image to use</p>
               </CardHeader>
               <CardContent>
                 <ImageGallery
