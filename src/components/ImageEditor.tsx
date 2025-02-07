@@ -76,7 +76,7 @@ export const ImageEditor = ({ imageUrl, onSave, onClose }: ImageEditorProps) => 
 
   return (
     <div className="fixed inset-0 z-50 bg-background/80 backdrop-blur-sm">
-      <div className="fixed left-[50%] top-[50%] z-50 w-full max-w-3xl translate-x-[-50%] translate-y-[-50%]">
+      <div className="fixed left-[50%] top-[50%] z-50 translate-x-[-50%] translate-y-[-50%] w-auto max-w-[544px]">
         <div className="p-4 flex flex-col gap-4 bg-white rounded-lg shadow-lg">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
@@ -89,8 +89,8 @@ export const ImageEditor = ({ imageUrl, onSave, onClose }: ImageEditorProps) => 
               <X className="h-4 w-4" />
             </Button>
           </div>
-          <div className="border border-gray-200 rounded-lg overflow-hidden">
-            <canvas ref={canvasRef} className="max-w-full" />
+          <div className="border border-gray-200 rounded-lg overflow-hidden w-[512px]">
+            <canvas ref={canvasRef} />
           </div>
           <DialogFooter>
             <Button
