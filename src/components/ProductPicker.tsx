@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Search } from "lucide-react";
 import { Input } from "@/components/ui/input";
@@ -42,7 +43,7 @@ export const ProductPicker = ({ onSelect }: ProductPickerProps) => {
   };
 
   return (
-    <div className="w-full max-w-2xl mx-auto p-6 bg-white rounded-lg shadow-sm">
+    <div className="w-full max-w-2xl mx-auto mt-8 p-6 bg-white rounded-lg shadow-sm">
       <div className="relative mb-6">
         <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-polaris-secondary" />
         <Input
