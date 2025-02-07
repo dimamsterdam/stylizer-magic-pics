@@ -93,7 +93,7 @@ const Index = () => {
           <div className="mb-8">
             <Card className="bg-white/80 backdrop-blur-sm border-0 shadow-lg">
               <CardHeader>
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-start">
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 items-start">
                   <div className="space-y-4">
                     <h1 className="text-display-xl text-[#1A1F2C] tracking-tight">
                       Welcome to Stylizer
@@ -103,16 +103,16 @@ const Index = () => {
                       Start by selecting a product below to enhance its visual appeal.
                     </p>
                   </div>
-                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
+                  <div className="grid grid-cols-3 sm:grid-cols-4 gap-2">
                     {fashionImages.slice(0, 6).map((image, index) => (
                       <div 
                         key={index}
-                        className="relative group overflow-hidden rounded-lg shadow-lg transition-transform duration-300 hover:scale-105"
+                        className="relative group overflow-hidden rounded-lg shadow-sm transition-transform duration-300 hover:scale-105"
                       >
                         <img
                           src={image.src}
                           alt={image.alt}
-                          className="w-full h-32 object-cover rounded-lg transform transition-transform duration-300 group-hover:scale-110"
+                          className="w-full h-24 object-cover rounded-lg transform transition-transform duration-300 group-hover:scale-110"
                           onError={(e) => {
                             console.error(`Failed to load image: ${image.src}`);
                             e.currentTarget.src = '/placeholder.svg';
