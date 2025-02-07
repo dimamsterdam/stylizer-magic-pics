@@ -44,6 +44,7 @@ export const ProductPicker = ({ onSelect }: ProductPickerProps) => {
 
   return (
     <div className="w-full max-w-2xl mx-auto mt-8 p-6 bg-white rounded-lg shadow-sm">
+      <h2 className="text-[#1A1F2C] text-display-md font-medium mb-4">Get started</h2>
       <div className="relative mb-6">
         <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-polaris-secondary" />
         <Input
