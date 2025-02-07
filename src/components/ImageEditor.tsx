@@ -1,6 +1,6 @@
 
 import { useEffect, useRef, useState } from "react";
-import { Canvas as FabricCanvas } from "fabric";
+import { Canvas as FabricCanvas, Image } from "fabric";
 import { Button } from "@/components/ui/button";
 import { DialogContent, DialogFooter } from "@/components/ui/dialog";
 import { Brush, Check, X } from "lucide-react";
@@ -24,12 +24,12 @@ export const ImageEditor = ({ imageUrl, onSave, onClose }: ImageEditorProps) => 
       isDrawingMode: true,
     });
 
-    // Load the image
-    fabric.Image.fromURL(imageUrl, (img) => {
-      canvas.setBackgroundImage(img, canvas.renderAll.bind(canvas), {
-        scaleX: canvas.width! / img.width!,
-        scaleY: canvas.height! / img.height!,
-      });
+    // Load the image using the fabric Image class
+    Image.fromURL(imageUrl, (img) => {
+      canvas.backgroundImage = img;
+      img.scaleX = canvas.width! / img.width!;
+      img.scaleY = canvas.height! / img.height!;
+      canvas.renderAll();
     });
 
     // Set up the brush
