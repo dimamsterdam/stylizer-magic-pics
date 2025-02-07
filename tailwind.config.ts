@@ -21,11 +21,11 @@ export default {
     extend: {
       colors: {
         polaris: {
-          green: "#9b87f5", // Updated to match reference purple
-          teal: "#7E69AB", // Updated to secondary purple
+          green: "#9b87f5",
+          teal: "#7E69AB",
           background: "#F6F6F7",
           border: "#E3E5E7",
-          text: "#1A1F2C", // Updated to dark purple
+          text: "#1A1F2C",
           secondary: "#6D7175",
         },
         border: "hsl(var(--border))",
@@ -66,11 +66,11 @@ export default {
         sans: ["Inter", "sans-serif"],
       },
       fontSize: {
-        // Polaris typography scale with adjusted sizes
-        'display-xl': ['32px', { lineHeight: '40px', fontWeight: '600' }],
-        'display-lg': ['28px', { lineHeight: '32px', fontWeight: '600' }],
-        'display-md': ['24px', { lineHeight: '28px', fontWeight: '600' }],
-        'display-sm': ['20px', { lineHeight: '24px', fontWeight: '600' }],
+        // Reduced display sizes by 25% while maintaining proportions
+        'display-xl': ['24px', { lineHeight: '30px', fontWeight: '600' }], // Was 32px
+        'display-lg': ['21px', { lineHeight: '24px', fontWeight: '600' }], // Was 28px
+        'display-md': ['18px', { lineHeight: '21px', fontWeight: '600' }], // Was 24px
+        'display-sm': ['15px', { lineHeight: '18px', fontWeight: '600' }], // Was 20px
         'body-lg': ['18px', { lineHeight: '28px', fontWeight: '400' }],
         'body-md': ['16px', { lineHeight: '24px', fontWeight: '400' }],
         'body-sm': ['14px', { lineHeight: '20px', fontWeight: '400' }],
