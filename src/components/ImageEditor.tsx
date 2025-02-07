@@ -1,6 +1,6 @@
 
 import { useEffect, useRef, useState } from "react";
-import { Canvas as FabricCanvas, Image } from "fabric";
+import { Canvas as FabricCanvas, Image, PencilBrush } from "fabric";
 import { Button } from "@/components/ui/button";
 import { DialogFooter } from "@/components/ui/dialog";
 import { Brush, Check, X } from "lucide-react";
@@ -24,19 +24,21 @@ export const ImageEditor = ({ imageUrl, onSave, onClose }: ImageEditorProps) => 
       isDrawingMode: true,
     });
 
-    // Load the image using the fabric Image class with correct typings
-    Image.fromURL(imageUrl, {
-      crossOrigin: 'anonymous'
-    }).then((img) => {
-      canvas.backgroundImage = img;
-      img.scaleX = canvas.width! / img.width!;
-      img.scaleY = canvas.height! / img.height!;
-      canvas.renderAll();
-    });
-
-    // Set up the brush
+    // Initialize the brush first
+    canvas.freeDrawingBrush = new PencilBrush(canvas);
     canvas.freeDrawingBrush.color = "rgba(255, 0, 0, 0.3)";
     canvas.freeDrawingBrush.width = 20;
+
+    // Load the image using the fabric Image class
+    Image.fromURL(imageUrl, {
+      crossOrigin: "anonymous",
+    }).then((img) => {
+      canvas.setBackgroundImage(img, canvas.renderAll.bind(canvas), {
+        scaleX: canvas.width! / img.width!,
+        scaleY: canvas.height! / img.height!,
+      });
+      canvas.renderAll();
+    });
 
     setFabricCanvas(canvas);
 
