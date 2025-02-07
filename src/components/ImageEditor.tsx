@@ -26,8 +26,7 @@ export const ImageEditor = ({ imageUrl, onSave, onClose }: ImageEditorProps) => 
 
     // Load the image using the fabric Image class with correct typings
     Image.fromURL(imageUrl, {
-      crossOrigin: 'anonymous',
-      objectCaching: false,
+      crossOrigin: 'anonymous'
     }).then((img) => {
       canvas.backgroundImage = img;
       img.scaleX = canvas.width! / img.width!;
