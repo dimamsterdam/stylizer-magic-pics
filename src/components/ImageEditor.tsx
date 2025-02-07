@@ -24,8 +24,11 @@ export const ImageEditor = ({ imageUrl, onSave, onClose }: ImageEditorProps) => 
       isDrawingMode: true,
     });
 
-    // Load the image using the fabric Image class
-    Image.fromURL(imageUrl, (img) => {
+    // Load the image using the fabric Image class with correct typings
+    Image.fromURL(imageUrl, {
+      crossOrigin: 'anonymous',
+      objectCaching: false,
+    }).then((img) => {
       canvas.backgroundImage = img;
       img.scaleX = canvas.width! / img.width!;
       img.scaleY = canvas.height! / img.height!;
