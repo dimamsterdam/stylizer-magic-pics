@@ -3,60 +3,69 @@ import { useEffect, useRef, useState } from "react";
 import { Canvas as FabricCanvas, Image, PencilBrush } from "fabric";
 import { Button } from "@/components/ui/button";
 import { DialogFooter } from "@/components/ui/dialog";
-import { Brush, Check, X } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { Brush, Check, X, Pen, Trash2 } from "lucide-react";
+
+interface Mark {
+  id: string;
+  path: any; // fabric.js path object
+  prompt: string;
+}
 
 interface ImageEditorProps {
   imageUrl: string;
-  onSave: (maskDataUrl: string) => void;
+  onSave: (maskDataUrl: string, marks: { prompt: string; area: string }[]) => void;
   onClose: () => void;
 }
 
 export const ImageEditor = ({ imageUrl, onSave, onClose }: ImageEditorProps) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [fabricCanvas, setFabricCanvas] = useState<FabricCanvas | null>(null);
+  const [marks, setMarks] = useState<Mark[]>([]);
+  const [currentPrompt, setCurrentPrompt] = useState("");
+  const [activeMarkId, setActiveMarkId] = useState<string | null>(null);
 
   useEffect(() => {
     if (!canvasRef.current) return;
 
-    // Create canvas with initial dimensions
     const canvas = new FabricCanvas(canvasRef.current, {
       width: 512,
       height: 512,
       isDrawingMode: true,
     });
 
-    // Initialize the brush
     canvas.freeDrawingBrush = new PencilBrush(canvas);
     canvas.freeDrawingBrush.color = "rgba(255, 0, 0, 0.3)";
     canvas.freeDrawingBrush.width = 20;
 
-    // Load and set the background image while maintaining aspect ratio
+    canvas.on('path:created', (e: any) => {
+      const path = e.path;
+      const markId = Math.random().toString(36).substring(7);
+      setMarks(prev => [...prev, { id: markId, path, prompt: "" }]);
+      setActiveMarkId(markId);
+    });
+
     Image.fromURL(imageUrl, {
       crossOrigin: "anonymous",
     }).then((img) => {
-      // Calculate scaling factors to maintain aspect ratio while fitting within 512x512
       const imgAspectRatio = img.width! / img.height!;
       const canvasAspectRatio = canvas.width! / canvas.height!;
       
       let scaleX, scaleY;
       if (imgAspectRatio > canvasAspectRatio) {
-        // Image is wider than canvas ratio
         scaleX = canvas.width! / img.width!;
         scaleY = scaleX;
       } else {
-        // Image is taller than canvas ratio
         scaleY = canvas.height! / img.height!;
         scaleX = scaleY;
       }
 
-      // Center the image
       img.scaleX = scaleX;
       img.scaleY = scaleY;
       img.left = (canvas.width! - (img.width! * scaleX)) / 2;
       img.top = (canvas.height! - (img.height! * scaleY)) / 2;
       img.selectable = false;
       
-      // Set as background
       canvas.backgroundImage = img;
       canvas.renderAll();
     });
@@ -68,10 +77,44 @@ export const ImageEditor = ({ imageUrl, onSave, onClose }: ImageEditorProps) => 
     };
   }, [imageUrl]);
 
+  const handlePromptSubmit = () => {
+    if (!activeMarkId || !currentPrompt.trim()) return;
+    
+    setMarks(prev => prev.map(mark => 
+      mark.id === activeMarkId ? { ...mark, prompt: currentPrompt } : mark
+    ));
+    setCurrentPrompt("");
+    setActiveMarkId(null);
+  };
+
+  const handleDeleteMark = (markId: string) => {
+    const markToDelete = marks.find(m => m.id === markId);
+    if (markToDelete && fabricCanvas) {
+      fabricCanvas.remove(markToDelete.path);
+      setMarks(prev => prev.filter(mark => mark.id !== markId));
+      if (activeMarkId === markId) {
+        setActiveMarkId(null);
+        setCurrentPrompt("");
+      }
+    }
+  };
+
+  const handleEditPrompt = (markId: string) => {
+    const mark = marks.find(m => m.id === markId);
+    if (mark) {
+      setCurrentPrompt(mark.prompt);
+      setActiveMarkId(markId);
+    }
+  };
+
   const handleSave = () => {
     if (!fabricCanvas) return;
     const dataUrl = fabricCanvas.toDataURL();
-    onSave(dataUrl);
+    const marksWithAreas = marks.map(mark => ({
+      prompt: mark.prompt,
+      area: mark.path.toDataURL()
+    }));
+    onSave(dataUrl, marksWithAreas);
   };
 
   return (
@@ -89,9 +132,73 @@ export const ImageEditor = ({ imageUrl, onSave, onClose }: ImageEditorProps) => 
               <X className="h-4 w-4" />
             </Button>
           </div>
-          <div className="border border-gray-200 rounded-lg overflow-hidden w-[512px]">
-            <canvas ref={canvasRef} />
+          
+          <div className="flex gap-4">
+            <div className="border border-gray-200 rounded-lg overflow-hidden w-[512px]">
+              <canvas ref={canvasRef} />
+            </div>
+            
+            <div className="w-64 flex flex-col gap-4">
+              {activeMarkId && (
+                <div className="flex flex-col gap-2">
+                  <label className="text-sm font-medium text-polaris-text">
+                    Enter prompt for marked area:
+                  </label>
+                  <div className="flex gap-2">
+                    <Input
+                      value={currentPrompt}
+                      onChange={(e) => setCurrentPrompt(e.target.value)}
+                      placeholder="Describe the change..."
+                    />
+                    <Button 
+                      size="sm"
+                      onClick={handlePromptSubmit}
+                      className="whitespace-nowrap"
+                    >
+                      Add
+                    </Button>
+                  </div>
+                </div>
+              )}
+              
+              <div className="flex flex-col gap-2">
+                <label className="text-sm font-medium text-polaris-text">
+                  Marked Areas:
+                </label>
+                <div className="flex flex-col gap-2">
+                  {marks.map((mark) => (
+                    <div
+                      key={mark.id}
+                      className="group flex items-start gap-2 p-2 rounded-md hover:bg-gray-50"
+                    >
+                      <p className="flex-1 text-sm">
+                        {mark.prompt || "No prompt added"}
+                      </p>
+                      <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-6 w-6"
+                          onClick={() => handleEditPrompt(mark.id)}
+                        >
+                          <Pen className="h-3 w-3" />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-6 w-6 text-red-500 hover:text-red-600"
+                          onClick={() => handleDeleteMark(mark.id)}
+                        >
+                          <Trash2 className="h-3 w-3" />
+                        </Button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
           </div>
+
           <DialogFooter>
             <Button
               variant="secondary"
@@ -103,6 +210,7 @@ export const ImageEditor = ({ imageUrl, onSave, onClose }: ImageEditorProps) => 
             <Button
               onClick={handleSave}
               className="bg-polaris-green hover:bg-polaris-teal text-white"
+              disabled={marks.some(mark => !mark.prompt)}
             >
               <Check className="h-4 w-4 mr-2" />
               Save Marks

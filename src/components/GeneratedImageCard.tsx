@@ -12,7 +12,7 @@ interface GeneratedImageProps {
   selected: boolean;
   onSelect: (id: string) => void;
   onRemove: (id: string) => void;
-  onRegenerate: (id: string, maskDataUrl?: string) => void;
+  onRegenerate: (id: string, maskDataUrl?: string, marks?: { prompt: string; area: string }[]) => void;
 }
 
 export const GeneratedImageCard = ({
@@ -26,12 +26,12 @@ export const GeneratedImageCard = ({
   const { toast } = useToast();
   const [isEditorOpen, setIsEditorOpen] = useState(false);
 
-  const handleSaveMask = (maskDataUrl: string) => {
-    onRegenerate(id, maskDataUrl);
+  const handleSaveMask = (maskDataUrl: string, marks: { prompt: string; area: string }[]) => {
+    onRegenerate(id, maskDataUrl, marks);
     setIsEditorOpen(false);
     toast({
       title: "Processing marked areas",
-      description: "Regenerating the image with your marked areas...",
+      description: `Regenerating the image with ${marks.length} marked ${marks.length === 1 ? 'area' : 'areas'}...`,
     });
   };
 
