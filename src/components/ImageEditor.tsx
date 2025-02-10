@@ -1,29 +1,16 @@
 
 import { useEffect, useRef, useState } from "react";
-import { Canvas as FabricCanvas, Image, PencilBrush } from "fabric";
+import { Canvas as FabricCanvas } from "fabric";
 import { Button } from "@/components/ui/button";
 import { DialogFooter } from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { Brush, Check, X, Pen, Trash2 } from "lucide-react";
-
-interface Mark {
-  id: string;
-  path: any;
-  prompt: string;
-  left?: number;
-  top?: number;
-}
-
-interface ImageEditorProps {
-  imageUrl: string;
-  onSave: (maskDataUrl: string, marks: { prompt: string; area: string }[]) => void;
-  onClose: () => void;
-}
+import { Brush, Check, X } from "lucide-react";
+import { Mark, ImageEditorProps } from "@/types/imageEditor";
+import { MarksList } from "./image-editor/MarksList";
+import { PromptInput } from "./image-editor/PromptInput";
+import { initializeCanvas } from "@/utils/canvasUtils";
 
 export const ImageEditor = ({ imageUrl, onSave, onClose }: ImageEditorProps) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const inputRef = useRef<HTMLInputElement>(null);
   const [fabricCanvas, setFabricCanvas] = useState<FabricCanvas | null>(null);
   const [marks, setMarks] = useState<Mark[]>([]);
   const [currentPrompt, setCurrentPrompt] = useState("");
@@ -34,18 +21,17 @@ export const ImageEditor = ({ imageUrl, onSave, onClose }: ImageEditorProps) => 
   useEffect(() => {
     if (!canvasRef.current) return;
 
-    const canvas = new FabricCanvas(canvasRef.current, {
-      width: 512,
-      height: 512,
-      isDrawingMode: true,
-    });
+    initializeCanvas(canvasRef.current, imageUrl).then(setFabricCanvas);
 
-    canvas.freeDrawingBrush = new PencilBrush(canvas);
-    canvas.freeDrawingBrush.color = "rgba(255, 0, 0, 0.3)";
-    canvas.freeDrawingBrush.width = 20;
+    return () => {
+      fabricCanvas?.dispose();
+    };
+  }, [imageUrl]);
 
-    canvas.on('path:created', (e: any) => {
-      // Remove previous mark if it has no prompt
+  useEffect(() => {
+    if (!fabricCanvas) return;
+
+    fabricCanvas.on('path:created', (e: any) => {
       if (activeMarkId) {
         const activeMark = marks.find(m => m.id === activeMarkId);
         if (activeMark && !activeMark.prompt) {
@@ -77,44 +63,7 @@ export const ImageEditor = ({ imageUrl, onSave, onClose }: ImageEditorProps) => 
       setShowPopover(true);
       setCurrentPrompt("");
     });
-
-    Image.fromURL(imageUrl, {
-      crossOrigin: "anonymous",
-    }).then((img) => {
-      const imgAspectRatio = img.width! / img.height!;
-      const canvasAspectRatio = canvas.width! / canvas.height!;
-      
-      let scaleX, scaleY;
-      if (imgAspectRatio > canvasAspectRatio) {
-        scaleX = canvas.width! / img.width!;
-        scaleY = scaleX;
-      } else {
-        scaleY = canvas.height! / img.height!;
-        scaleX = scaleY;
-      }
-
-      img.scaleX = scaleX;
-      img.scaleY = scaleY;
-      img.left = (canvas.width! - (img.width! * scaleX)) / 2;
-      img.top = (canvas.height! - (img.height! * scaleY)) / 2;
-      img.selectable = false;
-      
-      canvas.backgroundImage = img;
-      canvas.renderAll();
-    });
-
-    setFabricCanvas(canvas);
-
-    return () => {
-      canvas.dispose();
-    };
-  }, [imageUrl]);
-
-  useEffect(() => {
-    if (showPopover && inputRef.current) {
-      inputRef.current.focus();
-    }
-  }, [showPopover]);
+  }, [fabricCanvas, activeMarkId, marks]);
 
   const handlePromptSubmit = () => {
     if (!activeMarkId) return;
@@ -187,71 +136,21 @@ export const ImageEditor = ({ imageUrl, onSave, onClose }: ImageEditorProps) => 
             <div className="relative border border-gray-200 rounded-lg overflow-hidden w-[512px]">
               <canvas ref={canvasRef} />
               {showPopover && (
-                <div 
-                  className="absolute"
-                  style={{
-                    left: `${popoverPosition.left}px`,
-                    top: `${popoverPosition.top}px`,
-                    transform: 'translateX(-50%)'
-                  }}
-                >
-                  <div className="bg-white p-2 rounded-lg shadow-lg border border-gray-200">
-                    <Input
-                      ref={inputRef}
-                      value={currentPrompt}
-                      onChange={(e) => setCurrentPrompt(e.target.value)}
-                      onKeyDown={(e) => {
-                        if (e.key === 'Enter') {
-                          handlePromptSubmit();
-                        } else if (e.key === 'Escape') {
-                          handleDeleteMark(activeMarkId!);
-                        }
-                      }}
-                      placeholder="Describe the change..."
-                      className="min-w-[200px]"
-                    />
-                  </div>
-                </div>
+                <PromptInput
+                  currentPrompt={currentPrompt}
+                  position={popoverPosition}
+                  onChange={setCurrentPrompt}
+                  onSubmit={handlePromptSubmit}
+                  onCancel={() => handleDeleteMark(activeMarkId!)}
+                />
               )}
             </div>
             
-            <div className="w-64 flex flex-col gap-4">
-              <div className="flex flex-col gap-2">
-                <label className="text-sm font-medium text-polaris-text">
-                  Marked Areas:
-                </label>
-                <div className="flex flex-col gap-2">
-                  {marks.map((mark) => (
-                    <div
-                      key={mark.id}
-                      className="group flex items-start gap-2 p-2 rounded-md hover:bg-gray-50"
-                    >
-                      <p className="flex-1 text-sm">
-                        {mark.prompt || "No prompt added"}
-                      </p>
-                      <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          className="h-6 w-6"
-                          onClick={() => handleEditPrompt(mark.id)}
-                        >
-                          <Pen className="h-3 w-3" />
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          className="h-6 w-6 text-red-500 hover:text-red-600"
-                          onClick={() => handleDeleteMark(mark.id)}
-                        >
-                          <Trash2 className="h-3 w-3" />
-                        </Button>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </div>
+            <MarksList
+              marks={marks}
+              onEdit={handleEditPrompt}
+              onDelete={handleDeleteMark}
+            />
           </div>
 
           <DialogFooter>
