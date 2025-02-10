@@ -28,13 +28,14 @@ export const PromptInput = ({
     }
   }, []);
 
-  const handleSuggestedPromptClick = async (prompt: string) => {
-    // First update the prompt
+  const handleSuggestedPromptClick = (prompt: string) => {
     onChange(prompt);
-    // Wait for next render cycle to ensure state is updated
-    await new Promise(resolve => setTimeout(resolve, 0));
-    // Then submit
-    onSubmit();
+    // Use requestAnimationFrame to ensure state is updated
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        onSubmit();
+      });
+    });
   };
 
   return (

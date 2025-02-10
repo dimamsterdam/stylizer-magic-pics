@@ -1,4 +1,3 @@
-
 import { useEffect, useRef, useState } from "react";
 import { Canvas as FabricCanvas } from "fabric";
 import { Button } from "@/components/ui/button";
@@ -31,17 +30,6 @@ export const ImageEditor = ({ imageUrl, onSave, onClose }: ImageEditorProps) => 
   const [popoverPosition, setPopoverPosition] = useState({ left: 0, top: 0 });
   const [showPopover, setShowPopover] = useState(false);
 
-  // Clean up any empty marks when component unmounts
-  useEffect(() => {
-    return () => {
-      marks.forEach(mark => {
-        if (!mark.prompt && fabricCanvas) {
-          fabricCanvas.remove(mark.path);
-        }
-      });
-    };
-  }, [marks, fabricCanvas]);
-
   useEffect(() => {
     if (!canvasRef.current) return;
 
@@ -72,8 +60,10 @@ export const ImageEditor = ({ imageUrl, onSave, onClose }: ImageEditorProps) => 
       const suggestedPrompts = generateSuggestedPrompts(markId);
 
       setMarks(prev => {
-        // Only filter out marks that are empty AND not the active one
-        const cleanedMarks = prev.filter(mark => mark.prompt || mark.id === activeMarkId);
+        // Keep current mark if it's active, only filter out other empty marks
+        const cleanedMarks = prev.filter(mark => 
+          mark.prompt || (mark.id === activeMarkId)
+        );
         return [...cleanedMarks, { 
           id: markId, 
           path, 
@@ -96,12 +86,16 @@ export const ImageEditor = ({ imageUrl, onSave, onClose }: ImageEditorProps) => 
     const trimmedPrompt = currentPrompt.trim();
     
     if (trimmedPrompt) {
-      setMarks(prev => prev.map(mark => 
-        mark.id === activeMarkId ? { ...mark, prompt: trimmedPrompt } : mark
-      ));
-      setActiveMarkId(null);
-      setCurrentPrompt("");
+      setMarks(prev => 
+        prev.map(mark => 
+          mark.id === activeMarkId 
+            ? { ...mark, prompt: trimmedPrompt } 
+            : mark
+        ).filter(mark => mark.prompt || mark.id === activeMarkId)
+      );
       setShowPopover(false);
+      setCurrentPrompt("");
+      setActiveMarkId(null);
     } else {
       handleDeleteMark(activeMarkId);
     }
