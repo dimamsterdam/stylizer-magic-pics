@@ -31,6 +31,17 @@ export const ImageEditor = ({ imageUrl, onSave, onClose }: ImageEditorProps) => 
   const [popoverPosition, setPopoverPosition] = useState({ left: 0, top: 0 });
   const [showPopover, setShowPopover] = useState(false);
 
+  // Clean up any empty marks when component unmounts
+  useEffect(() => {
+    return () => {
+      marks.forEach(mark => {
+        if (!mark.prompt && fabricCanvas) {
+          fabricCanvas.remove(mark.path);
+        }
+      });
+    };
+  }, [marks, fabricCanvas]);
+
   useEffect(() => {
     if (!canvasRef.current) return;
 
@@ -45,12 +56,20 @@ export const ImageEditor = ({ imageUrl, onSave, onClose }: ImageEditorProps) => 
     if (!fabricCanvas) return;
 
     fabricCanvas.on('path:created', (e: any) => {
+      // First, clean up any existing empty marks
       if (activeMarkId) {
         const activeMark = marks.find(m => m.id === activeMarkId);
         if (activeMark && !activeMark.prompt) {
           handleDeleteMark(activeMarkId);
         }
       }
+
+      // Clean up any other empty marks that might exist
+      marks.forEach(mark => {
+        if (!mark.prompt) {
+          handleDeleteMark(mark.id);
+        }
+      });
 
       const path = e.path;
       const markId = Math.random().toString(36).substring(7);
@@ -67,7 +86,7 @@ export const ImageEditor = ({ imageUrl, onSave, onClose }: ImageEditorProps) => 
 
       const suggestedPrompts = generateSuggestedPrompts(markId);
 
-      setMarks(prev => [...prev, { 
+      setMarks(prev => [...prev.filter(mark => mark.prompt), { 
         id: markId, 
         path, 
         prompt: "",
