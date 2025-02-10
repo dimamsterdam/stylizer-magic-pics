@@ -56,21 +56,6 @@ export const ImageEditor = ({ imageUrl, onSave, onClose }: ImageEditorProps) => 
     if (!fabricCanvas) return;
 
     fabricCanvas.on('path:created', (e: any) => {
-      // First, clean up any existing empty marks
-      if (activeMarkId) {
-        const activeMark = marks.find(m => m.id === activeMarkId);
-        if (activeMark && !activeMark.prompt) {
-          handleDeleteMark(activeMarkId);
-        }
-      }
-
-      // Clean up any other empty marks that might exist
-      marks.forEach(mark => {
-        if (!mark.prompt) {
-          handleDeleteMark(mark.id);
-        }
-      });
-
       const path = e.path;
       const markId = Math.random().toString(36).substring(7);
       const bounds = path.getBoundingRect();
@@ -86,33 +71,39 @@ export const ImageEditor = ({ imageUrl, onSave, onClose }: ImageEditorProps) => 
 
       const suggestedPrompts = generateSuggestedPrompts(markId);
 
-      setMarks(prev => [...prev.filter(mark => mark.prompt), { 
-        id: markId, 
-        path, 
-        prompt: "",
-        suggestedPrompts,
-        left: bounds.left,
-        top: bounds.top
-      }]);
+      // Clean up any existing empty marks before adding new one
+      setMarks(prev => {
+        const cleanedMarks = prev.filter(mark => mark.prompt);
+        return [...cleanedMarks, { 
+          id: markId, 
+          path, 
+          prompt: "",
+          suggestedPrompts,
+          left: bounds.left,
+          top: bounds.top
+        }];
+      });
+      
       setActiveMarkId(markId);
       setShowPopover(true);
       setCurrentPrompt("");
     });
-  }, [fabricCanvas, activeMarkId, marks]);
+  }, [fabricCanvas]);
 
   const handlePromptSubmit = () => {
     if (!activeMarkId) return;
     
-    if (!currentPrompt.trim()) {
-      handleDeleteMark(activeMarkId);
-    } else {
+    // Only process if there's a prompt
+    if (currentPrompt.trim()) {
       setMarks(prev => prev.map(mark => 
         mark.id === activeMarkId ? { ...mark, prompt: currentPrompt } : mark
       ));
       setCurrentPrompt("");
       setActiveMarkId(null);
+      setShowPopover(false);
+    } else {
+      handleDeleteMark(activeMarkId);
     }
-    setShowPopover(false);
   };
 
   const handleDeleteMark = (markId: string) => {

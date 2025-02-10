@@ -29,11 +29,10 @@ export const PromptInput = ({
   }, []);
 
   const handleSuggestedPromptClick = (prompt: string) => {
+    // Set the prompt in parent state
     onChange(prompt);
-    // Add a small delay to ensure the state is updated before submitting
-    setTimeout(() => {
-      onSubmit();
-    }, 0);
+    // Submit after a longer delay to ensure state is updated
+    setTimeout(onSubmit, 100);
   };
 
   return (
@@ -82,4 +81,3 @@ export const PromptInput = ({
     </div>
   );
 };
-
