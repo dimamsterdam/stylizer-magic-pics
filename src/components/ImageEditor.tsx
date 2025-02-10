@@ -9,6 +9,19 @@ import { MarksList } from "./image-editor/MarksList";
 import { PromptInput } from "./image-editor/PromptInput";
 import { initializeCanvas } from "@/utils/canvasUtils";
 
+const generateSuggestedPrompts = (markId: string): string[] => {
+  return [
+    "Make this area brighter",
+    "Add more contrast here",
+    "Adjust the color balance",
+    "Enhance the details",
+    "Smooth out this region",
+    "Make this pop more",
+    "Soften this area",
+    "Add more texture here",
+  ];
+};
+
 export const ImageEditor = ({ imageUrl, onSave, onClose }: ImageEditorProps) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [fabricCanvas, setFabricCanvas] = useState<FabricCanvas | null>(null);
@@ -52,10 +65,13 @@ export const ImageEditor = ({ imageUrl, onSave, onClose }: ImageEditorProps) => 
         });
       }
 
+      const suggestedPrompts = generateSuggestedPrompts(markId);
+
       setMarks(prev => [...prev, { 
         id: markId, 
         path, 
         prompt: "",
+        suggestedPrompts,
         left: bounds.left,
         top: bounds.top
       }]);
@@ -138,6 +154,7 @@ export const ImageEditor = ({ imageUrl, onSave, onClose }: ImageEditorProps) => 
               {showPopover && (
                 <PromptInput
                   currentPrompt={currentPrompt}
+                  suggestedPrompts={marks.find(m => m.id === activeMarkId)?.suggestedPrompts}
                   position={popoverPosition}
                   onChange={setCurrentPrompt}
                   onSubmit={handlePromptSubmit}
@@ -175,4 +192,3 @@ export const ImageEditor = ({ imageUrl, onSave, onClose }: ImageEditorProps) => 
     </div>
   );
 };
-

@@ -1,9 +1,11 @@
 
 import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
 import { useEffect, useRef } from "react";
 
 interface PromptInputProps {
   currentPrompt: string;
+  suggestedPrompts?: string[];
   position: { left: number; top: number };
   onChange: (value: string) => void;
   onSubmit: () => void;
@@ -12,6 +14,7 @@ interface PromptInputProps {
 
 export const PromptInput = ({ 
   currentPrompt, 
+  suggestedPrompts,
   position, 
   onChange, 
   onSubmit,
@@ -27,7 +30,7 @@ export const PromptInput = ({
 
   return (
     <div 
-      className="absolute"
+      className="absolute z-50"
       style={{
         left: `${position.left}px`,
         top: `${position.top}px`,
@@ -47,10 +50,30 @@ export const PromptInput = ({
             }
           }}
           placeholder="Describe the change..."
-          className="min-w-[200px]"
+          className="min-w-[200px] mb-2"
         />
+        {suggestedPrompts && suggestedPrompts.length > 0 && (
+          <div className="flex flex-col gap-1 mt-2">
+            <p className="text-xs text-gray-500 font-medium">Suggested prompts:</p>
+            <div className="flex flex-wrap gap-1">
+              {suggestedPrompts.map((prompt, index) => (
+                <Button
+                  key={index}
+                  variant="secondary"
+                  size="sm"
+                  className="text-xs"
+                  onClick={() => {
+                    onChange(prompt);
+                    onSubmit();
+                  }}
+                >
+                  {prompt}
+                </Button>
+              ))}
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );
 };
-
