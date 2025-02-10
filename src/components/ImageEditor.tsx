@@ -45,6 +45,14 @@ export const ImageEditor = ({ imageUrl, onSave, onClose }: ImageEditorProps) => 
     canvas.freeDrawingBrush.width = 20;
 
     canvas.on('path:created', (e: any) => {
+      // Remove previous mark if it has no prompt
+      if (activeMarkId) {
+        const activeMark = marks.find(m => m.id === activeMarkId);
+        if (activeMark && !activeMark.prompt) {
+          handleDeleteMark(activeMarkId);
+        }
+      }
+
       const path = e.path;
       const markId = Math.random().toString(36).substring(7);
       const bounds = path.getBoundingRect();
@@ -268,3 +276,4 @@ export const ImageEditor = ({ imageUrl, onSave, onClose }: ImageEditorProps) => 
     </div>
   );
 };
+
