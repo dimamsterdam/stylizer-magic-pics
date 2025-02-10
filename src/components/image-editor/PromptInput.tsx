@@ -28,6 +28,14 @@ export const PromptInput = ({
     }
   }, []);
 
+  const handleSuggestedPromptClick = (prompt: string) => {
+    onChange(prompt);
+    // Add a small delay to ensure the state is updated before submitting
+    setTimeout(() => {
+      onSubmit();
+    }, 0);
+  };
+
   return (
     <div 
       className="absolute z-50"
@@ -62,10 +70,7 @@ export const PromptInput = ({
                   variant="secondary"
                   size="sm"
                   className="text-xs"
-                  onClick={() => {
-                    onChange(prompt);
-                    onSubmit();
-                  }}
+                  onClick={() => handleSuggestedPromptClick(prompt)}
                 >
                   {prompt}
                 </Button>
@@ -77,3 +82,4 @@ export const PromptInput = ({
     </div>
   );
 };
+
