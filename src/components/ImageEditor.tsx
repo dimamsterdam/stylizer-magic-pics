@@ -71,9 +71,9 @@ export const ImageEditor = ({ imageUrl, onSave, onClose }: ImageEditorProps) => 
 
       const suggestedPrompts = generateSuggestedPrompts(markId);
 
-      // Clean up any existing empty marks before adding new one
       setMarks(prev => {
-        const cleanedMarks = prev.filter(mark => mark.prompt);
+        // Only filter out marks that are empty AND not the active one
+        const cleanedMarks = prev.filter(mark => mark.prompt || mark.id === activeMarkId);
         return [...cleanedMarks, { 
           id: markId, 
           path, 
@@ -88,18 +88,19 @@ export const ImageEditor = ({ imageUrl, onSave, onClose }: ImageEditorProps) => 
       setShowPopover(true);
       setCurrentPrompt("");
     });
-  }, [fabricCanvas]);
+  }, [fabricCanvas, activeMarkId]);
 
   const handlePromptSubmit = () => {
     if (!activeMarkId) return;
+
+    const trimmedPrompt = currentPrompt.trim();
     
-    // Only process if there's a prompt
-    if (currentPrompt.trim()) {
+    if (trimmedPrompt) {
       setMarks(prev => prev.map(mark => 
-        mark.id === activeMarkId ? { ...mark, prompt: currentPrompt } : mark
+        mark.id === activeMarkId ? { ...mark, prompt: trimmedPrompt } : mark
       ));
-      setCurrentPrompt("");
       setActiveMarkId(null);
+      setCurrentPrompt("");
       setShowPopover(false);
     } else {
       handleDeleteMark(activeMarkId);
