@@ -4,5 +4,5 @@ project_id = "zjaswhqgqvlqpoosbfqn"
 [functions.sync-shopify-products]
 verify_jwt = false
 
-[functions.generate-fal-images]
+[functions.generate-deepseek-images]
 verify_jwt = false

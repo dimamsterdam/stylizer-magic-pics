@@ -80,7 +80,7 @@ const GenerationResults = () => {
     );
 
     try {
-      const { data, error } = await supabase.functions.invoke('generate-fal-images', {
+      const { data, error } = await supabase.functions.invoke('generate-deepseek-images', {
         body: {
           prompt,
           productId: product.id,

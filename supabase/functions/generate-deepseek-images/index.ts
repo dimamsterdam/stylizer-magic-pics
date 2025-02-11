@@ -62,7 +62,7 @@ serve(async (req) => {
     }
 
   } catch (error) {
-    console.error('Error in generate-fal-images:', {
+    console.error('Error in generate-deepseek-images:', {
       name: error.name,
       message: error.message,
       stack: error.stack,
