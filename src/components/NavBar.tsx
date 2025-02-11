@@ -9,8 +9,13 @@ const NavBar = () => {
         <div className="h-16 flex items-center justify-between">
           <div className="flex items-center">
             <Link to="/" className="flex items-center space-x-2">
-              <span className="font-inter font-semibold text-[#1A1F2C] tracking-[-0.03em] text-xl">
-                stylizer
+              <span className="flex items-center">
+                <span className="font-inter font-bold text-[#1A1F2C] tracking-[-0.03em] text-xl">
+                  brandmachine
+                </span>
+                <span className="ml-2 font-inter text-gray-500 text-lg">
+                  Stylizer
+                </span>
               </span>
             </Link>
           </div>
@@ -21,3 +26,4 @@ const NavBar = () => {
 };
 
 export default NavBar;
+
