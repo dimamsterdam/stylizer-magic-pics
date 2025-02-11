@@ -6,3 +6,6 @@ verify_jwt = false
 
 [functions.generate-deepseek-images]
 verify_jwt = false
+
+[functions.test-deepseek-connection]
+verify_jwt = false
