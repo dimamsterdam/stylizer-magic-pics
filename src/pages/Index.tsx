@@ -153,7 +153,7 @@ const Index = () => {
     if (studioStyle.isCustomPrompt) {
       return customPrompt;
     }
-    return `Product on a ${studioStyle.backgroundColor.toLowerCase()} studio background`;
+    return `Studio style`;
   };
 
   const canStartGeneration = images.length > 0 && 
@@ -370,12 +370,28 @@ const Index = () => {
                       </Button>
                     </PopoverTrigger>
                     <PopoverContent className="w-80">
-                      <Input
-                        placeholder="Describe the style you want..."
-                        value={customPrompt}
-                        onChange={(e) => setCustomPrompt(e.target.value)}
-                        className="mb-2"
-                      />
+                      <div className="space-y-2">
+                        <Input
+                          placeholder="Describe the style you want..."
+                          value={customPrompt}
+                          onChange={(e) => setCustomPrompt(e.target.value)}
+                          className="mb-2"
+                        />
+                        <Button 
+                          className="w-full"
+                          onClick={() => {
+                            if (customPrompt.trim()) {
+                              setStudioStyle(prev => ({ ...prev, isCustomPrompt: true }));
+                              toast({
+                                title: "Custom prompt set",
+                                description: "Your custom style prompt has been saved.",
+                              });
+                            }
+                          }}
+                        >
+                          Confirm Prompt
+                        </Button>
+                      </div>
                     </PopoverContent>
                   </Popover>
 

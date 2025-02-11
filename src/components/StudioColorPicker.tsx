@@ -27,6 +27,17 @@ export const StudioColorPicker = ({ color, onChange }: StudioColorPickerProps) =
     { name: "Medium Gray", hex: "#8A898C" },
     { name: "Dark Gray", hex: "#222222" },
     { name: "Studio Black", hex: "#000000" },
+    { name: "Primary Purple", hex: "#9b87f5" },
+    { name: "Vivid Purple", hex: "#8B5CF6" },
+    { name: "Magenta Pink", hex: "#D946EF" },
+    { name: "Bright Orange", hex: "#F97316" },
+    { name: "Ocean Blue", hex: "#0EA5E9" },
+    { name: "Sky Blue", hex: "#33C3F0" },
+    { name: "Soft Green", hex: "#F2FCE2" },
+    { name: "Soft Yellow", hex: "#FEF7CD" },
+    { name: "Soft Orange", hex: "#FEC6A1" },
+    { name: "Soft Purple", hex: "#E5DEFF" },
+    { name: "Soft Pink", hex: "#FFDEE2" },
   ];
 
   return (
@@ -40,7 +51,7 @@ export const StudioColorPicker = ({ color, onChange }: StudioColorPickerProps) =
           <Paintbrush className="h-4 w-4 absolute text-[#1A1F2C] opacity-50" />
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="w-64">
+      <PopoverContent className="w-80">
         <div className="space-y-4">
           <div className="space-y-2">
             <div className="flex justify-between items-center">
@@ -59,11 +70,11 @@ export const StudioColorPicker = ({ color, onChange }: StudioColorPickerProps) =
           </div>
           <div className="space-y-2">
             <label className="text-sm font-medium">Preset Colors</label>
-            <div className="grid grid-cols-5 gap-2">
+            <div className="grid grid-cols-8 gap-2">
               {presetColors.map((preset) => (
                 <button
                   key={preset.hex}
-                  className="w-8 h-8 rounded border hover:scale-110 transition-transform"
+                  className="w-6 h-6 rounded border hover:scale-110 transition-transform"
                   style={{ backgroundColor: preset.hex }}
                   onClick={() => {
                     setTempColor(preset.hex);
