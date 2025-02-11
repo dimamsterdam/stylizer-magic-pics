@@ -1,6 +1,6 @@
 
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
-import { serve } from "https://deno.fresh.run/std@v9.6.1/http/server.ts";
+import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 
 const shopifyQuery = `
 query {
@@ -34,6 +34,17 @@ query {
 
 serve(async (req: Request) => {
   try {
+    // Add CORS headers
+    const corsHeaders = {
+      'Access-Control-Allow-Origin': '*',
+      'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+    };
+
+    // Handle CORS preflight requests
+    if (req.method === 'OPTIONS') {
+      return new Response(null, { headers: corsHeaders });
+    }
+
     // Create Supabase client
     const supabaseClient = createClient(
       Deno.env.get('SUPABASE_URL') ?? '',
@@ -74,14 +85,26 @@ serve(async (req: Request) => {
 
     if (error) throw error;
 
-    return new Response(JSON.stringify({ success: true, count: products.length }), {
-      headers: { 'Content-Type': 'application/json' },
-    });
+    return new Response(
+      JSON.stringify({ success: true, count: products.length }),
+      { 
+        headers: { 
+          ...corsHeaders,
+          'Content-Type': 'application/json'
+        } 
+      }
+    );
   } catch (error) {
     console.error('Error:', error);
-    return new Response(JSON.stringify({ error: error.message }), {
-      status: 500,
-      headers: { 'Content-Type': 'application/json' },
-    });
+    return new Response(
+      JSON.stringify({ error: error.message }), 
+      { 
+        status: 500,
+        headers: { 
+          'Content-Type': 'application/json',
+          'Access-Control-Allow-Origin': '*',
+        } 
+      }
+    );
   }
 });
