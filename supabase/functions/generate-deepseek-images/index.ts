@@ -23,6 +23,15 @@ serve(async (req) => {
     const fullPrompt = `${prompt}. ${angle} shot of the product.`
     console.log('Full prompt:', fullPrompt)
 
+    const requestBody = {
+      prompt: fullPrompt,
+      n: 1,
+      size: "1024x1024",
+      response_format: "url",
+      model: "deepseek-xl"
+    }
+    console.log('Sending request to Deepseek:', requestBody)
+
     const response = await fetch('https://api.deepseek.ai/v2/images/generations', {
       method: 'POST',
       headers: {
@@ -30,36 +39,38 @@ serve(async (req) => {
         'Content-Type': 'application/json',
         'Accept': 'application/json'
       },
-      body: JSON.stringify({
-        prompt: fullPrompt,
-        n: 1,
-        size: "1024x1024",
-        response_format: "url",
-        model: "deepseek-xl"
-      })
+      body: JSON.stringify(requestBody)
     })
 
-    console.log('Response status:', response.status)
+    console.log('Deepseek response status:', response.status)
+    console.log('Deepseek response headers:', Object.fromEntries(response.headers.entries()))
+    
     const responseText = await response.text()
-    console.log('Response body:', responseText)
+    console.log('Deepseek response body:', responseText)
 
     if (!response.ok) {
       throw new Error(`Deepseek API error (${response.status}): ${responseText}`)
     }
 
+    let data
     try {
-      const data = JSON.parse(responseText)
-      if (!data.data?.[0]?.url) {
-        throw new Error('No image URL in response')
-      }
-      return new Response(
-        JSON.stringify({ imageUrl: data.data[0].url }),
-        { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      )
+      data = JSON.parse(responseText)
     } catch (parseError) {
       console.error('Error parsing response:', parseError)
-      throw new Error(`Invalid JSON response: ${responseText}`)
+      throw new Error(`Invalid JSON response from Deepseek: ${responseText}`)
     }
+
+    if (!data.data?.[0]?.url) {
+      console.error('Unexpected response structure:', data)
+      throw new Error('No image URL in Deepseek response')
+    }
+
+    console.log('Successfully generated image URL:', data.data[0].url)
+
+    return new Response(
+      JSON.stringify({ imageUrl: data.data[0].url }),
+      { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+    )
 
   } catch (error) {
     console.error('Error in generate-deepseek-images:', {
