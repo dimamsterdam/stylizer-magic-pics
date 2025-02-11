@@ -21,18 +21,26 @@ export const ProductPicker = ({ onSelect }: ProductPickerProps) => {
   const [searchTerm, setSearchTerm] = useState("");
   const [results, setResults] = useState<Product[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const { toast } = useToast();
 
   useEffect(() => {
     const loadInitialProducts = async () => {
       try {
+        setIsLoading(true);
+        setError(null);
+        console.log('Fetching initial products...');
         const { data, error } = await supabase
           .from('products')
           .select('*')
           .limit(10);
 
-        if (error) throw error;
+        if (error) {
+          console.error('Error fetching products:', error);
+          throw error;
+        }
 
+        console.log('Fetched products:', data);
         const formattedProducts = data.map(product => ({
           id: product.id,
           title: product.title,
@@ -43,6 +51,7 @@ export const ProductPicker = ({ onSelect }: ProductPickerProps) => {
         setResults(formattedProducts);
       } catch (error) {
         console.error('Error loading products:', error);
+        setError('Failed to load products. Please try again.');
         toast({
           title: "Error",
           description: "Failed to load products. Please try again.",
@@ -58,34 +67,89 @@ export const ProductPicker = ({ onSelect }: ProductPickerProps) => {
 
   const handleSearch = async (term: string) => {
     setSearchTerm(term);
+    setIsLoading(true);
+    setError(null);
     
-    if (term.trim() === "") {
-      const { data } = await supabase
-        .from('products')
-        .select('*')
-        .limit(10);
-      
-      setResults(data?.map(product => ({
-        id: product.id,
-        title: product.title,
-        sku: product.sku || '',
-        image: product.image_url || '',
-      })) || []);
-      return;
+    try {
+      console.log('Searching products with term:', term);
+      if (term.trim() === "") {
+        const { data, error } = await supabase
+          .from('products')
+          .select('*')
+          .limit(10);
+        
+        if (error) throw error;
+        
+        setResults(data?.map(product => ({
+          id: product.id,
+          title: product.title,
+          sku: product.sku || '',
+          image: product.image_url || '',
+        })) || []);
+      } else {
+        const { data, error } = await supabase
+          .from('products')
+          .select('*')
+          .or(`title.ilike.%${term}%,sku.ilike.%${term}%`)
+          .limit(10);
+        
+        if (error) throw error;
+        
+        console.log('Search results:', data);
+        setResults(data?.map(product => ({
+          id: product.id,
+          title: product.title,
+          sku: product.sku || '',
+          image: product.image_url || '',
+        })) || []);
+      }
+    } catch (error) {
+      console.error('Error searching products:', error);
+      setError('Failed to search products. Please try again.');
+      toast({
+        title: "Error",
+        description: "Failed to search products. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
     }
-    
-    const { data } = await supabase
-      .from('products')
-      .select('*')
-      .or(`title.ilike.%${term}%,sku.ilike.%${term}%`)
-      .limit(10);
-    
-    setResults(data?.map(product => ({
-      id: product.id,
-      title: product.title,
-      sku: product.sku || '',
-      image: product.image_url || '',
-    })) || []);
+  };
+
+  const handleSyncProducts = async () => {
+    try {
+      setIsLoading(true);
+      setError(null);
+      toast({
+        title: "Syncing products",
+        description: "Please wait while we sync your products...",
+      });
+
+      const response = await supabase.functions.invoke('sync-shopify-products');
+      
+      if (response.error) {
+        throw new Error(response.error.message);
+      }
+
+      console.log('Sync response:', response.data);
+      toast({
+        title: "Sync completed",
+        description: `Successfully synced ${response.data.count} products`,
+      });
+
+      // Reload products after sync
+      handleSearch(searchTerm);
+    } catch (error) {
+      console.error('Error syncing products:', error);
+      setError('Failed to sync products. Please try again.');
+      toast({
+        title: "Error",
+        description: "Failed to sync products. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -93,8 +157,19 @@ export const ProductPicker = ({ onSelect }: ProductPickerProps) => {
       <div className="p-6 bg-white rounded-lg shadow-sm">
         <div className="space-y-4">
           <div className="pb-4 border-b border-polaris-border">
-            <h2 className="text-[#1A1F2C] text-display-md font-medium">Get started</h2>
-            <p className="mt-1 text-polaris-secondary">Search and select a product to begin</p>
+            <div className="flex justify-between items-center">
+              <div>
+                <h2 className="text-[#1A1F2C] text-display-md font-medium">Get started</h2>
+                <p className="mt-1 text-polaris-secondary">Search and select a product to begin</p>
+              </div>
+              <Button
+                onClick={handleSyncProducts}
+                disabled={isLoading}
+                className="bg-[#9b87f5] hover:bg-[#7E69AB] text-white"
+              >
+                Sync Products
+              </Button>
+            </div>
           </div>
           <div className="relative">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-polaris-secondary" />
@@ -104,12 +179,15 @@ export const ProductPicker = ({ onSelect }: ProductPickerProps) => {
               value={searchTerm}
               onChange={(e) => handleSearch(e.target.value)}
               className="pl-10 border-polaris-border"
+              disabled={isLoading}
             />
           </div>
         </div>
         <div className="mt-6 space-y-4">
           {isLoading ? (
             <div className="text-center py-4">Loading products...</div>
+          ) : error ? (
+            <div className="text-center py-4 text-red-500">{error}</div>
           ) : results.length === 0 ? (
             <div className="text-center py-4 text-gray-500">
               No products found

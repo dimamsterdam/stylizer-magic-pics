@@ -55,16 +55,31 @@ serve(async (req: Request) => {
 
     // Fetch products from Shopify
     console.log('Fetching products from Shopify...');
-    const response = await fetch('https://your-store.myshopify.com/api/2024-01/graphql.json', {
+    const shopifyUrl = 'https://quickstart-50d94e13.myshopify.com/api/2024-01/graphql.json';
+    console.log('Using Shopify URL:', shopifyUrl);
+    
+    const shopifyToken = Deno.env.get('SHOPIFY_STOREFRONT_API_KEY');
+    if (!shopifyToken) {
+      console.error('Missing Shopify Storefront API Key');
+      throw new Error('Missing Shopify Storefront API Key');
+    }
+
+    const response = await fetch(shopifyUrl, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'X-Shopify-Storefront-Access-Token': Deno.env.get('SHOPIFY_STOREFRONT_API_KEY') ?? '',
+        'X-Shopify-Storefront-Access-Token': shopifyToken,
       },
       body: JSON.stringify({ query: shopifyQuery }),
     });
 
+    if (!response.ok) {
+      console.error('Shopify API error:', response.status, await response.text());
+      throw new Error(`Shopify API error: ${response.status}`);
+    }
+
     const data = await response.json();
+    console.log('Shopify API response:', JSON.stringify(data, null, 2));
     
     if (!data.data?.products?.edges) {
       console.error('Invalid response from Shopify:', data);
@@ -85,7 +100,7 @@ serve(async (req: Request) => {
         image_url: edge.node.images.edges[0]?.node.url || null,
         updated_at: new Date().toISOString(),
       };
-      console.log('Processed product:', product.title);
+      console.log('Processed product:', JSON.stringify(product, null, 2));
       return product;
     });
 
@@ -102,7 +117,11 @@ serve(async (req: Request) => {
     console.log('Products sync completed successfully');
 
     return new Response(
-      JSON.stringify({ success: true, count: products.length }),
+      JSON.stringify({ 
+        success: true, 
+        count: products.length,
+        products: products 
+      }),
       { 
         headers: { 
           ...corsHeaders,
@@ -113,7 +132,10 @@ serve(async (req: Request) => {
   } catch (error) {
     console.error('Error:', error);
     return new Response(
-      JSON.stringify({ error: error.message }), 
+      JSON.stringify({ 
+        error: error.message,
+        details: error.stack
+      }), 
       { 
         status: 500,
         headers: { 
