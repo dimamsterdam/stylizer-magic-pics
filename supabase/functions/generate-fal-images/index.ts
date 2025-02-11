@@ -28,17 +28,21 @@ serve(async (req) => {
     console.log('Making request to FAL AI...')
 
     try {
+      // Use URLSearchParams to properly encode the URL
+      const url = new URL('https://api.fal.ai/v1/text-to-image')
+
       // Call FAL AI API with more detailed error handling
       const controller = new AbortController()
       const timeoutId = setTimeout(() => controller.abort(), 30000)
 
-      const response = await fetch('https://api.fal.ai/v1/text-to-image', {
+      const requestOptions = {
         method: 'POST',
         headers: {
           'Accept': 'application/json',
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${falKey}`,
-          'User-Agent': 'Deno/1.0'
+          'User-Agent': 'Deno/1.0',
+          'Connection': 'keep-alive'
         },
         body: JSON.stringify({
           prompt: fullPrompt,
@@ -48,7 +52,16 @@ serve(async (req) => {
           sync: true
         }),
         signal: controller.signal
-      }).finally(() => clearTimeout(timeoutId))
+      }
+
+      console.log('Request options:', {
+        url: url.toString(),
+        method: requestOptions.method,
+        headers: { ...requestOptions.headers, Authorization: '[REDACTED]' },
+        body: requestOptions.body
+      })
+
+      const response = await fetch(url, requestOptions).finally(() => clearTimeout(timeoutId))
 
       console.log('FAL AI response status:', response.status)
 
