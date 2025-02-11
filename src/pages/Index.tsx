@@ -29,6 +29,11 @@ interface AnglePreferences {
   [key: string]: boolean;
 }
 
+interface StudioStyle {
+  backgroundColor: string;
+  isCustomPrompt: boolean;
+}
+
 const fashionImages = [
   { src: "https://images.unsplash.com/photo-1539109136881-3be0616acf4b?auto=format&fit=crop&w=800&q=80", alt: "Fashion model in urban setting" },
   { src: "https://images.unsplash.com/photo-1496747611176-843222e1e57c?auto=format&fit=crop&w=800&q=80", alt: "Street fashion portrait" },
