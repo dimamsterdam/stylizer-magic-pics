@@ -6,41 +6,19 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 }
 
-serve(async (req) => {
-  // Handle CORS preflight requests
-  if (req.method === 'OPTIONS') {
-    return new Response(null, { headers: corsHeaders })
+async function makeDeepseekRequest(fullPrompt: string, deepseekKey: string, retryCount = 0): Promise<Response> {
+  const url = 'https://api.deepseek.ai/v2/images/generation' // Note: using singular 'generation'
+  console.log(`Attempt ${retryCount + 1}: Making request to ${url}`)
+
+  const requestBody = {
+    prompt: fullPrompt,
+    n: 1,
+    size: "1024x1024",
+    response_format: "url",
+    model: "deepseek-xl"
   }
 
   try {
-    const { prompt, productId, angle } = await req.json()
-    console.log('Generating image with:', { prompt, productId, angle })
-
-    // Construct the full prompt for Deepseek
-    const fullPrompt = `${prompt}. ${angle} shot of the product.`
-
-    // Get Deepseek key from environment
-    const deepseekKey = Deno.env.get('DEEPSEEK_API_KEY')
-    if (!deepseekKey) {
-      console.error('DEEPSEEK_API_KEY not found in environment')
-      throw new Error('DEEPSEEK_API_KEY environment variable not set')
-    }
-
-    console.log('Making request to Deepseek...')
-    console.log('Full prompt:', fullPrompt)
-
-    const url = 'https://api.deepseek.ai/v2/images/generation'
-    console.log('Request URL:', url)
-
-    const requestBody = {
-      prompt: fullPrompt,
-      n: 1,
-      size: "1024x1024",
-      response_format: "url",
-      model: "deepseek-xl"
-    }
-    console.log('Request body:', JSON.stringify(requestBody))
-
     const response = await fetch(url, {
       method: 'POST',
       headers: {
@@ -51,26 +29,56 @@ serve(async (req) => {
       body: JSON.stringify(requestBody)
     })
 
-    console.log('Response status:', response.status)
-    
+    console.log(`Response status: ${response.status}`)
+    const responseText = await response.text()
+    console.log(`Response body: ${responseText}`)
+
     if (!response.ok) {
-      const errorText = await response.text()
-      console.error('Deepseek API error response:', errorText)
-      throw new Error(`Deepseek API error (${response.status}): ${errorText}`)
+      throw new Error(`Deepseek API error (${response.status}): ${responseText}`)
     }
 
-    const data = await response.json()
-    console.log('Deepseek response data:', data)
+    try {
+      const data = JSON.parse(responseText)
+      if (!data.data?.[0]?.url) {
+        throw new Error('No image URL in response')
+      }
+      return new Response(
+        JSON.stringify({ imageUrl: data.data[0].url }),
+        { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      )
+    } catch (e) {
+      console.error('Error parsing response:', e)
+      throw new Error(`Invalid response format: ${responseText}`)
+    }
+  } catch (error) {
+    if (retryCount < 2) {
+      console.log(`Retrying request (attempt ${retryCount + 2})...`)
+      await new Promise(resolve => setTimeout(resolve, 1000)) // Wait 1 second before retry
+      return makeDeepseekRequest(fullPrompt, deepseekKey, retryCount + 1)
+    }
+    throw error
+  }
+}
 
-    if (!data.data?.[0]?.url) {
-      console.error('Invalid response format:', data)
-      throw new Error('No image URL in response')
+serve(async (req) => {
+  if (req.method === 'OPTIONS') {
+    return new Response(null, { headers: corsHeaders })
+  }
+
+  try {
+    const { prompt, productId, angle } = await req.json()
+    console.log('Request received:', { prompt, productId, angle })
+
+    const deepseekKey = Deno.env.get('DEEPSEEK_API_KEY')
+    if (!deepseekKey) {
+      console.error('DEEPSEEK_API_KEY not found')
+      throw new Error('DEEPSEEK_API_KEY environment variable not set')
     }
 
-    return new Response(
-      JSON.stringify({ imageUrl: data.data[0].url }),
-      { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-    )
+    const fullPrompt = `${prompt}. ${angle} shot of the product.`
+    console.log('Full prompt:', fullPrompt)
+
+    return await makeDeepseekRequest(fullPrompt, deepseekKey)
 
   } catch (error) {
     console.error('Error in generate-fal-images:', {
