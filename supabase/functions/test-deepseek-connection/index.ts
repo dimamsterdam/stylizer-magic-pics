@@ -39,65 +39,55 @@ async function testApiKey(): Promise<TestResult> {
   }
 }
 
+async function testNetworkConnectivity(): Promise<TestResult> {
+  try {
+    console.log('Testing general network connectivity...');
+    const response = await fetch('https://api.github.com/zen');
+    const text = await response.text();
+    
+    return {
+      step: 'Network Connectivity Test',
+      success: true,
+      details: {
+        status: response.status,
+        response: text.substring(0, 50) // Only log first 50 chars
+      }
+    };
+  } catch (error) {
+    console.error('Network connectivity test failed:', error);
+    return {
+      step: 'Network Connectivity Test',
+      success: false,
+      details: {
+        errorName: error.name,
+        errorMessage: error.message
+      },
+      error: 'Failed to connect to test endpoint'
+    };
+  }
+}
+
 async function testApiConnection(deepseekKey: string): Promise<TestResult> {
   try {
     // Remove 'Bearer ' prefix if it exists and add it back consistently
     const cleanKey = deepseekKey.replace(/^Bearer\s+/i, '');
     const authHeader = `Bearer ${cleanKey}`;
     
-    console.log('Testing API connection...');
+    console.log('Testing Deepseek API connection...');
 
-    // First try a GET request to test basic connectivity
-    try {
-      console.log('Testing basic connectivity...');
-      const testResponse = await fetch('https://api.deepseek.ai/v1/models', {
-        method: 'GET',
-        headers: {
-          'Authorization': authHeader,
-          'Content-Type': 'application/json',
-        }
-      });
-      
-      console.log('Basic connectivity test response:', {
-        status: testResponse.status,
-        ok: testResponse.ok,
-        statusText: testResponse.statusText
-      });
-
-      if (!testResponse.ok) {
-        const errorText = await testResponse.text();
-        throw new Error(`API authentication failed: ${testResponse.status} - ${errorText}`);
-      }
-    } catch (testError) {
-      console.error('Basic connectivity test failed:', testError);
-      throw testError;
-    }
-
-    // Now try the image generation request
-    console.log('Testing image generation endpoint...');
-    const imageResponse = await fetch('https://api.deepseek.ai/v1/images/generations', {
-      method: 'POST',
+    // Test with minimal request
+    const response = await fetch('https://api.deepseek.ai/v1/models', {
+      method: 'GET',
       headers: {
-        'Authorization': authHeader,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        prompt: "test connection",
-        n: 1,
-        size: "256x256",
-        response_format: "url",
-        model: "deepseek/xl"
-      })
+        'Authorization': authHeader
+      }
     });
 
-    console.log('Image generation response:', {
-      status: imageResponse.status,
-      ok: imageResponse.ok,
-      statusText: imageResponse.statusText
+    const responseText = await response.text();
+    console.log('Models endpoint response:', {
+      status: response.status,
+      text: responseText
     });
-
-    const responseText = await imageResponse.text();
-    console.log('Response text:', responseText);
 
     let parsedResponse;
     try {
@@ -108,14 +98,14 @@ async function testApiConnection(deepseekKey: string): Promise<TestResult> {
 
     return {
       step: 'API Connection Test',
-      success: imageResponse.ok,
+      success: response.ok,
       details: {
-        statusCode: imageResponse.status,
-        statusText: imageResponse.statusText,
-        headers: Object.fromEntries(imageResponse.headers.entries()),
+        statusCode: response.status,
+        statusText: response.statusText,
+        headers: Object.fromEntries(response.headers.entries()),
         response: parsedResponse
       },
-      error: !imageResponse.ok ? `API returned status ${imageResponse.status}: ${responseText}` : undefined
+      error: !response.ok ? `API returned status ${response.status}: ${responseText}` : undefined
     };
   } catch (error) {
     console.error('Connection test error:', {
@@ -140,15 +130,24 @@ async function testApiConnection(deepseekKey: string): Promise<TestResult> {
 
 async function runAllTests() {
   const results: TestResult[] = [];
-  console.log('Starting Deepseek API tests...');
+  console.log('Starting connection tests...');
 
-  // Test 1: API Key
+  // Test 1: Network Connectivity
+  const networkResult = await testNetworkConnectivity();
+  results.push(networkResult);
+  console.log('Network test result:', networkResult);
+
+  if (!networkResult.success) {
+    return results;
+  }
+
+  // Test 2: API Key
   const apiKeyResult = await testApiKey();
   results.push(apiKeyResult);
   console.log('API Key test result:', apiKeyResult);
 
   if (apiKeyResult.success) {
-    // Test 2: API Connection
+    // Test 3: API Connection
     const deepseekKey = Deno.env.get('DEEPSEEK_API_KEY')!;
     const connectionResult = await testApiConnection(deepseekKey);
     results.push(connectionResult);
