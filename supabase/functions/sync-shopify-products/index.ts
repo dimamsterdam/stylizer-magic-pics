@@ -1,5 +1,5 @@
 
-// @ts-ignore
+// Follow Deno's best practices for imports
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 
 const buildShopifyQuery = (searchTerm?: string) => `
@@ -34,13 +34,13 @@ query {
 
 console.log("Edge Function starting...");
 
-serve(async (req: Request) => {
+// Create handler function
+const handler = async (req: Request) => {
   const corsHeaders = {
     'Access-Control-Allow-Origin': '*',
     'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
   };
 
-  // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
     return new Response(null, { 
       headers: corsHeaders
@@ -50,7 +50,6 @@ serve(async (req: Request) => {
   try {
     console.log('Request received:', req.method);
 
-    // Parse search parameters from request
     const { searchTerm } = await req.json().catch(() => {
       console.log('No request body or invalid JSON');
       return {};
@@ -58,14 +57,12 @@ serve(async (req: Request) => {
     
     console.log('Search term:', searchTerm);
 
-    // Check for Shopify API key
     const shopifyToken = Deno.env.get('SHOPIFY_STOREFRONT_API_KEY');
     if (!shopifyToken) {
       console.error('Missing Shopify Storefront API Key');
       throw new Error('Configuration error: Missing Shopify API key');
     }
 
-    // Fetch products from Shopify
     const shopifyUrl = 'https://quickstart-50d94e13.myshopify.com/api/2024-01/graphql.json';
     const query = buildShopifyQuery(searchTerm);
     
@@ -133,4 +130,7 @@ serve(async (req: Request) => {
       }
     );
   }
-});
+};
+
+// Start the server with the handler
+serve(handler);
