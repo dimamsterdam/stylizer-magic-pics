@@ -49,12 +49,14 @@ async function testApiConnection(deepseekKey: string): Promise<TestResult> {
 
     const startTime = Date.now();
 
-    // Using a more straightforward request structure
-    const requestOptions = {
+    // Using more specific request options
+    const requestInit: RequestInit = {
       method: 'POST',
       headers: {
         'Authorization': authHeader,
         'Content-Type': 'application/json',
+        'Accept': 'application/json',
+        'User-Agent': 'Supabase Edge Function'
       },
       body: JSON.stringify({
         prompt: 'test connection',
@@ -62,46 +64,79 @@ async function testApiConnection(deepseekKey: string): Promise<TestResult> {
         size: "256x256",
         response_format: "url",
         model: "deepseek/xl"
-      })
+      }),
+      // Adding specific request options
+      keepalive: true,
+      mode: 'cors',
+      credentials: 'omit',
     };
 
     console.log('Request options:', {
-      ...requestOptions,
+      ...requestInit,
       headers: {
-        ...requestOptions.headers,
+        ...requestInit.headers,
         'Authorization': 'Bearer sk-***' // Masking the actual key in logs
       }
     });
 
-    const response = await fetch('https://api.deepseek.ai/v1/images/generations', requestOptions);
-    const responseTime = Date.now() - startTime;
+    // Create a URL object to ensure proper URL formatting
+    const apiUrl = new URL('https://api.deepseek.ai/v1/images/generations');
 
-    console.log('Response status:', response.status);
-    console.log('Response headers:', Object.fromEntries(response.headers.entries()));
+    // Try with AbortController to handle timeouts
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 30000); // 30 second timeout
 
-    const responseText = await response.text();
-    console.log('Response text:', responseText);
-
-    let parsedResponse;
     try {
-      parsedResponse = JSON.parse(responseText);
-    } catch (e) {
-      parsedResponse = responseText;
-    }
+      const response = await fetch(apiUrl.toString(), {
+        ...requestInit,
+        signal: controller.signal
+      });
 
-    return {
-      step: 'API Connection Test',
-      success: response.ok,
-      details: {
-        statusCode: response.status,
-        statusText: response.statusText,
-        responseTime: `${responseTime}ms`,
-        headers: Object.fromEntries(response.headers.entries()),
-        response: parsedResponse
-      },
-      error: !response.ok ? `API returned status ${response.status}: ${responseText}` : undefined
+      clearTimeout(timeout);
+      const responseTime = Date.now() - startTime;
+
+      console.log('Response status:', response.status);
+      console.log('Response headers:', Object.fromEntries(response.headers.entries()));
+
+      const responseText = await response.text();
+      console.log('Response text:', responseText);
+
+      let parsedResponse;
+      try {
+        parsedResponse = JSON.parse(responseText);
+      } catch (e) {
+        parsedResponse = responseText;
+      }
+
+      return {
+        step: 'API Connection Test',
+        success: response.ok,
+        details: {
+          statusCode: response.status,
+          statusText: response.statusText,
+          responseTime: `${responseTime}ms`,
+          headers: Object.fromEntries(response.headers.entries()),
+          response: parsedResponse
+        },
+        error: !response.ok ? `API returned status ${response.status}: ${responseText}` : undefined
+      };
+    } finally {
+      clearTimeout(timeout);
     }
   } catch (error) {
+    if (error.name === 'AbortError') {
+      return {
+        step: 'API Connection Test',
+        success: false,
+        details: {
+          errorName: 'Timeout',
+          errorMessage: 'Request timed out after 30 seconds',
+          timestamp: new Date().toISOString()
+        },
+        error: 'Request timed out after 30 seconds'
+      };
+    }
+
     console.error('Connection test error:', {
       name: error.name,
       message: error.message,
@@ -118,7 +153,7 @@ async function testApiConnection(deepseekKey: string): Promise<TestResult> {
         timestamp: new Date().toISOString()
       },
       error: `Connection failed: ${error.message}`
-    }
+    };
   }
 }
 
