@@ -28,13 +28,17 @@ serve(async (req) => {
     console.log('Making request to FAL AI...')
 
     try {
-      // Use native fetch with all required options
+      // Call FAL AI API with more detailed error handling
+      const controller = new AbortController()
+      const timeoutId = setTimeout(() => controller.abort(), 30000)
+
       const response = await fetch('https://api.fal.ai/v1/text-to-image', {
         method: 'POST',
         headers: {
           'Accept': 'application/json',
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${falKey}`,
+          'User-Agent': 'Deno/1.0'
         },
         body: JSON.stringify({
           prompt: fullPrompt,
@@ -43,9 +47,8 @@ serve(async (req) => {
           model: 'sd-xl',
           sync: true
         }),
-        cache: 'no-cache',
-        signal: AbortSignal.timeout(30000) // 30 second timeout
-      })
+        signal: controller.signal
+      }).finally(() => clearTimeout(timeoutId))
 
       console.log('FAL AI response status:', response.status)
 
@@ -67,7 +70,11 @@ serve(async (req) => {
         }
       )
     } catch (fetchError) {
+      if (fetchError.name === 'AbortError') {
+        throw new Error('Request timed out after 30 seconds')
+      }
       console.error('Fetch error details:', {
+        name: fetchError.name,
         message: fetchError.message,
         cause: fetchError.cause,
         stack: fetchError.stack
