@@ -28,17 +28,18 @@ serve(async (req) => {
     console.log('Making request to Deepseek...')
 
     try {
-      const response = await fetch('https://api.deepseek.ai/v1/images/generate', {
+      const response = await fetch('https://api.deepseek.com/image/v1/generation', {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${deepseekKey}`,
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
+          model: 'deepseek-image',
           prompt: fullPrompt,
-          samples: 1,
-          width: 1024,
-          height: 1024
+          n: 1,
+          size: '1024x1024',
+          style: 'vivid'
         })
       });
 
@@ -51,12 +52,12 @@ serve(async (req) => {
       const data = await response.json();
       console.log('Deepseek response:', data);
 
-      if (!data.images?.[0]) {
+      if (!data.data?.[0]?.url) {
         throw new Error('No image URL in response');
       }
 
       return new Response(
-        JSON.stringify({ imageUrl: data.images[0] }),
+        JSON.stringify({ imageUrl: data.data[0].url }),
         { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
 
