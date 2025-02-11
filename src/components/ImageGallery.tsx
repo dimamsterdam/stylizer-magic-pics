@@ -1,5 +1,6 @@
+
 import { useState } from "react";
-import { X, Check, ZoomIn } from "lucide-react";
+import { Check, ZoomIn } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   HoverCard,
@@ -36,7 +37,7 @@ export const ImageGallery = ({ images, onSelect, onRemove }: ImageGalleryProps) 
             className="w-full h-48 md:h-64 object-cover rounded-lg"
           />
           <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-30 transition-opacity rounded-lg">
-            <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity flex gap-2">
+            <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
               <HoverCard>
                 <HoverCardTrigger asChild>
                   <Button
@@ -58,17 +59,6 @@ export const ImageGallery = ({ images, onSelect, onRemove }: ImageGalleryProps) 
                   />
                 </HoverCardContent>
               </HoverCard>
-              <Button
-                variant="destructive"
-                size="icon"
-                className="h-8 w-8"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  onRemove(image.id);
-                }}
-              >
-                <X className="h-4 w-4" />
-              </Button>
             </div>
             {image.selected && (
               <div className="absolute top-2 left-2">
