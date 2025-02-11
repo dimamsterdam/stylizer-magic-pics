@@ -25,18 +25,18 @@ serve(async (req) => {
       throw new Error('FAL_KEY environment variable not set')
     }
 
-    // Call FAL AI API with the correct endpoint URL
-    const response = await fetch('https://fal.run/text-to-image', {
+    // Call FAL AI API with the correct v1 endpoint URL
+    const response = await fetch('https://api.fal.ai/v1/text-to-image', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Key ${falKey}`,
+        'Authorization': `Bearer ${falKey}`,
       },
       body: JSON.stringify({
         prompt: fullPrompt,
         image_size: "1024x1024",
         num_images: 1,
-        model: 'stabilityai/stable-diffusion-xl-base-1.0'
+        model: 'sd-xl'
       }),
     })
 
