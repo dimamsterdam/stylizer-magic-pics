@@ -28,7 +28,7 @@ serve(async (req) => {
     console.log('Making request to Deepseek...')
 
     try {
-      const response = await fetch('https://api.deepseek.com/v1/images/generations', {
+      const response = await fetch('https://api.deepseek.ai/v1/images/generations', {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${deepseekKey}`,
