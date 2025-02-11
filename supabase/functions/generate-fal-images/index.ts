@@ -28,7 +28,7 @@ serve(async (req) => {
     console.log('Making request to FAL AI...')
 
     try {
-      // Call FAL AI API with explicit fetch options
+      // Use native fetch with all required options
       const response = await fetch('https://api.fal.ai/v1/text-to-image', {
         method: 'POST',
         headers: {
@@ -40,8 +40,11 @@ serve(async (req) => {
           prompt: fullPrompt,
           image_size: "1024x1024",
           num_images: 1,
-          model: 'sd-xl'
+          model: 'sd-xl',
+          sync: true
         }),
+        cache: 'no-cache',
+        signal: AbortSignal.timeout(30000) // 30 second timeout
       })
 
       console.log('FAL AI response status:', response.status)
