@@ -9,3 +9,4 @@ verify_jwt = false
 import_map = ["https://deno.land/std@0.168.0/http/server.ts"]
 allowed_domains = ["api.deepseek.ai"]
 allowed_http_methods = ["GET", "POST", "OPTIONS"]
+allowed_https_domains = ["api.deepseek.ai"]
