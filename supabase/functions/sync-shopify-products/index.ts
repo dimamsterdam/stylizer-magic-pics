@@ -45,6 +45,8 @@ serve(async (req: Request) => {
       return new Response(null, { headers: corsHeaders });
     }
 
+    console.log('Starting Shopify products sync...');
+
     // Create Supabase client
     const supabaseClient = createClient(
       Deno.env.get('SUPABASE_URL') ?? '',
@@ -52,6 +54,7 @@ serve(async (req: Request) => {
     );
 
     // Fetch products from Shopify
+    console.log('Fetching products from Shopify...');
     const response = await fetch('https://your-store.myshopify.com/api/2024-01/graphql.json', {
       method: 'POST',
       headers: {
@@ -64,26 +67,39 @@ serve(async (req: Request) => {
     const data = await response.json();
     
     if (!data.data?.products?.edges) {
+      console.error('Invalid response from Shopify:', data);
       throw new Error('Invalid response from Shopify');
     }
 
-    // Transform and upsert products
-    const products = data.data.products.edges.map((edge: any) => ({
-      id: edge.node.id.split('/').pop(),
-      shopify_gid: edge.node.id,
-      title: edge.node.title,
-      description: edge.node.description,
-      sku: edge.node.variants.edges[0]?.node.sku || null,
-      price: edge.node.variants.edges[0]?.node.price.amount || null,
-      image_url: edge.node.images.edges[0]?.node.url || null,
-      updated_at: new Date().toISOString(),
-    }));
+    console.log(`Found ${data.data.products.edges.length} products from Shopify`);
 
+    // Transform and upsert products
+    const products = data.data.products.edges.map((edge: any) => {
+      const product = {
+        id: edge.node.id.split('/').pop(),
+        shopify_gid: edge.node.id,
+        title: edge.node.title,
+        description: edge.node.description,
+        sku: edge.node.variants.edges[0]?.node.sku || null,
+        price: edge.node.variants.edges[0]?.node.price.amount || null,
+        image_url: edge.node.images.edges[0]?.node.url || null,
+        updated_at: new Date().toISOString(),
+      };
+      console.log('Processed product:', product.title);
+      return product;
+    });
+
+    console.log('Upserting products to Supabase...');
     const { error } = await supabaseClient
       .from('products')
       .upsert(products, { onConflict: 'shopify_gid' });
 
-    if (error) throw error;
+    if (error) {
+      console.error('Error upserting products:', error);
+      throw error;
+    }
+
+    console.log('Products sync completed successfully');
 
     return new Response(
       JSON.stringify({ success: true, count: products.length }),
