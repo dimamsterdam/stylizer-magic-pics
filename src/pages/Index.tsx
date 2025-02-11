@@ -169,7 +169,8 @@ const Index = () => {
           selectedProducts,
           selectedAngles: Object.entries(selectedAngles)
             .filter(([_, isSelected]) => isSelected)
-            .map(([angle]) => angle)
+            .map(([angle]) => angle),
+          prompt: getPrompt()
         }
       });
       toast({

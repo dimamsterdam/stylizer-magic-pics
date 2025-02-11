@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -9,12 +8,15 @@ import { productImages, ProductKey } from "@/data/images";
 import { ProductHeader } from "@/components/ProductHeader";
 import { GeneratedImageCard } from "@/components/GeneratedImageCard";
 import { Separator } from "@/components/ui/separator";
+import { supabase } from "@/integrations/supabase/client";
 
 interface GeneratedImage {
   id: string;
   url: string;
   selected: boolean;
   angle: string;
+  isGenerating?: boolean;
+  error?: string;
 }
 
 interface LocationState {
@@ -25,6 +27,7 @@ interface LocationState {
     image: string;
   }[];
   selectedAngles?: string[];
+  prompt?: string;
 }
 
 const GenerationResults = () => {
@@ -38,58 +41,85 @@ const GenerationResults = () => {
 
   console.log("Selected Products:", selectedProducts);
   console.log("Selected Angles:", selectedAngles);
+  console.log("Initial Prompt:", state?.prompt);
 
   if (selectedProducts.length === 0) {
     navigate("/");
     return null;
   }
 
-  const [prompt, setPrompt] = useState("Professional model wearing the product");
+  const [prompt, setPrompt] = useState(state?.prompt || "Professional model wearing the product");
   const [generatedImages, setGeneratedImages] = useState<GeneratedImage[]>(() => {
-    return selectedProducts.flatMap(product => {
-      console.log("Processing product:", product);
-      
-      // Find the matching product in our sample data
-      const productKey = Object.keys(productImages).find(key => {
-        const currentProduct = productImages[key as ProductKey];
-        console.log("Comparing:", currentProduct.id, "with", product.id);
-        return currentProduct.id === product.id;
-      }) as ProductKey | undefined;
-      
-      console.log("Found product key:", productKey);
-      
-      if (!productKey) {
-        console.warn("No matching product found for:", product.id);
-        return [];
-      }
-      
-      const productData = productImages[productKey];
-      const sampleImages = productData.generated || [];
-      
-      console.log("Sample images for product:", sampleImages);
-      
-      if (sampleImages.length === 0) {
-        console.warn("No sample images found for product:", product.id);
-        return [];
-      }
-      
-      // For each selected angle, create a generated image using sample data
-      return selectedAngles.map((angle, index) => {
-        // Cycle through available sample images
-        const imageIndex = index % sampleImages.length;
-        console.log("Creating image for angle:", angle, "using sample index:", imageIndex);
-        
-        return {
-          id: `${product.id}-${angle}`,
-          url: sampleImages[imageIndex].url,
-          selected: false,
-          angle: angle
-        };
-      });
-    });
+    return selectedProducts.flatMap(product => 
+      selectedAngles.map(angle => ({
+        id: `${product.id}-${angle}`,
+        url: '',
+        selected: false,
+        angle: angle,
+        isGenerating: true
+      }))
+    );
   });
 
-  console.log("Final generated images:", generatedImages);
+  const generateImage = async (imageId: string) => {
+    const [productId, angle] = imageId.split('-');
+    const product = selectedProducts.find(p => p.id === productId);
+    
+    if (!product) {
+      console.error('Product not found:', productId);
+      return;
+    }
+
+    setGeneratedImages(prev => 
+      prev.map(img => 
+        img.id === imageId 
+          ? { ...img, isGenerating: true, error: undefined }
+          : img
+      )
+    );
+
+    try {
+      const { data, error } = await supabase.functions.invoke('generate-fal-images', {
+        body: {
+          prompt,
+          productId: product.id,
+          angle: angle
+        }
+      });
+
+      if (error) throw error;
+
+      setGeneratedImages(prev => 
+        prev.map(img => 
+          img.id === imageId 
+            ? { ...img, url: data.imageUrl, isGenerating: false }
+            : img
+        )
+      );
+    } catch (error) {
+      console.error('Error generating image:', error);
+      setGeneratedImages(prev => 
+        prev.map(img => 
+          img.id === imageId 
+            ? { ...img, isGenerating: false, error: error.message }
+            : img
+        )
+      );
+      
+      toast({
+        title: "Error generating image",
+        description: error.message,
+        variant: "destructive",
+      });
+    }
+  };
+
+  // Start generating all images when component mounts
+  useState(() => {
+    generatedImages.forEach(img => {
+      generateImage(img.id);
+    });
+  }, []);
 
   const handleImageSelect = (id: string) => {
     setGeneratedImages(
