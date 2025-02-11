@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -7,20 +8,23 @@ import { useToast } from "@/components/ui/use-toast";
 import { productImages, ProductKey } from "@/data/images";
 import { ProductHeader } from "@/components/ProductHeader";
 import { GeneratedImageCard } from "@/components/GeneratedImageCard";
+import { Separator } from "@/components/ui/separator";
 
 interface GeneratedImage {
   id: string;
   url: string;
   selected: boolean;
+  angle: string;
 }
 
 interface LocationState {
-  selectedProduct?: {
+  selectedProducts?: {
     id: string;
     title: string;
     sku: string;
     image: string;
-  };
+  }[];
+  selectedAngles?: string[];
 }
 
 const GenerationResults = () => {
@@ -29,27 +33,33 @@ const GenerationResults = () => {
   const { toast } = useToast();
   
   const state = location.state as LocationState;
-  const selectedProduct = state?.selectedProduct;
+  const selectedProducts = state?.selectedProducts || [];
+  const selectedAngles = state?.selectedAngles || [];
 
-  if (!selectedProduct) {
-    console.log("No product selected, redirecting to index");
+  if (selectedProducts.length === 0) {
+    console.log("No products selected, redirecting to index");
     navigate("/");
     return null;
   }
 
-  const productKey = Object.keys(productImages).find(
-    key => productImages[key as ProductKey].id === selectedProduct.id
-  ) as ProductKey | undefined;
-
-  const productData = productKey ? productImages[productKey] : null;
-
-  const [prompt, setPrompt] = useState("Professional model wearing the shirt in an urban setting");
+  const [prompt, setPrompt] = useState("Professional model wearing the product");
   const [generatedImages, setGeneratedImages] = useState<GeneratedImage[]>(
-    productData?.generated.map(img => ({
-      id: img.id,
-      url: img.url,
-      selected: false,
-    })) || []
+    selectedProducts.flatMap(product => {
+      const productKey = Object.keys(productImages).find(
+        key => productImages[key as ProductKey].id === product.id
+      ) as ProductKey | undefined;
+      
+      const productData = productKey ? productImages[productKey] : null;
+      
+      if (!productData) return [];
+      
+      return selectedAngles.flatMap(angle => ({
+        id: `${product.id}-${angle}`,
+        url: productData.generated[0]?.url || '',
+        selected: false,
+        angle: angle
+      }));
+    })
   );
 
   const handleImageSelect = (id: string) => {
@@ -70,11 +80,12 @@ const GenerationResults = () => {
 
   const handleRegenerateImage = (id: string, maskDataUrl?: string) => {
     console.log("Regenerating image:", id, "with mask:", maskDataUrl);
+    const image = generatedImages.find(img => img.id === id);
     toast({
       title: maskDataUrl ? "Processing marked areas" : "Regenerating image",
       description: maskDataUrl 
-        ? "A new image is being generated with your marked areas..."
-        : "A new image is being generated...",
+        ? `A new ${image?.angle.toLowerCase()} image is being generated with your marked areas...`
+        : `A new ${image?.angle.toLowerCase()} image is being generated...`,
     });
   };
 
@@ -93,14 +104,20 @@ const GenerationResults = () => {
         selectedImages: selectedImages.map(img => ({
           id: img.id,
           url: img.url,
-          isAiGenerated: true
+          isAiGenerated: true,
+          angle: img.angle
         })),
-        selectedProduct
+        selectedProducts
       } 
     });
   };
 
   const selectedCount = generatedImages.filter((img) => img.selected).length;
+
+  const groupedImages = selectedAngles.reduce((acc, angle) => {
+    acc[angle] = generatedImages.filter(img => img.angle === angle);
+    return acc;
+  }, {} as Record<string, GeneratedImage[]>);
 
   return (
     <div className="min-h-screen bg-polaris-background">
@@ -108,11 +125,14 @@ const GenerationResults = () => {
         <Card className="mb-8">
           <CardHeader>
             <div className="flex flex-col space-y-6">
-              <ProductHeader
-                image={selectedProduct.image}
-                title={selectedProduct.title}
-                sku={selectedProduct.sku}
-              />
+              {selectedProducts.map(product => (
+                <ProductHeader
+                  key={product.id}
+                  image={product.image}
+                  title={product.title}
+                  sku={product.sku}
+                />
+              ))}
               <div className="space-y-2">
                 <h2 className="text-display-sm text-polaris-text">Generation Prompt</h2>
                 <div className="flex gap-4">
@@ -133,27 +153,29 @@ const GenerationResults = () => {
           </CardHeader>
         </Card>
 
-        <Card>
-          <CardHeader>
-            <h2 className="text-display-md text-polaris-text">Generated Images</h2>
-            <p className="text-body-md text-polaris-secondary mb-4">
-              Select the ones you want to publish
-            </p>
-          </CardHeader>
-          <CardContent>
-            <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-              {generatedImages.map((image) => (
-                <GeneratedImageCard
-                  key={image.id}
-                  {...image}
-                  onSelect={handleImageSelect}
-                  onRemove={handleImageRemove}
-                  onRegenerate={handleRegenerateImage}
-                />
-              ))}
-            </div>
-          </CardContent>
-        </Card>
+        {Object.entries(groupedImages).map(([angle, images]) => (
+          <Card key={angle} className="mb-8">
+            <CardHeader>
+              <h2 className="text-display-md text-polaris-text">{angle}</h2>
+              <p className="text-body-md text-polaris-secondary mb-4">
+                Select the images you want to publish
+              </p>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                {images.map((image) => (
+                  <GeneratedImageCard
+                    key={image.id}
+                    {...image}
+                    onSelect={handleImageSelect}
+                    onRemove={handleImageRemove}
+                    onRegenerate={handleRegenerateImage}
+                  />
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+        ))}
 
         {selectedCount > 0 && (
           <div className="mt-8 flex justify-end">

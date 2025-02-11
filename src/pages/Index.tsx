@@ -8,6 +8,7 @@ import { useNavigate } from "react-router-dom";
 import { useToast } from "@/components/ui/use-toast";
 import { Card, CardHeader, CardContent } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
+import { Toggle } from "@/components/ui/toggle";
 
 interface Product {
   id: string;
@@ -22,6 +23,10 @@ interface Image {
   selected: boolean;
 }
 
+interface AnglePreferences {
+  [key: string]: boolean;
+}
+
 const fashionImages = [
   { src: "https://images.unsplash.com/photo-1539109136881-3be0616acf4b?auto=format&fit=crop&w=800&q=80", alt: "Fashion model in urban setting" },
   { src: "https://images.unsplash.com/photo-1496747611176-843222e1e57c?auto=format&fit=crop&w=800&q=80", alt: "Street fashion portrait" },
@@ -33,6 +38,13 @@ const fashionImages = [
   { src: "https://images.unsplash.com/photo-1475180098004-ca77a66827be?auto=format&fit=crop&w=800&q=80", alt: "Fashion lifestyle" }
 ];
 
+const DEFAULT_ANGLES = {
+  "Front View": true,
+  "Back View": true,
+  "Side View": true,
+  "Full Body": true,
+};
+
 const Index = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
@@ -40,6 +52,7 @@ const Index = () => {
   const [images, setImages] = useState<Image[]>([]);
   const [prompt, setPrompt] = useState("");
   const [isPickingProducts, setIsPickingProducts] = useState(true);
+  const [selectedAngles, setSelectedAngles] = useState<AnglePreferences>(DEFAULT_ANGLES);
 
   const handleProductSelect = (product: Product) => {
     if (selectedProducts.length >= 3) {
@@ -114,13 +127,30 @@ const Index = () => {
     });
   };
 
-  const canStartGeneration = images.length > 0 && images.some((img) => img.selected) && prompt.trim();
+  const handleAngleToggle = (angle: string) => {
+    setSelectedAngles(prev => ({
+      ...prev,
+      [angle]: !prev[angle]
+    }));
+  };
+
+  const getSelectedAnglesCount = () => {
+    return Object.values(selectedAngles).filter(Boolean).length;
+  };
+
+  const canStartGeneration = images.length > 0 && 
+    images.some((img) => img.selected) && 
+    prompt.trim() && 
+    getSelectedAnglesCount() > 0;
 
   const handleStartGeneration = () => {
     if (canStartGeneration) {
       navigate("/generation-results", {
         state: {
-          selectedProducts: selectedProducts
+          selectedProducts,
+          selectedAngles: Object.entries(selectedAngles)
+            .filter(([_, isSelected]) => isSelected)
+            .map(([angle]) => angle)
         }
       });
       toast({
@@ -253,6 +283,40 @@ const Index = () => {
             <Card className="bg-white/80 backdrop-blur-sm border-0 shadow-lg">
               <CardHeader>
                 <h2 className="text-display-md text-[#1A1F2C] tracking-tight">
+                  Angle Selection
+                </h2>
+                <p className="text-body-md text-[#6D7175]">
+                  Choose which angles to generate for your products
+                </p>
+              </CardHeader>
+              <CardContent>
+                <div className="flex flex-wrap gap-3">
+                  {Object.entries(selectedAngles).map(([angle, isSelected]) => (
+                    <Toggle
+                      key={angle}
+                      pressed={isSelected}
+                      onPressedChange={() => handleAngleToggle(angle)}
+                      className={`px-4 py-2 ${
+                        isSelected 
+                          ? 'bg-[#9b87f5] text-white hover:bg-[#7E69AB]' 
+                          : 'bg-white text-[#1A1F2C] hover:bg-gray-100'
+                      }`}
+                    >
+                      {angle}
+                    </Toggle>
+                  ))}
+                </div>
+                {getSelectedAnglesCount() === 0 && (
+                  <p className="mt-2 text-sm text-red-500">
+                    Please select at least one angle
+                  </p>
+                )}
+              </CardContent>
+            </Card>
+
+            <Card className="bg-white/80 backdrop-blur-sm border-0 shadow-lg">
+              <CardHeader>
+                <h2 className="text-display-md text-[#1A1F2C] tracking-tight">
                   Style Prompt
                 </h2>
               </CardHeader>
@@ -268,7 +332,7 @@ const Index = () => {
                   disabled={!canStartGeneration}
                   onClick={handleStartGeneration}
                 >
-                  Start Generation
+                  Start Generation ({getSelectedAnglesCount()} angles selected)
                 </Button>
               </CardContent>
             </Card>
