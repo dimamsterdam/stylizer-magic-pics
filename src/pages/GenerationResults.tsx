@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -43,24 +42,29 @@ const GenerationResults = () => {
   }
 
   const [prompt, setPrompt] = useState("Professional model wearing the product");
-  const [generatedImages, setGeneratedImages] = useState<GeneratedImage[]>(
-    selectedProducts.flatMap(product => {
+  const [generatedImages, setGeneratedImages] = useState<GeneratedImage[]>(() => {
+    return selectedProducts.flatMap(product => {
       const productKey = Object.keys(productImages).find(
         key => productImages[key as ProductKey].id === product.id
       ) as ProductKey | undefined;
       
       const productData = productKey ? productImages[productKey] : null;
       
-      if (!productData) return [];
+      if (!productData || !productData.generated || productData.generated.length === 0) return [];
       
-      return selectedAngles.flatMap(angle => ({
-        id: `${product.id}-${angle}`,
-        url: productData.generated[0]?.url || '',
-        selected: false,
-        angle: angle
-      }));
-    })
-  );
+      return selectedAngles.flatMap(angle => {
+        const sampleImages = productData.generated;
+        const imageIndex = selectedAngles.indexOf(angle) % sampleImages.length;
+        
+        return {
+          id: `${product.id}-${angle}`,
+          url: sampleImages[imageIndex].url,
+          selected: false,
+          angle: angle
+        };
+      });
+    });
+  });
 
   const handleImageSelect = (id: string) => {
     setGeneratedImages(
