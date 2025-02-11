@@ -23,7 +23,7 @@ serve(async (req) => {
     const fullPrompt = `${prompt}. ${angle} shot of the product.`
     console.log('Full prompt:', fullPrompt)
 
-    const response = await fetch('https://api.deepseek.ai/v2/images/generation', {
+    const response = await fetch('https://api.deepseek.ai/v2/images/generations', {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${deepseekKey}`,
