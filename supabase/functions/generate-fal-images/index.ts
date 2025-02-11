@@ -32,7 +32,7 @@ serve(async (req) => {
 
       // Call FAL AI API with more detailed error handling
       const controller = new AbortController()
-      const timeoutId = setTimeout(() => controller.abort(), 30000)
+      const timeoutId = setTimeout(() => controller.abort(), 60000) // Increased timeout to 60s
 
       const requestOptions = {
         method: 'POST',
@@ -47,7 +47,7 @@ serve(async (req) => {
           prompt: fullPrompt,
           image_size: "landscape_4_3",
           num_images: 1,
-          seed: Math.floor(Math.random() * 2000000), // Random seed for variety
+          seed: Math.floor(Math.random() * 2000000),
           finetune_id: "ca8516ba-1e40-4f58-bf59-83b2d6c5f1d0",
           output_format: "jpeg",
           guidance_scale: 3.5,
@@ -64,7 +64,7 @@ serve(async (req) => {
         body: requestOptions.body
       })
 
-      const response = await fetch(url, requestOptions).finally(() => clearTimeout(timeoutId))
+      const response = await fetch(url, requestOptions)
 
       console.log('FAL AI response status:', response.status)
 
@@ -83,28 +83,45 @@ serve(async (req) => {
         throw new Error('No request_id received from FAL AI')
       }
 
-      // Poll for the result
-      const maxAttempts = 30
+      // Poll for the result with exponential backoff
+      const maxAttempts = 15 // Reduced max attempts but with longer intervals
       let attempts = 0
+      let waitTime = 2000 // Start with 2 second wait
+
       while (attempts < maxAttempts) {
+        console.log(`Polling attempt ${attempts + 1} with wait time ${waitTime}ms`)
+        
+        // Wait before polling
+        await new Promise(resolve => setTimeout(resolve, waitTime))
+        
         const pollResponse = await fetch(`https://queue.fal.run/fal-ai/flux-pro/finetuned/${requestId}`, {
+          method: 'POST', // Changed to POST method
           headers: {
             'Authorization': `Key ${falKey}`,
             'Accept': 'application/json',
+            'Content-Type': 'application/json',
           },
         })
 
         if (!pollResponse.ok) {
-          console.error(`Polling error (attempt ${attempts + 1}):`, await pollResponse.text())
+          const errorText = await pollResponse.text()
+          console.error(`Polling error (attempt ${attempts + 1}):`, errorText)
+          
+          // If we get a 404, the request might have expired
+          if (pollResponse.status === 404) {
+            throw new Error('Image generation request expired or not found')
+          }
+          
           attempts++
-          await new Promise(resolve => setTimeout(resolve, 1000))
+          waitTime = Math.min(waitTime * 1.5, 10000) // Exponential backoff, max 10s
           continue
         }
 
         const pollData = await pollResponse.json()
-        console.log(`Poll attempt ${attempts + 1}:`, pollData)
+        console.log(`Poll attempt ${attempts + 1} response:`, pollData)
 
         if (pollData.status === 'COMPLETED' && pollData.image) {
+          clearTimeout(timeoutId) // Clear the timeout since we're done
           return new Response(
             JSON.stringify({ 
               imageUrl: pollData.image,
@@ -116,17 +133,19 @@ serve(async (req) => {
         }
 
         if (pollData.status === 'FAILED') {
+          clearTimeout(timeoutId)
           throw new Error(`Image generation failed: ${pollData.error || 'Unknown error'}`)
         }
 
         attempts++
-        await new Promise(resolve => setTimeout(resolve, 1000))
+        waitTime = Math.min(waitTime * 1.5, 10000) // Exponential backoff, max 10s
       }
 
-      throw new Error('Timeout waiting for image generation')
+      clearTimeout(timeoutId)
+      throw new Error('Timeout waiting for image generation. Please try again.')
     } catch (fetchError) {
       if (fetchError.name === 'AbortError') {
-        throw new Error('Request timed out after 30 seconds')
+        throw new Error('Request timed out after 60 seconds')
       }
       console.error('Fetch error details:', {
         name: fetchError.name,
