@@ -19,12 +19,18 @@ serve(async (req) => {
     // Construct the full prompt for FAL AI
     const fullPrompt = `${prompt}. ${angle} shot of the product.`
 
-    // Call FAL AI API
+    // Get FAL key from environment
+    const falKey = Deno.env.get('FAL_KEY')
+    if (!falKey) {
+      throw new Error('FAL_KEY environment variable not set')
+    }
+
+    // Call FAL AI API with correctly formatted authorization header
     const response = await fetch('https://110602490-fal-image-generation.gateway.alpha.fal.ai/', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Key ${Deno.env.get('FAL_KEY')}`,
+        'Authorization': falKey.includes(':') ? `Key ${falKey}` : `Key ${falKey}:${falKey}`, // Ensure correct format
       },
       body: JSON.stringify({
         prompt: fullPrompt,
@@ -34,9 +40,9 @@ serve(async (req) => {
     })
 
     if (!response.ok) {
-      const error = await response.text()
-      console.error('FAL AI API error:', error)
-      throw new Error(`FAL AI API error: ${error}`)
+      const errorText = await response.text()
+      console.error('FAL AI API error:', errorText)
+      throw new Error(`FAL AI API error: ${errorText}`)
     }
 
     const data = await response.json()
