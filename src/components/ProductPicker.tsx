@@ -14,9 +14,10 @@ interface Product {
 
 interface ProductPickerProps {
   onSelect: (product: Product) => void;
+  selectedProducts: Product[];
 }
 
-export const ProductPicker = ({ onSelect }: ProductPickerProps) => {
+export const ProductPicker = ({ onSelect, selectedProducts }: ProductPickerProps) => {
   const [searchTerm, setSearchTerm] = useState("");
   const [results, setResults] = useState<Product[]>([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -64,20 +65,25 @@ export const ProductPicker = ({ onSelect }: ProductPickerProps) => {
     }
   };
 
-  // Handle search input changes
   const handleSearch = async (term: string) => {
     setSearchTerm(term);
     searchProducts(term);
   };
 
+  const isProductSelected = (productId: string) => {
+    return selectedProducts.some(p => p.id === productId);
+  };
+
   return (
-    <div className="w-full max-w-2xl mx-auto mt-8">
+    <div className="w-full max-w-2xl mx-auto">
       <div className="p-6 bg-white rounded-lg shadow-sm">
         <div className="space-y-4">
           <div className="pb-4 border-b border-polaris-border">
             <div>
-              <h2 className="text-[#1A1F2C] text-display-md font-medium">Get started</h2>
-              <p className="mt-1 text-polaris-secondary">Search and select a product to begin</p>
+              <h2 className="text-[#1A1F2C] text-display-md font-medium">Search Products</h2>
+              <p className="mt-1 text-polaris-secondary">
+                Select up to {3 - selectedProducts.length} more product{3 - selectedProducts.length !== 1 ? 's' : ''}
+              </p>
             </div>
           </div>
           <div className="relative">
@@ -88,7 +94,7 @@ export const ProductPicker = ({ onSelect }: ProductPickerProps) => {
               value={searchTerm}
               onChange={(e) => handleSearch(e.target.value)}
               className="pl-10 border-polaris-border"
-              disabled={isLoading}
+              disabled={isLoading || selectedProducts.length >= 3}
             />
           </div>
         </div>
@@ -97,6 +103,13 @@ export const ProductPicker = ({ onSelect }: ProductPickerProps) => {
             <div className="text-center py-4">Loading products...</div>
           ) : error ? (
             <div className="text-center py-4 text-red-500">{error}</div>
+          ) : selectedProducts.length >= 3 ? (
+            <div className="text-center py-8">
+              <p className="text-polaris-secondary">Maximum number of products selected (3)</p>
+              <p className="text-sm text-polaris-secondary mt-2">
+                Remove a product to select a different one
+              </p>
+            </div>
           ) : searchTerm.length < 2 ? (
             <div className="text-center py-8">
               <p className="text-polaris-secondary">Start typing to search for products</p>
@@ -109,31 +122,43 @@ export const ProductPicker = ({ onSelect }: ProductPickerProps) => {
               No products found matching "{searchTerm}"
             </div>
           ) : (
-            results.map((product) => (
-              <div
-                key={product.id}
-                className="flex items-center p-4 border border-polaris-border rounded-md hover:border-polaris-teal cursor-pointer transition-colors"
-                onClick={() => onSelect(product)}
-              >
-                <img
-                  src={product.image}
-                  alt={product.title}
-                  className="w-16 h-16 object-cover rounded-md"
-                  onError={(e) => {
-                    e.currentTarget.src = '/placeholder.svg';
-                  }}
-                />
-                <div className="ml-4 flex-1">
-                  <h3 className="font-medium text-polaris-text">{product.title}</h3>
-                  <p className="text-sm text-polaris-secondary">SKU: {product.sku}</p>
-                </div>
-                <button
-                  className="ml-4 px-4 py-2 text-polaris-teal border border-polaris-teal rounded hover:bg-polaris-teal hover:text-white transition-colors"
+            results.map((product) => {
+              const isSelected = isProductSelected(product.id);
+              return (
+                <div
+                  key={product.id}
+                  className={`flex items-center p-4 border rounded-md transition-colors ${
+                    isSelected 
+                      ? 'border-polaris-teal bg-polaris-teal/5 cursor-not-allowed' 
+                      : 'border-polaris-border hover:border-polaris-teal cursor-pointer'
+                  }`}
+                  onClick={() => !isSelected && onSelect(product)}
                 >
-                  Select
-                </button>
-              </div>
-            ))
+                  <img
+                    src={product.image}
+                    alt={product.title}
+                    className="w-16 h-16 object-cover rounded-md"
+                    onError={(e) => {
+                      e.currentTarget.src = '/placeholder.svg';
+                    }}
+                  />
+                  <div className="ml-4 flex-1">
+                    <h3 className="font-medium text-polaris-text">{product.title}</h3>
+                    <p className="text-sm text-polaris-secondary">SKU: {product.sku}</p>
+                  </div>
+                  <button
+                    className={`ml-4 px-4 py-2 rounded transition-colors ${
+                      isSelected
+                        ? 'text-polaris-teal bg-polaris-teal/10'
+                        : 'text-polaris-teal border border-polaris-teal hover:bg-polaris-teal hover:text-white'
+                    }`}
+                    disabled={isSelected}
+                  >
+                    {isSelected ? 'Selected' : 'Select'}
+                  </button>
+                </div>
+              );
+            })
           )}
         </div>
       </div>

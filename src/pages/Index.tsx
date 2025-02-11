@@ -36,22 +36,65 @@ const fashionImages = [
 const Index = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
-  const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
+  const [selectedProducts, setSelectedProducts] = useState<Product[]>([]);
   const [images, setImages] = useState<Image[]>([]);
   const [prompt, setPrompt] = useState("");
+  const [isPickingProducts, setIsPickingProducts] = useState(true);
 
   const handleProductSelect = (product: Product) => {
-    setSelectedProduct(product);
-    setImages([
-      {
-        id: "2",
-        url: product.image,
-        selected: false,
-      },
-    ]);
+    if (selectedProducts.length >= 3) {
+      toast({
+        title: "Maximum products reached",
+        description: "You can select up to 3 products.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (selectedProducts.some(p => p.id === product.id)) {
+      toast({
+        title: "Product already selected",
+        description: "This product is already in your selection.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    const updatedProducts = [...selectedProducts, product];
+    setSelectedProducts(updatedProducts);
     toast({
-      title: "Product selected",
-      description: "Product images have been loaded.",
+      title: "Product added",
+      description: `${product.title} has been added to your selection.`,
+    });
+  };
+
+  const handleProductRemove = (productId: string) => {
+    setSelectedProducts(selectedProducts.filter(p => p.id !== productId));
+    toast({
+      title: "Product removed",
+      description: "Product has been removed from your selection.",
+    });
+  };
+
+  const handleConfirmSelection = () => {
+    if (selectedProducts.length === 0) {
+      toast({
+        title: "No products selected",
+        description: "Please select at least one product to continue.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setIsPickingProducts(false);
+    setImages(selectedProducts.map(product => ({
+      id: product.id,
+      url: product.image,
+      selected: false,
+    })));
+    toast({
+      title: "Products confirmed",
+      description: `${selectedProducts.length} product(s) have been loaded.`,
     });
   };
 
@@ -71,13 +114,13 @@ const Index = () => {
     });
   };
 
-  const canStartGeneration = selectedProduct && images.some((img) => img.selected) && prompt.trim();
+  const canStartGeneration = images.length > 0 && images.some((img) => img.selected) && prompt.trim();
 
   const handleStartGeneration = () => {
     if (canStartGeneration) {
       navigate("/generation-results", {
         state: {
-          selectedProduct: selectedProduct
+          selectedProducts: selectedProducts
         }
       });
       toast({
@@ -90,9 +133,9 @@ const Index = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#F6F6F7] to-[#E5DEFF]">
       <div className="max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        {!selectedProduct && (
+        {isPickingProducts ? (
           <div className="mb-8">
-            <Card className="bg-white/80 backdrop-blur-sm border-0 shadow-lg">
+            <Card className="bg-white/80 backdrop-blur-sm border-0 shadow-lg mb-8">
               <CardHeader>
                 <div className="flex flex-col-reverse md:grid md:grid-cols-[1fr,320px] gap-8 md:gap-0 items-start">
                   <div className="space-y-4 pr-8">
@@ -101,7 +144,7 @@ const Index = () => {
                     </h1>
                     <p className="text-body-lg text-[#6D7175] max-w-2xl">
                       Transform your product photos into professional lifestyle images using AI. 
-                      Start by selecting a product below to enhance its visual appeal.
+                      Select up to 3 products to enhance their visual appeal together.
                     </p>
                   </div>
                   <div className="grid grid-cols-4 gap-1 w-full">
@@ -126,24 +169,76 @@ const Index = () => {
                 </div>
               </CardHeader>
             </Card>
-            <ProductPicker onSelect={handleProductSelect} />
+
+            {selectedProducts.length > 0 && (
+              <Card className="bg-white/80 backdrop-blur-sm border-0 shadow-lg mb-8">
+                <CardHeader>
+                  <h2 className="text-display-sm text-[#1A1F2C] tracking-tight">
+                    Selected Products ({selectedProducts.length}/3)
+                  </h2>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4">
+                    {selectedProducts.map((product) => (
+                      <div
+                        key={product.id}
+                        className="flex items-center p-4 border border-polaris-border rounded-md"
+                      >
+                        <img
+                          src={product.image}
+                          alt={product.title}
+                          className="w-16 h-16 object-cover rounded-md"
+                          onError={(e) => {
+                            e.currentTarget.src = '/placeholder.svg';
+                          }}
+                        />
+                        <div className="ml-4 flex-1">
+                          <h3 className="font-medium text-polaris-text">{product.title}</h3>
+                          <p className="text-sm text-polaris-secondary">SKU: {product.sku}</p>
+                        </div>
+                        <button
+                          onClick={() => handleProductRemove(product.id)}
+                          className="ml-4 px-4 py-2 text-red-500 border border-red-500 rounded hover:bg-red-50 transition-colors"
+                        >
+                          Remove
+                        </button>
+                      </div>
+                    ))}
+                    <Button
+                      onClick={handleConfirmSelection}
+                      className="w-full bg-[#9b87f5] hover:bg-[#7E69AB] text-white font-medium px-6 py-2 rounded-lg transition-colors"
+                    >
+                      Confirm Selection ({selectedProducts.length}/3)
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+
+            <ProductPicker 
+              onSelect={handleProductSelect} 
+              selectedProducts={selectedProducts}
+            />
           </div>
-        )}
-        
-        {selectedProduct && (
+        ) : (
           <div className="space-y-8">
             <Card className="bg-white/80 backdrop-blur-sm border-0 shadow-lg">
               <CardHeader>
                 <div>
                   <div className="flex items-baseline gap-2 mb-4">
-                    <span className="text-display-sm text-[#1A1F2C]">{selectedProduct.title}</span>
-                    <span className="text-body-md text-[#6D7175]">SKU: {selectedProduct.sku}</span>
+                    <span className="text-display-sm text-[#1A1F2C]">Selected Products</span>
+                    <button
+                      onClick={() => setIsPickingProducts(true)}
+                      className="text-polaris-teal hover:underline"
+                    >
+                      Edit Selection
+                    </button>
                   </div>
                   <Separator className="mb-4" />
                   <h5 className="text-body-lg text-[#1A1F2C] tracking-tight">
                     Product Images
                   </h5>
-                  <p className="text-body-md text-[#6D7175]">Select the product image to use for styling</p>
+                  <p className="text-body-md text-[#6D7175]">Select the product images to use for styling</p>
                 </div>
               </CardHeader>
               <CardContent>
@@ -163,7 +258,7 @@ const Index = () => {
               </CardHeader>
               <CardContent>
                 <Input
-                  placeholder="Describe the style you want (e.g., 'Professional model wearing the shirt in an urban setting')"
+                  placeholder="Describe the style you want (e.g., 'Professional models wearing the products in an urban setting')"
                   value={prompt}
                   onChange={(e) => setPrompt(e.target.value)}
                   className="mb-4"
