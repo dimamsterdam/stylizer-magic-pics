@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -36,7 +37,6 @@ const GenerationResults = () => {
   const selectedAngles = state?.selectedAngles || [];
 
   if (selectedProducts.length === 0) {
-    console.log("No products selected, redirecting to index");
     navigate("/");
     return null;
   }
@@ -44,17 +44,22 @@ const GenerationResults = () => {
   const [prompt, setPrompt] = useState("Professional model wearing the product");
   const [generatedImages, setGeneratedImages] = useState<GeneratedImage[]>(() => {
     return selectedProducts.flatMap(product => {
+      // Find the matching product in our sample data
       const productKey = Object.keys(productImages).find(
         key => productImages[key as ProductKey].id === product.id
       ) as ProductKey | undefined;
       
-      const productData = productKey ? productImages[productKey] : null;
+      if (!productKey) return [];
       
-      if (!productData || !productData.generated || productData.generated.length === 0) return [];
+      const productData = productImages[productKey];
+      const sampleImages = productData.generated || [];
       
-      return selectedAngles.flatMap(angle => {
-        const sampleImages = productData.generated;
-        const imageIndex = selectedAngles.indexOf(angle) % sampleImages.length;
+      if (sampleImages.length === 0) return [];
+      
+      // For each selected angle, create a generated image using sample data
+      return selectedAngles.map((angle, index) => {
+        // Cycle through available sample images
+        const imageIndex = index % sampleImages.length;
         
         return {
           id: `${product.id}-${angle}`,
