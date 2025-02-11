@@ -25,8 +25,8 @@ serve(async (req) => {
       throw new Error('FAL_KEY environment variable not set')
     }
 
-    // Call FAL AI API with the key directly - FAL handles the key:secret format internally
-    const response = await fetch('https://110602490-fal-image-generation.gateway.alpha.fal.ai/', {
+    // Call FAL AI API with the correct endpoint URL
+    const response = await fetch('https://fal.run/text-to-image', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -36,6 +36,7 @@ serve(async (req) => {
         prompt: fullPrompt,
         image_size: "1024x1024",
         num_images: 1,
+        model: 'stabilityai/stable-diffusion-xl-base-1.0'
       }),
     })
 
