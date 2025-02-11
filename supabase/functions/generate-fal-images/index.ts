@@ -25,12 +25,12 @@ serve(async (req) => {
       throw new Error('FAL_KEY environment variable not set')
     }
 
-    // Call FAL AI API with correctly formatted authorization header
+    // Call FAL AI API with the key directly - FAL handles the key:secret format internally
     const response = await fetch('https://110602490-fal-image-generation.gateway.alpha.fal.ai/', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': falKey.includes(':') ? `Key ${falKey}` : `Key ${falKey}:${falKey}`, // Ensure correct format
+        'Authorization': `Key ${falKey}`,
       },
       body: JSON.stringify({
         prompt: fullPrompt,
