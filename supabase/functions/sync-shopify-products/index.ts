@@ -5,35 +5,39 @@ import { serve } from "https://deno.land/std@0.177.0/http/server.ts";
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+  'Access-Control-Allow-Methods': 'POST, OPTIONS',
 };
 
 serve(async (req) => {
+  // Detailed request logging
+  console.log("Request received:", {
+    method: req.method,
+    url: req.url,
+    headers: Object.fromEntries(req.headers.entries())
+  });
+
+  // Handle CORS preflight
+  if (req.method === 'OPTIONS') {
+    return new Response(null, { 
+      status: 204, 
+      headers: corsHeaders 
+    });
+  }
+
+  // Validate request method
+  if (req.method !== 'POST') {
+    console.error("Invalid method:", req.method);
+    return new Response(
+      JSON.stringify({ error: 'Method not allowed' }),
+      { 
+        status: 405,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+      }
+    );
+  }
+
   try {
-    console.log("Function invoked with method:", req.method);
-    
-    // Handle CORS preflight
-    if (req.method === 'OPTIONS') {
-      return new Response(null, { 
-        headers: { 
-          ...corsHeaders,
-          'Access-Control-Allow-Methods': 'POST, OPTIONS',
-        }
-      });
-    }
-
-    // Validate request method
-    if (req.method !== 'POST') {
-      console.error("Invalid method:", req.method);
-      return new Response(
-        JSON.stringify({ error: 'Method not allowed' }),
-        { 
-          status: 405,
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-        }
-      );
-    }
-
-    // Get Shopify token
+    // Get and validate Shopify token
     const shopifyToken = Deno.env.get('SHOPIFY_STOREFRONT_API_KEY');
     console.log("Checking Shopify token:", shopifyToken ? "Token exists" : "Token missing");
     
@@ -48,15 +52,18 @@ serve(async (req) => {
       );
     }
 
-    // Parse request body
+    // Parse request body with error handling
     let requestData;
     try {
       requestData = await req.json();
-      console.log("Request data:", JSON.stringify(requestData));
+      console.log("Parsed request data:", JSON.stringify(requestData));
     } catch (error) {
       console.error("Error parsing request body:", error);
       return new Response(
-        JSON.stringify({ error: 'Invalid request body' }),
+        JSON.stringify({ 
+          error: 'Invalid request body',
+          details: error.message 
+        }),
         { 
           status: 400,
           headers: { ...corsHeaders, 'Content-Type': 'application/json' }
@@ -66,6 +73,7 @@ serve(async (req) => {
 
     const { searchTerm } = requestData;
 
+    // Construct GraphQL query
     const query = `
       query {
         products(first: 50${searchTerm ? `, query: "${searchTerm}"` : ''}) {
@@ -97,7 +105,7 @@ serve(async (req) => {
       }
     `;
 
-    console.log("Sending request to Shopify");
+    console.log("Sending request to Shopify API");
     const response = await fetch(
       'https://quickstart-50d94e13.myshopify.com/api/2024-01/graphql.json',
       {
@@ -110,9 +118,15 @@ serve(async (req) => {
       }
     );
 
+    // Handle Shopify API errors
     if (!response.ok) {
       const errorText = await response.text();
-      console.error("Shopify API error:", errorText);
+      console.error("Shopify API error:", {
+        status: response.status,
+        statusText: response.statusText,
+        body: errorText
+      });
+      
       return new Response(
         JSON.stringify({ 
           error: 'Shopify API error',
@@ -126,12 +140,16 @@ serve(async (req) => {
     }
 
     const data = await response.json();
-    console.log("Shopify response received");
+    console.log("Received response from Shopify API");
 
-    if (!data.data) {
-      console.error("Invalid Shopify response:", data);
+    // Validate Shopify response
+    if (!data.data?.products?.edges) {
+      console.error("Invalid Shopify response structure:", data);
       return new Response(
-        JSON.stringify({ error: 'Invalid response from Shopify' }),
+        JSON.stringify({ 
+          error: 'Invalid response from Shopify',
+          details: 'Response missing required data structure'
+        }),
         { 
           status: 500,
           headers: { ...corsHeaders, 'Content-Type': 'application/json' }
@@ -139,6 +157,7 @@ serve(async (req) => {
       );
     }
 
+    // Transform products data
     const products = data.data.products.edges.map((edge: any) => ({
       id: edge.node.id.split('/').pop(),
       shopify_gid: edge.node.id,
@@ -149,17 +168,24 @@ serve(async (req) => {
       image_url: edge.node.images.edges[0]?.node.url || null,
     }));
 
-    console.log(`Returning ${products.length} products`);
+    console.log(`Successfully processed ${products.length} products`);
     return new Response(
       JSON.stringify({ success: true, products }),
-      { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      { 
+        headers: { 
+          ...corsHeaders, 
+          'Content-Type': 'application/json'
+        } 
+      }
     );
+
   } catch (error) {
-    console.error('Error in sync-shopify-products:', error);
+    console.error('Unhandled error in sync-shopify-products:', error);
     return new Response(
       JSON.stringify({ 
         error: 'Internal server error',
-        details: error.message
+        details: error.message,
+        stack: error.stack
       }),
       { 
         status: 500,
