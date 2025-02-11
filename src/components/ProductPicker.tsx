@@ -1,5 +1,5 @@
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Search } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { supabase } from "@/integrations/supabase/client";
@@ -19,11 +19,16 @@ interface ProductPickerProps {
 export const ProductPicker = ({ onSelect }: ProductPickerProps) => {
   const [searchTerm, setSearchTerm] = useState("");
   const [results, setResults] = useState<Product[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const { toast } = useToast();
 
   const searchProducts = async (term: string) => {
+    if (term.length < 2) {
+      setResults([]);
+      return;
+    }
+
     try {
       setIsLoading(true);
       setError(null);
@@ -59,11 +64,6 @@ export const ProductPicker = ({ onSelect }: ProductPickerProps) => {
     }
   };
 
-  // Load initial products
-  useEffect(() => {
-    searchProducts("");
-  }, []);
-
   // Handle search input changes
   const handleSearch = async (term: string) => {
     setSearchTerm(term);
@@ -84,7 +84,7 @@ export const ProductPicker = ({ onSelect }: ProductPickerProps) => {
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-polaris-secondary" />
             <Input
               type="text"
-              placeholder="Search products by name or SKU"
+              placeholder="Search products by name or SKU (type at least 2 characters)"
               value={searchTerm}
               onChange={(e) => handleSearch(e.target.value)}
               className="pl-10 border-polaris-border"
@@ -97,9 +97,16 @@ export const ProductPicker = ({ onSelect }: ProductPickerProps) => {
             <div className="text-center py-4">Loading products...</div>
           ) : error ? (
             <div className="text-center py-4 text-red-500">{error}</div>
+          ) : searchTerm.length < 2 ? (
+            <div className="text-center py-8">
+              <p className="text-polaris-secondary">Start typing to search for products</p>
+              <p className="text-sm text-polaris-secondary mt-2">
+                Search by product name or SKU (minimum 2 characters)
+              </p>
+            </div>
           ) : results.length === 0 ? (
             <div className="text-center py-4 text-gray-500">
-              No products found
+              No products found matching "{searchTerm}"
             </div>
           ) : (
             results.map((product) => (
