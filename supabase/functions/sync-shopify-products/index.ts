@@ -13,7 +13,24 @@ serve(async (req) => {
     
     // Handle CORS preflight
     if (req.method === 'OPTIONS') {
-      return new Response(null, { headers: corsHeaders });
+      return new Response(null, { 
+        headers: { 
+          ...corsHeaders,
+          'Access-Control-Allow-Methods': 'POST, OPTIONS',
+        }
+      });
+    }
+
+    // Validate request method
+    if (req.method !== 'POST') {
+      console.error("Invalid method:", req.method);
+      return new Response(
+        JSON.stringify({ error: 'Method not allowed' }),
+        { 
+          status: 405,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+        }
+      );
     }
 
     // Get Shopify token
@@ -21,12 +38,32 @@ serve(async (req) => {
     console.log("Checking Shopify token:", shopifyToken ? "Token exists" : "Token missing");
     
     if (!shopifyToken) {
-      throw new Error('Missing Shopify API key');
+      console.error("Missing Shopify API key in environment variables");
+      return new Response(
+        JSON.stringify({ error: 'Missing Shopify API key configuration' }),
+        { 
+          status: 500,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+        }
+      );
     }
 
     // Parse request body
-    const requestData = await req.json();
-    console.log("Request data:", JSON.stringify(requestData));
+    let requestData;
+    try {
+      requestData = await req.json();
+      console.log("Request data:", JSON.stringify(requestData));
+    } catch (error) {
+      console.error("Error parsing request body:", error);
+      return new Response(
+        JSON.stringify({ error: 'Invalid request body' }),
+        { 
+          status: 400,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+        }
+      );
+    }
+
     const { searchTerm } = requestData;
 
     const query = `
@@ -76,7 +113,16 @@ serve(async (req) => {
     if (!response.ok) {
       const errorText = await response.text();
       console.error("Shopify API error:", errorText);
-      throw new Error(`Shopify API error: ${response.status} ${errorText}`);
+      return new Response(
+        JSON.stringify({ 
+          error: 'Shopify API error',
+          details: `${response.status}: ${errorText}`
+        }),
+        { 
+          status: response.status,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+        }
+      );
     }
 
     const data = await response.json();
@@ -84,7 +130,13 @@ serve(async (req) => {
 
     if (!data.data) {
       console.error("Invalid Shopify response:", data);
-      throw new Error('Invalid response from Shopify');
+      return new Response(
+        JSON.stringify({ error: 'Invalid response from Shopify' }),
+        { 
+          status: 500,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+        }
+      );
     }
 
     const products = data.data.products.edges.map((edge: any) => ({
@@ -106,8 +158,8 @@ serve(async (req) => {
     console.error('Error in sync-shopify-products:', error);
     return new Response(
       JSON.stringify({ 
-        error: error.message,
-        details: error.stack
+        error: 'Internal server error',
+        details: error.message
       }),
       { 
         status: 500,
