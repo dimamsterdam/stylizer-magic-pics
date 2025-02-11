@@ -28,7 +28,7 @@ serve(async (req) => {
       n: 1,
       size: "1024x1024",
       response_format: "url",
-      model: "deepseek-xl"
+      model: "deepseek/xl"
     }
     console.log('Sending request to Deepseek:', requestBody)
 
