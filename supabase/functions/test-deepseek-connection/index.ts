@@ -47,96 +47,77 @@ async function testApiConnection(deepseekKey: string): Promise<TestResult> {
     
     console.log('Testing API connection...');
 
-    const startTime = Date.now();
+    // First try a GET request to test basic connectivity
+    try {
+      console.log('Testing basic connectivity...');
+      const testResponse = await fetch('https://api.deepseek.ai/v1/models', {
+        method: 'GET',
+        headers: {
+          'Authorization': authHeader,
+          'Content-Type': 'application/json',
+        }
+      });
+      
+      console.log('Basic connectivity test response:', {
+        status: testResponse.status,
+        ok: testResponse.ok,
+        statusText: testResponse.statusText
+      });
 
-    // Using more specific request options
-    const requestInit: RequestInit = {
+      if (!testResponse.ok) {
+        const errorText = await testResponse.text();
+        throw new Error(`API authentication failed: ${testResponse.status} - ${errorText}`);
+      }
+    } catch (testError) {
+      console.error('Basic connectivity test failed:', testError);
+      throw testError;
+    }
+
+    // Now try the image generation request
+    console.log('Testing image generation endpoint...');
+    const imageResponse = await fetch('https://api.deepseek.ai/v1/images/generations', {
       method: 'POST',
       headers: {
         'Authorization': authHeader,
         'Content-Type': 'application/json',
-        'Accept': 'application/json',
-        'User-Agent': 'Supabase Edge Function'
       },
       body: JSON.stringify({
-        prompt: 'test connection',
+        prompt: "test connection",
         n: 1,
         size: "256x256",
         response_format: "url",
         model: "deepseek/xl"
-      }),
-      // Adding specific request options
-      keepalive: true,
-      mode: 'cors',
-      credentials: 'omit',
-    };
-
-    console.log('Request options:', {
-      ...requestInit,
-      headers: {
-        ...requestInit.headers,
-        'Authorization': 'Bearer sk-***' // Masking the actual key in logs
-      }
+      })
     });
 
-    // Create a URL object to ensure proper URL formatting
-    const apiUrl = new URL('https://api.deepseek.ai/v1/images/generations');
+    console.log('Image generation response:', {
+      status: imageResponse.status,
+      ok: imageResponse.ok,
+      statusText: imageResponse.statusText
+    });
 
-    // Try with AbortController to handle timeouts
-    const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), 30000); // 30 second timeout
+    const responseText = await imageResponse.text();
+    console.log('Response text:', responseText);
 
+    let parsedResponse;
     try {
-      const response = await fetch(apiUrl.toString(), {
-        ...requestInit,
-        signal: controller.signal
-      });
-
-      clearTimeout(timeout);
-      const responseTime = Date.now() - startTime;
-
-      console.log('Response status:', response.status);
-      console.log('Response headers:', Object.fromEntries(response.headers.entries()));
-
-      const responseText = await response.text();
-      console.log('Response text:', responseText);
-
-      let parsedResponse;
-      try {
-        parsedResponse = JSON.parse(responseText);
-      } catch (e) {
-        parsedResponse = responseText;
-      }
-
-      return {
-        step: 'API Connection Test',
-        success: response.ok,
-        details: {
-          statusCode: response.status,
-          statusText: response.statusText,
-          responseTime: `${responseTime}ms`,
-          headers: Object.fromEntries(response.headers.entries()),
-          response: parsedResponse
-        },
-        error: !response.ok ? `API returned status ${response.status}: ${responseText}` : undefined
-      };
-    } finally {
-      clearTimeout(timeout);
+      parsedResponse = JSON.parse(responseText);
+    } catch (e) {
+      parsedResponse = responseText;
     }
+
+    return {
+      step: 'API Connection Test',
+      success: imageResponse.ok,
+      details: {
+        statusCode: imageResponse.status,
+        statusText: imageResponse.statusText,
+        headers: Object.fromEntries(imageResponse.headers.entries()),
+        response: parsedResponse
+      },
+      error: !imageResponse.ok ? `API returned status ${imageResponse.status}: ${responseText}` : undefined
+    };
   } catch (error) {
-    if (error.name === 'AbortError') {
-      return {
-        step: 'API Connection Test',
-        success: false,
-        details: {
-          errorName: 'Timeout',
-          errorMessage: 'Request timed out after 30 seconds',
-          timestamp: new Date().toISOString()
-        },
-        error: 'Request timed out after 30 seconds'
-      };
-    }
-
     console.error('Connection test error:', {
       name: error.name,
       message: error.message,
