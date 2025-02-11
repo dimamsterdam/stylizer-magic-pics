@@ -8,7 +8,9 @@ import { useToast } from "@/components/ui/use-toast";
 import { Card, CardHeader, CardContent } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { Toggle } from "@/components/ui/toggle";
-import { Check } from "lucide-react";
+import { Check, Wand2 } from "lucide-react";
+import { StudioColorPicker } from "@/components/StudioColorPicker";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 
 interface Product {
   id: string;
@@ -50,9 +52,13 @@ const Index = () => {
   const { toast } = useToast();
   const [selectedProducts, setSelectedProducts] = useState<Product[]>([]);
   const [images, setImages] = useState<Image[]>([]);
-  const [prompt, setPrompt] = useState("");
+  const [customPrompt, setCustomPrompt] = useState("");
   const [isPickingProducts, setIsPickingProducts] = useState(true);
   const [selectedAngles, setSelectedAngles] = useState<AnglePreferences>(DEFAULT_ANGLES);
+  const [studioStyle, setStudioStyle] = useState<StudioStyle>({
+    backgroundColor: "#FFFFFF",
+    isCustomPrompt: false
+  });
 
   const handleProductSelect = (product: Product) => {
     if (selectedProducts.length >= 3) {
@@ -138,9 +144,16 @@ const Index = () => {
     return Object.values(selectedAngles).filter(Boolean).length;
   };
 
+  const getPrompt = () => {
+    if (studioStyle.isCustomPrompt) {
+      return customPrompt;
+    }
+    return `Product on a ${studioStyle.backgroundColor.toLowerCase()} studio background`;
+  };
+
   const canStartGeneration = images.length > 0 && 
     images.some((img) => img.selected) && 
-    prompt.trim() && 
+    (studioStyle.isCustomPrompt ? customPrompt.trim() : true) && 
     getSelectedAnglesCount() > 0;
 
   const handleStartGeneration = () => {
@@ -324,19 +337,56 @@ const Index = () => {
                 </h2>
               </CardHeader>
               <CardContent>
-                <Input
-                  placeholder="Describe the style you want (e.g., 'Professional models wearing the products in an urban setting')"
-                  value={prompt}
-                  onChange={(e) => setPrompt(e.target.value)}
-                  className="mb-4"
-                />
-                <Button
-                  className="bg-[#9b87f5] hover:bg-[#7E69AB] text-white font-medium px-6 py-2 rounded-lg transition-colors"
-                  disabled={!canStartGeneration}
-                  onClick={handleStartGeneration}
-                >
-                  Start Generation ({getSelectedAnglesCount()} angles selected)
-                </Button>
+                <div className="space-y-4">
+                  <div className="flex items-center space-x-4">
+                    <Button
+                      variant={!studioStyle.isCustomPrompt ? "default" : "outline"}
+                      className="flex items-center space-x-2"
+                      onClick={() => setStudioStyle(prev => ({ ...prev, isCustomPrompt: false }))}
+                    >
+                      <Wand2 className="h-4 w-4" />
+                      <span>Studio Style</span>
+                    </Button>
+                    {!studioStyle.isCustomPrompt && (
+                      <StudioColorPicker
+                        color={studioStyle.backgroundColor}
+                        onChange={(color) => setStudioStyle(prev => ({ ...prev, backgroundColor: color }))}
+                      />
+                    )}
+                  </div>
+                  
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <Button
+                        variant={studioStyle.isCustomPrompt ? "default" : "outline"}
+                        onClick={() => setStudioStyle(prev => ({ ...prev, isCustomPrompt: true }))}
+                      >
+                        Custom Prompt
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-80">
+                      <Input
+                        placeholder="Describe the style you want..."
+                        value={customPrompt}
+                        onChange={(e) => setCustomPrompt(e.target.value)}
+                        className="mb-2"
+                      />
+                    </PopoverContent>
+                  </Popover>
+
+                  <div className="bg-gray-50 p-4 rounded-lg">
+                    <p className="text-sm text-gray-600">Final Prompt:</p>
+                    <p className="text-sm font-medium">{getPrompt()}</p>
+                  </div>
+
+                  <Button
+                    className="bg-[#9b87f5] hover:bg-[#7E69AB] text-white font-medium px-6 py-2 rounded-lg transition-colors w-full"
+                    disabled={!canStartGeneration}
+                    onClick={handleStartGeneration}
+                  >
+                    Start Generation ({getSelectedAnglesCount()} angles selected)
+                  </Button>
+                </div>
               </CardContent>
             </Card>
           </div>
