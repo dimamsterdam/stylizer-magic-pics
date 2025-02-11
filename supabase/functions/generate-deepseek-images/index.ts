@@ -19,6 +19,13 @@ serve(async (req) => {
     if (!deepseekKey) {
       throw new Error('DEEPSEEK_API_KEY environment variable not set')
     }
+    
+    // Log the first few characters of the API key to verify format (safely)
+    console.log('API Key format check:', {
+      length: deepseekKey.length,
+      startsWithBearer: deepseekKey.startsWith('Bearer '),
+      firstChars: deepseekKey.substring(0, 4) + '...'
+    })
 
     const fullPrompt = `${prompt}. ${angle} shot of the product.`
     console.log('Full prompt:', fullPrompt)
@@ -32,10 +39,13 @@ serve(async (req) => {
     }
     console.log('Sending request to Deepseek:', requestBody)
 
+    // Ensure the Authorization header is properly formatted
+    const authHeader = deepseekKey.startsWith('Bearer ') ? deepseekKey : `Bearer ${deepseekKey}`
+    
     const response = await fetch('https://api.deepseek.ai/v1/images/generations', {
       method: 'POST',
       headers: {
-        'Authorization': `Bearer ${deepseekKey}`,
+        'Authorization': authHeader,
         'Content-Type': 'application/json',
         'Accept': 'application/json'
       },
