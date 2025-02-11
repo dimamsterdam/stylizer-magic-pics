@@ -90,6 +90,12 @@ const GenerationResults = () => {
 
       if (error) throw error;
 
+      if (!data.imageUrl) {
+        throw new Error('No image URL in response');
+      }
+
+      console.log('Received image URL:', data.imageUrl);
+
       setGeneratedImages(prev => 
         prev.map(img => 
           img.id === imageId 
@@ -138,19 +144,21 @@ const GenerationResults = () => {
     });
   };
 
-  const handleRegenerateImage = (id: string, maskDataUrl?: string) => {
-    console.log("Regenerating image:", id, "with mask:", maskDataUrl);
+  const handleRegenerateImage = (id: string) => {
     const image = generatedImages.find(img => img.id === id);
-    toast({
-      title: maskDataUrl ? "Processing marked areas" : "Regenerating image",
-      description: maskDataUrl 
-        ? `A new ${image?.angle.toLowerCase()} image is being generated with your marked areas...`
-        : `A new ${image?.angle.toLowerCase()} image is being generated...`,
-    });
+    if (image) {
+      generateImage(id);
+      toast({
+        title: "Regenerating image",
+        description: `A new ${image.angle.toLowerCase()} image is being generated...`,
+      });
+    }
   };
 
   const handlePromptUpdate = () => {
-    console.log("Updating prompt:", prompt);
+    generatedImages.forEach(img => {
+      generateImage(img.id);
+    });
     toast({
       title: "Updating generations",
       description: "New images are being generated with the updated prompt...",
