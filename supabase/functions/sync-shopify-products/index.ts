@@ -1,4 +1,5 @@
 
+// @ts-ignore
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 
 const buildShopifyQuery = (searchTerm?: string) => `
@@ -31,36 +32,44 @@ query {
   }
 }`;
 
-serve(async (req: Request) => {
-  try {
-    // Add CORS headers
-    const corsHeaders = {
-      'Access-Control-Allow-Origin': '*',
-      'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
-    };
+console.log("Edge Function starting...");
 
-    // Handle CORS preflight requests
-    if (req.method === 'OPTIONS') {
-      return new Response(null, { headers: corsHeaders });
-    }
+serve(async (req: Request) => {
+  const corsHeaders = {
+    'Access-Control-Allow-Origin': '*',
+    'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+  };
+
+  // Handle CORS preflight requests
+  if (req.method === 'OPTIONS') {
+    return new Response(null, { 
+      headers: corsHeaders
+    });
+  }
+
+  try {
+    console.log('Request received:', req.method);
 
     // Parse search parameters from request
-    const { searchTerm } = await req.json().catch(() => ({}));
-    console.log('Searching Shopify products with term:', searchTerm);
-
-    // Fetch products from Shopify
-    const shopifyUrl = 'https://quickstart-50d94e13.myshopify.com/api/2024-01/graphql.json';
-    console.log('Using Shopify URL:', shopifyUrl);
+    const { searchTerm } = await req.json().catch(() => {
+      console.log('No request body or invalid JSON');
+      return {};
+    });
     
+    console.log('Search term:', searchTerm);
+
+    // Check for Shopify API key
     const shopifyToken = Deno.env.get('SHOPIFY_STOREFRONT_API_KEY');
     if (!shopifyToken) {
       console.error('Missing Shopify Storefront API Key');
-      throw new Error('Missing Shopify Storefront API Key');
+      throw new Error('Configuration error: Missing Shopify API key');
     }
 
+    // Fetch products from Shopify
+    const shopifyUrl = 'https://quickstart-50d94e13.myshopify.com/api/2024-01/graphql.json';
     const query = buildShopifyQuery(searchTerm);
-    console.log('Executing Shopify query:', query);
-
+    
+    console.log('Sending request to Shopify...');
     const response = await fetch(shopifyUrl, {
       method: 'POST',
       headers: {
@@ -71,12 +80,12 @@ serve(async (req: Request) => {
     });
 
     if (!response.ok) {
-      console.error('Shopify API error:', response.status, await response.text());
+      const errorText = await response.text();
+      console.error('Shopify API error:', response.status, errorText);
       throw new Error(`Shopify API error: ${response.status}`);
     }
 
     const data = await response.json();
-    console.log('Shopify API response:', JSON.stringify(data, null, 2));
     
     if (!data.data?.products?.edges) {
       console.error('Invalid response from Shopify:', data);
@@ -93,7 +102,7 @@ serve(async (req: Request) => {
       image_url: edge.node.images.edges[0]?.node.url || null,
     }));
 
-    console.log(`Found ${products.length} products`);
+    console.log(`Returning ${products.length} products`);
 
     return new Response(
       JSON.stringify({ 
@@ -108,7 +117,8 @@ serve(async (req: Request) => {
       }
     );
   } catch (error) {
-    console.error('Error:', error);
+    console.error('Error in Edge Function:', error);
+    
     return new Response(
       JSON.stringify({ 
         error: error.message,
@@ -117,8 +127,8 @@ serve(async (req: Request) => {
       { 
         status: 500,
         headers: { 
+          ...corsHeaders,
           'Content-Type': 'application/json',
-          'Access-Control-Allow-Origin': '*',
         } 
       }
     );
