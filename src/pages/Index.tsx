@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { ProductPicker } from "@/components/ProductPicker";
 import { ImageGallery } from "@/components/ImageGallery";
@@ -252,12 +253,14 @@ const Index = () => {
                         </button>
                       </div>
                     ))}
-                    <Button
-                      onClick={handleConfirmSelection}
-                      className="w-full bg-[#9b87f5] hover:bg-[#7E69AB] text-white font-medium px-6 py-2 rounded-lg transition-colors"
-                    >
-                      Confirm Selection (Max 3)
-                    </Button>
+                    <div className="flex justify-end">
+                      <Button
+                        onClick={handleConfirmSelection}
+                        className="bg-[#9b87f5] hover:bg-[#7E69AB] text-white font-medium px-6 py-2 rounded-lg transition-colors"
+                      >
+                        Confirm Selection
+                      </Button>
+                    </div>
                   </div>
                 </CardContent>
               </Card>
