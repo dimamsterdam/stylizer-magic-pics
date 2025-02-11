@@ -296,10 +296,10 @@ const Index = () => {
                       key={angle}
                       pressed={isSelected}
                       onPressedChange={() => handleAngleToggle(angle)}
-                      className={`px-4 py-2 ${
+                      className={`px-4 py-2 transition-all duration-200 ${
                         isSelected 
-                          ? 'bg-[#9b87f5] text-white hover:bg-[#7E69AB]' 
-                          : 'bg-white text-[#1A1F2C] hover:bg-gray-100'
+                          ? 'bg-white text-[#9b87f5] border-2 border-[#9b87f5] hover:bg-gray-50' 
+                          : 'bg-gray-100 text-[#1A1F2C] hover:bg-gray-200 border-2 border-transparent'
                       }`}
                     >
                       {angle}
