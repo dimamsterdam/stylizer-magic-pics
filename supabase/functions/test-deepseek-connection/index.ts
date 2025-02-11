@@ -13,6 +13,39 @@ interface TestResult {
   error?: string;
 }
 
+async function testDNSAndConnectivity(): Promise<TestResult> {
+  try {
+    const startTime = Date.now();
+    // Test basic connectivity to the API domain
+    const response = await fetch('https://api.deepseek.ai/health', {
+      method: 'HEAD'
+    });
+    const responseTime = Date.now() - startTime;
+
+    return {
+      step: 'DNS and Connectivity Test',
+      success: response.ok || response.status === 404, // 404 is ok as the health endpoint might not exist
+      details: {
+        dnsResolved: true,
+        connectionEstablished: true,
+        responseTime: `${responseTime}ms`,
+        status: response.status
+      }
+    };
+  } catch (error) {
+    console.error('DNS/Connectivity test error:', error);
+    return {
+      step: 'DNS and Connectivity Test',
+      success: false,
+      details: {
+        dnsResolved: false,
+        error: error.message
+      },
+      error: `Connection failed: ${error.message}`
+    };
+  }
+}
+
 async function testApiKey(): Promise<TestResult> {
   const deepseekKey = Deno.env.get('DEEPSEEK_API_KEY')
   if (!deepseekKey) {
@@ -52,6 +85,30 @@ async function testApiConnection(deepseekKey: string): Promise<TestResult> {
 
     const startTime = Date.now();
     
+    // First, try a simpler request to verify authentication
+    const authTestResponse = await fetch('https://api.deepseek.ai/v1/models', {
+      method: 'GET',
+      headers: {
+        'Authorization': authHeader,
+        'Accept': 'application/json'
+      }
+    });
+
+    if (!authTestResponse.ok) {
+      const authErrorText = await authTestResponse.text();
+      return {
+        step: 'API Connection Test',
+        success: false,
+        details: {
+          statusCode: authTestResponse.status,
+          statusText: authTestResponse.statusText,
+          response: authErrorText
+        },
+        error: `Authentication failed: ${authTestResponse.status} - ${authErrorText}`
+      };
+    }
+
+    // If authentication works, try the image generation endpoint
     const response = await fetch('https://api.deepseek.ai/v1/images/generations', {
       method: 'POST',
       headers: {
@@ -108,17 +165,24 @@ async function runAllTests() {
   const results: TestResult[] = [];
   console.log('Starting Deepseek API tests...');
 
-  // Test 1: API Key
-  const apiKeyResult = await testApiKey();
-  results.push(apiKeyResult);
-  console.log('API Key test result:', apiKeyResult);
+  // Test 1: DNS and Connectivity
+  const connectivityResult = await testDNSAndConnectivity();
+  results.push(connectivityResult);
+  console.log('DNS and Connectivity test result:', connectivityResult);
 
-  if (apiKeyResult.success) {
-    // Test 2: API Connection
-    const deepseekKey = Deno.env.get('DEEPSEEK_API_KEY')!;
-    const connectionResult = await testApiConnection(deepseekKey);
-    results.push(connectionResult);
-    console.log('API Connection test result:', connectionResult);
+  if (connectivityResult.success) {
+    // Test 2: API Key
+    const apiKeyResult = await testApiKey();
+    results.push(apiKeyResult);
+    console.log('API Key test result:', apiKeyResult);
+
+    if (apiKeyResult.success) {
+      // Test 3: API Connection
+      const deepseekKey = Deno.env.get('DEEPSEEK_API_KEY')!;
+      const connectionResult = await testApiConnection(deepseekKey);
+      results.push(connectionResult);
+      console.log('API Connection test result:', connectionResult);
+    }
   }
 
   return results;
@@ -137,12 +201,11 @@ serve(async (req) => {
       allTestsPassed: results.every(r => r.success)
     };
     
-    // Always return 200 status since this is a test endpoint
     return new Response(
       JSON.stringify(response),
       { 
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        status: 200 // Changed from conditional 500 to always 200
+        status: 200
       }
     );
   } catch (error) {
@@ -155,7 +218,7 @@ serve(async (req) => {
       }),
       { 
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        status: 200 // Changed from 500 to 200 to allow error inspection
+        status: 200
       }
     );
   }
