@@ -36,6 +36,9 @@ const GenerationResults = () => {
   const selectedProducts = state?.selectedProducts || [];
   const selectedAngles = state?.selectedAngles || [];
 
+  console.log("Selected Products:", selectedProducts);
+  console.log("Selected Angles:", selectedAngles);
+
   if (selectedProducts.length === 0) {
     navigate("/");
     return null;
@@ -44,22 +47,37 @@ const GenerationResults = () => {
   const [prompt, setPrompt] = useState("Professional model wearing the product");
   const [generatedImages, setGeneratedImages] = useState<GeneratedImage[]>(() => {
     return selectedProducts.flatMap(product => {
-      // Find the matching product in our sample data
-      const productKey = Object.keys(productImages).find(
-        key => productImages[key as ProductKey].id === product.id
-      ) as ProductKey | undefined;
+      console.log("Processing product:", product);
       
-      if (!productKey) return [];
+      // Find the matching product in our sample data
+      const productKey = Object.keys(productImages).find(key => {
+        const currentProduct = productImages[key as ProductKey];
+        console.log("Comparing:", currentProduct.id, "with", product.id);
+        return currentProduct.id === product.id;
+      }) as ProductKey | undefined;
+      
+      console.log("Found product key:", productKey);
+      
+      if (!productKey) {
+        console.warn("No matching product found for:", product.id);
+        return [];
+      }
       
       const productData = productImages[productKey];
       const sampleImages = productData.generated || [];
       
-      if (sampleImages.length === 0) return [];
+      console.log("Sample images for product:", sampleImages);
+      
+      if (sampleImages.length === 0) {
+        console.warn("No sample images found for product:", product.id);
+        return [];
+      }
       
       // For each selected angle, create a generated image using sample data
       return selectedAngles.map((angle, index) => {
         // Cycle through available sample images
         const imageIndex = index % sampleImages.length;
+        console.log("Creating image for angle:", angle, "using sample index:", imageIndex);
         
         return {
           id: `${product.id}-${angle}`,
@@ -70,6 +88,8 @@ const GenerationResults = () => {
       });
     });
   });
+
+  console.log("Final generated images:", generatedImages);
 
   const handleImageSelect = (id: string) => {
     setGeneratedImages(
