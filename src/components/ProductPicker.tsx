@@ -2,7 +2,6 @@
 import { useState, useEffect } from "react";
 import { Search } from "lucide-react";
 import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/components/ui/use-toast";
 
@@ -24,85 +23,29 @@ export const ProductPicker = ({ onSelect }: ProductPickerProps) => {
   const [error, setError] = useState<string | null>(null);
   const { toast } = useToast();
 
-  useEffect(() => {
-    const loadInitialProducts = async () => {
-      try {
-        setIsLoading(true);
-        setError(null);
-        console.log('Fetching initial products...');
-        const { data, error } = await supabase
-          .from('products')
-          .select('*')
-          .limit(10);
-
-        if (error) {
-          console.error('Error fetching products:', error);
-          throw error;
-        }
-
-        console.log('Fetched products:', data);
-        const formattedProducts = data.map(product => ({
-          id: product.id,
-          title: product.title,
-          sku: product.sku || '',
-          image: product.image_url || '',
-        }));
-
-        setResults(formattedProducts);
-      } catch (error) {
-        console.error('Error loading products:', error);
-        setError('Failed to load products. Please try again.');
-        toast({
-          title: "Error",
-          description: "Failed to load products. Please try again.",
-          variant: "destructive",
-        });
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    loadInitialProducts();
-  }, []);
-
-  const handleSearch = async (term: string) => {
-    setSearchTerm(term);
-    setIsLoading(true);
-    setError(null);
-    
+  const searchProducts = async (term: string) => {
     try {
+      setIsLoading(true);
+      setError(null);
       console.log('Searching products with term:', term);
-      if (term.trim() === "") {
-        const { data, error } = await supabase
-          .from('products')
-          .select('*')
-          .limit(10);
-        
-        if (error) throw error;
-        
-        setResults(data?.map(product => ({
-          id: product.id,
-          title: product.title,
-          sku: product.sku || '',
-          image: product.image_url || '',
-        })) || []);
-      } else {
-        const { data, error } = await supabase
-          .from('products')
-          .select('*')
-          .or(`title.ilike.%${term}%,sku.ilike.%${term}%`)
-          .limit(10);
-        
-        if (error) throw error;
-        
-        console.log('Search results:', data);
-        setResults(data?.map(product => ({
-          id: product.id,
-          title: product.title,
-          sku: product.sku || '',
-          image: product.image_url || '',
-        })) || []);
+
+      const response = await supabase.functions.invoke('sync-shopify-products', {
+        body: { searchTerm: term }
+      });
+
+      if (response.error) {
+        throw new Error(response.error.message);
       }
+
+      console.log('Search response:', response.data);
+      const formattedProducts = response.data.products.map(product => ({
+        id: product.id,
+        title: product.title,
+        sku: product.sku || '',
+        image: product.image_url || '',
+      }));
+
+      setResults(formattedProducts);
     } catch (error) {
       console.error('Error searching products:', error);
       setError('Failed to search products. Please try again.');
@@ -116,40 +59,15 @@ export const ProductPicker = ({ onSelect }: ProductPickerProps) => {
     }
   };
 
-  const handleSyncProducts = async () => {
-    try {
-      setIsLoading(true);
-      setError(null);
-      toast({
-        title: "Syncing products",
-        description: "Please wait while we sync your products...",
-      });
+  // Load initial products
+  useEffect(() => {
+    searchProducts("");
+  }, []);
 
-      const response = await supabase.functions.invoke('sync-shopify-products');
-      
-      if (response.error) {
-        throw new Error(response.error.message);
-      }
-
-      console.log('Sync response:', response.data);
-      toast({
-        title: "Sync completed",
-        description: `Successfully synced ${response.data.count} products`,
-      });
-
-      // Reload products after sync
-      handleSearch(searchTerm);
-    } catch (error) {
-      console.error('Error syncing products:', error);
-      setError('Failed to sync products. Please try again.');
-      toast({
-        title: "Error",
-        description: "Failed to sync products. Please try again.",
-        variant: "destructive",
-      });
-    } finally {
-      setIsLoading(false);
-    }
+  // Handle search input changes
+  const handleSearch = async (term: string) => {
+    setSearchTerm(term);
+    searchProducts(term);
   };
 
   return (
@@ -157,18 +75,9 @@ export const ProductPicker = ({ onSelect }: ProductPickerProps) => {
       <div className="p-6 bg-white rounded-lg shadow-sm">
         <div className="space-y-4">
           <div className="pb-4 border-b border-polaris-border">
-            <div className="flex justify-between items-center">
-              <div>
-                <h2 className="text-[#1A1F2C] text-display-md font-medium">Get started</h2>
-                <p className="mt-1 text-polaris-secondary">Search and select a product to begin</p>
-              </div>
-              <Button
-                onClick={handleSyncProducts}
-                disabled={isLoading}
-                className="bg-[#9b87f5] hover:bg-[#7E69AB] text-white"
-              >
-                Sync Products
-              </Button>
+            <div>
+              <h2 className="text-[#1A1F2C] text-display-md font-medium">Get started</h2>
+              <p className="mt-1 text-polaris-secondary">Search and select a product to begin</p>
             </div>
           </div>
           <div className="relative">
@@ -211,12 +120,11 @@ export const ProductPicker = ({ onSelect }: ProductPickerProps) => {
                   <h3 className="font-medium text-polaris-text">{product.title}</h3>
                   <p className="text-sm text-polaris-secondary">SKU: {product.sku}</p>
                 </div>
-                <Button
-                  variant="outline"
-                  className="ml-4 text-polaris-teal border-polaris-teal hover:bg-polaris-teal hover:text-white"
+                <button
+                  className="ml-4 px-4 py-2 text-polaris-teal border border-polaris-teal rounded hover:bg-polaris-teal hover:text-white transition-colors"
                 >
                   Select
-                </Button>
+                </button>
               </div>
             ))
           )}

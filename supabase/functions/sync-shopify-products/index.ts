@@ -1,10 +1,9 @@
 
-import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 
-const shopifyQuery = `
+const buildShopifyQuery = (searchTerm?: string) => `
 query {
-  products(first: 50) {
+  products(first: 50${searchTerm ? `, query: "${searchTerm}"` : ''}) {
     edges {
       node {
         id
@@ -45,16 +44,11 @@ serve(async (req: Request) => {
       return new Response(null, { headers: corsHeaders });
     }
 
-    console.log('Starting Shopify products sync...');
-
-    // Create Supabase client
-    const supabaseClient = createClient(
-      Deno.env.get('SUPABASE_URL') ?? '',
-      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
-    );
+    // Parse search parameters from request
+    const { searchTerm } = await req.json().catch(() => ({}));
+    console.log('Searching Shopify products with term:', searchTerm);
 
     // Fetch products from Shopify
-    console.log('Fetching products from Shopify...');
     const shopifyUrl = 'https://quickstart-50d94e13.myshopify.com/api/2024-01/graphql.json';
     console.log('Using Shopify URL:', shopifyUrl);
     
@@ -64,13 +58,16 @@ serve(async (req: Request) => {
       throw new Error('Missing Shopify Storefront API Key');
     }
 
+    const query = buildShopifyQuery(searchTerm);
+    console.log('Executing Shopify query:', query);
+
     const response = await fetch(shopifyUrl, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
         'X-Shopify-Storefront-Access-Token': shopifyToken,
       },
-      body: JSON.stringify({ query: shopifyQuery }),
+      body: JSON.stringify({ query }),
     });
 
     if (!response.ok) {
@@ -86,41 +83,22 @@ serve(async (req: Request) => {
       throw new Error('Invalid response from Shopify');
     }
 
-    console.log(`Found ${data.data.products.edges.length} products from Shopify`);
+    const products = data.data.products.edges.map((edge: any) => ({
+      id: edge.node.id.split('/').pop(),
+      shopify_gid: edge.node.id,
+      title: edge.node.title,
+      description: edge.node.description,
+      sku: edge.node.variants.edges[0]?.node.sku || null,
+      price: edge.node.variants.edges[0]?.node.price.amount || null,
+      image_url: edge.node.images.edges[0]?.node.url || null,
+    }));
 
-    // Transform and upsert products
-    const products = data.data.products.edges.map((edge: any) => {
-      const product = {
-        id: edge.node.id.split('/').pop(),
-        shopify_gid: edge.node.id,
-        title: edge.node.title,
-        description: edge.node.description,
-        sku: edge.node.variants.edges[0]?.node.sku || null,
-        price: edge.node.variants.edges[0]?.node.price.amount || null,
-        image_url: edge.node.images.edges[0]?.node.url || null,
-        updated_at: new Date().toISOString(),
-      };
-      console.log('Processed product:', JSON.stringify(product, null, 2));
-      return product;
-    });
-
-    console.log('Upserting products to Supabase...');
-    const { error } = await supabaseClient
-      .from('products')
-      .upsert(products, { onConflict: 'shopify_gid' });
-
-    if (error) {
-      console.error('Error upserting products:', error);
-      throw error;
-    }
-
-    console.log('Products sync completed successfully');
+    console.log(`Found ${products.length} products`);
 
     return new Response(
       JSON.stringify({ 
         success: true, 
-        count: products.length,
-        products: products 
+        products 
       }),
       { 
         headers: { 
