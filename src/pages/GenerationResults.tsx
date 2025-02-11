@@ -1,4 +1,5 @@
-import { useState } from "react";
+
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
@@ -115,11 +116,11 @@ const GenerationResults = () => {
   };
 
   // Start generating all images when component mounts
-  useState(() => {
+  useEffect(() => {
     generatedImages.forEach(img => {
       generateImage(img.id);
     });
-  }, []);
+  }, []); // Only run once when component mounts
 
   const handleImageSelect = (id: string) => {
     setGeneratedImages(
