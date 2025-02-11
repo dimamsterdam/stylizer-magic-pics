@@ -28,8 +28,7 @@ serve(async (req) => {
     console.log('Making request to FAL AI...')
 
     try {
-      // Use URLSearchParams to properly encode the URL
-      const url = new URL('https://api.fal.ai/v1/text-to-image')
+      const url = 'https://queue.fal.run/fal-ai/flux-pro/finetuned'
 
       // Call FAL AI API with more detailed error handling
       const controller = new AbortController()
@@ -40,22 +39,26 @@ serve(async (req) => {
         headers: {
           'Accept': 'application/json',
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${falKey}`,
+          'Authorization': `Key ${falKey}`,
           'User-Agent': 'Deno/1.0',
           'Connection': 'keep-alive'
         },
         body: JSON.stringify({
           prompt: fullPrompt,
-          image_size: "1024x1024",
+          image_size: "landscape_4_3",
           num_images: 1,
-          model: 'sd-xl',
-          sync: true
+          seed: Math.floor(Math.random() * 2000000), // Random seed for variety
+          finetune_id: "ca8516ba-1e40-4f58-bf59-83b2d6c5f1d0",
+          output_format: "jpeg",
+          guidance_scale: 3.5,
+          finetune_strength: 1.3,
+          num_inference_steps: 44
         }),
         signal: controller.signal
       }
 
       console.log('Request options:', {
-        url: url.toString(),
+        url,
         method: requestOptions.method,
         headers: { ...requestOptions.headers, Authorization: '[REDACTED]' },
         body: requestOptions.body
@@ -72,16 +75,55 @@ serve(async (req) => {
       }
 
       const data = await response.json()
-      console.log('FAL AI successful response:', data)
+      console.log('FAL AI initial response:', data)
 
-      return new Response(
-        JSON.stringify({ 
-          imageUrl: data.images[0].url,
-        }),
-        { 
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
+      // Get the request_id from the response
+      const requestId = data.request_id
+      if (!requestId) {
+        throw new Error('No request_id received from FAL AI')
+      }
+
+      // Poll for the result
+      const maxAttempts = 30
+      let attempts = 0
+      while (attempts < maxAttempts) {
+        const pollResponse = await fetch(`https://queue.fal.run/fal-ai/flux-pro/finetuned/${requestId}`, {
+          headers: {
+            'Authorization': `Key ${falKey}`,
+            'Accept': 'application/json',
+          },
+        })
+
+        if (!pollResponse.ok) {
+          console.error(`Polling error (attempt ${attempts + 1}):`, await pollResponse.text())
+          attempts++
+          await new Promise(resolve => setTimeout(resolve, 1000))
+          continue
         }
-      )
+
+        const pollData = await pollResponse.json()
+        console.log(`Poll attempt ${attempts + 1}:`, pollData)
+
+        if (pollData.status === 'COMPLETED' && pollData.image) {
+          return new Response(
+            JSON.stringify({ 
+              imageUrl: pollData.image,
+            }),
+            { 
+              headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
+            }
+          )
+        }
+
+        if (pollData.status === 'FAILED') {
+          throw new Error(`Image generation failed: ${pollData.error || 'Unknown error'}`)
+        }
+
+        attempts++
+        await new Promise(resolve => setTimeout(resolve, 1000))
+      }
+
+      throw new Error('Timeout waiting for image generation')
     } catch (fetchError) {
       if (fetchError.name === 'AbortError') {
         throw new Error('Request timed out after 30 seconds')
