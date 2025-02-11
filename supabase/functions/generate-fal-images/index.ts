@@ -21,16 +21,14 @@ serve(async (req) => {
     }
 
     const fullPrompt = `${prompt}. ${angle} shot of the product.`
-    const url = 'https://api.deepseek.ai/v2/images/generation'
-    
-    console.log('Making request to:', url)
     console.log('Full prompt:', fullPrompt)
 
-    const response = await fetch(url, {
+    const response = await fetch('https://api.deepseek.ai/v2/images/generation', {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${deepseekKey}`,
         'Content-Type': 'application/json',
+        'Accept': 'application/json'
       },
       body: JSON.stringify({
         prompt: fullPrompt,
@@ -49,15 +47,19 @@ serve(async (req) => {
       throw new Error(`Deepseek API error (${response.status}): ${responseText}`)
     }
 
-    const data = JSON.parse(responseText)
-    if (!data.data?.[0]?.url) {
-      throw new Error('No image URL in response')
+    try {
+      const data = JSON.parse(responseText)
+      if (!data.data?.[0]?.url) {
+        throw new Error('No image URL in response')
+      }
+      return new Response(
+        JSON.stringify({ imageUrl: data.data[0].url }),
+        { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      )
+    } catch (parseError) {
+      console.error('Error parsing response:', parseError)
+      throw new Error(`Invalid JSON response: ${responseText}`)
     }
-
-    return new Response(
-      JSON.stringify({ imageUrl: data.data[0].url }),
-      { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-    )
 
   } catch (error) {
     console.error('Error in generate-fal-images:', {
