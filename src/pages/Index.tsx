@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { ProductPicker } from "@/components/ProductPicker";
 import { ImageGallery } from "@/components/ImageGallery";
@@ -9,6 +8,7 @@ import { useToast } from "@/components/ui/use-toast";
 import { Card, CardHeader, CardContent } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { Toggle } from "@/components/ui/toggle";
+import { Check } from "lucide-react";
 
 interface Product {
   id: string;
@@ -296,12 +296,15 @@ const Index = () => {
                       key={angle}
                       pressed={isSelected}
                       onPressedChange={() => handleAngleToggle(angle)}
-                      className={`px-4 py-2 transition-all duration-200 ${
+                      className={`px-4 py-2 transition-all duration-200 relative ${
                         isSelected 
-                          ? 'bg-white text-[#9b87f5] border-2 border-[#9b87f5] hover:bg-gray-50' 
+                          ? 'bg-white text-[#9b87f5] border-2 border-[#9b87f5] hover:bg-gray-50 pl-8' 
                           : 'bg-gray-100 text-[#1A1F2C] hover:bg-gray-200 border-2 border-transparent'
                       }`}
                     >
+                      {isSelected && (
+                        <Check className="h-4 w-4 absolute left-2 top-1/2 transform -translate-y-1/2" />
+                      )}
                       {angle}
                     </Toggle>
                   ))}
