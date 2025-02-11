@@ -44,11 +44,6 @@ const GenerationResults = () => {
   console.log("Selected Angles:", selectedAngles);
   console.log("Initial Prompt:", state?.prompt);
 
-  if (selectedProducts.length === 0) {
-    navigate("/");
-    return null;
-  }
-
   const [prompt, setPrompt] = useState(state?.prompt || "Professional model wearing the product");
   const [generatedImages, setGeneratedImages] = useState<GeneratedImage[]>(() => {
     return selectedProducts.flatMap(product => 
@@ -61,6 +56,12 @@ const GenerationResults = () => {
       }))
     );
   });
+
+  useEffect(() => {
+    if (selectedProducts.length === 0) {
+      navigate("/");
+    }
+  }, [selectedProducts, navigate]);
 
   const generateImage = async (imageId: string) => {
     const [productId, angle] = imageId.split('-');
@@ -186,6 +187,10 @@ const GenerationResults = () => {
     acc[angle] = generatedImages.filter(img => img.angle === angle);
     return acc;
   }, {} as Record<string, GeneratedImage[]>);
+
+  if (selectedProducts.length === 0) {
+    return null;
+  }
 
   return (
     <div className="min-h-screen bg-polaris-background">
