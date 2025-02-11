@@ -208,7 +208,7 @@ const Index = () => {
                       onClick={handleConfirmSelection}
                       className="w-full bg-[#9b87f5] hover:bg-[#7E69AB] text-white font-medium px-6 py-2 rounded-lg transition-colors"
                     >
-                      Confirm Selection ({selectedProducts.length}/3)
+                      Confirm Selection (Max 3)
                     </Button>
                   </div>
                 </CardContent>
