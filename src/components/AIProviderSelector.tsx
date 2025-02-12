@@ -9,7 +9,7 @@ import { useToast } from "@/components/ui/use-toast";
 import { useQueryClient } from "@tanstack/react-query";
 
 export function AIProviderSelector() {
-  const { data: currentProvider, isLoading } = useAIProvider();
+  const { data: currentProvider, isLoading, isError } = useAIProvider();
   const [selectedProvider, setSelectedProvider] = useState<string | undefined>(undefined);
   const { toast } = useToast();
   const queryClient = useQueryClient();
@@ -41,7 +41,29 @@ export function AIProviderSelector() {
   };
 
   if (isLoading) {
-    return <div>Loading...</div>;
+    return (
+      <Card>
+        <CardHeader>
+          <CardTitle>AI Provider Selection</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div>Loading...</div>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  if (isError) {
+    return (
+      <Card>
+        <CardHeader>
+          <CardTitle>AI Provider Selection</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="text-red-500">Error loading AI provider settings</div>
+        </CardContent>
+      </Card>
+    );
   }
 
   return (

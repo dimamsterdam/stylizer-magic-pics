@@ -33,9 +33,25 @@ export const useAIProvider = () => {
         .from('feature_flags')
         .select('value')
         .eq('name', 'ai_provider')
-        .single();
+        .maybeSingle();
       
       if (error) throw error;
+      
+      // If no data is found, return the default provider
+      if (!data) {
+        // Insert the default provider
+        const { error: insertError } = await supabase
+          .from('feature_flags')
+          .insert({
+            name: 'ai_provider',
+            value: 'deepseek',
+            description: 'Controls which AI provider is currently active. Valid values: deepseek, perplexity, fal'
+          });
+        
+        if (insertError) throw insertError;
+        return 'deepseek' as const;
+      }
+      
       return data.value as 'deepseek' | 'perplexity' | 'fal';
     }
   });
