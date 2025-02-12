@@ -143,6 +143,7 @@ const Index = () => {
       id: product.id,
       url: product.image,
       selected: false,
+      title: product.title,
     })));
     toast({
       title: "Products confirmed",
