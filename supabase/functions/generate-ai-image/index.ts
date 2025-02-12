@@ -73,7 +73,7 @@ async function generateWithFal(prompt: string) {
   console.log('Generating image with FAL, prompt:', prompt);
 
   try {
-    const response = await fetch('https://110602490-fast-stable-diffusion.fal.run/stable-diffusion/text-to-image', {
+    const response = await fetch('https://110602490-fast-stable-diffusion.fal.run/stable-diffusion/v1/text2image', {
       method: 'POST',
       headers: {
         'Authorization': `Key ${falKey}`,
