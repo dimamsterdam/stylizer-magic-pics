@@ -274,17 +274,6 @@ const Index = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#F6F6F7] to-[#E5DEFF]">
       <div className="max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="mb-8">
-          <div className="flex items-center space-x-2 mb-6">
-            <h1 className="font-inter font-bold text-[#1A1F2C] tracking-[-0.03em] text-display-xl">
-              brandmachine
-            </h1>
-            <span className="font-inter font-semibold text-polaris-secondary text-display-lg">
-              Stylizer
-            </span>
-          </div>
-        </div>
-
         {isPickingProducts ? (
           <div className="mb-8 animate-fade-in">
             <Card className="bg-white/80 backdrop-blur-sm border-0 shadow-lg mb-8 transition-all duration-300 hover:shadow-xl">
@@ -399,7 +388,7 @@ const Index = () => {
               <CardHeader>
                 <div className="flex items-center justify-between mb-6">
                   <h2 className="text-display-lg text-[#1A1F2C] tracking-tight">
-                    Selected Products
+                    Define your 'photo shoot'
                   </h2>
                   <button
                     onClick={() => setIsPickingProducts(true)}
