@@ -47,19 +47,22 @@ async function testFalAPI() {
 
   try {
     console.log('Testing FAL API connection...');
-    const response = await fetch('https://110602490-fast-stable-diffusion.fal.run/stable-diffusion/v1/text2image', {
+    const response = await fetch('https://queue.fal.run/fal-ai/flux-pro/finetuned', {
       method: 'POST',
       headers: {
         'Authorization': `Key ${apiKey}`,
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
+        seed: 1772431,
         prompt: "test connection",
-        image_size: "256x256",
-        num_inference_steps: 10,
-        guidance_scale: 7.5,
+        image_size: "landscape_4_3",
         num_images: 1,
-        safety_filter: true
+        finetune_id: "ca8516ba-1e40-4f58-bf59-83b2d6c5f1d0",
+        output_format: "jpeg",
+        guidance_scale: 3.5,
+        finetune_strength: 1.3,
+        num_inference_steps: 44
       })
     });
 
