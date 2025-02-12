@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Search } from "lucide-react";
+import { Search, Check, Wand2, Loader2 } from "lucide-react";
 import { ProductPicker } from "@/components/ProductPicker";
 import { ImageGallery } from "@/components/ImageGallery";
 import { Button } from "@/components/ui/button";
@@ -9,7 +9,6 @@ import { useToast } from "@/components/ui/use-toast";
 import { Card, CardHeader, CardContent } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { Toggle } from "@/components/ui/toggle";
-import { Check, Wand2, Hourglass } from "lucide-react";
 import { StudioColorPicker } from "@/components/StudioColorPicker";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
@@ -317,7 +316,12 @@ const Index = () => {
               <CardContent>
                 <div className="mt-8 border-t border-polaris-border pt-6">
                   <div className="relative max-w-2xl mx-auto">
-                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-polaris-secondary" />
+                    {!isLoading && (
+                      <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-polaris-secondary" />
+                    )}
+                    {isLoading && (
+                      <Loader2 className="absolute left-3 top-1/2 transform -translate-y-1/2 text-polaris-secondary animate-spin" />
+                    )}
                     <Input
                       type="text"
                       placeholder="Search products by name or SKU (type at least 2 characters)"
