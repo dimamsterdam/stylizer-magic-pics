@@ -45,28 +45,37 @@ async function testFalAPI() {
     throw new Error('FAL_KEY is not set');
   }
 
-  const response = await fetch('https://fal.run/v1/stable-diffusion/text-to-image', {
-    method: 'POST',
-    headers: {
-      'Authorization': `Key ${apiKey}`,
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({
-      prompt: "test connection",
-      model_name: "stabilityai/stable-diffusion-xl-base-1.0",
-      image_size: "256x256",
-      num_inference_steps: 10,
-      guidance_scale: 7.5,
-      num_images: 1,
-      safety_checker: true
-    })
-  });
+  try {
+    console.log('Testing FAL API connection...');
+    const response = await fetch('https://110602490-fast-stable-diffusion.fal.run/v1/text-to-image', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Key ${apiKey}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        prompt: "test connection",
+        image_size: "256x256",
+        num_inference_steps: 10,
+        guidance_scale: 7.5,
+        num_images: 1,
+        safety_filter: true
+      })
+    });
 
-  if (!response.ok) {
-    throw new Error(`FAL API error: ${response.status}`);
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error('FAL API error response:', errorText);
+      throw new Error(`FAL API error: ${response.status} - ${errorText}`);
+    }
+
+    const data = await response.json();
+    console.log('FAL API test successful:', data);
+    return data;
+  } catch (error) {
+    console.error('Error in testFalAPI:', error);
+    throw error;
   }
-
-  return await response.json();
 }
 
 async function testPerplexityAPI() {
