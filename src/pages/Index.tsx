@@ -15,6 +15,7 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
 import { DeepseekConnectionTest } from "@/components/DeepseekConnectionTest";
+import { AIProviderSelector } from "@/components/aiProviderSelector";
 
 interface Product {
   id: string;
@@ -224,6 +225,20 @@ const Index = () => {
     <div className="min-h-screen bg-gradient-to-br from-[#F6F6F7] to-[#E5DEFF]">
       <div className="max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <div className="mb-8">
+          <Card className="bg-white/80 backdrop-blur-sm border-0 shadow-lg mb-8">
+            <CardHeader>
+              <h1 className="text-display-xl text-[#1A1F2C] tracking-tight">
+                AI Provider Configuration
+              </h1>
+              <p className="text-body-lg text-[#6D7175] max-w-2xl">
+                Select which AI provider to use for image generation.
+              </p>
+            </CardHeader>
+            <CardContent>
+              <AIProviderSelector />
+            </CardContent>
+          </Card>
+
           <Card className="bg-white/80 backdrop-blur-sm border-0 shadow-lg mb-8">
             <CardHeader>
               <h1 className="text-display-xl text-[#1A1F2C] tracking-tight">
