@@ -1,4 +1,3 @@
-
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.7.1'
 
@@ -74,8 +73,8 @@ async function generateWithFal(prompt: string) {
   console.log('Generating image with FAL, prompt:', prompt);
 
   try {
-    // Initial request to generate image
-    const response = await fetch('https://fal.run/fal-ai/flux-pro/finetuned', {
+    // Initial request to generate image using the REST API endpoint
+    const response = await fetch('https://fal.run/api/v1/art/models/1.6-turbo', {
       method: 'POST',
       headers: {
         'Authorization': `Key ${falKey}`,
@@ -83,15 +82,12 @@ async function generateWithFal(prompt: string) {
         'Accept': 'application/json'
       },
       body: JSON.stringify({
-        seed: 1772431,
         prompt,
         image_size: "landscape_4_3",
         num_images: 1,
-        finetune_id: "ca8516ba-1e40-4f58-bf59-83b2d6c5f1d0",
         output_format: "jpeg",
-        guidance_scale: 3.5,
-        finetune_strength: 1.3,
-        num_inference_steps: 44
+        guidance_scale: 7.5,
+        num_inference_steps: 50
       })
     });
 
@@ -104,19 +100,19 @@ async function generateWithFal(prompt: string) {
     const data = await response.json();
     console.log('FAL API initial response:', data);
 
-    if (!data.request_id) {
-      throw new Error('No request_id in FAL API response');
+    if (!data.id) {
+      throw new Error('No request ID in FAL API response');
     }
 
     // Wait for the image generation to complete
-    const imageResult = await waitForImageGeneration(data.request_id, falKey);
+    const imageResult = await waitForImageGeneration(data.id, falKey);
     console.log('FAL API final image result:', imageResult);
 
-    if (!imageResult.images || !imageResult.images[0]) {
+    if (!imageResult.image?.url) {
       throw new Error('No image URL in FAL API response');
     }
 
-    return imageResult.images[0];
+    return imageResult.image.url;
   } catch (error) {
     console.error('Error in generateWithFal:', error);
     throw error;
@@ -129,8 +125,8 @@ async function waitForImageGeneration(requestId: string, apiKey: string) {
 
   for (let attempt = 0; attempt < maxAttempts; attempt++) {
     try {
-      const response = await fetch(`https://fal.run/fal-ai/flux-pro/finetuned/status/${requestId}`, {
-        method: 'GET',  // Explicitly set method to GET for status check
+      const response = await fetch(`https://fal.run/api/v1/art/requests/${requestId}`, {
+        method: 'GET',
         headers: {
           'Authorization': `Key ${apiKey}`,
           'Accept': 'application/json'
@@ -218,4 +214,3 @@ serve(async (req) => {
     );
   }
 });
-
