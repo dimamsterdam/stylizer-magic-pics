@@ -200,7 +200,7 @@ const Index = () => {
     
     const stylePart = studioStyle.type === 'custom' 
       ? studioStyle.customPrompt
-      : `in a professional studio setting with ${studioStyle.backgroundColor} background and clean lighting`;
+      : `in a professional studio setting with Background Color: ${studioStyle.backgroundColor} (${studioStyle.backgroundColor}) and clean lighting`;
 
     return `${basePrompt}${ethnicityPart}${agePart}${posePart}, ${stylePart}`;
   };
@@ -625,7 +625,7 @@ const Index = () => {
                                 className="ml-4 relative pl-10"
                               >
                                 <div 
-                                  className="w-6 h-6 rounded-full absolute left-2"
+                                  className="w-6 h-6 rounded-full absolute left-2 border-2 border-gray-300"
                                   style={{ backgroundColor: studioStyle.backgroundColor }}
                                 />
                                 Choose Studio Background
