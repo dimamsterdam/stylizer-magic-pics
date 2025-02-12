@@ -617,7 +617,7 @@ const Index = () => {
                   </div>
 
                   <Button
-                    className={`w-full transition-all duration-300 ${
+                    className={`w-auto ml-auto transition-all duration-300 ${
                       canStartGeneration
                         ? 'bg-[#9b87f5] hover:bg-[#7E69AB] text-white shadow-lg hover:shadow-xl hover:scale-105'
                         : 'bg-gray-200 text-gray-500 cursor-not-allowed'
@@ -625,7 +625,7 @@ const Index = () => {
                     disabled={!canStartGeneration}
                     onClick={handleStartGeneration}
                   >
-                    Start Generation ({getSelectedAnglesCount()} angles selected)
+                    Start Generation {getSelectedAnglesCount()} angles selected
                   </Button>
                 </div>
               </CardContent>
