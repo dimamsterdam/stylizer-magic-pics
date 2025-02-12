@@ -74,11 +74,13 @@ async function generateWithFal(prompt: string) {
   console.log('Generating image with FAL, prompt:', prompt);
 
   try {
-    const response = await fetch('https://queue.fal.run/fal-ai/flux-pro/finetuned', {
+    // Initial request to generate image
+    const response = await fetch('https://fal.run/fal-ai/flux-pro/finetuned', {
       method: 'POST',
       headers: {
         'Authorization': `Key ${falKey}`,
         'Content-Type': 'application/json',
+        'Accept': 'application/json'
       },
       body: JSON.stringify({
         seed: 1772431,
@@ -102,17 +104,14 @@ async function generateWithFal(prompt: string) {
     const data = await response.json();
     console.log('FAL API initial response:', data);
 
-    // Extract the request_id from the response
-    const requestId = data.request_id;
-    if (!requestId) {
+    if (!data.request_id) {
       throw new Error('No request_id in FAL API response');
     }
 
-    // Wait for the image generation to complete and get the result
-    const imageResult = await waitForImageGeneration(requestId, falKey);
+    // Wait for the image generation to complete
+    const imageResult = await waitForImageGeneration(data.request_id, falKey);
     console.log('FAL API final image result:', imageResult);
 
-    // The FAL API returns the image URL in the 'images' field
     if (!imageResult.images || !imageResult.images[0]) {
       throw new Error('No image URL in FAL API response');
     }
@@ -125,23 +124,27 @@ async function generateWithFal(prompt: string) {
 }
 
 async function waitForImageGeneration(requestId: string, apiKey: string) {
-  const maxAttempts = 30; // Maximum number of attempts to check status
-  const delayMs = 1000; // Delay between attempts in milliseconds
+  const maxAttempts = 30;
+  const delayMs = 1000;
 
   for (let attempt = 0; attempt < maxAttempts; attempt++) {
     try {
-      const response = await fetch(`https://queue.fal.run/fal-ai/flux-pro/finetuned/status/${requestId}`, {
+      const response = await fetch(`https://fal.run/fal-ai/flux-pro/finetuned/status/${requestId}`, {
+        method: 'GET',  // Explicitly set method to GET for status check
         headers: {
           'Authorization': `Key ${apiKey}`,
+          'Accept': 'application/json'
         },
       });
 
       if (!response.ok) {
+        const errorText = await response.text();
+        console.error(`Status check attempt ${attempt + 1} failed:`, errorText);
         throw new Error(`Status check failed: ${response.status}`);
       }
 
       const result = await response.json();
-      console.log('Status check result:', result);
+      console.log(`Status check attempt ${attempt + 1} result:`, result);
 
       if (result.status === 'completed') {
         return result;
@@ -149,10 +152,9 @@ async function waitForImageGeneration(requestId: string, apiKey: string) {
         throw new Error('Image generation failed: ' + (result.error || 'Unknown error'));
       }
 
-      // Wait before next attempt
       await new Promise(resolve => setTimeout(resolve, delayMs));
     } catch (error) {
-      console.error('Error checking generation status:', error);
+      console.error(`Error in attempt ${attempt + 1}:`, error);
       throw error;
     }
   }
@@ -216,3 +218,4 @@ serve(async (req) => {
     );
   }
 });
+
