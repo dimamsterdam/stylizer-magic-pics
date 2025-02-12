@@ -112,10 +112,7 @@ export const ProductPicker = ({ onSelect, selectedProducts }: ProductPickerProps
             </div>
           ) : searchTerm.length < 2 ? (
             <div className="text-center py-8">
-              <p className="text-polaris-secondary">Start typing to search for products</p>
-              <p className="text-sm text-polaris-secondary mt-2">
-                Search by product name or SKU (minimum 2 characters)
-              </p>
+              <p className="text-polaris-secondary"></p>
             </div>
           ) : results.length === 0 ? (
             <div className="text-center py-4 text-gray-500">
