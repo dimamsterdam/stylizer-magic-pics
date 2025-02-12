@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Search, Check, Wand2, Loader2 } from "lucide-react";
 import { ProductPicker } from "@/components/ProductPicker";
@@ -36,8 +35,9 @@ interface AnglePreferences {
 }
 
 interface StudioStyle {
+  type: 'studio' | 'custom';
   backgroundColor: string;
-  isCustomPrompt: boolean;
+  customPrompt: string;
 }
 
 interface ModelAttributes {
@@ -77,8 +77,9 @@ const Index = () => {
   const [isPickingProducts, setIsPickingProducts] = useState(true);
   const [selectedAngles, setSelectedAngles] = useState<AnglePreferences>(DEFAULT_ANGLES);
   const [studioStyle, setStudioStyle] = useState<StudioStyle>({
+    type: 'studio',
     backgroundColor: "#FFFFFF",
-    isCustomPrompt: false
+    customPrompt: ""
   });
   const [modelAttributes, setModelAttributes] = useState<ModelAttributes>({
     gender: "Any",
@@ -180,10 +181,10 @@ const Index = () => {
   };
 
   const getPrompt = () => {
-    if (studioStyle.isCustomPrompt) {
-      return customPrompt;
+    if (studioStyle.type === 'custom' && studioStyle.customPrompt) {
+      return studioStyle.customPrompt;
     }
-    return `Studio style`;
+    return `Professional studio setting with ${studioStyle.backgroundColor} background`;
   };
 
   const getFinalPrompt = () => {
@@ -197,16 +198,16 @@ const Index = () => {
     
     const posePart = `, in a ${modelAttributes.pose.toLowerCase()} pose`;
     
-    const stylePart = studioStyle.isCustomPrompt 
-      ? customPrompt
-      : "in a professional studio setting with clean lighting";
+    const stylePart = studioStyle.type === 'custom' 
+      ? studioStyle.customPrompt
+      : `in a professional studio setting with ${studioStyle.backgroundColor} background and clean lighting`;
 
     return `${basePrompt}${ethnicityPart}${agePart}${posePart}, ${stylePart}`;
   };
 
   const canStartGeneration = images.length > 0 && 
     images.some((img) => img.selected) && 
-    (studioStyle.isCustomPrompt ? customPrompt.trim().length > 0 : true) && 
+    (studioStyle.type === 'custom' ? studioStyle.customPrompt.trim().length > 0 : true) && 
     getSelectedAnglesCount() > 0 &&
     modelAttributes.gender !== 'Any' &&
     modelAttributes.bodyType !== 'Athletic' &&
@@ -594,58 +595,90 @@ const Index = () => {
               </CardContent>
             </Card>
 
-            <Card className="bg-white/80 backdrop-blur-sm border-0 shadow-lg">
+            <Card className="bg-white/80 backdrop-blur-sm border-0 shadow-lg transition-all duration-300 hover:shadow-xl">
               <CardHeader>
                 <h2 className="text-display-lg text-[#1A1F2C] tracking-tight mb-2">
-                  Studio Style
+                  Define Style
                 </h2>
                 <p className="text-body-lg text-[#6D7175]">
-                  Choose the background color and customize the studio setting
+                  Choose your desired background setting or color
                 </p>
               </CardHeader>
               <CardContent>
                 <div className="space-y-6">
-                  <div className="flex items-center justify-between">
-                    <div className="space-y-1">
-                      <Label>Background Color</Label>
-                      <p className="text-sm text-[#6D7175]">Select the background color for your product shots</p>
-                    </div>
-                    <StudioColorPicker
-                      color={studioStyle.backgroundColor}
-                      onChange={(color) => setStudioStyle(prev => ({ ...prev, backgroundColor: color }))}
-                    />
-                  </div>
-
-                  <Separator className="my-4" />
-
-                  <div className="space-y-4">
-                    <div className="flex items-center justify-between">
-                      <div className="space-y-1">
-                        <Label>Custom Studio Prompt</Label>
-                        <p className="text-sm text-[#6D7175]">Use a custom prompt for more control over the studio setting</p>
+                  <RadioGroup
+                    value={studioStyle.type}
+                    onValueChange={(value: 'studio' | 'custom') => {
+                      setStudioStyle(prev => ({ ...prev, type: value }));
+                    }}
+                    className="flex flex-col space-y-4"
+                  >
+                    <div className="flex items-center justify-between p-4 border border-polaris-border rounded-lg hover:border-polaris-teal transition-colors">
+                      <div className="flex items-center space-x-2">
+                        <RadioGroupItem value="studio" id="studio" />
+                        <Label htmlFor="studio">Studio Setting</Label>
                       </div>
-                      <Switch
-                        checked={studioStyle.isCustomPrompt}
-                        onCheckedChange={(checked) => {
-                          setStudioStyle(prev => ({ ...prev, isCustomPrompt: checked }));
-                          if (!checked) setCustomPrompt("");
-                        }}
-                      />
+                      {studioStyle.type === 'studio' && (
+                        <Popover>
+                          <PopoverTrigger asChild>
+                            <Button variant="outline" className="ml-4">
+                              Choose Background Color
+                            </Button>
+                          </PopoverTrigger>
+                          <PopoverContent className="w-80">
+                            <div className="space-y-4">
+                              <div className="space-y-2">
+                                <Label>Background Color</Label>
+                                <StudioColorPicker
+                                  color={studioStyle.backgroundColor}
+                                  onChange={(color) => setStudioStyle(prev => ({ ...prev, backgroundColor: color }))}
+                                />
+                              </div>
+                            </div>
+                          </PopoverContent>
+                        </Popover>
+                      )}
                     </div>
 
-                    {studioStyle.isCustomPrompt && (
-                      <div className="space-y-2">
-                        <Input
-                          value={customPrompt}
-                          onChange={(e) => setCustomPrompt(e.target.value)}
-                          placeholder="Enter your custom studio prompt..."
-                          className="w-full"
-                        />
-                        <p className="text-sm text-[#6D7175]">
-                          Describe the studio setting in detail (e.g., "minimalist studio with soft natural lighting and simple backdrop")
-                        </p>
+                    <div className="flex items-center justify-between p-4 border border-polaris-border rounded-lg hover:border-polaris-teal transition-colors">
+                      <div className="flex items-center space-x-2">
+                        <RadioGroupItem value="custom" id="custom" />
+                        <Label htmlFor="custom">Custom Prompt</Label>
                       </div>
-                    )}
+                      {studioStyle.type === 'custom' && (
+                        <Popover>
+                          <PopoverTrigger asChild>
+                            <Button variant="outline" className="ml-4">
+                              {studioStyle.customPrompt ? 'Edit Prompt' : 'Add Prompt'}
+                            </Button>
+                          </PopoverTrigger>
+                          <PopoverContent className="w-80">
+                            <div className="space-y-4">
+                              <div className="space-y-2">
+                                <Label>Custom Studio Prompt</Label>
+                                <Input
+                                  value={studioStyle.customPrompt}
+                                  onChange={(e) => setStudioStyle(prev => ({ ...prev, customPrompt: e.target.value }))}
+                                  placeholder="Describe your desired studio setting..."
+                                />
+                                <p className="text-sm text-[#6D7175]">
+                                  E.g., "minimalist studio with soft natural lighting"
+                                </p>
+                              </div>
+                            </div>
+                          </PopoverContent>
+                        </Popover>
+                      )}
+                    </div>
+                  </RadioGroup>
+
+                  <div className="mt-4 p-4 bg-gray-50 rounded-lg">
+                    <p className="text-sm text-gray-600 font-medium">Selected Style:</p>
+                    <p className="text-sm mt-1">
+                      {studioStyle.type === 'studio' 
+                        ? `Studio setting with ${studioStyle.backgroundColor} background`
+                        : studioStyle.customPrompt || 'No custom prompt set'}
+                    </p>
                   </div>
                 </div>
               </CardContent>
