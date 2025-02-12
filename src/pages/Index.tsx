@@ -275,8 +275,8 @@ const Index = () => {
     <div className="min-h-screen bg-gradient-to-br from-[#F6F6F7] to-[#E5DEFF]">
       <div className="max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8 py-12">
         {isPickingProducts ? (
-          <div className="mb-8">
-            <Card className="bg-white/80 backdrop-blur-sm border-0 shadow-lg mb-8">
+          <div className="mb-8 animate-fade-in">
+            <Card className="bg-white/80 backdrop-blur-sm border-0 shadow-lg mb-8 transition-all duration-300 hover:shadow-xl">
               <CardHeader>
                 <div className="flex flex-col-reverse md:grid md:grid-cols-[1fr,320px] gap-8 md:gap-0 items-start">
                   <div className="space-y-4 pr-8">
@@ -292,7 +292,7 @@ const Index = () => {
                     {fashionImages.map((image, index) => (
                       <div 
                         key={index}
-                        className="relative group overflow-hidden aspect-square"
+                        className="relative group overflow-hidden aspect-square transition-transform duration-300 hover:scale-105"
                       >
                         <img
                           src={image.src}
@@ -318,7 +318,7 @@ const Index = () => {
                       placeholder="Search products by name or SKU (type at least 2 characters)"
                       value={searchTerm}
                       onChange={(e) => handleSearch(e.target.value)}
-                      className="pl-10 border-polaris-border"
+                      className="pl-10 border-polaris-border bg-white/50 backdrop-blur-sm transition-all duration-300 focus:bg-white"
                       disabled={isLoading || selectedProducts.length >= 3}
                     />
                   </div>
@@ -327,7 +327,7 @@ const Index = () => {
             </Card>
 
             {selectedProducts.length > 0 && (
-              <Card className="bg-white/80 backdrop-blur-sm border-0 shadow-lg mb-8">
+              <Card className="bg-white/80 backdrop-blur-sm border-0 shadow-lg mb-8 transition-all duration-300 hover:shadow-xl animate-fade-in">
                 <CardHeader>
                   <h2 className="text-display-sm text-[#1A1F2C] tracking-tight">
                     Selected Products ({selectedProducts.length}/3)
@@ -338,12 +338,12 @@ const Index = () => {
                     {selectedProducts.map((product) => (
                       <div
                         key={product.id}
-                        className="flex items-center p-4 border border-polaris-border rounded-md"
+                        className="flex items-center p-4 border border-polaris-border rounded-md bg-white/50 backdrop-blur-sm transition-all duration-300 hover:bg-white/70 hover:shadow-md animate-scale-in"
                       >
                         <img
                           src={product.image}
                           alt={product.title}
-                          className="w-16 h-16 object-cover rounded-md"
+                          className="w-16 h-16 object-cover rounded-md transition-transform duration-300 hover:scale-105"
                           onError={(e) => {
                             e.currentTarget.src = '/placeholder.svg';
                           }}
@@ -354,7 +354,7 @@ const Index = () => {
                         </div>
                         <button
                           onClick={() => handleProductRemove(product.id)}
-                          className="ml-4 px-4 py-2 text-red-500 border border-red-500 rounded hover:bg-red-50 transition-colors"
+                          className="ml-4 px-4 py-2 text-red-500 border border-red-500 rounded hover:bg-red-50 transition-all duration-300"
                         >
                           Remove
                         </button>
@@ -363,7 +363,7 @@ const Index = () => {
                     <div className="flex justify-end">
                       <Button
                         onClick={handleConfirmSelection}
-                        className="bg-[#9b87f5] hover:bg-[#7E69AB] text-white font-medium px-6 py-2 rounded-lg transition-colors"
+                        className="bg-[#9b87f5] hover:bg-[#7E69AB] text-white font-medium px-6 py-2 rounded-lg transition-all duration-300 shadow-lg hover:shadow-xl hover:scale-105 disabled:opacity-50 disabled:hover:scale-100"
                       >
                         Confirm Selection
                       </Button>
@@ -383,15 +383,15 @@ const Index = () => {
             />
           </div>
         ) : (
-          <div className="space-y-8">
-            <Card className="bg-white/80 backdrop-blur-sm border-0 shadow-lg">
+          <div className="space-y-8 animate-fade-in">
+            <Card className="bg-white/80 backdrop-blur-sm border-0 shadow-lg transition-all duration-300 hover:shadow-xl">
               <CardHeader>
                 <div>
                   <div className="flex items-baseline gap-2 mb-4">
                     <span className="text-display-sm text-[#1A1F2C]">Selected Products</span>
                     <button
                       onClick={() => setIsPickingProducts(true)}
-                      className="text-polaris-teal hover:underline"
+                      className="text-polaris-teal hover:text-[#9b87f5] transition-colors duration-300"
                     >
                       Edit Selection
                     </button>
@@ -412,7 +412,7 @@ const Index = () => {
               </CardContent>
             </Card>
 
-            <Card className="bg-white/80 backdrop-blur-sm border-0 shadow-lg">
+            <Card className="bg-white/80 backdrop-blur-sm border-0 shadow-lg transition-all duration-300 hover:shadow-xl">
               <CardHeader>
                 <h2 className="text-display-md text-[#1A1F2C] tracking-tight">
                   Angle Selection
@@ -428,9 +428,9 @@ const Index = () => {
                       key={angle}
                       pressed={isSelected}
                       onPressedChange={() => handleAngleToggle(angle)}
-                      className={`px-4 py-2 transition-all duration-200 relative ${
+                      className={`px-4 py-2 transition-all duration-300 relative ${
                         isSelected 
-                          ? 'bg-white text-[#9b87f5] border-2 border-[#9b87f5] hover:bg-gray-50 pl-8' 
+                          ? 'bg-white text-[#9b87f5] border-2 border-[#9b87f5] hover:bg-gray-50 pl-8 shadow-md hover:shadow-lg' 
                           : 'bg-gray-100 text-[#1A1F2C] hover:bg-gray-200 border-2 border-transparent'
                       }`}
                     >
@@ -598,72 +598,19 @@ const Index = () => {
             </Card>
 
             <Card className="bg-white/80 backdrop-blur-sm border-0 shadow-lg">
-              <CardHeader>
-                <h2 className="text-display-md text-[#1A1F2C] tracking-tight">
-                  Style Prompt
-                </h2>
-              </CardHeader>
               <CardContent>
                 <div className="space-y-4">
-                  <div className="flex items-center space-x-4">
-                    <Button
-                      variant={!studioStyle.isCustomPrompt ? "default" : "outline"}
-                      className="flex items-center space-x-2"
-                      onClick={() => setStudioStyle(prev => ({ ...prev, isCustomPrompt: false }))}
-                    >
-                      <Wand2 className="h-4 w-4" />
-                      <span>Studio Style</span>
-                    </Button>
-                    {!studioStyle.isCustomPrompt && (
-                      <StudioColorPicker
-                        color={studioStyle.backgroundColor}
-                        onChange={(color) => setStudioStyle(prev => ({ ...prev, backgroundColor: color }))}
-                      />
-                    )}
-                  </div>
-                  
-                  <Popover>
-                    <PopoverTrigger asChild>
-                      <Button
-                        variant={studioStyle.isCustomPrompt ? "default" : "outline"}
-                        onClick={() => setStudioStyle(prev => ({ ...prev, isCustomPrompt: true }))}
-                      >
-                        Custom Prompt
-                      </Button>
-                    </PopoverTrigger>
-                    <PopoverContent className="w-80">
-                      <div className="space-y-2">
-                        <Input
-                          placeholder="Describe the style you want..."
-                          value={customPrompt}
-                          onChange={(e) => setCustomPrompt(e.target.value)}
-                          className="mb-2"
-                        />
-                        <Button 
-                          className="w-full"
-                          onClick={() => {
-                            if (customPrompt.trim()) {
-                              setStudioStyle(prev => ({ ...prev, isCustomPrompt: true }));
-                              toast({
-                                title: "Custom prompt set",
-                                description: "Your custom style prompt has been saved.",
-                              });
-                            }
-                          }}
-                        >
-                          Confirm Prompt
-                        </Button>
-                      </div>
-                    </PopoverContent>
-                  </Popover>
-
                   <div className="bg-gray-50 p-4 rounded-lg">
                     <p className="text-sm text-gray-600">Final Prompt:</p>
                     <p className="text-sm font-medium">{getPrompt()}</p>
                   </div>
 
                   <Button
-                    className="bg-[#9b87f5] hover:bg-[#7E69AB] text-white font-medium px-6 py-2 rounded-lg transition-colors w-full"
+                    className={`w-full transition-all duration-300 ${
+                      canStartGeneration
+                        ? 'bg-[#9b87f5] hover:bg-[#7E69AB] text-white shadow-lg hover:shadow-xl hover:scale-105'
+                        : 'bg-gray-200 text-gray-500 cursor-not-allowed'
+                    }`}
                     disabled={!canStartGeneration}
                     onClick={handleStartGeneration}
                   >
