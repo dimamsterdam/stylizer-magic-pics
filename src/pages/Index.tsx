@@ -273,16 +273,27 @@ const Index = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#F6F6F7] to-[#E5DEFF]">
-      <div className="max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8 py-12">
+      <div className="max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div className="mb-8">
+          <div className="flex items-center space-x-2 mb-6">
+            <h1 className="font-inter font-bold text-[#1A1F2C] tracking-[-0.03em] text-display-xl">
+              brandmachine
+            </h1>
+            <span className="font-inter font-semibold text-polaris-secondary text-display-lg">
+              Stylizer
+            </span>
+          </div>
+        </div>
+
         {isPickingProducts ? (
           <div className="mb-8 animate-fade-in">
             <Card className="bg-white/80 backdrop-blur-sm border-0 shadow-lg mb-8 transition-all duration-300 hover:shadow-xl">
               <CardHeader>
                 <div className="flex flex-col-reverse md:grid md:grid-cols-[1fr,320px] gap-8 md:gap-0 items-start">
                   <div className="space-y-4 pr-8">
-                    <h1 className="text-display-xl text-[#1A1F2C] tracking-tight">
-                      Welcome to Stylizer
-                    </h1>
+                    <h2 className="text-display-lg text-[#1A1F2C] tracking-tight">
+                      Create AI-Generated Product Photos
+                    </h2>
                     <p className="text-body-lg text-[#6D7175] max-w-2xl">
                       Transform your product photos into professional lifestyle images using AI. 
                       Select up to 3 products to enhance their visual appeal together.
@@ -386,22 +397,24 @@ const Index = () => {
           <div className="space-y-8 animate-fade-in">
             <Card className="bg-white/80 backdrop-blur-sm border-0 shadow-lg transition-all duration-300 hover:shadow-xl">
               <CardHeader>
-                <div>
-                  <div className="flex items-baseline gap-2 mb-4">
-                    <span className="text-display-sm text-[#1A1F2C]">Selected Products</span>
-                    <button
-                      onClick={() => setIsPickingProducts(true)}
-                      className="text-polaris-teal hover:text-[#9b87f5] transition-colors duration-300"
-                    >
-                      Edit Selection
-                    </button>
-                  </div>
-                  <Separator className="mb-4" />
-                  <h5 className="text-body-lg text-[#1A1F2C] tracking-tight">
-                    Product Images
-                  </h5>
-                  <p className="text-body-md text-[#6D7175]">Select the product images to use for styling</p>
+                <div className="flex items-center justify-between mb-6">
+                  <h2 className="text-display-lg text-[#1A1F2C] tracking-tight">
+                    Selected Products
+                  </h2>
+                  <button
+                    onClick={() => setIsPickingProducts(true)}
+                    className="inline-flex items-center text-[#9b87f5] hover:text-[#7E69AB] transition-colors duration-300 text-body-md font-medium"
+                  >
+                    Edit Selection
+                  </button>
                 </div>
+                <Separator className="mb-6" />
+                <h3 className="text-display-md text-[#1A1F2C] tracking-tight mb-2">
+                  Product Images
+                </h3>
+                <p className="text-body-lg text-[#6D7175]">
+                  Select the product images to use for styling
+                </p>
               </CardHeader>
               <CardContent>
                 <ImageGallery
@@ -414,10 +427,10 @@ const Index = () => {
 
             <Card className="bg-white/80 backdrop-blur-sm border-0 shadow-lg transition-all duration-300 hover:shadow-xl">
               <CardHeader>
-                <h2 className="text-display-md text-[#1A1F2C] tracking-tight">
+                <h2 className="text-display-lg text-[#1A1F2C] tracking-tight mb-2">
                   Angle Selection
                 </h2>
-                <p className="text-body-md text-[#6D7175]">
+                <p className="text-body-lg text-[#6D7175]">
                   Choose which angles to generate for your products
                 </p>
               </CardHeader>
@@ -449,12 +462,12 @@ const Index = () => {
               </CardContent>
             </Card>
 
-            <Card className="bg-white/80 backdrop-blur-sm border-0 shadow-lg">
+            <Card className="bg-white/80 backdrop-blur-sm border-0 shadow-lg transition-all duration-300 hover:shadow-xl">
               <CardHeader>
-                <h2 className="text-display-md text-[#1A1F2C] tracking-tight">
+                <h2 className="text-display-lg text-[#1A1F2C] tracking-tight mb-2">
                   Model Attributes
                 </h2>
-                <p className="text-body-md text-[#6D7175]">
+                <p className="text-body-lg text-[#6D7175]">
                   Customize the appearance of the fashion model
                 </p>
               </CardHeader>
@@ -598,10 +611,18 @@ const Index = () => {
             </Card>
 
             <Card className="bg-white/80 backdrop-blur-sm border-0 shadow-lg">
+              <CardHeader>
+                <h2 className="text-display-lg text-[#1A1F2C] tracking-tight mb-2">
+                  Generate Images
+                </h2>
+                <p className="text-body-lg text-[#6D7175]">
+                  Review your selections and start the generation process
+                </p>
+              </CardHeader>
               <CardContent>
                 <div className="space-y-4">
                   <div className="bg-gray-50 p-4 rounded-lg">
-                    <p className="text-sm text-gray-600">Final Prompt:</p>
+                    <p className="text-sm text-gray-600 mb-1">Final Prompt:</p>
                     <p className="text-sm font-medium">{getPrompt()}</p>
                   </div>
 
