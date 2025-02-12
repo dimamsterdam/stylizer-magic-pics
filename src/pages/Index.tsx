@@ -289,7 +289,7 @@ const Index = () => {
                     </h2>
                     <p className="text-body-lg text-[#6D7175] max-w-2xl">
                       Transform your product photos into professional lifestyle images using AI. 
-                      Select up to 3 products to enhance their visual appeal together.
+                      Select up to 3 products to enhance their visual appeal together and publish directly to Shopify.
                     </p>
                   </div>
                   <div className="grid grid-cols-4 gap-1 w-full">
