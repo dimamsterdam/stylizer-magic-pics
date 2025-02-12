@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -208,6 +207,9 @@ const GenerationResults = () => {
               ))}
               <div className="space-y-2">
                 <h2 className="text-display-sm text-polaris-text">Generation Prompt</h2>
+                <div className="bg-[#FEF7CD] p-6 rounded-lg border-l-4 border-[#9b87f5] mb-4">
+                  <p className="text-[#1A1F2C] text-body-md">{prompt}</p>
+                </div>
                 <div className="flex gap-4">
                   <Input
                     value={prompt}
