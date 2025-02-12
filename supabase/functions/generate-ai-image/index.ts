@@ -100,7 +100,7 @@ async function generateWithFal(prompt: string) {
     }
 
     const data = await response.json();
-    console.log('FAL API response:', data);
+    console.log('FAL API initial response:', data);
 
     // Extract the request_id from the response
     const requestId = data.request_id;
@@ -110,14 +110,20 @@ async function generateWithFal(prompt: string) {
 
     // Wait for the image generation to complete and get the result
     const imageResult = await waitForImageGeneration(requestId, falKey);
-    return imageResult.image;
+    console.log('FAL API final image result:', imageResult);
+
+    // The FAL API returns the image URL in the 'images' field
+    if (!imageResult.images || !imageResult.images[0]) {
+      throw new Error('No image URL in FAL API response');
+    }
+
+    return imageResult.images[0];
   } catch (error) {
     console.error('Error in generateWithFal:', error);
     throw error;
   }
 }
 
-// Add helper function to wait for image generation
 async function waitForImageGeneration(requestId: string, apiKey: string) {
   const maxAttempts = 30; // Maximum number of attempts to check status
   const delayMs = 1000; // Delay between attempts in milliseconds

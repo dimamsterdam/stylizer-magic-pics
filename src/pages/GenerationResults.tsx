@@ -81,7 +81,7 @@ const GenerationResults = () => {
     );
 
     try {
-      const { data, error } = await supabase.functions.invoke('generate-deepseek-images', {
+      const { data, error } = await supabase.functions.invoke('generate-ai-image', {
         body: {
           prompt,
           productId: product.id,
