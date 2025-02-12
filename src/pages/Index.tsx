@@ -14,6 +14,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
+import { supabase } from "@/lib/supabase";
 
 interface Product {
   id: string;
@@ -86,6 +87,10 @@ const Index = () => {
     hairColor: "Brown",
     pose: "Professional"
   });
+  const [searchTerm, setSearchTerm] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+  const [searchError, setSearchError] = useState<string | null>(null);
+  const [results, setResults] = useState<Product[]>([]);
 
   const handleProductSelect = (product: Product) => {
     if (selectedProducts.length >= 3) {
@@ -219,6 +224,52 @@ const Index = () => {
     }
   };
 
+  const searchProducts = async (term: string) => {
+    if (term.length < 2) {
+      setResults([]);
+      return;
+    }
+
+    try {
+      setIsLoading(true);
+      setSearchError(null);
+      console.log('Searching products with term:', term);
+
+      const response = await supabase.functions.invoke('sync-shopify-products', {
+        body: { searchTerm: term }
+      });
+
+      if (response.error) {
+        throw new Error(response.error.message);
+      }
+
+      console.log('Search response:', response.data);
+      const formattedProducts = response.data.products.map(product => ({
+        id: product.id,
+        title: product.title,
+        sku: product.sku || '',
+        image: product.image_url || '',
+      }));
+
+      setResults(formattedProducts);
+    } catch (error) {
+      console.error('Error searching products:', error);
+      setSearchError('Failed to search products. Please try again.');
+      toast({
+        title: "Error",
+        description: "Failed to search products. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleSearch = async (term: string) => {
+    setSearchTerm(term);
+    searchProducts(term);
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#F6F6F7] to-[#E5DEFF]">
       <div className="max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8 py-12">
@@ -257,6 +308,21 @@ const Index = () => {
                   </div>
                 </div>
               </CardHeader>
+              <CardContent>
+                <div className="mt-8 border-t border-polaris-border pt-6">
+                  <div className="relative max-w-2xl mx-auto">
+                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-polaris-secondary" />
+                    <Input
+                      type="text"
+                      placeholder="Search products by name or SKU (type at least 2 characters)"
+                      value={searchTerm}
+                      onChange={(e) => handleSearch(e.target.value)}
+                      className="pl-10 border-polaris-border"
+                      disabled={isLoading || selectedProducts.length >= 3}
+                    />
+                  </div>
+                </div>
+              </CardContent>
             </Card>
 
             {selectedProducts.length > 0 && (
@@ -309,6 +375,10 @@ const Index = () => {
             <ProductPicker 
               onSelect={handleProductSelect} 
               selectedProducts={selectedProducts}
+              searchResults={results}
+              isLoading={isLoading}
+              error={searchError}
+              searchTerm={searchTerm}
             />
           </div>
         ) : (
