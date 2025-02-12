@@ -617,27 +617,29 @@ const Index = () => {
                       <div className="flex items-center space-x-2">
                         <RadioGroupItem value="studio" id="studio" />
                         <Label htmlFor="studio">Studio Setting</Label>
-                      </div>
-                      {studioStyle.type === 'studio' && (
-                        <Popover>
-                          <PopoverTrigger asChild>
-                            <Button variant="outline" className="ml-4">
-                              Choose Background Color
-                            </Button>
-                          </PopoverTrigger>
-                          <PopoverContent className="w-80">
-                            <div className="space-y-4">
-                              <div className="space-y-2">
-                                <Label>Background Color</Label>
-                                <StudioColorPicker
-                                  color={studioStyle.backgroundColor}
-                                  onChange={(color) => setStudioStyle(prev => ({ ...prev, backgroundColor: color }))}
+                        {studioStyle.type === 'studio' && (
+                          <Popover defaultOpen>
+                            <PopoverTrigger asChild>
+                              <Button 
+                                variant="outline" 
+                                className="ml-4 relative pl-10"
+                              >
+                                <div 
+                                  className="w-6 h-6 rounded-full absolute left-2"
+                                  style={{ backgroundColor: studioStyle.backgroundColor }}
                                 />
-                              </div>
-                            </div>
-                          </PopoverContent>
-                        </Popover>
-                      )}
+                                Choose Studio Background
+                              </Button>
+                            </PopoverTrigger>
+                            <PopoverContent className="w-80">
+                              <StudioColorPicker
+                                color={studioStyle.backgroundColor}
+                                onChange={(color) => setStudioStyle(prev => ({ ...prev, backgroundColor: color }))}
+                              />
+                            </PopoverContent>
+                          </Popover>
+                        )}
+                      </div>
                     </div>
 
                     <div className="flex items-center justify-between p-4 border border-polaris-border rounded-lg hover:border-polaris-teal transition-colors">

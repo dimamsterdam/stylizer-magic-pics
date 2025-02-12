@@ -3,7 +3,7 @@ import { useState } from "react";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Paintbrush } from "lucide-react";
+import { Label } from "@/components/ui/label";
 
 interface StudioColorPickerProps {
   color: string;
@@ -41,52 +41,39 @@ export const StudioColorPicker = ({ color, onChange }: StudioColorPickerProps) =
   ];
 
   return (
-    <Popover>
-      <PopoverTrigger asChild>
-        <Button 
-          variant="outline" 
-          className="w-[80px] h-[36px] p-1 relative"
-          style={{ backgroundColor: color }}
-        >
-          <Paintbrush className="h-4 w-4 absolute text-[#1A1F2C] opacity-50" />
-        </Button>
-      </PopoverTrigger>
-      <PopoverContent className="w-80">
-        <div className="space-y-4">
-          <div className="space-y-2">
-            <div className="flex justify-between items-center">
-              <label className="text-sm font-medium">Background Color</label>
-              <div 
-                className="w-8 h-8 rounded border"
-                style={{ backgroundColor: tempColor }}
-              />
-            </div>
-            <Input
-              value={tempColor}
-              onChange={handleHexInputChange}
-              placeholder="#FFFFFF"
-              className="font-mono"
-            />
-          </div>
-          <div className="space-y-2">
-            <label className="text-sm font-medium">Preset Colors</label>
-            <div className="grid grid-cols-8 gap-2">
-              {presetColors.map((preset) => (
-                <button
-                  key={preset.hex}
-                  className="w-6 h-6 rounded border hover:scale-110 transition-transform"
-                  style={{ backgroundColor: preset.hex }}
-                  onClick={() => {
-                    setTempColor(preset.hex);
-                    onChange(preset.hex);
-                  }}
-                  title={preset.name}
-                />
-              ))}
-            </div>
-          </div>
+    <div className="space-y-4">
+      <div className="space-y-2">
+        <div className="flex justify-between items-center">
+          <label className="text-sm font-medium">Background Color</label>
+          <div 
+            className="w-8 h-8 rounded-full border"
+            style={{ backgroundColor: tempColor }}
+          />
         </div>
-      </PopoverContent>
-    </Popover>
+        <Input
+          value={tempColor}
+          onChange={handleHexInputChange}
+          placeholder="#FFFFFF"
+          className="font-mono"
+        />
+      </div>
+      <div className="space-y-2">
+        <label className="text-sm font-medium">Preset Colors</label>
+        <div className="grid grid-cols-8 gap-2">
+          {presetColors.map((preset) => (
+            <button
+              key={preset.hex}
+              className="w-6 h-6 rounded-full border hover:scale-110 transition-transform"
+              style={{ backgroundColor: preset.hex }}
+              onClick={() => {
+                setTempColor(preset.hex);
+                onChange(preset.hex);
+              }}
+              title={preset.name}
+            />
+          ))}
+        </div>
+      </div>
+    </div>
   );
 };
