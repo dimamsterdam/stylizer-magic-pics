@@ -12,13 +12,21 @@ interface StudioColorPickerProps {
 
 export const StudioColorPicker = ({ color, onChange }: StudioColorPickerProps) => {
   const [tempColor, setTempColor] = useState(color);
+  const [open, setOpen] = useState(false);
 
   const handleHexInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const newColor = e.target.value;
     setTempColor(newColor);
     if (/^#[0-9A-F]{6}$/i.test(newColor)) {
       onChange(newColor);
+      setOpen(false);
     }
+  };
+
+  const handlePresetColorClick = (hex: string) => {
+    setTempColor(hex);
+    onChange(hex);
+    setOpen(false);
   };
 
   const presetColors = [
@@ -50,29 +58,44 @@ export const StudioColorPicker = ({ color, onChange }: StudioColorPickerProps) =
             style={{ backgroundColor: tempColor }}
           />
         </div>
-        <Input
-          value={tempColor}
-          onChange={handleHexInputChange}
-          placeholder="#FFFFFF"
-          className="font-mono"
-        />
-      </div>
-      <div className="space-y-2">
-        <label className="text-sm font-medium">Preset Colors</label>
-        <div className="grid grid-cols-8 gap-2">
-          {presetColors.map((preset) => (
-            <button
-              key={preset.hex}
-              className="w-6 h-6 rounded-full border hover:scale-110 transition-transform"
-              style={{ backgroundColor: preset.hex }}
-              onClick={() => {
-                setTempColor(preset.hex);
-                onChange(preset.hex);
-              }}
-              title={preset.name}
+        <Popover open={open} onOpenChange={setOpen}>
+          <PopoverTrigger asChild>
+            <Input
+              value={tempColor}
+              readOnly
+              onClick={() => setOpen(true)}
+              placeholder="#FFFFFF"
+              className="font-mono cursor-pointer"
             />
-          ))}
-        </div>
+          </PopoverTrigger>
+          <PopoverContent className="w-80">
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <Label>Hex Color</Label>
+                <Input
+                  value={tempColor}
+                  onChange={handleHexInputChange}
+                  placeholder="#FFFFFF"
+                  className="font-mono"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>Preset Colors</Label>
+                <div className="grid grid-cols-8 gap-2">
+                  {presetColors.map((preset) => (
+                    <button
+                      key={preset.hex}
+                      className="w-6 h-6 rounded-full border hover:scale-110 transition-transform"
+                      style={{ backgroundColor: preset.hex }}
+                      onClick={() => handlePresetColorClick(preset.hex)}
+                      title={preset.name}
+                    />
+                  ))}
+                </div>
+              </div>
+            </div>
+          </PopoverContent>
+        </Popover>
       </div>
     </div>
   );
