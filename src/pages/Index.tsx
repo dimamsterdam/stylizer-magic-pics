@@ -709,17 +709,13 @@ const Index = () => {
             <Card className="bg-white/80 backdrop-blur-sm border-0 shadow-lg transition-all duration-300 hover:shadow-xl">
               <CardHeader>
                 <h2 className="text-display-lg text-[#1A1F2C] tracking-tight mb-2">
-                  Generate Images
+                  Final Prompt
                 </h2>
-                <p className="text-body-lg text-[#6D7175]">
-                  Review your selections and start the generation process
-                </p>
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
-                  <div className="bg-gray-50 p-4 rounded-lg">
-                    <p className="text-sm text-gray-600 mb-1">Final Prompt:</p>
-                    <p className="text-sm font-medium">{getPrompt()}</p>
+                  <div className="bg-[#FEF7CD] p-6 rounded-lg border-l-4 border-[#9b87f5]">
+                    <p className="text-[#1A1F2C] text-body-md">{getFinalPrompt()}</p>
                   </div>
 
                   <div className="flex justify-end mt-4">
