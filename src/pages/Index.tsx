@@ -41,10 +41,10 @@ interface StudioStyle {
 }
 
 interface ModelAttributes {
-  gender: "Male" | "Female" | "Any";
+  gender: "Male" | "Female";
   bodyType: "Slim" | "Athletic" | "Curvy" | "Plus Size";
   age: "18-25" | "25-35" | "35-45" | "45+";
-  ethnicity: "Any" | "Asian" | "Black" | "Caucasian" | "Hispanic" | "Middle Eastern" | "Mixed";
+  ethnicity: "Asian" | "Black" | "Caucasian" | "Hispanic" | "Middle Eastern" | "Mixed";
   hairLength: "Short" | "Medium" | "Long";
   hairColor: "Black" | "Brown" | "Blonde" | "Red" | "Gray" | "Other";
   pose: "Natural" | "Professional" | "Casual" | "Dynamic";
@@ -82,10 +82,10 @@ const Index = () => {
     customPrompt: ""
   });
   const [modelAttributes, setModelAttributes] = useState<ModelAttributes>({
-    gender: "Any",
+    gender: "Female",
     bodyType: "Athletic",
     age: "25-35",
-    ethnicity: "Any",
+    ethnicity: "Caucasian",
     hairLength: "Medium",
     hairColor: "Brown",
     pose: "Professional"
@@ -208,8 +208,7 @@ const Index = () => {
   const canStartGeneration = images.length > 0 && 
     images.some((img) => img.selected) && 
     getSelectedAnglesCount() > 0 &&
-    (studioStyle.type === 'studio' || (studioStyle.type === 'custom' && studioStyle.customPrompt.trim().length > 0)) &&
-    modelAttributes.gender !== 'Any';
+    (studioStyle.type === 'studio' || (studioStyle.type === 'custom' && studioStyle.customPrompt.trim().length > 0));
 
   const handleStartGeneration = () => {
     if (canStartGeneration) {
@@ -464,7 +463,7 @@ const Index = () => {
                       }
                       className="flex gap-4"
                     >
-                      {["Any", "Male", "Female"].map((gender) => (
+                      {["Male", "Female"].map((gender) => (
                         <div key={gender} className="flex items-center space-x-2">
                           <RadioGroupItem value={gender} id={`gender-${gender}`} />
                           <Label htmlFor={`gender-${gender}`}>{gender}</Label>
@@ -524,7 +523,7 @@ const Index = () => {
                           <SelectValue />
                         </SelectTrigger>
                         <SelectContent>
-                          {["Any", "Asian", "Black", "Caucasian", "Hispanic", "Middle Eastern", "Mixed"].map((ethnicity) => (
+                          {["Asian", "Black", "Caucasian", "Hispanic", "Middle Eastern", "Mixed"].map((ethnicity) => (
                             <SelectItem key={ethnicity} value={ethnicity}>{ethnicity}</SelectItem>
                           ))}
                         </SelectContent>
