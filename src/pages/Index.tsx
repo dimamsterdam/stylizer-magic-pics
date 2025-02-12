@@ -645,7 +645,7 @@ const Index = () => {
       </div>
       {isLoading ? (
         <div className="flex items-center justify-center p-4">
-          <Hourglass className="h-6 w-6 text-polaris-text animate-spin" />
+          <Loader2 className="h-6 w-6 text-polaris-text animate-spin" />
         </div>
       ) : null}
     </div>
