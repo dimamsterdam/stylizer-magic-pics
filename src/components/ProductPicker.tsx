@@ -32,39 +32,22 @@ export const ProductPicker = ({
     return selectedProducts.some(p => p.id === productId);
   };
 
+  const shouldShowResults = searchTerm.length >= 2 && searchResults.length > 0 && !isLoading && !error;
+
   return (
     <div className="w-full max-w-2xl mx-auto">
-      <div className="p-6 bg-white rounded-lg shadow-sm">
-        <div className="mt-6 space-y-4">
-          {isLoading ? (
-            <div className="text-center py-4">Loading products...</div>
-          ) : error ? (
-            <div className="text-center py-4 text-red-500">{error}</div>
-          ) : selectedProducts.length >= 3 ? (
-            <div className="text-center py-8">
-              <p className="text-polaris-secondary">Maximum number of products selected (3)</p>
-              <p className="text-sm text-polaris-secondary mt-2">
-                Remove a product to select a different one
-              </p>
-            </div>
-          ) : searchTerm.length < 2 ? (
-            <div className="text-center py-8">
-              <p className="text-polaris-secondary"></p>
-            </div>
-          ) : searchResults.length === 0 ? (
-            <div className="text-center py-4 text-gray-500">
-              No products found matching "{searchTerm}"
-            </div>
-          ) : (
-            searchResults.map((product) => {
+      {shouldShowResults ? (
+        <div className="p-6 bg-white rounded-lg shadow-sm animate-in fade-in-0 slide-in-from-bottom-4 duration-300">
+          <div className="space-y-4">
+            {searchResults.map((product) => {
               const isSelected = isProductSelected(product.id);
               return (
                 <div
                   key={product.id}
-                  className={`flex items-center p-4 border rounded-md transition-colors ${
+                  className={`flex items-center p-4 border rounded-md transition-all duration-200 ${
                     isSelected 
                       ? 'border-polaris-teal bg-polaris-teal/5 cursor-not-allowed' 
-                      : 'border-polaris-border hover:border-polaris-teal cursor-pointer'
+                      : 'border-polaris-border hover:border-polaris-teal hover:shadow-md cursor-pointer'
                   }`}
                   onClick={() => !isSelected && onSelect(product)}
                 >
@@ -92,10 +75,35 @@ export const ProductPicker = ({
                   </button>
                 </div>
               );
-            })
-          )}
+            })}
+          </div>
         </div>
-      </div>
+      ) : (
+        <div className="p-6 bg-white rounded-lg shadow-sm">
+          <div className="mt-6 space-y-4">
+            {isLoading ? (
+              <div className="text-center py-4">Loading products...</div>
+            ) : error ? (
+              <div className="text-center py-4 text-red-500">{error}</div>
+            ) : selectedProducts.length >= 3 ? (
+              <div className="text-center py-8">
+                <p className="text-polaris-secondary">Maximum number of products selected (3)</p>
+                <p className="text-sm text-polaris-secondary mt-2">
+                  Remove a product to select a different one
+                </p>
+              </div>
+            ) : searchTerm.length < 2 ? (
+              <div className="text-center py-8">
+                <p className="text-polaris-secondary">Start typing to search for products</p>
+              </div>
+            ) : searchResults.length === 0 ? (
+              <div className="text-center py-4 text-gray-500">
+                No products found matching "{searchTerm}"
+              </div>
+            ) : null}
+          </div>
+        </div>
+      )}
     </div>
   );
 };
