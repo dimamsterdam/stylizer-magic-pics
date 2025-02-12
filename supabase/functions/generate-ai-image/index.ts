@@ -131,17 +131,21 @@ async function waitForImageGeneration(requestId: string, apiKey: string) {
   for (let attempt = 0; attempt < maxAttempts; attempt++) {
     try {
       const response = await fetch(`https://queue.fal.run/fal-ai/flux-pro/finetuned/status/${requestId}`, {
+        method: 'GET', // Explicitly specify GET method
         headers: {
           'Authorization': `Key ${apiKey}`,
+          'Accept': 'application/json'
         },
       });
 
       if (!response.ok) {
+        const errorText = await response.text();
+        console.error(`Status check failed (Attempt ${attempt + 1}/${maxAttempts}):`, errorText);
         throw new Error(`Status check failed: ${response.status}`);
       }
 
       const result = await response.json();
-      console.log('Status check result:', result);
+      console.log(`Status check result (Attempt ${attempt + 1}/${maxAttempts}):`, result);
 
       if (result.status === 'completed') {
         return result;
