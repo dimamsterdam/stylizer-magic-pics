@@ -327,7 +327,7 @@ const Index = () => {
                       placeholder="Search products by name or SKU (type at least 2 characters)"
                       value={searchTerm}
                       onChange={(e) => handleSearch(e.target.value)}
-                      className="pl-10 border-polaris-border bg-white/50 backdrop-blur-sm transition-all duration-300 focus:bg-white"
+                      className="pl-10 border-polaris-border bg-white/50 transition-all duration-300 focus:bg-white"
                       disabled={isLoading || selectedProducts.length >= 3}
                     />
                   </div>
