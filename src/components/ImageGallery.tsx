@@ -12,7 +12,7 @@ interface Image {
   id: string;
   url: string;
   selected: boolean;
-  title?: string; // Adding optional title property
+  title?: string;
 }
 
 interface ImageGalleryProps {
@@ -27,9 +27,9 @@ export const ImageGallery = ({ images, onSelect, onRemove }: ImageGalleryProps) 
       {images.map((image) => (
         <div
           key={image.id}
-          className="relative group"
+          className="relative flex flex-col"
         >
-          <div className={`cursor-pointer ${
+          <div className={`relative cursor-pointer ${
             image.selected ? "ring-2 ring-polaris-teal rounded-lg" : ""
           }`}
             onClick={() => onSelect(image.id)}

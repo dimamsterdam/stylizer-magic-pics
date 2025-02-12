@@ -658,11 +658,31 @@ const Index = () => {
                             <div className="space-y-4">
                               <div className="space-y-2">
                                 <Label>Custom Studio Prompt</Label>
-                                <Input
-                                  value={studioStyle.customPrompt}
-                                  onChange={(e) => setStudioStyle(prev => ({ ...prev, customPrompt: e.target.value }))}
-                                  placeholder="Describe your desired studio setting..."
-                                />
+                                <div className="flex space-x-2">
+                                  <Input
+                                    value={studioStyle.customPrompt}
+                                    onChange={(e) => setStudioStyle(prev => ({ ...prev, customPrompt: e.target.value }))}
+                                    placeholder="Describe your desired studio setting..."
+                                    onKeyDown={(e) => {
+                                      if (e.key === 'Enter') {
+                                        const popoverElement = e.currentTarget.closest('[data-radix-popper-content-wrapper]');
+                                        if (popoverElement instanceof HTMLElement) {
+                                          popoverElement.style.display = 'none';
+                                        }
+                                      }
+                                    }}
+                                  />
+                                  <Button 
+                                    onClick={(e) => {
+                                      const popoverElement = e.currentTarget.closest('[data-radix-popper-content-wrapper]');
+                                      if (popoverElement instanceof HTMLElement) {
+                                        popoverElement.style.display = 'none';
+                                      }
+                                    }}
+                                  >
+                                    Enter
+                                  </Button>
+                                </div>
                                 <p className="text-sm text-[#6D7175]">
                                   E.g., "minimalist studio with soft natural lighting"
                                 </p>
