@@ -595,6 +595,63 @@ const Index = () => {
             <Card className="bg-white/80 backdrop-blur-sm border-0 shadow-lg">
               <CardHeader>
                 <h2 className="text-display-lg text-[#1A1F2C] tracking-tight mb-2">
+                  Studio Style
+                </h2>
+                <p className="text-body-lg text-[#6D7175]">
+                  Choose the background color and customize the studio setting
+                </p>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-6">
+                  <div className="flex items-center justify-between">
+                    <div className="space-y-1">
+                      <Label>Background Color</Label>
+                      <p className="text-sm text-[#6D7175]">Select the background color for your product shots</p>
+                    </div>
+                    <StudioColorPicker
+                      color={studioStyle.backgroundColor}
+                      onChange={(color) => setStudioStyle(prev => ({ ...prev, backgroundColor: color }))}
+                    />
+                  </div>
+
+                  <Separator className="my-4" />
+
+                  <div className="space-y-4">
+                    <div className="flex items-center justify-between">
+                      <div className="space-y-1">
+                        <Label>Custom Studio Prompt</Label>
+                        <p className="text-sm text-[#6D7175]">Use a custom prompt for more control over the studio setting</p>
+                      </div>
+                      <Switch
+                        checked={studioStyle.isCustomPrompt}
+                        onCheckedChange={(checked) => {
+                          setStudioStyle(prev => ({ ...prev, isCustomPrompt: checked }));
+                          if (!checked) setCustomPrompt("");
+                        }}
+                      />
+                    </div>
+
+                    {studioStyle.isCustomPrompt && (
+                      <div className="space-y-2">
+                        <Input
+                          value={customPrompt}
+                          onChange={(e) => setCustomPrompt(e.target.value)}
+                          placeholder="Enter your custom studio prompt..."
+                          className="w-full"
+                        />
+                        <p className="text-sm text-[#6D7175]">
+                          Describe the studio setting in detail (e.g., "minimalist studio with soft natural lighting and simple backdrop")
+                        </p>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card className="bg-white/80 backdrop-blur-sm border-0 shadow-lg transition-all duration-300 hover:shadow-xl">
+              <CardHeader>
+                <h2 className="text-display-lg text-[#1A1F2C] tracking-tight mb-2">
                   Generate Images
                 </h2>
                 <p className="text-body-lg text-[#6D7175]">
