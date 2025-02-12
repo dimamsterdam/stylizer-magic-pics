@@ -335,53 +335,6 @@ const Index = () => {
               </CardContent>
             </Card>
 
-            {selectedProducts.length > 0 && (
-              <Card className="bg-white/80 backdrop-blur-sm border-0 shadow-lg mb-8 transition-all duration-300 hover:shadow-xl animate-fade-in">
-                <CardHeader>
-                  <h2 className="text-display-sm text-[#1A1F2C] tracking-tight">
-                    Selected Products ({selectedProducts.length}/3)
-                  </h2>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-4">
-                    {selectedProducts.map((product) => (
-                      <div
-                        key={product.id}
-                        className="flex items-center p-4 border border-polaris-border rounded-md bg-white/50 backdrop-blur-sm transition-all duration-300 hover:bg-white/70 hover:shadow-md animate-scale-in"
-                      >
-                        <img
-                          src={product.image}
-                          alt={product.title}
-                          className="w-16 h-16 object-cover rounded-md transition-transform duration-300 hover:scale-105"
-                          onError={(e) => {
-                            e.currentTarget.src = '/placeholder.svg';
-                          }}
-                        />
-                        <div className="ml-4 flex-1">
-                          <h3 className="font-medium text-polaris-text">{product.title}</h3>
-                          <p className="text-sm text-polaris-secondary">SKU: {product.sku}</p>
-                        </div>
-                        <button
-                          onClick={() => handleProductRemove(product.id)}
-                          className="ml-4 px-4 py-2 text-red-500 border border-red-500 rounded hover:bg-red-50 transition-all duration-300"
-                        >
-                          Remove
-                        </button>
-                      </div>
-                    ))}
-                    <div className="flex justify-end">
-                      <Button
-                        onClick={handleConfirmSelection}
-                        className="bg-[#9b87f5] hover:bg-[#7E69AB] text-white font-medium px-6 py-2 rounded-lg transition-all duration-300 shadow-lg hover:shadow-xl hover:scale-105 disabled:opacity-50 disabled:hover:scale-100"
-                      >
-                        Confirm Selection
-                      </Button>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            )}
-
             <ProductPicker 
               onSelect={handleProductSelect} 
               selectedProducts={selectedProducts}
