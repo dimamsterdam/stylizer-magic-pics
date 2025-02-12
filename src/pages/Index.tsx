@@ -207,12 +207,9 @@ const Index = () => {
 
   const canStartGeneration = images.length > 0 && 
     images.some((img) => img.selected) && 
-    (studioStyle.type === 'custom' ? studioStyle.customPrompt.trim().length > 0 : true) && 
     getSelectedAnglesCount() > 0 &&
-    modelAttributes.gender !== 'Any' &&
-    modelAttributes.bodyType !== 'Athletic' &&
-    modelAttributes.age !== '25-35' &&
-    modelAttributes.pose !== 'Professional';
+    (studioStyle.type === 'studio' || (studioStyle.type === 'custom' && studioStyle.customPrompt.trim().length > 0)) &&
+    modelAttributes.gender !== 'Any';
 
   const handleStartGeneration = () => {
     if (canStartGeneration) {

@@ -29,9 +29,10 @@ export const ImageGallery = ({ images, onSelect, onRemove }: ImageGalleryProps) 
           key={image.id}
           className="relative flex flex-col"
         >
-          <div className={`relative cursor-pointer ${
-            image.selected ? "ring-2 ring-polaris-teal rounded-lg" : ""
-          }`}
+          <div 
+            className={`relative cursor-pointer group ${
+              image.selected ? "ring-2 ring-polaris-teal rounded-lg" : ""
+            }`}
             onClick={() => onSelect(image.id)}
           >
             <img
