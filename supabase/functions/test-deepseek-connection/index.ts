@@ -47,7 +47,7 @@ async function testFalAPI() {
 
   try {
     console.log('Testing FAL API connection...');
-    const response = await fetch('https://110602490-fast-stable-diffusion.fal.run/v1/text-to-image', {
+    const response = await fetch('https://110602490-fast-stable-diffusion.fal.run/stable-diffusion/text-to-image', {
       method: 'POST',
       headers: {
         'Authorization': `Key ${apiKey}`,
