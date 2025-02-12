@@ -205,8 +205,12 @@ const Index = () => {
 
   const canStartGeneration = images.length > 0 && 
     images.some((img) => img.selected) && 
-    (studioStyle.isCustomPrompt ? customPrompt.trim() : true) && 
-    getSelectedAnglesCount() > 0;
+    (studioStyle.isCustomPrompt ? customPrompt.trim().length > 0 : true) && 
+    getSelectedAnglesCount() > 0 &&
+    modelAttributes.gender !== "" &&
+    modelAttributes.bodyType !== "" &&
+    modelAttributes.age !== "" &&
+    modelAttributes.pose !== "";
 
   const handleStartGeneration = () => {
     if (canStartGeneration) {
@@ -616,17 +620,19 @@ const Index = () => {
                     <p className="text-sm font-medium">{getPrompt()}</p>
                   </div>
 
-                  <Button
-                    className={`w-auto ml-auto transition-all duration-300 ${
-                      canStartGeneration
-                        ? 'bg-[#9b87f5] hover:bg-[#7E69AB] text-white shadow-lg hover:shadow-xl hover:scale-105'
-                        : 'bg-gray-200 text-gray-500 cursor-not-allowed'
-                    }`}
-                    disabled={!canStartGeneration}
-                    onClick={handleStartGeneration}
-                  >
-                    Start Generation {getSelectedAnglesCount()} angles selected
-                  </Button>
+                  <div className="flex justify-end mt-4">
+                    <Button
+                      className={`transition-all duration-300 ${
+                        canStartGeneration
+                          ? 'bg-[#9b87f5] hover:bg-[#7E69AB] text-white shadow-lg hover:shadow-xl hover:scale-105'
+                          : 'bg-gray-200 text-gray-500 cursor-not-allowed'
+                      }`}
+                      disabled={!canStartGeneration}
+                      onClick={handleStartGeneration}
+                    >
+                      Start Generation
+                    </Button>
+                  </div>
                 </div>
               </CardContent>
             </Card>
