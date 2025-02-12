@@ -9,7 +9,7 @@ import { useToast } from "@/components/ui/use-toast";
 import { Card, CardHeader, CardContent } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { Toggle } from "@/components/ui/toggle";
-import { Check, Wand2 } from "lucide-react";
+import { Check, Wand2, Hourglass } from "lucide-react";
 import { StudioColorPicker } from "@/components/StudioColorPicker";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
@@ -207,10 +207,10 @@ const Index = () => {
     images.some((img) => img.selected) && 
     (studioStyle.isCustomPrompt ? customPrompt.trim().length > 0 : true) && 
     getSelectedAnglesCount() > 0 &&
-    modelAttributes.gender !== "" &&
-    modelAttributes.bodyType !== "" &&
-    modelAttributes.age !== "" &&
-    modelAttributes.pose !== "";
+    modelAttributes.gender !== 'Any' &&
+    modelAttributes.bodyType !== 'Athletic' &&
+    modelAttributes.age !== '25-35' &&
+    modelAttributes.pose !== 'Professional';
 
   const handleStartGeneration = () => {
     if (canStartGeneration) {
@@ -639,6 +639,11 @@ const Index = () => {
           </div>
         )}
       </div>
+      {isLoading ? (
+        <div className="flex items-center justify-center p-4">
+          <Hourglass className="h-6 w-6 text-polaris-text animate-spin" />
+        </div>
+      ) : null}
     </div>
   );
 };
