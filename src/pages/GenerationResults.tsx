@@ -1,10 +1,9 @@
+
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useToast } from "@/components/ui/use-toast";
-import { productImages, ProductKey } from "@/data/images";
 import { ProductHeader } from "@/components/ProductHeader";
 import { GeneratedImageCard } from "@/components/GeneratedImageCard";
 import { Separator } from "@/components/ui/separator";
@@ -38,12 +37,8 @@ const GenerationResults = () => {
   const state = location.state as LocationState;
   const selectedProducts = state?.selectedProducts || [];
   const selectedAngles = state?.selectedAngles || [];
+  const [prompt] = useState(state?.prompt || "Professional model wearing the product");
 
-  console.log("Selected Products:", selectedProducts);
-  console.log("Selected Angles:", selectedAngles);
-  console.log("Initial Prompt:", state?.prompt);
-
-  const [prompt, setPrompt] = useState(state?.prompt || "Professional model wearing the product");
   const [generatedImages, setGeneratedImages] = useState<GeneratedImage[]>(() => {
     return selectedProducts.flatMap(product => 
       selectedAngles.map(angle => ({
@@ -94,8 +89,6 @@ const GenerationResults = () => {
         throw new Error('No image URL in response');
       }
 
-      console.log('Received image URL:', data.imageUrl);
-
       setGeneratedImages(prev => 
         prev.map(img => 
           img.id === imageId 
@@ -121,12 +114,11 @@ const GenerationResults = () => {
     }
   };
 
-  // Start generating all images when component mounts
   useEffect(() => {
     generatedImages.forEach(img => {
       generateImage(img.id);
     });
-  }, []); // Only run once when component mounts
+  }, []);
 
   const handleImageSelect = (id: string) => {
     setGeneratedImages(
@@ -153,16 +145,6 @@ const GenerationResults = () => {
         description: `A new ${image.angle.toLowerCase()} image is being generated...`,
       });
     }
-  };
-
-  const handlePromptUpdate = () => {
-    generatedImages.forEach(img => {
-      generateImage(img.id);
-    });
-    toast({
-      title: "Updating generations",
-      description: "New images are being generated with the updated prompt...",
-    });
   };
 
   const handlePublish = () => {
@@ -197,36 +179,27 @@ const GenerationResults = () => {
         <Card className="mb-8">
           <CardHeader>
             <div className="flex flex-col space-y-6">
-              {selectedProducts.map(product => (
-                <ProductHeader
-                  key={product.id}
-                  image={product.image}
-                  title={product.title}
-                  sku={product.sku}
-                />
-              ))}
+              <div className="flex items-center justify-center">
+                {selectedProducts.map(product => (
+                  <img
+                    key={product.id}
+                    src={product.image}
+                    alt={product.title}
+                    className="w-32 h-32 object-cover rounded-lg"
+                  />
+                ))}
+              </div>
               <div className="space-y-2">
                 <h2 className="text-display-sm text-polaris-text">Generation Prompt</h2>
                 <div className="bg-[#FEF7CD] p-6 rounded-lg border-l-4 border-[#9b87f5] mb-4">
                   <p className="text-[#1A1F2C] text-body-md">{prompt}</p>
                 </div>
-                <div className="flex gap-4">
-                  <Input
-                    value={prompt}
-                    onChange={(e) => setPrompt(e.target.value)}
-                    className="flex-1"
-                  />
-                  <Button
-                    onClick={handlePromptUpdate}
-                    className="bg-polaris-green hover:bg-polaris-teal text-white whitespace-nowrap"
-                  >
-                    Update Prompt
-                  </Button>
-                </div>
               </div>
             </div>
           </CardHeader>
         </Card>
+
+        <h2 className="text-display-lg text-polaris-text mb-6">Generation Results</h2>
 
         {Object.entries(groupedImages).map(([angle, images]) => (
           <Card key={angle} className="mb-8">
