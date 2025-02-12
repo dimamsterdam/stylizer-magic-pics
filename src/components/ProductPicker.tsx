@@ -2,7 +2,7 @@
 import { Search } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
 import { Input } from "@/components/ui/input";
-import { Popover, PopoverContent } from "@/components/ui/popover";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 
 interface Product {
   id: string;
@@ -39,19 +39,20 @@ export const ProductPicker = ({
 
   return (
     <div className="relative w-full max-w-2xl mx-auto">
-      <div className="relative">
-        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-polaris-secondary" />
-        <Input
-          type="text"
-          placeholder="Search products by name or SKU (type at least 2 characters)"
-          value={searchTerm}
-          onChange={(e) => onSearch(e.target.value)}
-          className="pl-10 border-polaris-border bg-white/50 transition-all duration-300 focus:bg-white"
-          disabled={isLoading || selectedProducts.length >= 3}
-        />
-      </div>
-
       <Popover open={isOpen}>
+        <PopoverTrigger asChild>
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-polaris-secondary" />
+            <Input
+              type="text"
+              placeholder="Search products by name or SKU (type at least 2 characters)"
+              value={searchTerm}
+              onChange={(e) => onSearch(e.target.value)}
+              className="pl-10 border-polaris-border bg-white/50 transition-all duration-300 focus:bg-white"
+              disabled={isLoading || selectedProducts.length >= 3}
+            />
+          </div>
+        </PopoverTrigger>
         <PopoverContent 
           className="w-[var(--radix-popover-trigger-width)] p-0" 
           align="start"
@@ -96,6 +97,11 @@ export const ProductPicker = ({
                   </div>
                 );
               })}
+              {searchResults.length === 0 && searchTerm.length >= 2 && (
+                <div className="text-center py-4 text-polaris-secondary">
+                  No products found
+                </div>
+              )}
             </div>
           </div>
         </PopoverContent>
