@@ -37,6 +37,13 @@ export const ProductPicker = ({
     return selectedProducts.some(p => p.id === productId);
   };
 
+  const handleProductSelect = (product: Product) => {
+    if (!isProductSelected(product.id)) {
+      onSelect(product);
+      onSearch(''); // Clear the search input after selection
+    }
+  };
+
   return (
     <div className="relative w-full max-w-2xl mx-auto">
       <Popover open={isOpen}>
@@ -70,7 +77,7 @@ export const ProductPicker = ({
                         ? 'border-polaris-teal bg-polaris-teal/5 cursor-not-allowed' 
                         : 'border-polaris-border hover:border-polaris-teal hover:shadow-md cursor-pointer'
                     }`}
-                    onClick={() => !isSelected && onSelect(product)}
+                    onClick={() => !isSelected && handleProductSelect(product)}
                   >
                     <img
                       src={product.image}
