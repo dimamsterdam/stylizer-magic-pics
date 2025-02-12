@@ -285,7 +285,7 @@ const Index = () => {
                 <div className="flex flex-col-reverse md:grid md:grid-cols-[1fr,320px] gap-8 md:gap-0 items-start">
                   <div className="space-y-4 pr-8">
                     <h2 className="text-display-lg text-[#1A1F2C] tracking-tight">
-                      Create AI-Generated Product Photos
+                      Improve Your Pack Shots
                     </h2>
                     <p className="text-body-lg text-[#6D7175] max-w-2xl">
                       Transform your product photos into professional lifestyle images using AI. 
