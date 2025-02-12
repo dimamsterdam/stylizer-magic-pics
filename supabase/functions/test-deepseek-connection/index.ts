@@ -1,194 +1,204 @@
 
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.7.1'
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 }
 
-interface TestResult {
-  step: string;
-  success: boolean;
-  details: any;
-  error?: string;
+// Initialize Supabase client
+const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
+const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
+const supabase = createClient(supabaseUrl, supabaseKey);
+
+async function testDeepseekAPI() {
+  const apiKey = Deno.env.get('DEEPSEEK_API_KEY');
+  if (!apiKey) {
+    throw new Error('DEEPSEEK_API_KEY is not set');
+  }
+
+  const response = await fetch('https://api.deepseek.ai/v1/images/generations', {
+    method: 'POST',
+    headers: {
+      'Authorization': `Bearer ${apiKey}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      prompt: "test connection",
+      n: 1,
+      size: "256x256",
+      response_format: "url"
+    })
+  });
+
+  if (!response.ok) {
+    throw new Error(`Deepseek API error: ${response.status}`);
+  }
+
+  return await response.json();
 }
 
-async function testApiKey(): Promise<TestResult> {
-  const deepseekKey = Deno.env.get('DEEPSEEK_API_KEY')
-  if (!deepseekKey) {
-    return {
-      step: 'API Key Validation',
-      success: false,
-      details: { exists: false },
-      error: 'DEEPSEEK_API_KEY environment variable not set'
-    }
+async function testFalAPI() {
+  const apiKey = Deno.env.get('FAL_KEY');
+  if (!apiKey) {
+    throw new Error('FAL_KEY is not set');
   }
 
-  // Remove 'Bearer ' prefix if it exists
-  const cleanKey = deepseekKey.replace(/^Bearer\s+/i, '');
-  
-  return {
-    step: 'API Key Validation',
-    success: true,
-    details: {
-      exists: true,
-      length: cleanKey.length,
-      format: cleanKey.substring(0, 4) + '...',
-      isValidFormat: cleanKey.startsWith('sk-')
-    }
+  const response = await fetch('https://fal.run/v1/stable-diffusion/text-to-image', {
+    method: 'POST',
+    headers: {
+      'Authorization': `Key ${apiKey}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      prompt: "test connection",
+      model_name: "stabilityai/stable-diffusion-xl-base-1.0",
+      image_size: "256x256",
+      num_inference_steps: 10,
+      guidance_scale: 7.5,
+      num_images: 1,
+      safety_checker: true
+    })
+  });
+
+  if (!response.ok) {
+    throw new Error(`FAL API error: ${response.status}`);
   }
+
+  return await response.json();
 }
 
-async function testNetworkConnectivity(): Promise<TestResult> {
-  try {
-    console.log('Testing general network connectivity...');
-    const response = await fetch('https://api.github.com/zen');
-    const text = await response.text();
-    
-    return {
-      step: 'Network Connectivity Test',
-      success: true,
-      details: {
-        status: response.status,
-        response: text.substring(0, 50) // Only log first 50 chars
-      }
-    };
-  } catch (error) {
-    console.error('Network connectivity test failed:', error);
-    return {
-      step: 'Network Connectivity Test',
-      success: false,
-      details: {
-        errorName: error.name,
-        errorMessage: error.message
-      },
-      error: 'Failed to connect to test endpoint'
-    };
-  }
-}
-
-async function testApiConnection(deepseekKey: string): Promise<TestResult> {
-  try {
-    // Remove 'Bearer ' prefix if it exists and add it back consistently
-    const cleanKey = deepseekKey.replace(/^Bearer\s+/i, '');
-    const authHeader = `Bearer ${cleanKey}`;
-    
-    console.log('Testing Deepseek API connection...');
-
-    // Test with minimal request
-    const response = await fetch('https://api.deepseek.ai/v1/models', {
-      method: 'GET',
-      headers: {
-        'Authorization': authHeader
-      }
-    });
-
-    const responseText = await response.text();
-    console.log('Models endpoint response:', {
-      status: response.status,
-      text: responseText
-    });
-
-    let parsedResponse;
-    try {
-      parsedResponse = JSON.parse(responseText);
-    } catch (e) {
-      parsedResponse = responseText;
-    }
-
-    return {
-      step: 'API Connection Test',
-      success: response.ok,
-      details: {
-        statusCode: response.status,
-        statusText: response.statusText,
-        headers: Object.fromEntries(response.headers.entries()),
-        response: parsedResponse
-      },
-      error: !response.ok ? `API returned status ${response.status}: ${responseText}` : undefined
-    };
-  } catch (error) {
-    console.error('Connection test error:', {
-      name: error.name,
-      message: error.message,
-      stack: error.stack
-    });
-
-    return {
-      step: 'API Connection Test',
-      success: false,
-      details: { 
-        errorName: error.name,
-        errorMessage: error.message,
-        stack: error.stack,
-        timestamp: new Date().toISOString()
-      },
-      error: `Connection failed: ${error.message}`
-    };
-  }
-}
-
-async function runAllTests() {
-  const results: TestResult[] = [];
-  console.log('Starting connection tests...');
-
-  // Test 1: Network Connectivity
-  const networkResult = await testNetworkConnectivity();
-  results.push(networkResult);
-  console.log('Network test result:', networkResult);
-
-  if (!networkResult.success) {
-    return results;
+async function testPerplexityAPI() {
+  const apiKey = Deno.env.get('PERPLEXITY_API_KEY');
+  if (!apiKey) {
+    throw new Error('PERPLEXITY_API_KEY is not set');
   }
 
-  // Test 2: API Key
-  const apiKeyResult = await testApiKey();
-  results.push(apiKeyResult);
-  console.log('API Key test result:', apiKeyResult);
+  const response = await fetch('https://api.perplexity.ai/chat/completions', {
+    method: 'POST',
+    headers: {
+      'Authorization': `Bearer ${apiKey}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      model: 'llama-3.1-sonar-small-128k-online',
+      messages: [
+        {
+          role: 'system',
+          content: 'Test connection.'
+        }
+      ]
+    })
+  });
 
-  if (apiKeyResult.success) {
-    // Test 3: API Connection
-    const deepseekKey = Deno.env.get('DEEPSEEK_API_KEY')!;
-    const connectionResult = await testApiConnection(deepseekKey);
-    results.push(connectionResult);
-    console.log('API Connection test result:', connectionResult);
+  if (!response.ok) {
+    throw new Error(`Perplexity API error: ${response.status}`);
   }
 
-  return results;
+  return await response.json();
 }
 
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
-    return new Response(null, { headers: corsHeaders })
+    return new Response(null, { headers: corsHeaders });
   }
 
+  const timestamp = new Date().toISOString();
+  const results = [];
+  let allTestsPassed = true;
+
   try {
-    const results = await runAllTests();
-    const response = { 
-      timestamp: new Date().toISOString(),
-      results,
-      allTestsPassed: results.every(r => r.success)
-    };
-    
-    return new Response(
-      JSON.stringify(response),
-      { 
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        status: 200
+    // Get current provider from feature flags
+    const { data: featureFlags, error: flagError } = await supabase
+      .from('feature_flags')
+      .select('value')
+      .eq('name', 'ai_provider')
+      .maybeSingle();
+
+    if (flagError) {
+      throw new Error(`Error fetching AI provider: ${flagError.message}`);
+    }
+
+    const provider = featureFlags?.value || 'deepseek';
+    console.log('Testing provider:', provider);
+
+    // Only test the currently selected provider
+    try {
+      let testResult;
+      switch (provider) {
+        case 'deepseek':
+          testResult = await testDeepseekAPI();
+          results.push({
+            step: "Deepseek API Connection",
+            success: true,
+            details: {
+              message: "Successfully connected to Deepseek API",
+              response: testResult
+            }
+          });
+          break;
+
+        case 'fal':
+          testResult = await testFalAPI();
+          results.push({
+            step: "FAL API Connection",
+            success: true,
+            details: {
+              message: "Successfully connected to FAL API",
+              response: testResult
+            }
+          });
+          break;
+
+        case 'perplexity':
+          testResult = await testPerplexityAPI();
+          results.push({
+            step: "Perplexity API Connection",
+            success: true,
+            details: {
+              message: "Successfully connected to Perplexity API",
+              response: testResult
+            }
+          });
+          break;
+
+        default:
+          throw new Error(`Unknown provider: ${provider}`);
       }
+    } catch (error) {
+      allTestsPassed = false;
+      results.push({
+        step: `${provider.charAt(0).toUpperCase() + provider.slice(1)} API Connection`,
+        success: false,
+        details: {
+          message: `Failed to connect to ${provider} API`,
+          error: error.message
+        }
+      });
+    }
+
+    return new Response(
+      JSON.stringify({
+        timestamp,
+        results,
+        allTestsPassed
+      }),
+      { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
   } catch (error) {
-    console.error('Error in test-deepseek-connection:', error);
+    console.error('Error in test function:', error);
     return new Response(
-      JSON.stringify({ 
-        error: error.message,
-        details: 'Test execution failed',
-        stack: error.stack,
-        timestamp: new Date().toISOString()
+      JSON.stringify({
+        timestamp,
+        error: 'Failed to run tests',
+        details: error.message,
+        results,
+        allTestsPassed: false
       }),
       { 
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        status: 200
+        status: 500
       }
     );
   }

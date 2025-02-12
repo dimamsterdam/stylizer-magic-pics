@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Check, X, Loader2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import { useAIProvider } from "@/hooks/use-feature-flags";
 
 interface TestResult {
   step: string;
@@ -22,6 +23,7 @@ export function DeepseekConnectionTest() {
   const [isLoading, setIsLoading] = useState(false);
   const [testResults, setTestResults] = useState<TestResponse | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const { data: currentProvider } = useAIProvider();
 
   const runTest = async () => {
     setIsLoading(true);
@@ -42,7 +44,7 @@ export function DeepseekConnectionTest() {
     <Card className="w-full max-w-2xl mx-auto">
       <CardHeader>
         <CardTitle className="flex items-center justify-between">
-          <span>Deepseek API Connection Test</span>
+          <span>AI Provider Connection Test ({currentProvider})</span>
           <Button 
             onClick={runTest} 
             disabled={isLoading}
