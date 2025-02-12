@@ -707,6 +707,9 @@ const Index = () => {
                 <h2 className="text-display-lg text-[#1A1F2C] tracking-tight mb-2">
                   Final Prompt
                 </h2>
+                <p className="text-body-lg text-[#6D7175]">
+                  Adjust by changing the values above
+                </p>
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
