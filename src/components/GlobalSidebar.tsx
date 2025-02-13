@@ -1,4 +1,5 @@
-import { ChevronDown, ChevronRight, Home, Image, Video, Palette, Settings, ChevronLeft } from "lucide-react";
+
+import { ChevronDown, ChevronRight, Home, Image, Video, Palette, Settings, ChevronLeft, Library } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
 import {
   Sidebar,
@@ -87,16 +88,44 @@ export function GlobalSidebar() {
           <div className="h-px bg-polaris-border mx-4" />
 
           <SidebarGroup>
+            <SidebarGroupLabel>Brand</SidebarGroupLabel>
+            <SidebarGroupContent>
+              <SidebarMenu>
+                <SidebarMenuItem>
+                  <SidebarMenuButton
+                    asChild
+                    className={`${
+                      location.pathname === "/brand" 
+                        ? "bg-[#F6F6F7] border-l-4 border-[#9b87f5]" 
+                        : "hover:bg-gray-50"
+                    }`}
+                  >
+                    <Link to="/brand" className="flex items-center gap-2">
+                      <Palette className="h-5 w-5" />
+                      <span>Brand Identity</span>
+                    </Link>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              </SidebarMenu>
+            </SidebarGroupContent>
+          </SidebarGroup>
+
+          <div className="h-px bg-polaris-border mx-4" />
+
+          <SidebarGroup>
             <button
               onClick={() => setIsLibraryExpanded(!isLibraryExpanded)}
-              className="flex items-center w-full px-3 py-2 text-sm font-medium text-gray-600 hover:text-gray-900"
+              className="flex items-center justify-between w-full px-3 py-2 text-sm font-medium text-gray-600 hover:text-gray-900"
             >
+              <span className="flex items-center gap-2">
+                <Library className="h-5 w-5" />
+                <span>Library</span>
+              </span>
               {isLibraryExpanded ? (
-                <ChevronDown className="h-4 w-4 mr-2" />
+                <ChevronDown className="h-4 w-4" />
               ) : (
-                <ChevronRight className="h-4 w-4 mr-2" />
+                <ChevronRight className="h-4 w-4" />
               )}
-              Library
             </button>
             {isLibraryExpanded && (
               <SidebarGroupContent>
@@ -121,31 +150,6 @@ export function GlobalSidebar() {
                 </SidebarMenu>
               </SidebarGroupContent>
             )}
-          </SidebarGroup>
-
-          <div className="h-px bg-polaris-border mx-4" />
-
-          <SidebarGroup>
-            <SidebarGroupLabel>Brand</SidebarGroupLabel>
-            <SidebarGroupContent>
-              <SidebarMenu>
-                <SidebarMenuItem>
-                  <SidebarMenuButton
-                    asChild
-                    className={`${
-                      location.pathname === "/brand" 
-                        ? "bg-[#F6F6F7] border-l-4 border-[#9b87f5]" 
-                        : "hover:bg-gray-50"
-                    }`}
-                  >
-                    <Link to="/brand" className="flex items-center gap-2">
-                      <Palette className="h-5 w-5" />
-                      <span>Brand Identity</span>
-                    </Link>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-              </SidebarMenu>
-            </SidebarGroupContent>
           </SidebarGroup>
 
           <div className="h-px bg-polaris-border mx-4" />
