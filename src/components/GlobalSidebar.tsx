@@ -1,5 +1,5 @@
 
-import { Home, Image, Video, Palette, Settings, Menu, X, ChevronLeft, ChevronRight } from "lucide-react";
+import { ChevronDown, ChevronRight, Home, Image, Video, Palette, Settings, ChevronLeft } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
 import {
   Sidebar,
@@ -12,12 +12,18 @@ import {
   SidebarMenuItem,
   SidebarTrigger,
 } from "@/components/ui/sidebar";
+import { useState } from "react";
 
 const mainNavItems = [
   {
+    title: "Home",
+    icon: Home,
+    url: "/",
+  },
+  {
     title: "Stylizer",
     icon: Palette,
-    url: "/",
+    url: "/stylizer",
   },
   {
     title: "Expose",
@@ -46,11 +52,14 @@ const libraryItems = [
 
 export function GlobalSidebar() {
   const location = useLocation();
+  const [isLibraryExpanded, setIsLibraryExpanded] = useState(true);
+
+  const isLibraryRoute = location.pathname.startsWith('/library');
 
   return (
     <div className="fixed left-0 top-16 bottom-0 z-40">
       <Sidebar className="h-[calc(100vh-4rem)] border-r border-polaris-border">
-        <SidebarContent>
+        <SidebarContent className="space-y-1">
           <SidebarGroup>
             <SidebarGroupLabel>Applications</SidebarGroupLabel>
             <SidebarGroupContent>
@@ -59,7 +68,11 @@ export function GlobalSidebar() {
                   <SidebarMenuItem key={item.title}>
                     <SidebarMenuButton
                       asChild
-                      className={location.pathname === item.url ? "bg-polaris-background" : ""}
+                      className={`${
+                        location.pathname === item.url 
+                          ? "bg-[#F6F6F7] border-l-4 border-[#9b87f5]" 
+                          : "hover:bg-gray-50"
+                      }`}
                     >
                       <Link to={item.url} className="flex items-center gap-2">
                         <item.icon className="h-5 w-5" />
@@ -72,26 +85,46 @@ export function GlobalSidebar() {
             </SidebarGroupContent>
           </SidebarGroup>
 
+          <div className="h-px bg-polaris-border mx-4" />
+
           <SidebarGroup>
-            <SidebarGroupLabel>Library</SidebarGroupLabel>
-            <SidebarGroupContent>
-              <SidebarMenu>
-                {libraryItems.map((item) => (
-                  <SidebarMenuItem key={item.title}>
-                    <SidebarMenuButton
-                      asChild
-                      className={location.pathname === item.url ? "bg-polaris-background" : ""}
-                    >
-                      <Link to={item.url} className="flex items-center gap-2">
-                        <item.icon className="h-5 w-5" />
-                        <span>{item.title}</span>
-                      </Link>
-                    </SidebarMenuButton>
-                  </SidebarMenuItem>
-                ))}
-              </SidebarMenu>
-            </SidebarGroupContent>
+            <button
+              onClick={() => setIsLibraryExpanded(!isLibraryExpanded)}
+              className="flex items-center w-full px-3 py-2 text-sm font-medium text-gray-600 hover:text-gray-900"
+            >
+              {isLibraryExpanded ? (
+                <ChevronDown className="h-4 w-4 mr-2" />
+              ) : (
+                <ChevronRight className="h-4 w-4 mr-2" />
+              )}
+              Library
+            </button>
+            {isLibraryExpanded && (
+              <SidebarGroupContent>
+                <SidebarMenu>
+                  {libraryItems.map((item) => (
+                    <SidebarMenuItem key={item.title}>
+                      <SidebarMenuButton
+                        asChild
+                        className={`${
+                          location.pathname === item.url 
+                            ? "bg-[#F6F6F7] border-l-4 border-[#9b87f5]" 
+                            : "hover:bg-gray-50"
+                        }`}
+                      >
+                        <Link to={item.url} className="flex items-center gap-2">
+                          <item.icon className="h-5 w-5" />
+                          <span>{item.title}</span>
+                        </Link>
+                      </SidebarMenuButton>
+                    </SidebarMenuItem>
+                  ))}
+                </SidebarMenu>
+              </SidebarGroupContent>
+            )}
           </SidebarGroup>
+
+          <div className="h-px bg-polaris-border mx-4" />
 
           <SidebarGroup>
             <SidebarGroupLabel>Brand</SidebarGroupLabel>
@@ -100,7 +133,11 @@ export function GlobalSidebar() {
                 <SidebarMenuItem>
                   <SidebarMenuButton
                     asChild
-                    className={location.pathname === "/brand" ? "bg-polaris-background" : ""}
+                    className={`${
+                      location.pathname === "/brand" 
+                        ? "bg-[#F6F6F7] border-l-4 border-[#9b87f5]" 
+                        : "hover:bg-gray-50"
+                    }`}
                   >
                     <Link to="/brand" className="flex items-center gap-2">
                       <Palette className="h-5 w-5" />
@@ -112,6 +149,8 @@ export function GlobalSidebar() {
             </SidebarGroupContent>
           </SidebarGroup>
 
+          <div className="h-px bg-polaris-border mx-4" />
+
           <div className="mt-auto">
             <SidebarGroup>
               <SidebarGroupContent>
@@ -119,7 +158,11 @@ export function GlobalSidebar() {
                   <SidebarMenuItem>
                     <SidebarMenuButton
                       asChild
-                      className={location.pathname === "/settings" ? "bg-polaris-background" : ""}
+                      className={`${
+                        location.pathname === "/settings" 
+                          ? "bg-[#F6F6F7] border-l-4 border-[#9b87f5]" 
+                          : "hover:bg-gray-50"
+                      }`}
                     >
                       <Link to="/settings" className="flex items-center gap-2">
                         <Settings className="h-5 w-5" />

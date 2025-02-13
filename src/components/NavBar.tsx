@@ -13,9 +13,6 @@ const NavBar = () => {
                 <span className="font-inter font-bold text-[#1A1F2C] tracking-[-0.03em] text-xl">
                   brandmachine
                 </span>
-                <span className="ml-2 font-inter font-semibold text-polaris-secondary text-lg">
-                  Stylizer
-                </span>
               </span>
             </Link>
           </div>
@@ -26,4 +23,3 @@ const NavBar = () => {
 };
 
 export default NavBar;
-
