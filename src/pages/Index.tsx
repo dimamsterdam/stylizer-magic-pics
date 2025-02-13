@@ -42,19 +42,6 @@ const Index = () => {
                 Create stunning product displays and layouts for your brand.
               </p>
             </Link>
-
-            <Link 
-              to="/brand" 
-              className="group p-4 border rounded-lg hover:border-[#9b87f5] transition-colors"
-            >
-              <div className="flex items-center justify-between mb-2">
-                <h3 className="font-semibold text-[#1A1F2C]">Brand Identity</h3>
-                <ArrowRight className="h-4 w-4 text-[#9b87f5] opacity-0 group-hover:opacity-100 transition-opacity" />
-              </div>
-              <p className="text-sm text-[#6D7175]">
-                Define and manage your brand's visual identity and guidelines.
-              </p>
-            </Link>
           </div>
         </CardContent>
       </Card>
