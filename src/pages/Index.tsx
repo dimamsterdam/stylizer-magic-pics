@@ -278,129 +278,121 @@ const Index = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[#F6F6F7] to-[#E5DEFF]">
-      <div className="max-w-[1200px] mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {isPickingProducts ? (
-          <div className="mb-8 animate-fade-in">
-            <Card className="bg-white/80 backdrop-blur-sm border-0 shadow-lg mb-8 transition-all duration-300 hover:shadow-xl max-w-4xl mx-auto">
-              <CardHeader>
-                <div className="flex flex-col-reverse md:grid md:grid-cols-[1fr,320px] gap-8 md:gap-0 items-start">
-                  <div className="space-y-4 pr-8">
-                    <h2 className="text-display-lg text-[#1A1F2C] tracking-tight">
-                      Improve Your Pack Shots
-                    </h2>
-                    <p className="text-body-lg text-[#6D7175] max-w-2xl">
-                      Transform your product photos into professional lifestyle images using AI. 
-                      Select up to 3 products to enhance their visual appeal together and publish directly to Shopify.
-                    </p>
-                  </div>
-                  <div className="grid grid-cols-4 gap-1 w-full">
-                    {fashionImages.map((image, index) => (
+    <div className="h-full w-full">
+      {isPickingProducts ? (
+        <div className="p-4 sm:p-6">
+          <Card className="border-0 shadow-sm overflow-hidden">
+            <CardHeader className="p-6 pb-0">
+              <div className="flex flex-col lg:flex-row gap-6 items-start">
+                <div className="flex-1 min-w-0">
+                  <h1 className="text-2xl font-semibold text-[#1A1F2C] tracking-tight mb-2">
+                    Improve Your Pack Shots
+                  </h1>
+                  <p className="text-[#6D7175] text-base">
+                    Transform your product photos into professional lifestyle images using AI. 
+                    Select up to 3 products to enhance their visual appeal together and publish directly to Shopify.
+                  </p>
+                </div>
+                <div className="w-full lg:w-[320px] shrink-0">
+                  <div className="grid grid-cols-4 gap-1">
+                    {fashionImages.slice(0, 8).map((image, index) => (
                       <div 
                         key={index}
-                        className="relative group overflow-hidden aspect-square transition-transform duration-300 hover:scale-105"
+                        className="relative group aspect-square overflow-hidden rounded"
                       >
                         <img
                           src={image.src}
                           alt={image.alt}
-                          className="w-full h-full object-cover transform transition-transform duration-300 group-hover:scale-110"
-                          onError={(e) => {
-                            console.error(`Failed to load image: ${image.src}`);
-                            e.currentTarget.src = '/placeholder.svg';
-                          }}
+                          className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110"
                         />
-                        <div className="absolute inset-0 bg-black/30 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                        <div className="absolute inset-0 bg-black/30 opacity-0 group-hover:opacity-100 transition-opacity" />
                       </div>
                     ))}
                   </div>
                 </div>
+              </div>
+            </CardHeader>
+            <CardContent className="p-6">
+              <div className="mt-4">
+                <ProductPicker 
+                  onSelect={handleProductSelect} 
+                  selectedProducts={selectedProducts}
+                  searchResults={results}
+                  isLoading={isLoading}
+                  error={searchError}
+                  searchTerm={searchTerm}
+                  onSearch={handleSearch}
+                />
+              </div>
+            </CardContent>
+          </Card>
+
+          {selectedProducts.length > 0 && (
+            <Card className="mt-4 border-0 shadow-sm">
+              <CardHeader className="p-6">
+                <h2 className="text-xl font-semibold text-[#1A1F2C]">
+                  Selected Products ({selectedProducts.length}/3)
+                </h2>
               </CardHeader>
-              <CardContent>
-                <div className="mt-8 border-t border-polaris-border pt-6">
-                  <ProductPicker 
-                    onSelect={handleProductSelect} 
-                    selectedProducts={selectedProducts}
-                    searchResults={results}
-                    isLoading={isLoading}
-                    error={searchError}
-                    searchTerm={searchTerm}
-                    onSearch={handleSearch}
-                  />
+              <CardContent className="p-6 pt-0">
+                <div className="space-y-4">
+                  {selectedProducts.map((product) => (
+                    <div
+                      key={product.id}
+                      className="flex items-center p-4 border rounded-lg bg-white/50 transition-all duration-300 hover:bg-white/70"
+                    >
+                      <img
+                        src={product.image}
+                        alt={product.title}
+                        className="w-16 h-16 object-cover rounded-md"
+                        onError={(e) => {
+                          e.currentTarget.src = '/placeholder.svg';
+                        }}
+                      />
+                      <div className="ml-4 flex-1 min-w-0">
+                        <h3 className="font-medium text-[#1A1F2C] truncate">{product.title}</h3>
+                        <p className="text-sm text-[#6D7175]">SKU: {product.sku}</p>
+                      </div>
+                      <button
+                        onClick={() => handleProductRemove(product.id)}
+                        className="ml-4 px-4 py-2 text-red-500 border border-red-500 rounded-lg hover:bg-red-50 transition-all duration-300"
+                      >
+                        Remove
+                      </button>
+                    </div>
+                  ))}
+                  <div className="flex justify-end">
+                    <Button
+                      onClick={handleConfirmSelection}
+                      className="bg-[#9b87f5] hover:bg-[#7E69AB] text-white shadow-sm"
+                    >
+                      Confirm Selection
+                    </Button>
+                  </div>
                 </div>
               </CardContent>
             </Card>
-
-            {selectedProducts.length > 0 && (
-              <Card className="bg-white/80 backdrop-blur-sm border-0 shadow-lg mb-8 transition-all duration-300 hover:shadow-xl max-w-4xl mx-auto">
-                <CardHeader>
-                  <h2 className="text-display-sm text-[#1A1F2C] tracking-tight">
-                    Selected Products ({selectedProducts.length}/3)
-                  </h2>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-4">
-                    {selectedProducts.map((product) => (
-                      <div
-                        key={product.id}
-                        className="flex items-center p-4 border border-polaris-border rounded-md bg-white/50 backdrop-blur-sm transition-all duration-300 hover:bg-white/70 hover:shadow-md animate-scale-in"
-                      >
-                        <img
-                          src={product.image}
-                          alt={product.title}
-                          className="w-16 h-16 object-cover rounded-md transition-transform duration-300 hover:scale-105"
-                          onError={(e) => {
-                            e.currentTarget.src = '/placeholder.svg';
-                          }}
-                        />
-                        <div className="ml-4 flex-1">
-                          <h3 className="font-medium text-polaris-text">{product.title}</h3>
-                          <p className="text-sm text-polaris-secondary">SKU: {product.sku}</p>
-                        </div>
-                        <button
-                          onClick={() => handleProductRemove(product.id)}
-                          className="ml-4 px-4 py-2 text-red-500 border border-red-500 rounded hover:bg-red-50 transition-all duration-300"
-                        >
-                          Remove
-                        </button>
-                      </div>
-                    ))}
-                    <div className="flex justify-end">
-                      <Button
-                        onClick={handleConfirmSelection}
-                        className="bg-[#9b87f5] hover:bg-[#7E69AB] text-white font-medium px-6 py-2 rounded-lg transition-all duration-300 shadow-lg hover:shadow-xl disabled:opacity-50 disabled:hover:scale-100"
-                      >
-                        Confirm Selection
-                      </Button>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            )}
-          </div>
-        ) : (
-          <div className="space-y-8 animate-fade-in max-w-4xl mx-auto">
-            <Card className="bg-white/80 backdrop-blur-sm border-0 shadow-lg transition-all duration-300 hover:shadow-xl">
-              <CardHeader>
-                <div className="flex items-center justify-between mb-6">
-                  <h2 className="text-display-lg text-[#1A1F2C] tracking-tight">
-                    Define your 'photo shoot'
-                  </h2>
+          )}
+        </div>
+      ) : (
+        <div className="p-4 sm:p-6">
+          <div className="space-y-4">
+            <Card className="border-0 shadow-sm">
+              <CardHeader className="p-6">
+                <div className="flex items-center justify-between">
+                  <h2 className="text-xl font-semibold text-[#1A1F2C]">Define your 'photo shoot'</h2>
                   <button
                     onClick={() => setIsPickingProducts(true)}
-                    className="inline-flex items-center text-[#9b87f5] hover:text-[#7E69AB] transition-colors duration-300 text-body-md font-medium"
+                    className="text-[#9b87f5] hover:text-[#7E69AB] font-medium"
                   >
                     Edit Selection
                   </button>
                 </div>
-                <Separator className="mb-6" />
-                <h3 className="text-display-md text-[#1A1F2C] tracking-tight mb-2">
-                  Product Images
-                </h3>
-                <p className="text-body-lg text-[#6D7175]">
-                  Select the product images to use for styling
-                </p>
+                <Separator className="my-4" />
+                <h3 className="text-lg font-semibold text-[#1A1F2C]">Product Images</h3>
+                <p className="text-[#6D7175]">Select the product images to use for styling</p>
               </CardHeader>
-              <CardContent>
+              <CardContent className="p-6 pt-0">
                 <ImageGallery
                   images={images}
                   onSelect={handleImageSelect}
@@ -409,16 +401,12 @@ const Index = () => {
               </CardContent>
             </Card>
 
-            <Card className="bg-white/80 backdrop-blur-sm border-0 shadow-lg transition-all duration-300 hover:shadow-xl">
-              <CardHeader>
-                <h2 className="text-display-lg text-[#1A1F2C] tracking-tight mb-2">
-                  Model Description
-                </h2>
-                <p className="text-body-lg text-[#6D7175]">
-                  Describe your ideal model by clicking on any attribute to customize it
-                </p>
+            <Card className="border-0 shadow-sm">
+              <CardHeader className="p-6">
+                <h2 className="text-xl font-semibold text-[#1A1F2C]">Model Description</h2>
+                <p className="text-[#6D7175]">Describe your ideal model by clicking on any attribute to customize it</p>
               </CardHeader>
-              <CardContent>
+              <CardContent className="p-6 pt-0">
                 <ModelPromptBuilder
                   attributes={modelAttributes}
                   onChange={(key, value) => 
@@ -428,53 +416,40 @@ const Index = () => {
               </CardContent>
             </Card>
 
-            <Card className="bg-white/80 backdrop-blur-sm border-0 shadow-lg transition-all duration-300 hover:shadow-xl">
-              <CardHeader>
-                <h2 className="text-display-lg text-[#1A1F2C] tracking-tight mb-2">
-                  Angle Selection
-                </h2>
-                <p className="text-body-lg text-[#6D7175]">
-                  Choose which angles to generate for your products
-                </p>
+            <Card className="border-0 shadow-sm">
+              <CardHeader className="p-6">
+                <h2 className="text-xl font-semibold text-[#1A1F2C]">Angle Selection</h2>
+                <p className="text-[#6D7175]">Choose which angles to generate for your products</p>
               </CardHeader>
-              <CardContent>
-                <div className="flex flex-wrap gap-3">
+              <CardContent className="p-6 pt-0">
+                <div className="flex flex-wrap gap-2">
                   {Object.entries(selectedAngles).map(([angle, isSelected]) => (
                     <Toggle
                       key={angle}
                       pressed={isSelected}
                       onPressedChange={() => handleAngleToggle(angle)}
-                      className={`px-4 py-2 transition-all duration-300 relative ${
+                      className={`transition-all duration-300 ${
                         isSelected 
-                          ? 'bg-white text-[#9b87f5] border-2 border-[#9b87f5] hover:bg-gray-50 pl-8 shadow-md hover:shadow-lg' 
+                          ? 'bg-white text-[#9b87f5] border-2 border-[#9b87f5] hover:bg-gray-50 pl-8 shadow-sm' 
                           : 'bg-gray-100 text-[#1A1F2C] hover:bg-gray-200 border-2 border-transparent'
                       }`}
                     >
                       {isSelected && (
-                        <Check className="h-4 w-4 absolute left-2 top-1/2 transform -translate-y-1/2" />
+                        <Check className="h-4 w-4 absolute left-2" />
                       )}
                       {angle}
                     </Toggle>
                   ))}
                 </div>
-                {getSelectedAnglesCount() === 0 && (
-                  <p className="mt-2 text-sm text-red-500">
-                    Please select at least one angle
-                  </p>
-                )}
               </CardContent>
             </Card>
 
-            <Card className="bg-white/80 backdrop-blur-sm border-0 shadow-lg transition-all duration-300 hover:shadow-xl">
-              <CardHeader>
-                <h2 className="text-display-lg text-[#1A1F2C] tracking-tight mb-2">
-                  Define Style
-                </h2>
-                <p className="text-body-lg text-[#6D7175]">
-                  Choose your desired background setting or color
-                </p>
+            <Card className="border-0 shadow-sm">
+              <CardHeader className="p-6">
+                <h2 className="text-xl font-semibold text-[#1A1F2C]">Define Style</h2>
+                <p className="text-[#6D7175]">Choose your desired background setting or color</p>
               </CardHeader>
-              <CardContent>
+              <CardContent className="p-6 pt-0">
                 <div className="space-y-6">
                   <RadioGroup
                     value={studioStyle.type}
@@ -483,7 +458,7 @@ const Index = () => {
                     }}
                     className="flex flex-col space-y-4"
                   >
-                    <div className="flex items-center justify-between p-4 border border-polaris-border rounded-lg hover:border-polaris-teal transition-colors">
+                    <div className="flex items-center justify-between p-4 border rounded-lg hover:border-[#9b87f5] transition-colors">
                       <div className="flex items-center space-x-2">
                         <RadioGroupItem value="studio" id="studio" />
                         <Label htmlFor="studio">Studio Setting</Label>
@@ -512,7 +487,7 @@ const Index = () => {
                       </div>
                     </div>
 
-                    <div className="flex items-center justify-between p-4 border border-polaris-border rounded-lg hover:border-polaris-teal transition-colors">
+                    <div className="flex items-center justify-between p-4 border rounded-lg hover:border-[#9b87f5] transition-colors">
                       <div className="flex items-center space-x-2">
                         <RadioGroupItem value="custom" id="custom" />
                         <Label htmlFor="custom">Custom Prompt</Label>
@@ -533,14 +508,6 @@ const Index = () => {
                                     value={studioStyle.customPrompt}
                                     onChange={(e) => setStudioStyle(prev => ({ ...prev, customPrompt: e.target.value }))}
                                     placeholder="Describe your desired studio setting..."
-                                    onKeyDown={(e) => {
-                                      if (e.key === 'Enter') {
-                                        const popoverElement = e.currentTarget.closest('[data-radix-popper-content-wrapper]');
-                                        if (popoverElement instanceof HTMLElement) {
-                                          popoverElement.style.display = 'none';
-                                        }
-                                      }
-                                    }}
                                   />
                                   <Button 
                                     onClick={(e) => {
@@ -550,12 +517,9 @@ const Index = () => {
                                       }
                                     }}
                                   >
-                                    Enter
+                                    Save
                                   </Button>
                                 </div>
-                                <p className="text-sm text-[#6D7175]">
-                                  E.g., "minimalist studio with soft natural lighting"
-                                </p>
                               </div>
                             </div>
                           </PopoverContent>
@@ -564,9 +528,9 @@ const Index = () => {
                     </div>
                   </RadioGroup>
 
-                  <div className="mt-4 p-4 bg-gray-50 rounded-lg">
-                    <p className="text-sm text-gray-600 font-medium">Selected Style:</p>
-                    <p className="text-sm mt-1">
+                  <div className="p-4 bg-gray-50 rounded-lg">
+                    <p className="text-sm font-medium text-[#6D7175]">Selected Style:</p>
+                    <p className="text-sm mt-1 text-[#1A1F2C]">
                       {studioStyle.type === 'studio' 
                         ? `Studio setting with ${studioStyle.backgroundColor} background`
                         : studioStyle.customPrompt || 'No custom prompt set'}
@@ -576,26 +540,22 @@ const Index = () => {
               </CardContent>
             </Card>
 
-            <Card className="bg-white/80 backdrop-blur-sm border-0 shadow-lg transition-all duration-300 hover:shadow-xl">
-              <CardHeader>
-                <h2 className="text-display-lg text-[#1A1F2C] tracking-tight mb-2">
-                  Final Prompt
-                </h2>
-                <p className="text-body-lg text-[#6D7175]">
-                  Adjust by changing the values above
-                </p>
+            <Card className="border-0 shadow-sm">
+              <CardHeader className="p-6">
+                <h2 className="text-xl font-semibold text-[#1A1F2C]">Final Prompt</h2>
+                <p className="text-[#6D7175]">Adjust by changing the values above</p>
               </CardHeader>
-              <CardContent>
+              <CardContent className="p-6 pt-0">
                 <div className="space-y-4">
                   <div className="bg-[#FEF7CD] p-6 rounded-lg border-l-4 border-[#9b87f5]">
-                    <p className="text-[#1A1F2C] text-body-md">{`${getFinalPrompt()}`}</p>
+                    <p className="text-[#1A1F2C]">{getFinalPrompt()}</p>
                   </div>
 
-                  <div className="flex justify-end mt-4">
+                  <div className="flex justify-end">
                     <Button
                       className={`transition-all duration-300 ${
                         canStartGeneration
-                          ? 'bg-[#9b87f5] hover:bg-[#7E69AB] text-white shadow-lg hover:shadow-xl hover:scale-105'
+                          ? 'bg-[#9b87f5] hover:bg-[#7E69AB] text-white shadow-sm'
                           : 'bg-gray-200 text-gray-500 cursor-not-allowed'
                       }`}
                       disabled={!canStartGeneration}
@@ -608,13 +568,13 @@ const Index = () => {
               </CardContent>
             </Card>
           </div>
-        )}
-      </div>
-      {isLoading ? (
-        <div className="flex items-center justify-center p-4">
-          <Loader2 className="h-6 w-6 text-polaris-text animate-spin" />
         </div>
-      ) : null}
+      )}
+      {isLoading && (
+        <div className="flex items-center justify-center p-4">
+          <Loader2 className="h-6 w-6 text-[#6D7175] animate-spin" />
+        </div>
+      )}
     </div>
   );
 };
