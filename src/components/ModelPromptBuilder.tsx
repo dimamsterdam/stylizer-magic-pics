@@ -136,7 +136,7 @@ const AttributeSelector = ({
   return <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
         <Button variant="outline" role="combobox" aria-expanded={open} className="justify-between hover:bg-muted/50 focus:ring-1 focus:ring-offset-1 min-w-[90px] h-[30px] px-2 text-sm">
-          <span className="truncate text-purple-500">{value || `any ${attribute}`}</span>
+          <span className="truncate text-purple-500 font-medium">{value || `any ${attribute}`}</span>
           <ChevronsUpDown className="ml-1 h-3 w-3 shrink-0 opacity-50" />
         </Button>
       </PopoverTrigger>
