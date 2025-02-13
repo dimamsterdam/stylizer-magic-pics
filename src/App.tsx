@@ -7,6 +7,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import NavBar from "./components/NavBar";
 import Breadcrumbs from "./components/Breadcrumbs";
 import Index from "./pages/Index";
+import Stylizer from "./pages/Stylizer";
 import NotFound from "./pages/NotFound";
 import GenerationResults from "./pages/GenerationResults";
 import Publish from "./pages/Publish";
@@ -33,6 +34,7 @@ const App = () => (
                 <Sonner />
                 <Routes>
                   <Route path="/" element={<Index />} />
+                  <Route path="/stylizer" element={<Stylizer />} />
                   <Route path="/expose" element={<Expose />} />
                   <Route path="/brand" element={<Brand />} />
                   <Route path="/settings" element={<Settings />} />
