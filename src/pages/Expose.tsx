@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { ProductPicker } from "@/components/ProductPicker";
 import { supabase } from "@/integrations/supabase/client";
 import { Loader2 } from "lucide-react";
+import { useToast } from "@/components/ui/use-toast";
 
 interface Product {
   id: string;
@@ -17,6 +18,7 @@ interface Product {
 const Expose = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedProducts, setSelectedProducts] = useState<Product[]>([]);
+  const { toast } = useToast();
   
   const { data: searchResults = [], isLoading, error } = useQuery({
     queryKey: ['products', searchTerm],
@@ -58,11 +60,20 @@ const Expose = () => {
     if (selectedProducts.length === 0) return;
 
     try {
+      const {
+        data: { user },
+        error: userError
+      } = await supabase.auth.getUser();
+
+      if (userError) throw userError;
+      if (!user) throw new Error('No user found');
+
       const { data, error } = await supabase
         .from('exposes')
         .insert({
           selected_product_ids: selectedProducts.map(p => p.id),
-          status: 'draft'
+          status: 'draft',
+          user_id: user.id
         })
         .select()
         .single();
@@ -73,6 +84,11 @@ const Expose = () => {
       console.log('Created expose:', data);
     } catch (error) {
       console.error('Error creating expose:', error);
+      toast({
+        title: "Error",
+        description: "Failed to create expose. Please try again.",
+        variant: "destructive"
+      });
     }
   };
 
