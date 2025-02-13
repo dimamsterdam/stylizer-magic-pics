@@ -65,7 +65,7 @@ const Auth = () => {
         <Card className="w-full shadow-sm border-0">
           <CardHeader className="space-y-1 p-6">
             <h1 className="text-2xl font-semibold tracking-tight">
-              {isSignUp ? "Create an Account" : "Welcome Back"}
+              {isSignUp ? "Create an Account" : "Brandmachine is ready"}
             </h1>
             <p className="text-sm text-muted-foreground">
               {isSignUp
