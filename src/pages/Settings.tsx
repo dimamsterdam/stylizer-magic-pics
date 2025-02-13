@@ -1,7 +1,8 @@
 
 import React from "react";
 import { Link } from "react-router-dom";
-import { Palette } from "lucide-react";
+import { Palette, ArrowRight } from "lucide-react";
+import { Card, CardHeader, CardContent } from "@/components/ui/card";
 
 const settingsApps = [
   {
@@ -14,24 +15,36 @@ const settingsApps = [
 
 const Settings = () => {
   return (
-    <div className="container py-6">
-      <h1 className="text-2xl font-semibold text-polaris-text mb-6">Settings</h1>
-      
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        {settingsApps.map((app) => (
-          <Link
-            key={app.title}
-            to={app.url}
-            className="group block space-y-2 rounded-md border border-polaris-border bg-white p-6 hover:border-[#6D7175] transition-colors"
-          >
-            <div className="flex items-center gap-3">
-              <app.icon className="h-6 w-6 text-polaris-text" />
-              <h2 className="font-medium text-polaris-text">{app.title}</h2>
-            </div>
-            <p className="text-sm text-polaris-secondary">{app.description}</p>
-          </Link>
-        ))}
-      </div>
+    <div className="p-4 sm:p-6">
+      <Card className="border-0 shadow-sm">
+        <CardHeader className="p-6">
+          <h1 className="text-2xl font-semibold text-[#1A1F2C] tracking-tight">
+            Settings
+          </h1>
+          <p className="text-[#6D7175] mt-2">
+            Configure your application settings and manage your brand identity.
+          </p>
+        </CardHeader>
+        <CardContent className="p-6 pt-0">
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {settingsApps.map((app) => (
+              <Link 
+                key={app.title}
+                to={app.url} 
+                className="group p-4 border rounded-lg hover:border-[#9b87f5] transition-colors"
+              >
+                <div className="flex items-center justify-between mb-2">
+                  <h3 className="font-semibold text-[#1A1F2C]">{app.title}</h3>
+                  <ArrowRight className="h-4 w-4 text-[#9b87f5] opacity-0 group-hover:opacity-100 transition-opacity" />
+                </div>
+                <p className="text-sm text-[#6D7175]">
+                  {app.description}
+                </p>
+              </Link>
+            ))}
+          </div>
+        </CardContent>
+      </Card>
     </div>
   );
 };
