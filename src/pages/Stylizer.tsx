@@ -333,11 +333,14 @@ const Stylizer = () => {
         </CardContent>
       </Card>}
     </div> : <div className="p-4 sm:p-6">
+      <div className="mb-6">
+        <h2 className="text-[#1A1F2C] text-2xl font-medium">Define your photo shoot</h2>
+        <p className="text-[#6D7175] mt-1">Configure all aspects of your AI-powered product photo shoot</p>
+      </div>
       <div className="space-y-4">
         <Card className="border-0 shadow-sm">
           <CardHeader className="p-6 pb-2">
             <div className="flex items-center justify-between">
-              <h2 className="text-xl font-semibold text-[#1A1F2C] mb-1">Define your 'photo shoot'</h2>
               <button onClick={() => setIsPickingProducts(true)} className="text-[#9b87f5] hover:text-[#7E69AB] font-medium">
                 Edit Selection
               </button>
