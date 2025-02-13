@@ -26,10 +26,6 @@ const mainNavItems = [{
   title: "Expose",
   icon: Image,
   url: "/expose"
-}, {
-  title: "Brand Identity",
-  icon: Palette,
-  url: "/brand"
 }];
 
 const libraryItems = [{
