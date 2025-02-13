@@ -22,29 +22,46 @@ const Auth = () => {
 
     try {
       if (isSignUp) {
-        const { error } = await supabase.auth.signUp({
+        const { data, error } = await supabase.auth.signUp({
           email,
           password,
+          options: {
+            emailRedirectTo: window.location.origin
+          }
         });
+        
         if (error) throw error;
         
         toast({
           title: "Success",
           description: "Please check your email to verify your account",
         });
+        
+        console.log("Sign up response:", data); // Debug log
       } else {
-        const { error } = await supabase.auth.signInWithPassword({
+        const { data, error } = await supabase.auth.signInWithPassword({
           email,
           password,
         });
+        
         if (error) throw error;
         
+        console.log("Sign in response:", data); // Debug log
         navigate("/");
       }
     } catch (error: any) {
+      console.error("Auth error:", error); // Debug log
+      
+      let errorMessage = error.message;
+      if (error.message.includes("Invalid login credentials")) {
+        errorMessage = isSignUp 
+          ? "Failed to create account. Please try again."
+          : "Invalid email or password. Please try again or sign up if you don't have an account.";
+      }
+      
       toast({
         title: "Error",
-        description: error.message,
+        description: errorMessage,
         variant: "destructive",
       });
     } finally {
