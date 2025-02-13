@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Search, Check, Wand2, Loader2 } from "lucide-react";
 import { ProductPicker } from "@/components/ProductPicker";
@@ -278,7 +279,7 @@ const Stylizer = () => {
   };
 
   return (
-    <div className="h-full w-full">
+    <div className="h-full w-full pt-4">
       {isPickingProducts ? (
         <div className="p-4 sm:p-6">
           <Card className="border-0 shadow-sm overflow-hidden">
