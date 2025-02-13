@@ -18,6 +18,13 @@ const Auth = () => {
 
   // Check if user is already logged in
   useEffect(() => {
+    supabase.auth.getSession().then(({ data: { session }}) => {
+      console.log("Current session:", session); // Debug log
+      if (session) {
+        navigate("/");
+      }
+    });
+
     const { data: authListener } = supabase.auth.onAuthStateChange((event, session) => {
       console.log("Auth state changed:", event, session); // Debug log
       if (session) {
@@ -39,13 +46,7 @@ const Auth = () => {
         console.log("Attempting to sign up with email:", email); // Debug log
         const { data, error } = await supabase.auth.signUp({
           email,
-          password,
-          options: {
-            emailRedirectTo: `${window.location.origin}/auth`,
-            data: {
-              email: email,
-            }
-          }
+          password
         });
         
         if (error) {
@@ -57,7 +58,7 @@ const Auth = () => {
         
         toast({
           title: "Account created",
-          description: "Please check your email to verify your account before signing in.",
+          description: "You can now sign in with your credentials.",
         });
         
         // Clear form after successful signup
