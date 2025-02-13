@@ -105,7 +105,7 @@ serve(async (req) => {
       }
     `;
 
-    console.log("Sending request to Shopify API");
+    console.log("Sending request to Shopify API with query:", query);
     const response = await fetch(
       'https://quickstart-50d94e13.myshopify.com/api/2024-01/graphql.json',
       {
@@ -140,7 +140,7 @@ serve(async (req) => {
     }
 
     const data = await response.json();
-    console.log("Received response from Shopify API");
+    console.log("Received response from Shopify API:", JSON.stringify(data));
 
     // Validate Shopify response
     if (!data.data?.products?.edges) {
