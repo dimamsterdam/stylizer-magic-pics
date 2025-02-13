@@ -1,5 +1,4 @@
-
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -10,6 +9,7 @@ import { useToast } from "@/components/ui/use-toast";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { useNavigate } from "react-router-dom";
 
 interface Product {
   id: string;
@@ -29,6 +29,24 @@ const Expose = () => {
   const [isGenerating, setIsGenerating] = useState(false);
   const [exposeId, setExposeId] = useState<string | null>(null);
   const { toast } = useToast();
+  const navigate = useNavigate();
+
+  // Check for authentication
+  useEffect(() => {
+    const checkAuth = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) {
+        toast({
+          title: "Authentication required",
+          description: "Please log in to create exposes",
+          variant: "destructive",
+        });
+        navigate('/auth');
+      }
+    };
+    
+    checkAuth();
+  }, [navigate, toast]);
   
   const { data: searchResults = [], isLoading, error } = useQuery({
     queryKey: ['products', searchTerm],
@@ -70,25 +88,32 @@ const Expose = () => {
     if (selectedProducts.length === 0) return;
 
     try {
-      const {
-        data: { user },
-        error: userError
-      } = await supabase.auth.getUser();
-
-      if (userError) throw userError;
-      if (!user) throw new Error('No user found');
+      const { data: { session } } = await supabase.auth.getSession();
+      
+      if (!session?.user) {
+        toast({
+          title: "Authentication required",
+          description: "Please log in to create exposes",
+          variant: "destructive",
+        });
+        navigate('/auth');
+        return;
+      }
 
       const { data, error } = await supabase
         .from('exposes')
         .insert({
           selected_product_ids: selectedProducts.map(p => p.id),
           status: 'draft',
-          user_id: user.id
+          user_id: session.user.id
         })
         .select()
         .single();
 
-      if (error) throw error;
+      if (error) {
+        console.error('Error creating expose:', error);
+        throw error;
+      }
 
       setExposeId(data.id);
       setCurrentStep('configuration');
