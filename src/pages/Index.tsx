@@ -48,6 +48,7 @@ interface ModelAttributes {
   ethnicity: "Asian" | "Black" | "Caucasian" | "Hispanic" | "Middle Eastern" | "Mixed";
   hairLength: "Short" | "Medium" | "Long";
   hairColor: "Black" | "Brown" | "Blonde" | "Red" | "Gray" | "Other";
+  style: "authentic" | "amateur" | "polished" | "rock star" | "vogue";
   pose: "Natural" | "Professional" | "Casual" | "Dynamic";
 }
 
@@ -89,6 +90,7 @@ const Index = () => {
     ethnicity: "Caucasian",
     hairLength: "Medium",
     hairColor: "Brown",
+    style: "authentic",
     pose: "Professional"
   });
   const [searchTerm, setSearchTerm] = useState("");
@@ -198,12 +200,14 @@ const Index = () => {
     const agePart = `, ${modelAttributes.age} years old`;
     
     const posePart = `, in a ${modelAttributes.pose.toLowerCase()} pose`;
+
+    const stylePart = `, with a ${modelAttributes.style} look`;
     
-    const stylePart = studioStyle.type === 'custom' 
+    const studioStylePart = studioStyle.type === 'custom' 
       ? studioStyle.customPrompt
       : `in a professional studio setting with Background Color: ${studioStyle.backgroundColor}`;
 
-    return `${basePrompt}${ethnicityPart}${agePart}${posePart}, ${stylePart}`;
+    return `${basePrompt}${ethnicityPart}${agePart}${posePart}${stylePart}, ${studioStylePart}`;
   };
 
   const canStartGeneration = images.length > 0 && 
