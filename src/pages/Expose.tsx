@@ -7,6 +7,9 @@ import { ProductPicker } from "@/components/ProductPicker";
 import { supabase } from "@/integrations/supabase/client";
 import { Loader2 } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 
 interface Product {
   id: string;
@@ -15,9 +18,16 @@ interface Product {
   image: string;
 }
 
+type Step = 'products' | 'hero';
+
 const Expose = () => {
+  const [currentStep, setCurrentStep] = useState<Step>('products');
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedProducts, setSelectedProducts] = useState<Product[]>([]);
+  const [occasion, setOccasion] = useState("");
+  const [brandConstraints, setBrandConstraints] = useState("");
+  const [isGenerating, setIsGenerating] = useState(false);
+  const [exposeId, setExposeId] = useState<string | null>(null);
   const { toast } = useToast();
   
   const { data: searchResults = [], isLoading, error } = useQuery({
@@ -80,8 +90,8 @@ const Expose = () => {
 
       if (error) throw error;
 
-      // Will implement navigation to next step later
-      console.log('Created expose:', data);
+      setExposeId(data.id);
+      setCurrentStep('hero');
     } catch (error) {
       console.error('Error creating expose:', error);
       toast({
@@ -92,15 +102,60 @@ const Expose = () => {
     }
   };
 
-  return (
-    <div className="min-h-screen bg-[#F6F6F7]">
-      <div className="p-4 sm:p-6">
-        <div className="mb-6">
-          <h1 className="text-[#1A1F2C] text-2xl font-medium">Create an Expose</h1>
-          <p className="text-[#6D7175] mt-1">Generate AI-driven hero images with your products</p>
-        </div>
+  const handleGenerateHero = async () => {
+    if (!exposeId || !occasion) return;
 
-        <div className="max-w-3xl">
+    setIsGenerating(true);
+    try {
+      const prompt = `Create a hero product image for ${occasion}. ${
+        brandConstraints ? `Style guidelines: ${brandConstraints}.` : ''
+      } The image should feature ${selectedProducts.length} product${
+        selectedProducts.length > 1 ? 's' : ''
+      } in an engaging and professional composition.`;
+
+      const response = await fetch('/api/generate-ai-image', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ prompt }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to generate image');
+      }
+
+      const { imageUrl } = await response.json();
+
+      const { error: updateError } = await supabase
+        .from('exposes')
+        .update({
+          hero_image_url: imageUrl,
+          occasion,
+          brand_constraints: brandConstraints
+        })
+        .eq('id', exposeId);
+
+      if (updateError) throw updateError;
+
+      toast({
+        title: "Success",
+        description: "Hero image generated successfully!",
+      });
+    } catch (error) {
+      console.error('Error generating hero:', error);
+      toast({
+        title: "Error",
+        description: "Failed to generate hero image. Please try again.",
+        variant: "destructive"
+      });
+    } finally {
+      setIsGenerating(false);
+    }
+  };
+
+  const renderStep = () => {
+    switch (currentStep) {
+      case 'products':
+        return (
           <Card className="border-0 shadow-sm">
             <CardHeader className="p-6 pb-2">
               <h2 className="text-lg font-semibold text-[#1A1F2C] mb-1">Select Products</h2>
@@ -168,6 +223,73 @@ const Expose = () => {
               </div>
             </CardContent>
           </Card>
+        );
+
+      case 'hero':
+        return (
+          <Card className="border-0 shadow-sm">
+            <CardHeader className="p-6 pb-2">
+              <h2 className="text-lg font-semibold text-[#1A1F2C] mb-1">Generate Hero Image</h2>
+              <p className="text-[#6D7175]">Customize your hero image generation settings</p>
+            </CardHeader>
+            <CardContent className="p-6">
+              <div className="space-y-6">
+                <div className="space-y-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="occasion">Occasion or Theme</Label>
+                    <Input
+                      id="occasion"
+                      placeholder="e.g., Valentine's Day, Summer Sale, New Collection"
+                      value={occasion}
+                      onChange={(e) => setOccasion(e.target.value)}
+                    />
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <Label htmlFor="brand-constraints">Brand Style Guidelines (Optional)</Label>
+                    <Textarea
+                      id="brand-constraints"
+                      placeholder="e.g., Minimalist aesthetic, bright and airy, dark and moody"
+                      value={brandConstraints}
+                      onChange={(e) => setBrandConstraints(e.target.value)}
+                      className="h-24"
+                    />
+                  </div>
+                </div>
+
+                <div className="flex justify-end pt-4">
+                  <Button
+                    onClick={handleGenerateHero}
+                    disabled={!occasion || isGenerating}
+                    className="bg-[#008060] hover:bg-[#006e52] text-white px-6"
+                  >
+                    {isGenerating ? (
+                      <>
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        Generating...
+                      </>
+                    ) : (
+                      'Generate Hero Image'
+                    )}
+                  </Button>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        );
+    }
+  };
+
+  return (
+    <div className="min-h-screen bg-[#F6F6F7]">
+      <div className="p-4 sm:p-6">
+        <div className="mb-6">
+          <h1 className="text-[#1A1F2C] text-2xl font-medium">Create an Expose</h1>
+          <p className="text-[#6D7175] mt-1">Generate AI-driven hero images with your products</p>
+        </div>
+
+        <div className="max-w-3xl">
+          {renderStep()}
         </div>
       </div>
     </div>
