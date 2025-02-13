@@ -190,7 +190,7 @@ const Index = () => {
   const getFinalPrompt = () => {
     const basePrompt = `A ${modelAttributes.gender.toLowerCase()} fashion model with ${modelAttributes.bodyType.toLowerCase()} build, ${modelAttributes.hairLength.toLowerCase()} ${modelAttributes.hairColor.toLowerCase()} hair`;
     
-    const ethnicityPart = modelAttributes.ethnicity 
+    const ethnicityPart = modelAttributes.ethnicity !== "Any" 
       ? `, ${modelAttributes.ethnicity} ethnicity` 
       : "";
       
@@ -200,7 +200,7 @@ const Index = () => {
     
     const stylePart = studioStyle.type === 'custom' 
       ? studioStyle.customPrompt
-      : `in a professional studio setting with Background Color: ${studioStyle.backgroundColor}`;
+      : `in a professional studio setting with Background Color: ${studioStyle.backgroundColor} (${studioStyle.backgroundColor}) and clean lighting`;
 
     return `${basePrompt}${ethnicityPart}${agePart}${posePart}, ${stylePart}`;
   };
@@ -276,10 +276,10 @@ const Index = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#F6F6F7] to-[#E5DEFF]">
-      <div className="max-w-[1200px] mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div className="max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {isPickingProducts ? (
           <div className="mb-8 animate-fade-in">
-            <Card className="bg-white/80 backdrop-blur-sm border-0 shadow-lg mb-8 transition-all duration-300 hover:shadow-xl max-w-4xl mx-auto">
+            <Card className="bg-white/80 backdrop-blur-sm border-0 shadow-lg mb-8 transition-all duration-300 hover:shadow-xl">
               <CardHeader>
                 <div className="flex flex-col-reverse md:grid md:grid-cols-[1fr,320px] gap-8 md:gap-0 items-start">
                   <div className="space-y-4 pr-8">
@@ -328,7 +328,7 @@ const Index = () => {
             </Card>
 
             {selectedProducts.length > 0 && (
-              <Card className="bg-white/80 backdrop-blur-sm border-0 shadow-lg mb-8 transition-all duration-300 hover:shadow-xl max-w-4xl mx-auto">
+              <Card className="bg-white/80 backdrop-blur-sm border-0 shadow-lg mb-8 transition-all duration-300 hover:shadow-xl animate-fade-in">
                 <CardHeader>
                   <h2 className="text-display-sm text-[#1A1F2C] tracking-tight">
                     Selected Products ({selectedProducts.length}/3)
@@ -364,7 +364,7 @@ const Index = () => {
                     <div className="flex justify-end">
                       <Button
                         onClick={handleConfirmSelection}
-                        className="bg-[#9b87f5] hover:bg-[#7E69AB] text-white font-medium px-6 py-2 rounded-lg transition-all duration-300 shadow-lg hover:shadow-xl disabled:opacity-50 disabled:hover:scale-100"
+                        className="bg-[#9b87f5] hover:bg-[#7E69AB] text-white font-medium px-6 py-2 rounded-lg transition-all duration-300 shadow-lg hover:shadow-xl hover:scale-105 disabled:opacity-50 disabled:hover:scale-100"
                       >
                         Confirm Selection
                       </Button>
@@ -375,7 +375,7 @@ const Index = () => {
             )}
           </div>
         ) : (
-          <div className="space-y-8 animate-fade-in max-w-4xl mx-auto">
+          <div className="space-y-8 animate-fade-in">
             <Card className="bg-white/80 backdrop-blur-sm border-0 shadow-lg transition-all duration-300 hover:shadow-xl">
               <CardHeader>
                 <div className="flex items-center justify-between mb-6">
@@ -614,7 +614,7 @@ const Index = () => {
                         <RadioGroupItem value="studio" id="studio" />
                         <Label htmlFor="studio">Studio Setting</Label>
                         {studioStyle.type === 'studio' && (
-                          <Popover>
+                          <Popover defaultOpen>
                             <PopoverTrigger asChild>
                               <Button 
                                 variant="outline" 
@@ -707,14 +707,11 @@ const Index = () => {
                 <h2 className="text-display-lg text-[#1A1F2C] tracking-tight mb-2">
                   Final Prompt
                 </h2>
-                <p className="text-body-lg text-[#6D7175]">
-                  Adjust by changing the values above
-                </p>
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
                   <div className="bg-[#FEF7CD] p-6 rounded-lg border-l-4 border-[#9b87f5]">
-                    <p className="text-[#1A1F2C] text-body-md">{`${getFinalPrompt()}`}</p>
+                    <p className="text-[#1A1F2C] text-body-md">{getFinalPrompt()}</p>
                   </div>
 
                   <div className="flex justify-end mt-4">
