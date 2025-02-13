@@ -190,7 +190,7 @@ const Index = () => {
   const getFinalPrompt = () => {
     const basePrompt = `A ${modelAttributes.gender.toLowerCase()} fashion model with ${modelAttributes.bodyType.toLowerCase()} build, ${modelAttributes.hairLength.toLowerCase()} ${modelAttributes.hairColor.toLowerCase()} hair`;
     
-    const ethnicityPart = modelAttributes.ethnicity !== "Any" 
+    const ethnicityPart = modelAttributes.ethnicity 
       ? `, ${modelAttributes.ethnicity} ethnicity` 
       : "";
       
@@ -614,7 +614,7 @@ const Index = () => {
                         <RadioGroupItem value="studio" id="studio" />
                         <Label htmlFor="studio">Studio Setting</Label>
                         {studioStyle.type === 'studio' && (
-                          <Popover defaultOpen>
+                          <Popover>
                             <PopoverTrigger asChild>
                               <Button 
                                 variant="outline" 
