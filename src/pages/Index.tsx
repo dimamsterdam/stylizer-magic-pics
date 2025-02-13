@@ -200,7 +200,7 @@ const Index = () => {
     
     const stylePart = studioStyle.type === 'custom' 
       ? studioStyle.customPrompt
-      : `in a professional studio setting with Background Color: ${studioStyle.backgroundColor} (${studioStyle.backgroundColor}) and clean lighting`;
+      : `in a professional studio setting with Background Color: ${studioStyle.backgroundColor}`;
 
     return `${basePrompt}${ethnicityPart}${agePart}${posePart}, ${stylePart}`;
   };
@@ -364,7 +364,7 @@ const Index = () => {
                     <div className="flex justify-end">
                       <Button
                         onClick={handleConfirmSelection}
-                        className="bg-[#9b87f5] hover:bg-[#7E69AB] text-white font-medium px-6 py-2 rounded-lg transition-all duration-300 shadow-lg hover:shadow-xl hover:scale-105 disabled:opacity-50 disabled:hover:scale-100"
+                        className="bg-[#9b87f5] hover:bg-[#7E69AB] text-white font-medium px-6 py-2 rounded-lg transition-all duration-300 shadow-lg hover:shadow-xl disabled:opacity-50 disabled:hover:scale-100"
                       >
                         Confirm Selection
                       </Button>
@@ -714,7 +714,7 @@ const Index = () => {
               <CardContent>
                 <div className="space-y-4">
                   <div className="bg-[#FEF7CD] p-6 rounded-lg border-l-4 border-[#9b87f5]">
-                    <p className="text-[#1A1F2C] text-body-md">{getFinalPrompt()}</p>
+                    <p className="text-[#1A1F2C] text-body-md">{`${getFinalPrompt()}`}</p>
                   </div>
 
                   <div className="flex justify-end mt-4">
