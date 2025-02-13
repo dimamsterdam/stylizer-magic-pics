@@ -17,7 +17,7 @@ interface ModelAttributes {
   ethnicity: "Asian" | "Black" | "Caucasian" | "Hispanic" | "Middle Eastern" | "Mixed";
   hairLength: "Short" | "Medium" | "Long";
   hairColor: "Black" | "Brown" | "Blonde" | "Red" | "Gray" | "Other";
-  pose: "Natural" | "Professional" | "Casual" | "Dynamic";
+  style: "authentic" | "amateur" | "polished" | "rock star" | "vogue";
 }
 
 interface ModelPromptBuilderProps {
@@ -68,11 +68,12 @@ const attributeOptions: Record<keyof ModelAttributes, AttributeOption[]> = {
     { label: "Gray", value: "Gray" },
     { label: "Other", value: "Other" },
   ],
-  pose: [
-    { label: "Natural", value: "Natural" },
-    { label: "Professional", value: "Professional" },
-    { label: "Casual", value: "Casual" },
-    { label: "Dynamic", value: "Dynamic" },
+  style: [
+    { label: "authentic", value: "authentic" },
+    { label: "amateur", value: "amateur" },
+    { label: "polished", value: "polished" },
+    { label: "rock star", value: "rock star" },
+    { label: "vogue", value: "vogue" },
   ],
 };
 
@@ -97,10 +98,10 @@ const AttributeSelector = ({
           variant="outline"
           role="combobox"
           aria-expanded={open}
-          className="justify-between hover:bg-muted/50 focus:ring-1 focus:ring-offset-1 min-w-[120px]"
+          className="justify-between hover:bg-muted/50 focus:ring-1 focus:ring-offset-1 min-w-[90px] h-[30px] px-2 text-sm"
         >
           <span className="truncate">{value || `any ${attribute}`}</span>
-          <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+          <ChevronsUpDown className="ml-1 h-3 w-3 shrink-0 opacity-50" />
         </Button>
       </PopoverTrigger>
       <PopoverContent className="w-[200px] p-0">
@@ -147,8 +148,8 @@ export const ModelPromptBuilder: React.FC<ModelPromptBuilderProps> = ({
   onChange,
 }) => {
   return (
-    <div className="space-y-4 text-lg">
-      <p className="leading-relaxed">
+    <div className="space-y-2.5 text-lg">
+      <p className="leading-relaxed whitespace-nowrap">
         I want to create a{" "}
         <AttributeSelector
           attribute="gender"
@@ -172,7 +173,7 @@ export const ModelPromptBuilder: React.FC<ModelPromptBuilderProps> = ({
         />
         .
       </p>
-      <p className="leading-relaxed">
+      <p className="leading-relaxed whitespace-nowrap">
         The model should be of{" "}
         <AttributeSelector
           attribute="ethnicity"
@@ -195,15 +196,15 @@ export const ModelPromptBuilder: React.FC<ModelPromptBuilderProps> = ({
         />{" "}
         hair.
       </p>
-      <p className="leading-relaxed">
-        The model should strike a{" "}
+      <p className="leading-relaxed whitespace-nowrap">
+        The model should have a{" "}
         <AttributeSelector
-          attribute="pose"
-          value={attributes.pose}
-          options={attributeOptions.pose}
-          onChange={(value) => onChange("pose", value)}
+          attribute="style"
+          value={attributes.style}
+          options={attributeOptions.style}
+          onChange={(value) => onChange("style", value)}
         />{" "}
-        pose.
+        look.
       </p>
     </div>
   );
