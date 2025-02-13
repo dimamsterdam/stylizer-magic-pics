@@ -60,74 +60,77 @@ const Auth = () => {
   });
 
   return (
-    <div className="w-full min-h-screen bg-[#F6F6F7] flex items-center justify-center p-4">
-      <Card className="w-full max-w-md border-0 shadow-sm">
-        <CardHeader className="p-6 pb-2">
-          <h1 className="text-2xl font-medium text-[#1A1F2C]">
-            {isSignUp ? "Create an Account" : "Welcome Back"}
-          </h1>
-          <p className="text-[#6D7175] mt-1">
-            {isSignUp
-              ? "Sign up to start creating exposes"
-              : "Sign in to your account"}
-          </p>
-        </CardHeader>
-        <CardContent className="p-6">
-          <form onSubmit={handleAuth} className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
-              <Input
-                id="email"
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="Enter your email"
-                required
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="password">Password</Label>
-              <Input
-                id="password"
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                placeholder="Enter your password"
-                required
-              />
-            </div>
-            <Button
-              type="submit"
-              className="w-full bg-[#008060] hover:bg-[#006e52]"
-              disabled={isLoading}
-            >
-              {isLoading ? (
-                <span className="flex items-center">
-                  <span className="animate-spin mr-2">⌛</span>
-                  {isSignUp ? "Creating Account..." : "Signing In..."}
-                </span>
-              ) : isSignUp ? (
-                "Create Account"
-              ) : (
-                "Sign In"
-              )}
-            </Button>
-          </form>
-
-          <div className="mt-4 text-center">
-            <button
-              onClick={() => setIsSignUp(!isSignUp)}
-              className="text-[#006e52] hover:underline text-sm"
-            >
+    <div className="min-h-screen bg-[#F6F6F7] flex items-center justify-center">
+      <div className="w-full max-w-[400px] px-4">
+        <Card className="w-full shadow-sm border-0">
+          <CardHeader className="space-y-1 p-6">
+            <h1 className="text-2xl font-semibold tracking-tight">
+              {isSignUp ? "Create an Account" : "Welcome Back"}
+            </h1>
+            <p className="text-sm text-muted-foreground">
               {isSignUp
-                ? "Already have an account? Sign in"
-                : "Need an account? Sign up"}
-            </button>
-          </div>
-        </CardContent>
-      </Card>
+                ? "Sign up to start creating exposes"
+                : "Sign in to your account"}
+            </p>
+          </CardHeader>
+          <CardContent className="p-6 pt-0">
+            <form onSubmit={handleAuth} className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="email">Email</Label>
+                <Input
+                  id="email"
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder="Enter your email"
+                  required
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="password">Password</Label>
+                <Input
+                  id="password"
+                  type="password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  placeholder="Enter your password"
+                  required
+                />
+              </div>
+              <Button
+                type="submit"
+                className="w-full bg-[#008060] hover:bg-[#006e52] text-white"
+                disabled={isLoading}
+              >
+                {isLoading ? (
+                  <span className="flex items-center justify-center">
+                    <span className="animate-spin mr-2">⌛</span>
+                    {isSignUp ? "Creating Account..." : "Signing In..."}
+                  </span>
+                ) : isSignUp ? (
+                  "Create Account"
+                ) : (
+                  "Sign In"
+                )}
+              </Button>
+            </form>
+
+            <div className="mt-4 text-center">
+              <button
+                type="button"
+                onClick={() => setIsSignUp(!isSignUp)}
+                className="text-sm text-[#006e52] hover:underline"
+              >
+                {isSignUp
+                  ? "Already have an account? Sign in"
+                  : "Need an account? Sign up"}
+              </button>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
     </div>
   );
-};
+}
 
 export default Auth;

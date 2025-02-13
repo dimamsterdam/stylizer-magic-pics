@@ -21,30 +21,37 @@ function AppContent() {
   const location = useLocation();
   const isAuthRoute = location.pathname === '/auth';
 
+  if (isAuthRoute) {
+    return (
+      <main className="min-h-screen w-full">
+        <Routes>
+          <Route path="/auth" element={<Auth />} />
+        </Routes>
+      </main>
+    );
+  }
+
   return (
     <div className="relative h-full">
-      <TooltipProvider>
-        <SidebarProvider>
-          <div className="flex h-screen overflow-hidden">
-            {!isAuthRoute && <GlobalSidebar />}
-            <main className={`flex-1 overflow-y-auto ${isAuthRoute ? 'w-full' : ''}`}>
-              <Routes>
-                <Route path="/" element={<Expose />} />
-                <Route path="/brand" element={<Brand />} />
-                <Route path="/stylizer" element={<Stylizer />} />
-                <Route
-                  path="/generation-results"
-                  element={<GenerationResults />}
-                />
-                <Route path="/publish" element={<Publish />} />
-                <Route path="/settings" element={<Settings />} />
-                <Route path="/auth" element={<Auth />} />
-                <Route path="*" element={<NotFound />} />
-              </Routes>
-            </main>
-          </div>
-        </SidebarProvider>
-      </TooltipProvider>
+      <SidebarProvider>
+        <div className="flex h-screen overflow-hidden">
+          <GlobalSidebar />
+          <main className="flex-1 overflow-y-auto">
+            <Routes>
+              <Route path="/" element={<Expose />} />
+              <Route path="/brand" element={<Brand />} />
+              <Route path="/stylizer" element={<Stylizer />} />
+              <Route
+                path="/generation-results"
+                element={<GenerationResults />}
+              />
+              <Route path="/publish" element={<Publish />} />
+              <Route path="/settings" element={<Settings />} />
+              <Route path="*" element={<NotFound />} />
+            </Routes>
+          </main>
+        </div>
+      </SidebarProvider>
     </div>
   );
 }
