@@ -276,10 +276,10 @@ const Index = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#F6F6F7] to-[#E5DEFF]">
-      <div className="max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div className="max-w-[1200px] mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {isPickingProducts ? (
           <div className="mb-8 animate-fade-in">
-            <Card className="bg-white/80 backdrop-blur-sm border-0 shadow-lg mb-8 transition-all duration-300 hover:shadow-xl">
+            <Card className="bg-white/80 backdrop-blur-sm border-0 shadow-lg mb-8 transition-all duration-300 hover:shadow-xl max-w-4xl mx-auto">
               <CardHeader>
                 <div className="flex flex-col-reverse md:grid md:grid-cols-[1fr,320px] gap-8 md:gap-0 items-start">
                   <div className="space-y-4 pr-8">
@@ -328,7 +328,7 @@ const Index = () => {
             </Card>
 
             {selectedProducts.length > 0 && (
-              <Card className="bg-white/80 backdrop-blur-sm border-0 shadow-lg mb-8 transition-all duration-300 hover:shadow-xl animate-fade-in">
+              <Card className="bg-white/80 backdrop-blur-sm border-0 shadow-lg mb-8 transition-all duration-300 hover:shadow-xl max-w-4xl mx-auto">
                 <CardHeader>
                   <h2 className="text-display-sm text-[#1A1F2C] tracking-tight">
                     Selected Products ({selectedProducts.length}/3)
@@ -375,7 +375,7 @@ const Index = () => {
             )}
           </div>
         ) : (
-          <div className="space-y-8 animate-fade-in">
+          <div className="space-y-8 animate-fade-in max-w-4xl mx-auto">
             <Card className="bg-white/80 backdrop-blur-sm border-0 shadow-lg transition-all duration-300 hover:shadow-xl">
               <CardHeader>
                 <div className="flex items-center justify-between mb-6">
