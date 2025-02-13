@@ -1,5 +1,5 @@
 
-import { Home, Image, Video, Palette, Settings, Menu, X } from "lucide-react";
+import { Home, Image, Video, Palette, Settings, Menu, X, ChevronLeft, ChevronRight } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
 import {
   Sidebar,
@@ -10,7 +10,6 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
-  SidebarProvider,
   SidebarTrigger,
 } from "@/components/ui/sidebar";
 
@@ -49,7 +48,7 @@ export function GlobalSidebar() {
   const location = useLocation();
 
   return (
-    <Sidebar className="border-r border-polaris-border">
+    <Sidebar className="border-r border-polaris-border fixed left-0 top-16 h-[calc(100vh-4rem)] z-40">
       <SidebarContent>
         <SidebarGroup>
           <SidebarGroupLabel>Applications</SidebarGroupLabel>
@@ -132,6 +131,9 @@ export function GlobalSidebar() {
           </SidebarGroup>
         </div>
       </SidebarContent>
+      <SidebarTrigger className="absolute -right-3 top-3 bg-white border border-polaris-border rounded-full p-1 hover:bg-polaris-background transition-colors">
+        <ChevronLeft className="h-4 w-4 sidebar-expanded:rotate-180 transition-transform duration-200" />
+      </SidebarTrigger>
     </Sidebar>
   );
 }

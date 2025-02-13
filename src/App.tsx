@@ -24,10 +24,10 @@ const App = () => (
       <div className="min-h-screen bg-polaris-background">
         <BrowserRouter>
           <NavBar />
-          <div className="flex w-full">
+          <div className="flex w-full pt-16">
             <SidebarProvider>
               <GlobalSidebar />
-              <main className="flex-1">
+              <main className="flex-1 pl-[260px] sidebar-collapsed:pl-[80px] transition-[padding] duration-300">
                 <Breadcrumbs />
                 <Toaster />
                 <Sonner />
