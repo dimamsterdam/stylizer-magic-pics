@@ -51,20 +51,13 @@ export const ProductPicker = ({
     if (term.length < 2) return;
 
     try {
-      const response = await fetch('/api/sync-shopify-products', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ searchTerm: term }),
+      const { data, error: functionError } = await supabase.functions.invoke('sync-shopify-products', {
+        body: { searchTerm: term }
       });
 
-      if (!response.ok) {
-        throw new Error('Failed to fetch products');
-      }
+      if (functionError) throw functionError;
 
-      const data = await response.json();
-      if (data.products) {
+      if (data?.products) {
         // Update products in Supabase
         const { error } = await supabase
           .from('products')
@@ -199,4 +192,3 @@ export const ProductPicker = ({
     </div>
   );
 };
-
