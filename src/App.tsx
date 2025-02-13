@@ -24,10 +24,10 @@ const App = () => (
       <div className="min-h-screen bg-polaris-background">
         <BrowserRouter>
           <NavBar />
-          <div className="flex w-full">
-            <SidebarProvider>
+          <SidebarProvider>
+            <div className="flex w-full pt-16">
               <GlobalSidebar />
-              <main className="flex-1 pl-[260px] sidebar-collapsed:pl-[80px] transition-[padding] duration-300">
+              <main className="flex-1 transition-[margin] duration-300 ml-[260px] sidebar-collapsed:ml-[80px]">
                 <Breadcrumbs />
                 <Toaster />
                 <Sonner />
@@ -41,8 +41,8 @@ const App = () => (
                   <Route path="*" element={<NotFound />} />
                 </Routes>
               </main>
-            </SidebarProvider>
-          </div>
+            </div>
+          </SidebarProvider>
         </BrowserRouter>
       </div>
     </TooltipProvider>
