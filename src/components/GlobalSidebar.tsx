@@ -1,4 +1,3 @@
-
 import { ChevronDown, ChevronRight, Home, Image, Video, Palette, Settings, ChevronLeft } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
 import {
@@ -52,7 +51,7 @@ const libraryItems = [
 
 export function GlobalSidebar() {
   const location = useLocation();
-  const [isLibraryExpanded, setIsLibraryExpanded] = useState(true);
+  const [isLibraryExpanded, setIsLibraryExpanded] = useState(false);
 
   const isLibraryRoute = location.pathname.startsWith('/library');
 
