@@ -209,13 +209,21 @@ export const StudioColorPicker = ({ color, onChange }: StudioColorPickerProps) =
         </div>
         <Popover open={open} onOpenChange={setOpen}>
           <PopoverTrigger asChild>
-            <Input
-              value={tempColor}
-              readOnly
-              onClick={() => setOpen(true)}
-              placeholder="#FFFFFF"
-              className="font-mono cursor-pointer"
-            />
+            <div className="relative">
+              <Input
+                value={tempColor}
+                readOnly
+                placeholder="#FFFFFF"
+                className="font-mono cursor-pointer pr-10"
+              />
+              <button
+                type="button"
+                onClick={() => setOpen(true)}
+                className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700"
+              >
+                Edit
+              </button>
+            </div>
           </PopoverTrigger>
           <PopoverContent className="w-80">
             <div className="space-y-4">
