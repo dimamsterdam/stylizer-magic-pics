@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -16,37 +16,67 @@ const Auth = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
 
+  // Check if user is already logged in
+  useEffect(() => {
+    const { data: authListener } = supabase.auth.onAuthStateChange((event, session) => {
+      console.log("Auth state changed:", event, session); // Debug log
+      if (session) {
+        navigate("/");
+      }
+    });
+
+    return () => {
+      authListener.subscription.unsubscribe();
+    };
+  }, [navigate]);
+
   const handleAuth = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
 
     try {
       if (isSignUp) {
+        console.log("Attempting to sign up with email:", email); // Debug log
         const { data, error } = await supabase.auth.signUp({
           email,
           password,
           options: {
-            emailRedirectTo: window.location.origin
+            emailRedirectTo: `${window.location.origin}/auth`,
+            data: {
+              email: email,
+            }
           }
         });
         
-        if (error) throw error;
+        if (error) {
+          console.error("Sign up error:", error); // Debug log
+          throw error;
+        }
+        
+        console.log("Sign up successful:", data); // Debug log
         
         toast({
-          title: "Success",
-          description: "Please check your email to verify your account",
+          title: "Account created",
+          description: "Please check your email to verify your account before signing in.",
         });
         
-        console.log("Sign up response:", data); // Debug log
+        // Clear form after successful signup
+        setEmail("");
+        setPassword("");
+        setIsSignUp(false);
       } else {
+        console.log("Attempting to sign in with email:", email); // Debug log
         const { data, error } = await supabase.auth.signInWithPassword({
           email,
           password,
         });
         
-        if (error) throw error;
+        if (error) {
+          console.error("Sign in error:", error); // Debug log
+          throw error;
+        }
         
-        console.log("Sign in response:", data); // Debug log
+        console.log("Sign in successful:", data); // Debug log
         navigate("/");
       }
     } catch (error: any) {
@@ -56,7 +86,9 @@ const Auth = () => {
       if (error.message.includes("Invalid login credentials")) {
         errorMessage = isSignUp 
           ? "Failed to create account. Please try again."
-          : "Invalid email or password. Please try again or sign up if you don't have an account.";
+          : "Invalid email or password. If you haven't created an account yet, please sign up first.";
+      } else if (error.message.includes("Email rate limit exceeded")) {
+        errorMessage = "Too many attempts. Please try again later.";
       }
       
       toast({
@@ -69,20 +101,13 @@ const Auth = () => {
     }
   };
 
-  // Check if user is already logged in
-  supabase.auth.onAuthStateChange((event, session) => {
-    if (session) {
-      navigate("/");
-    }
-  });
-
   return (
     <div className="min-h-screen bg-[#F6F6F7] flex items-center justify-center">
       <div className="w-full max-w-[400px] px-4">
         <Card className="w-full shadow-sm border-0">
           <CardHeader className="space-y-1 p-6">
             <h1 className="text-2xl font-semibold tracking-tight">
-              {isSignUp ? "Create an Account" : "Brandmachine is ready"}
+              {isSignUp ? "Create an Account" : "Welcome Back"}
             </h1>
             <p className="text-sm text-muted-foreground">
               {isSignUp
@@ -135,7 +160,11 @@ const Auth = () => {
             <div className="mt-4 text-center">
               <button
                 type="button"
-                onClick={() => setIsSignUp(!isSignUp)}
+                onClick={() => {
+                  setIsSignUp(!isSignUp);
+                  setEmail("");
+                  setPassword("");
+                }}
                 className="text-sm text-[#006e52] hover:underline"
               >
                 {isSignUp
