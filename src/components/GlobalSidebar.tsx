@@ -81,8 +81,8 @@ export function GlobalSidebar() {
                       }`}
                     >
                       <Link to={item.url} className="flex items-center gap-2">
-                        <item.icon className={`h-5 w-5 ${location.pathname === item.url ? "text-[#9b87f5]" : ""}`} />
-                        <span className={location.pathname === item.url ? "text-[#9b87f5] font-medium" : ""}>{item.title}</span>
+                        <item.icon className={`h-5 w-5 ${location.pathname === item.url ? "text-black" : ""}`} />
+                        <span className={location.pathname === item.url ? "text-black font-medium" : ""}>{item.title}</span>
                       </Link>
                     </SidebarMenuButton>
                   </SidebarMenuItem>
@@ -97,11 +97,11 @@ export function GlobalSidebar() {
             <button
               onClick={() => setIsLibraryExpanded(!isLibraryExpanded)}
               className={`flex items-center justify-between w-full px-3 py-2 text-sm font-medium ${
-                isLibraryRoute ? "text-[#9b87f5]" : "text-gray-600 hover:text-gray-900"
+                isLibraryRoute ? "text-black font-medium" : "text-gray-600 hover:text-gray-900"
               }`}
             >
               <span className="flex items-center gap-2">
-                <Library className={`h-5 w-5 ${isLibraryRoute ? "text-[#9b87f5]" : ""}`} />
+                <Library className={`h-5 w-5 ${isLibraryRoute ? "text-black" : ""}`} />
                 <span>Library</span>
               </span>
               {isLibraryExpanded ? (
@@ -124,8 +124,8 @@ export function GlobalSidebar() {
                         }`}
                       >
                         <Link to={item.url} className="flex items-center gap-2">
-                          <item.icon className={`h-5 w-5 ${location.pathname === item.url ? "text-[#9b87f5]" : ""}`} />
-                          <span className={location.pathname === item.url ? "text-[#9b87f5] font-medium" : ""}>{item.title}</span>
+                          <item.icon className={`h-5 w-5 ${location.pathname === item.url ? "text-black" : ""}`} />
+                          <span className={location.pathname === item.url ? "text-black font-medium" : ""}>{item.title}</span>
                         </Link>
                       </SidebarMenuButton>
                     </SidebarMenuItem>
@@ -151,8 +151,8 @@ export function GlobalSidebar() {
                       }`}
                     >
                       <Link to="/settings" className="flex items-center gap-2">
-                        <Settings className={`h-5 w-5 ${location.pathname === "/settings" ? "text-[#9b87f5]" : ""}`} />
-                        <span className={location.pathname === "/settings" ? "text-[#9b87f5] font-medium" : ""}>Settings</span>
+                        <Settings className={`h-5 w-5 ${location.pathname === "/settings" ? "text-black" : ""}`} />
+                        <span className={location.pathname === "/settings" ? "text-black font-medium" : ""}>Settings</span>
                       </Link>
                     </SidebarMenuButton>
                   </SidebarMenuItem>
@@ -166,8 +166,8 @@ export function GlobalSidebar() {
                       }`}
                     >
                       <Link to="/brand" className="flex items-center gap-2">
-                        <Palette className={`h-5 w-5 ${location.pathname === "/brand" ? "text-[#9b87f5]" : ""}`} />
-                        <span className={location.pathname === "/brand" ? "text-[#9b87f5] font-medium" : ""}>Brand Identity</span>
+                        <Palette className={`h-5 w-5 ${location.pathname === "/brand" ? "text-black" : ""}`} />
+                        <span className={location.pathname === "/brand" ? "text-black font-medium" : ""}>Brand Identity</span>
                       </Link>
                     </SidebarMenuButton>
                   </SidebarMenuItem>
