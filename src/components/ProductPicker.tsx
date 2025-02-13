@@ -3,6 +3,7 @@ import { Search, Loader2 } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
 import { Input } from "@/components/ui/input";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { supabase } from "@/integrations/supabase/client";
 
 interface Product {
   id: string;
@@ -41,6 +42,55 @@ export const ProductPicker = ({
     if (!isProductSelected(product.id)) {
       onSelect(product);
       onSearch(''); // Clear the search input after selection
+    }
+  };
+
+  const handleSearch = async (term: string) => {
+    onSearch(term);
+    
+    if (term.length < 2) return;
+
+    try {
+      const response = await fetch('/api/sync-shopify-products', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ searchTerm: term }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to fetch products');
+      }
+
+      const data = await response.json();
+      if (data.products) {
+        // Update products in Supabase
+        const { error } = await supabase
+          .from('products')
+          .upsert(
+            data.products.map((p: any) => ({
+              id: p.id,
+              title: p.title,
+              description: p.description,
+              sku: p.sku,
+              price: p.price,
+              image_url: p.image_url,
+              shopify_gid: p.shopify_gid,
+            }))
+          );
+
+        if (error) {
+          console.error('Error syncing products to Supabase:', error);
+        }
+      }
+    } catch (error) {
+      console.error('Error fetching products:', error);
+      toast({
+        title: "Error",
+        description: "Failed to fetch products. Please try again.",
+        variant: "destructive",
+      });
     }
   };
 
@@ -130,7 +180,7 @@ export const ProductPicker = ({
               type="text"
               placeholder="Search products by name or SKU"
               value={searchTerm}
-              onChange={(e) => onSearch(e.target.value)}
+              onChange={(e) => handleSearch(e.target.value)}
               className="pl-10 border-polaris-border bg-white/50 transition-all duration-300 focus:bg-white"
               disabled={isLoading || selectedProducts.length >= 3}
             />
@@ -149,3 +199,4 @@ export const ProductPicker = ({
     </div>
   );
 };
+
