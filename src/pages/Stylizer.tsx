@@ -344,7 +344,7 @@ const Stylizer = () => {
 
             <Card className="border-0 shadow-sm">
               <CardHeader className="p-6">
-                <h2 className="text-xl font-semibold text-[#1A1F2C]">Angle Selection</h2>
+                <h2 className="text-xl font-semibold text-[#1A1F2C]">Selected Angles</h2>
                 <p className="text-[#6D7175]">Choose which angles to generate for your products</p>
               </CardHeader>
               <CardContent className="p-6 pt-0">
