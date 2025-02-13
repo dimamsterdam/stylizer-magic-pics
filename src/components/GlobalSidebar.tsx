@@ -1,4 +1,3 @@
-
 import { ChevronDown, ChevronRight, Home, Image, Video, Palette, Settings, ChevronLeft, Library } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
 import {
@@ -74,11 +73,7 @@ export function GlobalSidebar() {
                   <SidebarMenuItem key={item.title}>
                     <SidebarMenuButton
                       asChild
-                      className={`${
-                        location.pathname === item.url 
-                          ? "bg-[#F6F6F7] border-l-4 border-[#9b87f5]" 
-                          : "hover:bg-gray-50"
-                      }`}
+                      className={location.pathname === item.url ? "bg-[#F6F6F7]" : "hover:bg-gray-50"}
                     >
                       <Link to={item.url} className="flex items-center gap-2">
                         <item.icon className={`h-5 w-5 ${location.pathname === item.url ? "text-black" : ""}`} />
@@ -117,11 +112,7 @@ export function GlobalSidebar() {
                     <SidebarMenuItem key={item.title}>
                       <SidebarMenuButton
                         asChild
-                        className={`${
-                          location.pathname === item.url 
-                            ? "bg-[#F6F6F7] border-l-4 border-[#9b87f5]" 
-                            : "hover:bg-gray-50"
-                        }`}
+                        className={location.pathname === item.url ? "bg-[#F6F6F7]" : "hover:bg-gray-50"}
                       >
                         <Link to={item.url} className="flex items-center gap-2">
                           <item.icon className={`h-5 w-5 ${location.pathname === item.url ? "text-black" : ""}`} />
@@ -144,11 +135,7 @@ export function GlobalSidebar() {
                   <SidebarMenuItem>
                     <SidebarMenuButton
                       asChild
-                      className={`${
-                        location.pathname === "/settings" 
-                          ? "bg-[#F6F6F7] border-l-4 border-[#9b87f5]" 
-                          : "hover:bg-gray-50"
-                      }`}
+                      className={location.pathname === "/settings" ? "bg-[#F6F6F7]" : "hover:bg-gray-50"}
                     >
                       <Link to="/settings" className="flex items-center gap-2">
                         <Settings className={`h-5 w-5 ${location.pathname === "/settings" ? "text-black" : ""}`} />
@@ -159,11 +146,7 @@ export function GlobalSidebar() {
                   <SidebarMenuItem>
                     <SidebarMenuButton
                       asChild
-                      className={`${
-                        location.pathname === "/brand" 
-                          ? "bg-[#F6F6F7] border-l-4 border-[#9b87f5]" 
-                          : "hover:bg-gray-50"
-                      }`}
+                      className={location.pathname === "/brand" ? "bg-[#F6F6F7]" : "hover:bg-gray-50"}
                     >
                       <Link to="/brand" className="flex items-center gap-2">
                         <Palette className={`h-5 w-5 ${location.pathname === "/brand" ? "text-black" : ""}`} />
