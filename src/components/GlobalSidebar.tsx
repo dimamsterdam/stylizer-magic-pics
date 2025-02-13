@@ -49,7 +49,7 @@ export function GlobalSidebar() {
           <SidebarGroup>
             <SidebarGroupLabel>Applications</SidebarGroupLabel>
             <SidebarGroupContent>
-              <SidebarMenu>
+              <SidebarMenu className="px-[17px]">
                 {mainNavItems.map(item => <SidebarMenuItem key={item.title}>
                     <SidebarMenuButton asChild className={location.pathname === item.url ? "bg-[#F6F6F7]" : "hover:bg-gray-50"}>
                       <Link to={item.url} className="flex items-center gap-2 px-[17px]">
