@@ -5,7 +5,7 @@ import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { ProductPicker } from "@/components/ProductPicker";
 import { supabase } from "@/integrations/supabase/client";
-import { Loader2 } from "lucide-react";
+import { Loader2, ArrowLeft, Grid3X3 } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -18,7 +18,7 @@ interface Product {
   image: string;
 }
 
-type Step = 'products' | 'hero';
+type Step = 'products' | 'configuration' | 'preview' | 'generation';
 
 const Expose = () => {
   const [currentStep, setCurrentStep] = useState<Step>('products');
@@ -91,7 +91,7 @@ const Expose = () => {
       if (error) throw error;
 
       setExposeId(data.id);
-      setCurrentStep('hero');
+      setCurrentStep('configuration');
     } catch (error) {
       console.error('Error creating expose:', error);
       toast({
@@ -140,6 +140,7 @@ const Expose = () => {
         title: "Success",
         description: "Hero image generated successfully!",
       });
+      setCurrentStep('generation');
     } catch (error) {
       console.error('Error generating hero:', error);
       toast({
@@ -225,12 +226,24 @@ const Expose = () => {
           </Card>
         );
 
-      case 'hero':
+      case 'configuration':
         return (
           <Card className="border-0 shadow-sm">
             <CardHeader className="p-6 pb-2">
-              <h2 className="text-lg font-semibold text-[#1A1F2C] mb-1">Generate Hero Image</h2>
-              <p className="text-[#6D7175]">Customize your hero image generation settings</p>
+              <div className="flex items-center mb-4">
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => setCurrentStep('products')}
+                  className="mr-2"
+                >
+                  <ArrowLeft className="h-4 w-4" />
+                </Button>
+                <div>
+                  <h2 className="text-lg font-semibold text-[#1A1F2C] mb-1">Configure Hero Image</h2>
+                  <p className="text-[#6D7175]">Set the occasion and style for your hero image</p>
+                </div>
+              </div>
             </CardHeader>
             <CardContent className="p-6">
               <div className="space-y-6">
@@ -259,8 +272,96 @@ const Expose = () => {
 
                 <div className="flex justify-end pt-4">
                   <Button
+                    onClick={() => setCurrentStep('preview')}
+                    disabled={!occasion}
+                    className="bg-[#008060] hover:bg-[#006e52] text-white px-6"
+                  >
+                    Preview
+                  </Button>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        );
+
+      case 'preview':
+        return (
+          <Card className="border-0 shadow-sm">
+            <CardHeader className="p-6 pb-2">
+              <div className="flex items-center mb-4">
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => setCurrentStep('configuration')}
+                  className="mr-2"
+                >
+                  <ArrowLeft className="h-4 w-4" />
+                </Button>
+                <div>
+                  <h2 className="text-lg font-semibold text-[#1A1F2C] mb-1">Preview Configuration</h2>
+                  <p className="text-[#6D7175]">Review your settings before generating the hero image</p>
+                </div>
+              </div>
+            </CardHeader>
+            <CardContent className="p-6">
+              <div className="space-y-8">
+                <div className="space-y-4">
+                  <div>
+                    <h3 className="text-sm font-medium text-[#1A1F2C] mb-2">Selected Products</h3>
+                    <div className="grid grid-cols-3 gap-4">
+                      {selectedProducts.map(product => (
+                        <div key={product.id} className="relative">
+                          <img
+                            src={product.image}
+                            alt={product.title}
+                            className="w-full aspect-square object-cover rounded-lg"
+                            onError={(e) => {
+                              e.currentTarget.src = '/placeholder.svg';
+                            }}
+                          />
+                          <div className="absolute inset-0 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity bg-black/50 rounded-lg">
+                            <p className="text-white text-sm font-medium px-2 text-center">
+                              {product.title}
+                            </p>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div className="space-y-2">
+                    <h3 className="text-sm font-medium text-[#1A1F2C]">Layout Preview</h3>
+                    <div className="bg-gray-50 p-4 rounded-lg border border-[#E3E5E7]">
+                      <div className="flex items-center justify-center">
+                        <Grid3X3 className="h-32 w-32 text-[#6D7175]" />
+                      </div>
+                      <p className="text-sm text-[#6D7175] text-center mt-2">
+                        Products will be arranged in a visually appealing composition
+                      </p>
+                    </div>
+                  </div>
+
+                  <div>
+                    <h3 className="text-sm font-medium text-[#1A1F2C] mb-2">Generation Settings</h3>
+                    <div className="bg-gray-50 p-4 rounded-lg border border-[#E3E5E7] space-y-2">
+                      <div>
+                        <span className="text-sm font-medium text-[#1A1F2C]">Occasion: </span>
+                        <span className="text-sm text-[#6D7175]">{occasion}</span>
+                      </div>
+                      {brandConstraints && (
+                        <div>
+                          <span className="text-sm font-medium text-[#1A1F2C]">Style Guidelines: </span>
+                          <span className="text-sm text-[#6D7175]">{brandConstraints}</span>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </div>
+
+                <div className="flex justify-end pt-4">
+                  <Button
                     onClick={handleGenerateHero}
-                    disabled={!occasion || isGenerating}
+                    disabled={isGenerating}
                     className="bg-[#008060] hover:bg-[#006e52] text-white px-6"
                   >
                     {isGenerating ? (
@@ -273,6 +374,22 @@ const Expose = () => {
                     )}
                   </Button>
                 </div>
+              </div>
+            </CardContent>
+          </Card>
+        );
+
+      case 'generation':
+        return (
+          <Card className="border-0 shadow-sm">
+            <CardHeader className="p-6 pb-2">
+              <h2 className="text-lg font-semibold text-[#1A1F2C] mb-1">Generation Complete</h2>
+              <p className="text-[#6D7175]">Your hero image has been generated successfully</p>
+            </CardHeader>
+            <CardContent className="p-6">
+              {/* Generation result view will be implemented in the next step */}
+              <div className="text-center text-[#6D7175]">
+                Hero image generated successfully!
               </div>
             </CardContent>
           </Card>
