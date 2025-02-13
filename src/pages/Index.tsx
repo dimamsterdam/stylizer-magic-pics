@@ -409,6 +409,25 @@ const Index = () => {
             <Card className="bg-white/80 backdrop-blur-sm border-0 shadow-lg transition-all duration-300 hover:shadow-xl">
               <CardHeader>
                 <h2 className="text-display-lg text-[#1A1F2C] tracking-tight mb-2">
+                  Model Description
+                </h2>
+                <p className="text-body-lg text-[#6D7175]">
+                  Describe your ideal model by clicking on any attribute to customize it
+                </p>
+              </CardHeader>
+              <CardContent>
+                <ModelPromptBuilder
+                  attributes={modelAttributes}
+                  onChange={(key, value) => 
+                    setModelAttributes(prev => ({ ...prev, [key]: value }))
+                  }
+                />
+              </CardContent>
+            </Card>
+
+            <Card className="bg-white/80 backdrop-blur-sm border-0 shadow-lg transition-all duration-300 hover:shadow-xl">
+              <CardHeader>
+                <h2 className="text-display-lg text-[#1A1F2C] tracking-tight mb-2">
                   Angle Selection
                 </h2>
                 <p className="text-body-lg text-[#6D7175]">
@@ -440,154 +459,6 @@ const Index = () => {
                     Please select at least one angle
                   </p>
                 )}
-              </CardContent>
-            </Card>
-
-            <Card className="bg-white/80 backdrop-blur-sm border-0 shadow-lg transition-all duration-300 hover:shadow-xl">
-              <CardHeader>
-                <h2 className="text-display-lg text-[#1A1F2C] tracking-tight mb-2">
-                  Model Attributes
-                </h2>
-                <p className="text-body-lg text-[#6D7175]">
-                  Customize the appearance of the fashion model
-                </p>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-6">
-                  <div className="space-y-2">
-                    <Label>Gender</Label>
-                    <RadioGroup
-                      value={modelAttributes.gender}
-                      onValueChange={(value) => 
-                        setModelAttributes(prev => ({ ...prev, gender: value as ModelAttributes["gender"] }))
-                      }
-                      className="flex gap-4"
-                    >
-                      {["Male", "Female"].map((gender) => (
-                        <div key={gender} className="flex items-center space-x-2">
-                          <RadioGroupItem value={gender} id={`gender-${gender}`} />
-                          <Label htmlFor={`gender-${gender}`}>{gender}</Label>
-                        </div>
-                      ))}
-                    </RadioGroup>
-                  </div>
-
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                      <Label>Body Type</Label>
-                      <Select
-                        value={modelAttributes.bodyType}
-                        onValueChange={(value) => 
-                          setModelAttributes(prev => ({ ...prev, bodyType: value as ModelAttributes["bodyType"] }))
-                        }
-                      >
-                        <SelectTrigger>
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {["Slim", "Athletic", "Curvy", "Plus Size"].map((type) => (
-                            <SelectItem key={type} value={type}>{type}</SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </div>
-
-                    <div className="space-y-2">
-                      <Label>Age Range</Label>
-                      <Select
-                        value={modelAttributes.age}
-                        onValueChange={(value) => 
-                          setModelAttributes(prev => ({ ...prev, age: value as ModelAttributes["age"] }))
-                        }
-                      >
-                        <SelectTrigger>
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {["18-25", "25-35", "35-45", "45+"].map((age) => (
-                            <SelectItem key={age} value={age}>{age}</SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </div>
-
-                    <div className="space-y-2">
-                      <Label>Ethnicity</Label>
-                      <Select
-                        value={modelAttributes.ethnicity}
-                        onValueChange={(value) => 
-                          setModelAttributes(prev => ({ ...prev, ethnicity: value as ModelAttributes["ethnicity"] }))
-                        }
-                      >
-                        <SelectTrigger>
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {["Asian", "Black", "Caucasian", "Hispanic", "Middle Eastern", "Mixed"].map((ethnicity) => (
-                            <SelectItem key={ethnicity} value={ethnicity}>{ethnicity}</SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </div>
-
-                    <div className="space-y-2">
-                      <Label>Pose Style</Label>
-                      <Select
-                        value={modelAttributes.pose}
-                        onValueChange={(value) => 
-                          setModelAttributes(prev => ({ ...prev, pose: value as ModelAttributes["pose"] }))
-                        }
-                      >
-                        <SelectTrigger>
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {["Natural", "Professional", "Casual", "Dynamic"].map((pose) => (
-                            <SelectItem key={pose} value={pose}>{pose}</SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </div>
-
-                    <div className="space-y-2">
-                      <Label>Hair Length</Label>
-                      <Select
-                        value={modelAttributes.hairLength}
-                        onValueChange={(value) => 
-                          setModelAttributes(prev => ({ ...prev, hairLength: value as ModelAttributes["hairLength"] }))
-                        }
-                      >
-                        <SelectTrigger>
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {["Short", "Medium", "Long"].map((length) => (
-                            <SelectItem key={length} value={length}>{length}</SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </div>
-
-                    <div className="space-y-2">
-                      <Label>Hair Color</Label>
-                      <Select
-                        value={modelAttributes.hairColor}
-                        onValueChange={(value) => 
-                          setModelAttributes(prev => ({ ...prev, hairColor: value as ModelAttributes["hairColor"] }))
-                        }
-                      >
-                        <SelectTrigger>
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {["Black", "Brown", "Blonde", "Red", "Gray", "Other"].map((color) => (
-                            <SelectItem key={color} value={color}>{color}</SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </div>
-                  </div>
-                </div>
               </CardContent>
             </Card>
 
