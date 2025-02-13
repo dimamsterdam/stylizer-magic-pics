@@ -12,7 +12,7 @@ import {
   SidebarMenuItem,
   SidebarTrigger,
 } from "@/components/ui/sidebar";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 const mainNavItems = [
   {
@@ -53,8 +53,14 @@ const libraryItems = [
 export function GlobalSidebar() {
   const location = useLocation();
   const [isLibraryExpanded, setIsLibraryExpanded] = useState(false);
-
   const isLibraryRoute = location.pathname.startsWith('/library');
+
+  // Auto-expand library section when on a library route
+  useEffect(() => {
+    if (isLibraryRoute && !isLibraryExpanded) {
+      setIsLibraryExpanded(true);
+    }
+  }, [location.pathname]);
 
   return (
     <div className="fixed left-0 top-16 bottom-0 z-40">
@@ -75,8 +81,8 @@ export function GlobalSidebar() {
                       }`}
                     >
                       <Link to={item.url} className="flex items-center gap-2">
-                        <item.icon className="h-5 w-5" />
-                        <span>{item.title}</span>
+                        <item.icon className={`h-5 w-5 ${location.pathname === item.url ? "text-[#9b87f5]" : ""}`} />
+                        <span className={location.pathname === item.url ? "text-[#9b87f5] font-medium" : ""}>{item.title}</span>
                       </Link>
                     </SidebarMenuButton>
                   </SidebarMenuItem>
@@ -90,10 +96,12 @@ export function GlobalSidebar() {
           <SidebarGroup>
             <button
               onClick={() => setIsLibraryExpanded(!isLibraryExpanded)}
-              className="flex items-center justify-between w-full px-3 py-2 text-sm font-medium text-gray-600 hover:text-gray-900"
+              className={`flex items-center justify-between w-full px-3 py-2 text-sm font-medium ${
+                isLibraryRoute ? "text-[#9b87f5]" : "text-gray-600 hover:text-gray-900"
+              }`}
             >
               <span className="flex items-center gap-2">
-                <Library className="h-5 w-5" />
+                <Library className={`h-5 w-5 ${isLibraryRoute ? "text-[#9b87f5]" : ""}`} />
                 <span>Library</span>
               </span>
               {isLibraryExpanded ? (
@@ -116,8 +124,8 @@ export function GlobalSidebar() {
                         }`}
                       >
                         <Link to={item.url} className="flex items-center gap-2">
-                          <item.icon className="h-5 w-5" />
-                          <span>{item.title}</span>
+                          <item.icon className={`h-5 w-5 ${location.pathname === item.url ? "text-[#9b87f5]" : ""}`} />
+                          <span className={location.pathname === item.url ? "text-[#9b87f5] font-medium" : ""}>{item.title}</span>
                         </Link>
                       </SidebarMenuButton>
                     </SidebarMenuItem>
@@ -143,8 +151,8 @@ export function GlobalSidebar() {
                       }`}
                     >
                       <Link to="/settings" className="flex items-center gap-2">
-                        <Settings className="h-5 w-5" />
-                        <span>Settings</span>
+                        <Settings className={`h-5 w-5 ${location.pathname === "/settings" ? "text-[#9b87f5]" : ""}`} />
+                        <span className={location.pathname === "/settings" ? "text-[#9b87f5] font-medium" : ""}>Settings</span>
                       </Link>
                     </SidebarMenuButton>
                   </SidebarMenuItem>
@@ -158,8 +166,8 @@ export function GlobalSidebar() {
                       }`}
                     >
                       <Link to="/brand" className="flex items-center gap-2">
-                        <Palette className="h-5 w-5" />
-                        <span>Brand Identity</span>
+                        <Palette className={`h-5 w-5 ${location.pathname === "/brand" ? "text-[#9b87f5]" : ""}`} />
+                        <span className={location.pathname === "/brand" ? "text-[#9b87f5] font-medium" : ""}>Brand Identity</span>
                       </Link>
                     </SidebarMenuButton>
                   </SidebarMenuItem>
