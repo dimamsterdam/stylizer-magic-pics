@@ -49,6 +49,7 @@ interface ModelAttributes {
   hairLength: "Short" | "Medium" | "Long";
   hairColor: "Black" | "Brown" | "Blonde" | "Red" | "Gray" | "Other";
   pose: "Natural" | "Professional" | "Casual" | "Dynamic";
+  style: "authentic" | "amateur" | "polished" | "rock star" | "vogue";
 }
 
 const fashionImages = [
@@ -89,7 +90,8 @@ const Index = () => {
     ethnicity: "Caucasian",
     hairLength: "Medium",
     hairColor: "Brown",
-    pose: "Professional"
+    pose: "Professional",
+    style: "polished"
   });
   const [searchTerm, setSearchTerm] = useState("");
   const [isLoading, setIsLoading] = useState(false);
