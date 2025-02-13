@@ -24,7 +24,7 @@ const App = () => (
       <div className="min-h-screen bg-polaris-background">
         <BrowserRouter>
           <NavBar />
-          <div className="flex w-full pt-16">
+          <div className="flex w-full">
             <SidebarProvider>
               <GlobalSidebar />
               <main className="flex-1 pl-[260px] sidebar-collapsed:pl-[80px] transition-[padding] duration-300">
