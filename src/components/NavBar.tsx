@@ -7,7 +7,7 @@ const NavBar = () => {
           <div className="flex items-center">
             <Link to="/" className="flex items-center space-x-2">
               <span className="flex items-center">
-                <span className="font-inter font-bold text-[#1A1F2C] tracking-[-0.03em] text-xl px-[11px]">
+                <span className="font-inter text-[#1A1F2C] tracking-[-0.03em] text-xl px-[13px] font-semibold">
                   brandmachine
                 </span>
               </span>
