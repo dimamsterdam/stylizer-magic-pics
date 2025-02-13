@@ -18,15 +18,23 @@ const Auth = () => {
 
   // Check if user is already logged in
   useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session }}) => {
-      console.log("Current session:", session); // Debug log
-      if (session) {
-        navigate("/");
+    const checkSession = async () => {
+      try {
+        const { data: { session }, error } = await supabase.auth.getSession();
+        console.log("Session check:", { session, error }); // Debug log
+        if (error) throw error;
+        if (session) {
+          navigate("/");
+        }
+      } catch (error) {
+        console.error("Session check error:", error);
       }
-    });
+    };
+
+    checkSession();
 
     const { data: authListener } = supabase.auth.onAuthStateChange((event, session) => {
-      console.log("Auth state changed:", event, session); // Debug log
+      console.log("Auth state changed:", { event, session }); // Debug log
       if (session) {
         navigate("/");
       }
@@ -43,51 +51,57 @@ const Auth = () => {
 
     try {
       if (isSignUp) {
-        console.log("Attempting to sign up with email:", email); // Debug log
+        console.log("Attempting to sign up with:", { email }); // Debug log
         const { data, error } = await supabase.auth.signUp({
           email,
-          password
+          password,
+          options: {
+            emailRedirectTo: `${window.location.origin}`,
+          }
         });
         
         if (error) {
-          console.error("Sign up error:", error); // Debug log
+          console.error("Sign up error:", error);
           throw error;
         }
         
-        console.log("Sign up successful:", data); // Debug log
+        console.log("Sign up response:", data);
+        
+        if (data.user && data.user.identities && data.user.identities.length === 0) {
+          throw new Error("Email already registered");
+        }
         
         toast({
           title: "Account created",
           description: "You can now sign in with your credentials.",
         });
         
-        // Clear form after successful signup
         setEmail("");
         setPassword("");
         setIsSignUp(false);
       } else {
-        console.log("Attempting to sign in with email:", email); // Debug log
+        console.log("Attempting to sign in with:", { email }); // Debug log
         const { data, error } = await supabase.auth.signInWithPassword({
           email,
           password,
         });
         
         if (error) {
-          console.error("Sign in error:", error); // Debug log
+          console.error("Sign in error:", error);
           throw error;
         }
         
-        console.log("Sign in successful:", data); // Debug log
+        console.log("Sign in successful:", data);
         navigate("/");
       }
     } catch (error: any) {
-      console.error("Auth error:", error); // Debug log
+      console.error("Auth error:", error);
       
       let errorMessage = error.message;
-      if (error.message.includes("Invalid login credentials")) {
-        errorMessage = isSignUp 
-          ? "Failed to create account. Please try again."
-          : "Invalid email or password. If you haven't created an account yet, please sign up first.";
+      if (error.message.includes("Email already registered")) {
+        errorMessage = "This email is already registered. Please sign in instead.";
+      } else if (error.message.includes("Invalid login credentials")) {
+        errorMessage = "Invalid email or password. Please try again.";
       } else if (error.message.includes("Email rate limit exceeded")) {
         errorMessage = "Too many attempts. Please try again later.";
       }
@@ -137,6 +151,7 @@ const Auth = () => {
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="Enter your password"
+                  minLength={6}
                   required
                 />
               </div>
