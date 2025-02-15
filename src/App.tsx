@@ -34,12 +34,12 @@ function AppContent() {
   }
 
   return (
-    <div className="relative h-full">
+    <div className="h-screen flex flex-col">
       <NavBar />
       <SidebarProvider>
-        <div className="flex h-screen overflow-hidden">
+        <div className="flex flex-1 overflow-hidden pt-16">
           <GlobalSidebar />
-          <main className="flex-1 overflow-y-auto">
+          <main className="flex-1 overflow-y-auto bg-[#F6F6F7]">
             <Routes>
               <Route path="/" element={<Index />} />
               <Route path="/expose" element={<Expose />} />
