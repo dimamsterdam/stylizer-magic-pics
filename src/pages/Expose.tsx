@@ -24,7 +24,7 @@ const Expose = () => {
   const [currentStep, setCurrentStep] = useState<Step>('products');
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedProducts, setSelectedProducts] = useState<Product[]>([]);
-  const [occasion, setOccasion] = useState("");
+  const [selectedTheme, setSelectedTheme] = useState("");
   const [brandConstraints, setBrandConstraints] = useState("");
   const [isGenerating, setIsGenerating] = useState(false);
   const [exposeId, setExposeId] = useState<string | null>(null);
@@ -84,6 +84,11 @@ const Expose = () => {
     setSearchTerm(term);
   };
 
+  const handleThemeSelect = (themeId: string, styleGuide: string) => {
+    setSelectedTheme(themeId);
+    setBrandConstraints(styleGuide);
+  };
+
   const handleContinue = async () => {
     if (selectedProducts.length === 0) return;
 
@@ -128,11 +133,12 @@ const Expose = () => {
   };
 
   const handleGenerateHero = async () => {
-    if (!exposeId || !occasion) return;
+    if (!exposeId || !selectedTheme) return;
 
     setIsGenerating(true);
     try {
-      const prompt = `Create a hero product image for ${occasion}. ${
+      const selectedThemeData = THEMES.find(t => t.id === selectedTheme);
+      const prompt = `Create a hero product image for ${selectedThemeData?.label}. ${
         brandConstraints ? `Style guidelines: ${brandConstraints}.` : ''
       } The image should feature ${selectedProducts.length} product${
         selectedProducts.length > 1 ? 's' : ''
@@ -154,7 +160,7 @@ const Expose = () => {
         .from('exposes')
         .update({
           hero_image_url: imageUrl,
-          occasion,
+          theme: selectedTheme,
           brand_constraints: brandConstraints
         })
         .eq('id', exposeId);
@@ -265,40 +271,32 @@ const Expose = () => {
                   <ArrowLeft className="h-4 w-4" />
                 </Button>
                 <div>
-                  <h2 className="text-lg font-semibold text-[#1A1F2C] mb-1">Configure Hero Image</h2>
-                  <p className="text-[#6D7175]">Set the occasion and style for your hero image</p>
+                  <h2 className="text-lg font-semibold text-[#1A1F2C] mb-1">Select Theme</h2>
+                  <p className="text-[#6D7175]">Choose a theme for your hero image</p>
                 </div>
               </div>
             </CardHeader>
             <CardContent className="p-6">
               <div className="space-y-6">
-                <div className="space-y-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="occasion">Occasion or Theme</Label>
-                    <Input
-                      id="occasion"
-                      placeholder="e.g., Valentine's Day, Summer Sale, New Collection"
-                      value={occasion}
-                      onChange={(e) => setOccasion(e.target.value)}
-                    />
-                  </div>
-                  
-                  <div className="space-y-2">
-                    <Label htmlFor="brand-constraints">Brand Style Guidelines (Optional)</Label>
-                    <Textarea
-                      id="brand-constraints"
-                      placeholder="e.g., Minimalist aesthetic, bright and airy, dark and moody"
-                      value={brandConstraints}
-                      onChange={(e) => setBrandConstraints(e.target.value)}
-                      className="h-24"
-                    />
-                  </div>
+                <ThemeSelector
+                  value={selectedTheme}
+                  onChange={handleThemeSelect}
+                />
+                
+                <div className="space-y-2">
+                  <Label htmlFor="brand-constraints">Brand Style Guidelines</Label>
+                  <Textarea
+                    id="brand-constraints"
+                    value={brandConstraints}
+                    onChange={(e) => setBrandConstraints(e.target.value)}
+                    className="h-24"
+                  />
                 </div>
 
                 <div className="flex justify-end pt-4">
                   <Button
                     onClick={() => setCurrentStep('preview')}
-                    disabled={!occasion}
+                    disabled={!selectedTheme}
                     className="bg-[#008060] hover:bg-[#006e52] text-white px-6"
                   >
                     Preview
