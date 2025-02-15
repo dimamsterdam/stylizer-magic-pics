@@ -310,6 +310,7 @@ const Expose = () => {
         );
 
       case 'preview':
+        const selectedThemeData = THEMES.find(t => t.id === selectedTheme);
         return (
           <Card className="border-0 shadow-sm">
             <CardHeader className="p-6 pb-2">
@@ -370,8 +371,8 @@ const Expose = () => {
                     <h3 className="text-sm font-medium text-[#1A1F2C] mb-2">Generation Settings</h3>
                     <div className="bg-gray-50 p-4 rounded-lg border border-[#E3E5E7] space-y-2">
                       <div>
-                        <span className="text-sm font-medium text-[#1A1F2C]">Occasion: </span>
-                        <span className="text-sm text-[#6D7175]">{occasion}</span>
+                        <span className="text-sm font-medium text-[#1A1F2C]">Theme: </span>
+                        <span className="text-sm text-[#6D7175]">{selectedThemeData?.label}</span>
                       </div>
                       {brandConstraints && (
                         <div>
@@ -412,7 +413,6 @@ const Expose = () => {
               <p className="text-[#6D7175]">Your hero image has been generated successfully</p>
             </CardHeader>
             <CardContent className="p-6">
-              {/* Generation result view will be implemented in the next step */}
               <div className="text-center text-[#6D7175]">
                 Hero image generated successfully!
               </div>
