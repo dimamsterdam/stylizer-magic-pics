@@ -14,6 +14,8 @@ import Publish from "@/pages/Publish";
 import Settings from "@/pages/Settings";
 import NotFound from "@/pages/NotFound";
 import Auth from "@/pages/Auth";
+import Index from "@/pages/Index";
+import NavBar from "@/components/NavBar";
 
 const queryClient = new QueryClient();
 
@@ -33,12 +35,14 @@ function AppContent() {
 
   return (
     <div className="relative h-full">
+      <NavBar />
       <SidebarProvider>
         <div className="flex h-screen overflow-hidden">
           <GlobalSidebar />
           <main className="flex-1 overflow-y-auto">
             <Routes>
-              <Route path="/" element={<Expose />} />
+              <Route path="/" element={<Index />} />
+              <Route path="/expose" element={<Expose />} />
               <Route path="/brand" element={<Brand />} />
               <Route path="/stylizer" element={<Stylizer />} />
               <Route
