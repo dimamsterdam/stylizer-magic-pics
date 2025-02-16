@@ -8,6 +8,9 @@ const Index = () => {
     <div className="p-4 sm:p-6">
       <Card className="border-0 shadow-sm">
         <CardHeader className="p-6">
+          <h1 className="text-2xl font-semibold text-[#1A1F2C] tracking-tight">
+            Welcome to Brandmachine
+          </h1>
           <p className="text-[#6D7175] mt-2">
             Transform your product visuals and enhance your brand presence with our suite of AI-powered tools.
           </p>

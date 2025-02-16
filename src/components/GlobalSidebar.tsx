@@ -47,6 +47,7 @@ export function GlobalSidebar() {
   const [isLibraryExpanded, setIsLibraryExpanded] = useState(false);
   const isLibraryRoute = location.pathname.startsWith('/library');
 
+  // Auto-expand library section when on a library route
   useEffect(() => {
     if (isLibraryRoute && !isLibraryExpanded) {
       setIsLibraryExpanded(true);
@@ -54,8 +55,8 @@ export function GlobalSidebar() {
   }, [location.pathname]);
 
   return (
-    <div className="h-[calc(100vh-4rem)] top-16">
-      <Sidebar className="h-full border-r border-polaris-border">
+    <div className="fixed left-0 top-16 bottom-0 z-40">
+      <Sidebar className="h-[calc(100vh-4rem)] border-r border-polaris-border">
         <SidebarContent className="space-y-1">
           <SidebarGroup>
             <SidebarGroupLabel>Applications</SidebarGroupLabel>
