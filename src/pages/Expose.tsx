@@ -373,7 +373,7 @@ const Expose = () => {
                       </div>
                     </div>
                     <div className="space-y-2">
-                      <Label>AI Generated Prompt (Editable)</Label>
+                      <Label>Image Generation Prompt</Label>
                       <Textarea
                         value={brandConstraints}
                         onChange={(e) => setBrandConstraints(e.target.value)}
