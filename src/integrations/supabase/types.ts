@@ -90,6 +90,7 @@ export type Database = {
       }
       exposes: {
         Row: {
+          body_copy: string | null
           brand_constraints: string | null
           created_at: string
           end_date: string | null
@@ -100,10 +101,12 @@ export type Database = {
           selected_product_ids: string[]
           start_date: string | null
           status: Database["public"]["Enums"]["expose_status"]
+          theme: string | null
           updated_at: string
           user_id: string
         }
         Insert: {
+          body_copy?: string | null
           brand_constraints?: string | null
           created_at?: string
           end_date?: string | null
@@ -114,10 +117,12 @@ export type Database = {
           selected_product_ids?: string[]
           start_date?: string | null
           status?: Database["public"]["Enums"]["expose_status"]
+          theme?: string | null
           updated_at?: string
           user_id: string
         }
         Update: {
+          body_copy?: string | null
           brand_constraints?: string | null
           created_at?: string
           end_date?: string | null
@@ -128,6 +133,7 @@ export type Database = {
           selected_product_ids?: string[]
           start_date?: string | null
           status?: Database["public"]["Enums"]["expose_status"]
+          theme?: string | null
           updated_at?: string
           user_id?: string
         }

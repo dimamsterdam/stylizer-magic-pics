@@ -20,7 +20,7 @@ interface Product {
   image: string;
 }
 
-type Step = 'products' | 'configuration' | 'preview' | 'generation';
+type Step = 'products' | 'configuration' | 'preview' | 'content' | 'generation';
 
 const Expose = () => {
   const [currentStep, setCurrentStep] = useState<Step>('products');
@@ -29,6 +29,8 @@ const Expose = () => {
   const [selectedTheme, setSelectedTheme] = useState("");
   const [brandConstraints, setBrandConstraints] = useState("");
   const [negativePrompt, setNegativePrompt] = useState("");
+  const [headline, setHeadline] = useState("");
+  const [bodyCopy, setBodyCopy] = useState("");
   const [isGenerating, setIsGenerating] = useState(false);
   const [exposeId, setExposeId] = useState<string | null>(null);
   const { toast } = useToast();
@@ -151,7 +153,7 @@ const Expose = () => {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ 
           prompt,
-          negativePrompt: negativePrompt 
+          negativePrompt 
         }),
       });
 
@@ -167,7 +169,9 @@ const Expose = () => {
           hero_image_url: imageUrl,
           theme: selectedTheme,
           brand_constraints: brandConstraints,
-          negative_prompt: negativePrompt
+          negative_prompt: negativePrompt,
+          headline: headline,
+          body_copy: bodyCopy
         })
         .eq('id', exposeId);
 
@@ -407,20 +411,76 @@ const Expose = () => {
 
                   <div className="flex justify-end">
                     <Button
-                      onClick={handleGenerateHero}
-                      disabled={isGenerating}
+                      onClick={() => setCurrentStep('content')}
                       className="bg-[#008060] hover:bg-[#006e52] text-white px-6"
                     >
-                      {isGenerating ? (
-                        <>
-                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                          Generating...
-                        </>
-                      ) : (
-                        'Generate Hero Image'
-                      )}
+                      Continue to Content
                     </Button>
                   </div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        );
+
+      case 'content':
+        return (
+          <Card className="border-0 shadow-sm">
+            <CardHeader className="p-6 pb-2">
+              <div className="flex items-center mb-4">
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => setCurrentStep('preview')}
+                  className="mr-2"
+                >
+                  <ArrowLeft className="h-4 w-4" />
+                </Button>
+                <div>
+                  <h2 className="text-lg font-semibold text-[#1A1F2C] mb-1">Add Content</h2>
+                  <p className="text-[#6D7175]">Enter the text content for your expose</p>
+                </div>
+              </div>
+            </CardHeader>
+            <CardContent className="p-6">
+              <div className="space-y-6">
+                <div className="space-y-2">
+                  <Label htmlFor="headline">Headline</Label>
+                  <Input 
+                    id="headline"
+                    value={headline}
+                    onChange={(e) => setHeadline(e.target.value)}
+                    placeholder="Enter a compelling headline..."
+                    className="text-lg"
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="body-copy">Body Copy</Label>
+                  <Textarea
+                    id="body-copy"
+                    value={bodyCopy}
+                    onChange={(e) => setBodyCopy(e.target.value)}
+                    placeholder="Enter the main content of your expose..."
+                    className="h-48"
+                  />
+                </div>
+
+                <div className="flex justify-end">
+                  <Button
+                    onClick={handleGenerateHero}
+                    disabled={isGenerating || !headline.trim() || !bodyCopy.trim()}
+                    className="bg-[#008060] hover:bg-[#006e52] text-white px-6"
+                  >
+                    {isGenerating ? (
+                      <>
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        Generating...
+                      </>
+                    ) : (
+                      'Generate Hero Image'
+                    )}
+                  </Button>
                 </div>
               </div>
             </CardContent>
@@ -432,11 +492,11 @@ const Expose = () => {
           <Card className="border-0 shadow-sm">
             <CardHeader className="p-6 pb-2">
               <h2 className="text-lg font-semibold text-[#1A1F2C] mb-1">Generation Complete</h2>
-              <p className="text-[#6D7175]">Your hero image has been generated successfully</p>
+              <p className="text-[#6D7175]">Your expose has been generated successfully</p>
             </CardHeader>
             <CardContent className="p-6">
               <div className="text-center text-[#6D7175]">
-                Hero image generated successfully!
+                Hero image and content generated successfully!
               </div>
             </CardContent>
           </Card>
