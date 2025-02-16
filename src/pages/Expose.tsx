@@ -33,7 +33,6 @@ const Expose = () => {
   const { toast } = useToast();
   const navigate = useNavigate();
 
-  // Check for authentication
   useEffect(() => {
     const checkAuth = async () => {
       const { data: { session } } = await supabase.auth.getSession();
