@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { ProductPicker } from "@/components/ProductPicker";
 import { supabase } from "@/integrations/supabase/client";
-import { Loader2, ArrowLeft, Plus, Equal } from "lucide-react";
+import { Loader2, ArrowLeft, Plus, Equal, WandSparkles } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -194,6 +194,47 @@ const Expose = () => {
     }
   };
 
+  const generateContent = async (type: 'headline' | 'body') => {
+    try {
+      const selectedThemeData = THEMES.find(t => t.id === selectedTheme);
+      if (!selectedThemeData) return;
+
+      const response = await fetch('/api/generate-content', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          type,
+          products: selectedProducts,
+          theme: selectedThemeData.label
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to generate content');
+      }
+
+      const { generatedText } = await response.json();
+
+      if (type === 'headline') {
+        setHeadline(generatedText);
+      } else {
+        setBodyCopy(generatedText);
+      }
+
+      toast({
+        title: "Success",
+        description: `Generated ${type} successfully!`,
+      });
+    } catch (error) {
+      console.error('Error generating content:', error);
+      toast({
+        title: "Error",
+        description: `Failed to generate ${type}. Please try again.`,
+        variant: "destructive"
+      });
+    }
+  };
+
   const renderStep = () => {
     switch (currentStep) {
       case 'products':
@@ -339,7 +380,18 @@ const Expose = () => {
             <CardContent className="p-6">
               <div className="space-y-6">
                 <div className="space-y-2">
-                  <Label htmlFor="headline">Headline</Label>
+                  <div className="flex justify-between items-center">
+                    <Label htmlFor="headline">Headline</Label>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => generateContent('headline')}
+                      className="text-[#008060] hover:text-[#006e52]"
+                    >
+                      <WandSparkles className="h-4 w-4 mr-1" />
+                      Generate
+                    </Button>
+                  </div>
                   <Input 
                     id="headline"
                     value={headline}
@@ -350,7 +402,18 @@ const Expose = () => {
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="body-copy">Body Copy</Label>
+                  <div className="flex justify-between items-center">
+                    <Label htmlFor="body-copy">Body Copy</Label>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => generateContent('body')}
+                      className="text-[#008060] hover:text-[#006e52]"
+                    >
+                      <WandSparkles className="h-4 w-4 mr-1" />
+                      Generate
+                    </Button>
+                  </div>
                   <Textarea
                     id="body-copy"
                     value={bodyCopy}
