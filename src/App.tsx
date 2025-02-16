@@ -34,10 +34,10 @@ function AppContent() {
   }
 
   return (
-    <div className="min-h-screen">
+    <div className="flex flex-col min-h-screen">
       <NavBar />
       <SidebarProvider>
-        <div className="flex w-full" style={{ paddingTop: '64px', minHeight: 'calc(100vh - 64px)' }}>
+        <div className="flex flex-1 pt-16">
           <GlobalSidebar />
           <main className="flex-1 overflow-y-auto bg-[#F6F6F7]">
             <Routes>
