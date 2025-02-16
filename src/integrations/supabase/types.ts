@@ -9,130 +9,6 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
-      expose_localizations: {
-        Row: {
-          created_at: string
-          expose_id: string | null
-          headline: string | null
-          id: string
-          is_auto_translated: boolean | null
-          locale: string
-          product_data: Json | null
-          updated_at: string
-        }
-        Insert: {
-          created_at?: string
-          expose_id?: string | null
-          headline?: string | null
-          id?: string
-          is_auto_translated?: boolean | null
-          locale: string
-          product_data?: Json | null
-          updated_at?: string
-        }
-        Update: {
-          created_at?: string
-          expose_id?: string | null
-          headline?: string | null
-          id?: string
-          is_auto_translated?: boolean | null
-          locale?: string
-          product_data?: Json | null
-          updated_at?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "expose_localizations_expose_id_fkey"
-            columns: ["expose_id"]
-            isOneToOne: false
-            referencedRelation: "exposes"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      expose_revisions: {
-        Row: {
-          brand_constraints: string | null
-          created_at: string
-          expose_id: string | null
-          headline: string | null
-          hero_image_url: string
-          id: string
-          occasion: string | null
-        }
-        Insert: {
-          brand_constraints?: string | null
-          created_at?: string
-          expose_id?: string | null
-          headline?: string | null
-          hero_image_url: string
-          id?: string
-          occasion?: string | null
-        }
-        Update: {
-          brand_constraints?: string | null
-          created_at?: string
-          expose_id?: string | null
-          headline?: string | null
-          hero_image_url?: string
-          id?: string
-          occasion?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "expose_revisions_expose_id_fkey"
-            columns: ["expose_id"]
-            isOneToOne: false
-            referencedRelation: "exposes"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      exposes: {
-        Row: {
-          brand_constraints: string | null
-          created_at: string
-          end_date: string | null
-          headline: string | null
-          hero_image_url: string | null
-          id: string
-          occasion: string | null
-          selected_product_ids: string[]
-          start_date: string | null
-          status: Database["public"]["Enums"]["expose_status"]
-          updated_at: string
-          user_id: string
-        }
-        Insert: {
-          brand_constraints?: string | null
-          created_at?: string
-          end_date?: string | null
-          headline?: string | null
-          hero_image_url?: string | null
-          id?: string
-          occasion?: string | null
-          selected_product_ids?: string[]
-          start_date?: string | null
-          status?: Database["public"]["Enums"]["expose_status"]
-          updated_at?: string
-          user_id: string
-        }
-        Update: {
-          brand_constraints?: string | null
-          created_at?: string
-          end_date?: string | null
-          headline?: string | null
-          hero_image_url?: string | null
-          id?: string
-          occasion?: string | null
-          selected_product_ids?: string[]
-          start_date?: string | null
-          status?: Database["public"]["Enums"]["expose_status"]
-          updated_at?: string
-          user_id?: string
-        }
-        Relationships: []
-      }
       feature_flags: {
         Row: {
           created_at: string
@@ -240,7 +116,6 @@ export type Database = {
       [_ in never]: never
     }
     Enums: {
-      expose_status: "draft" | "published" | "scheduled" | "archived"
       task_priority: "low" | "medium" | "high"
     }
     CompositeTypes: {
