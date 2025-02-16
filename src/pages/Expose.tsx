@@ -199,21 +199,19 @@ const Expose = () => {
       const selectedThemeData = THEMES.find(t => t.id === selectedTheme);
       if (!selectedThemeData) return;
 
-      const response = await fetch('/api/generate-content', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
+      const { data, error } = await supabase.functions.invoke('generate-content', {
+        body: {
           type,
           products: selectedProducts,
           theme: selectedThemeData.label
-        }),
+        },
       });
 
-      if (!response.ok) {
-        throw new Error('Failed to generate content');
+      if (error) {
+        throw error;
       }
 
-      const { generatedText } = await response.json();
+      const { generatedText } = data;
 
       if (type === 'headline') {
         setHeadline(generatedText);
