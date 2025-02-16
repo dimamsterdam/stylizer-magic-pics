@@ -17,6 +17,8 @@ serve(async (req) => {
   try {
     const { type, products, theme } = await req.json();
 
+    console.log('Generating content for:', { type, productsCount: products.length, theme });
+
     const prompt = type === 'headline' 
       ? `Create a compelling, short headline for ${products.length} product${products.length > 1 ? 's' : ''} in a ${theme} theme. Make it catchy and professional, focusing on the key benefits or features. The headline should be less than 10 words.`
       : `Write compelling body copy for ${products.length} product${products.length > 1 ? 's' : ''} in a ${theme} theme. Focus on the value proposition and key features. Keep it between 2-3 sentences.`;
@@ -36,7 +38,20 @@ serve(async (req) => {
       }),
     });
 
+    if (!response.ok) {
+      const error = await response.text();
+      console.error('OpenAI API error:', error);
+      throw new Error('Failed to generate content from OpenAI');
+    }
+
     const data = await response.json();
+    console.log('OpenAI response:', data);
+
+    if (!data.choices || !data.choices[0] || !data.choices[0].message) {
+      console.error('Unexpected OpenAI response format:', data);
+      throw new Error('Invalid response format from OpenAI');
+    }
+
     const generatedText = data.choices[0].message.content;
 
     return new Response(JSON.stringify({ generatedText }), {
@@ -44,7 +59,9 @@ serve(async (req) => {
     });
   } catch (error) {
     console.error('Error in generate-content function:', error);
-    return new Response(JSON.stringify({ error: error.message }), {
+    return new Response(JSON.stringify({ 
+      error: error.message || 'An error occurred while generating content'
+    }), {
       status: 500,
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
