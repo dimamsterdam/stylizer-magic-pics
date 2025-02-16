@@ -20,7 +20,7 @@ interface Product {
   image: string;
 }
 
-type Step = 'products' | 'configuration' | 'preview' | 'content' | 'generation';
+type Step = 'products' | 'configuration' | 'content' | 'preview' | 'generation';
 
 const Expose = () => {
   const [currentStep, setCurrentStep] = useState<Step>('products');
@@ -305,11 +305,68 @@ const Expose = () => {
 
                 <div className="flex justify-end pt-4">
                   <Button
-                    onClick={() => setCurrentStep('preview')}
+                    onClick={() => setCurrentStep('content')}
                     disabled={!selectedTheme}
                     className="bg-[#008060] hover:bg-[#006e52] text-white px-6"
                   >
-                    Preview
+                    Continue to Content
+                  </Button>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        );
+
+      case 'content':
+        return (
+          <Card className="border-0 shadow-sm">
+            <CardHeader className="p-6 pb-2">
+              <div className="flex items-center mb-4">
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => setCurrentStep('configuration')}
+                  className="mr-2"
+                >
+                  <ArrowLeft className="h-4 w-4" />
+                </Button>
+                <div>
+                  <h2 className="text-lg font-semibold text-[#1A1F2C] mb-1">Add Content</h2>
+                  <p className="text-[#6D7175]">Enter the text content for your expose</p>
+                </div>
+              </div>
+            </CardHeader>
+            <CardContent className="p-6">
+              <div className="space-y-6">
+                <div className="space-y-2">
+                  <Label htmlFor="headline">Headline</Label>
+                  <Input 
+                    id="headline"
+                    value={headline}
+                    onChange={(e) => setHeadline(e.target.value)}
+                    placeholder="Enter a compelling headline..."
+                    className="text-lg"
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="body-copy">Body Copy</Label>
+                  <Textarea
+                    id="body-copy"
+                    value={bodyCopy}
+                    onChange={(e) => setBodyCopy(e.target.value)}
+                    placeholder="Enter the main content of your expose..."
+                    className="h-48"
+                  />
+                </div>
+
+                <div className="flex justify-end">
+                  <Button
+                    onClick={() => setCurrentStep('preview')}
+                    disabled={!headline.trim() || !bodyCopy.trim()}
+                    className="bg-[#008060] hover:bg-[#006e52] text-white px-6"
+                  >
+                    Continue to Preview
                   </Button>
                 </div>
               </div>
@@ -326,7 +383,7 @@ const Expose = () => {
                 <Button
                   variant="ghost"
                   size="icon"
-                  onClick={() => setCurrentStep('configuration')}
+                  onClick={() => setCurrentStep('content')}
                   className="mr-2"
                 >
                   <ArrowLeft className="h-4 w-4" />
@@ -411,76 +468,12 @@ const Expose = () => {
 
                   <div className="flex justify-end">
                     <Button
-                      onClick={() => setCurrentStep('content')}
+                      onClick={() => setCurrentStep('generation')}
                       className="bg-[#008060] hover:bg-[#006e52] text-white px-6"
                     >
-                      Continue to Content
+                      Generate Hero Image
                     </Button>
                   </div>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        );
-
-      case 'content':
-        return (
-          <Card className="border-0 shadow-sm">
-            <CardHeader className="p-6 pb-2">
-              <div className="flex items-center mb-4">
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  onClick={() => setCurrentStep('preview')}
-                  className="mr-2"
-                >
-                  <ArrowLeft className="h-4 w-4" />
-                </Button>
-                <div>
-                  <h2 className="text-lg font-semibold text-[#1A1F2C] mb-1">Add Content</h2>
-                  <p className="text-[#6D7175]">Enter the text content for your expose</p>
-                </div>
-              </div>
-            </CardHeader>
-            <CardContent className="p-6">
-              <div className="space-y-6">
-                <div className="space-y-2">
-                  <Label htmlFor="headline">Headline</Label>
-                  <Input 
-                    id="headline"
-                    value={headline}
-                    onChange={(e) => setHeadline(e.target.value)}
-                    placeholder="Enter a compelling headline..."
-                    className="text-lg"
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="body-copy">Body Copy</Label>
-                  <Textarea
-                    id="body-copy"
-                    value={bodyCopy}
-                    onChange={(e) => setBodyCopy(e.target.value)}
-                    placeholder="Enter the main content of your expose..."
-                    className="h-48"
-                  />
-                </div>
-
-                <div className="flex justify-end">
-                  <Button
-                    onClick={handleGenerateHero}
-                    disabled={isGenerating || !headline.trim() || !bodyCopy.trim()}
-                    className="bg-[#008060] hover:bg-[#006e52] text-white px-6"
-                  >
-                    {isGenerating ? (
-                      <>
-                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                        Generating...
-                      </>
-                    ) : (
-                      'Generate Hero Image'
-                    )}
-                  </Button>
                 </div>
               </div>
             </CardContent>
