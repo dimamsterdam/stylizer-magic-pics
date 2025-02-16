@@ -56,7 +56,7 @@ export function GlobalSidebar() {
   return (
     <div className="h-[calc(100vh-64px)] border-r border-polaris-border">
       <Sidebar className="h-full">
-        <SidebarContent className="space-y-1">
+        <SidebarContent className="space-y-1 pt-4">
           <SidebarGroup>
             <SidebarGroupLabel>Applications</SidebarGroupLabel>
             <SidebarGroupContent>
