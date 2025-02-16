@@ -1,6 +1,7 @@
+
 import { ChevronDown, ChevronRight, Home, Image, Video, Palette, Settings, ChevronLeft, Library } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
-import { Sidebar, SidebarContent, SidebarGroup, SidebarGroupContent, SidebarGroupLabel, SidebarMenu, SidebarMenuButton, SidebarMenuItem, SidebarTrigger } from "@/components/ui/sidebar";
+import { Sidebar, SidebarContent, SidebarGroup, SidebarGroupContent, SidebarGroupLabel, SidebarMenu, SidebarMenuButton, SidebarMenuItem } from "@/components/ui/sidebar";
 import { useState, useEffect } from "react";
 
 const mainNavItems = [
@@ -53,7 +54,7 @@ export function GlobalSidebar() {
   }, [location.pathname]);
 
   return (
-    <div className={`h-[calc(100vh-4rem)] top-16 transition-all duration-300 ${isCollapsed ? 'w-16' : 'w-64'}`}>
+    <div className={`h-full transition-all duration-300 ${isCollapsed ? 'w-16' : 'w-64'}`}>
       <Sidebar className="h-full border-r border-polaris-border relative">
         <SidebarContent className="space-y-1">
           <SidebarGroup>
