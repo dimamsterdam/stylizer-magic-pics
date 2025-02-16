@@ -54,7 +54,7 @@ export function GlobalSidebar() {
   }, [location.pathname]);
 
   return (
-    <div className={`h-[calc(100vh-4rem)] transition-all duration-300 ${isCollapsed ? 'w-16' : 'w-64'}`}>
+    <div className={`h-full transition-all duration-300 ${isCollapsed ? 'w-16' : 'w-64'}`}>
       <Sidebar className="h-full border-r border-polaris-border relative">
         <SidebarContent className="space-y-1">
           <SidebarGroup>

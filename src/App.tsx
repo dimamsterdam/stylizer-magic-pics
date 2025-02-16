@@ -34,25 +34,27 @@ function AppContent() {
   }
 
   return (
-    <div className="min-h-screen w-full flex flex-col">
+    <div className="min-h-screen w-full">
       <NavBar />
-      <SidebarProvider>
-        <div className="flex flex-1 pt-16">
-          <GlobalSidebar />
-          <main className="flex-1 overflow-y-auto bg-[#F6F6F7]">
-            <Routes>
-              <Route path="/" element={<Index />} />
-              <Route path="/expose" element={<Expose />} />
-              <Route path="/brand" element={<Brand />} />
-              <Route path="/stylizer" element={<Stylizer />} />
-              <Route path="/generation-results" element={<GenerationResults />} />
-              <Route path="/publish" element={<Publish />} />
-              <Route path="/settings" element={<Settings />} />
-              <Route path="*" element={<NotFound />} />
-            </Routes>
-          </main>
-        </div>
-      </SidebarProvider>
+      <div className="pt-16 h-[calc(100vh-4rem)]">
+        <SidebarProvider>
+          <div className="flex h-full">
+            <GlobalSidebar />
+            <main className="flex-1 overflow-y-auto bg-[#F6F6F7]">
+              <Routes>
+                <Route path="/" element={<Index />} />
+                <Route path="/expose" element={<Expose />} />
+                <Route path="/brand" element={<Brand />} />
+                <Route path="/stylizer" element={<Stylizer />} />
+                <Route path="/generation-results" element={<GenerationResults />} />
+                <Route path="/publish" element={<Publish />} />
+                <Route path="/settings" element={<Settings />} />
+                <Route path="*" element={<NotFound />} />
+              </Routes>
+            </main>
+          </div>
+        </SidebarProvider>
+      </div>
     </div>
   );
 }
