@@ -47,8 +47,8 @@ export function GlobalSidebar() {
   }, [location.pathname]);
 
   return (
-    <Sidebar className="border-r border-polaris-border h-full">
-      <SidebarContent className="space-y-1 pt-4">
+    <Sidebar className="border-r border-polaris-border relative h-[calc(100vh-64px)]">
+      <SidebarContent className="space-y-1">
         <SidebarGroup>
           <SidebarGroupLabel>Applications</SidebarGroupLabel>
           <SidebarGroupContent>
