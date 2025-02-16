@@ -10,37 +10,14 @@ export function calculateNextOccurrence(themeDate: ThemeDate, currentDate: Date 
     return now;
   }
 
-  // Calculate this year's date
-  let thisYearDate = new Date(year, themeDate.month - 1, themeDate.day || 1);
+  let nextDate = new Date(year, themeDate.month - 1, themeDate.day || 1);
   
-  // If the date hasn't passed this year, use it
-  if (thisYearDate > now) {
-    return thisYearDate;
-  }
-  
-  // If it has passed, use next year's date
-  return new Date(year + 1, themeDate.month - 1, themeDate.day || 1);
-}
-
-export function calculatePreviousOccurrence(themeDate: ThemeDate, currentDate: Date = new Date()): Date {
-  const now = new Date(currentDate);
-  const year = now.getFullYear();
-  
-  // For non-annual events, return current date
-  if (!themeDate.isAnnual) {
-    return now;
+  // If the date has passed this year, calculate for next year
+  if (nextDate < now) {
+    nextDate = new Date(year + 1, themeDate.month - 1, themeDate.day || 1);
   }
 
-  // Calculate this year's date
-  let thisYearDate = new Date(year, themeDate.month - 1, themeDate.day || 1);
-  
-  // If the date hasn't occurred this year yet, use last year's date
-  if (thisYearDate > now) {
-    return new Date(year - 1, themeDate.month - 1, themeDate.day || 1);
-  }
-  
-  // If it has passed this year, use this year's date
-  return thisYearDate;
+  return nextDate;
 }
 
 export function getDaysBetween(date1: Date, date2: Date): number {
@@ -52,34 +29,29 @@ export function getThemeCategory(theme: Theme, currentDate: Date = new Date()): 
   const nextOccurrence = calculateNextOccurrence(theme.date, currentDate);
   const daysUntil = getDaysBetween(currentDate, nextOccurrence);
 
-  if (!theme.date.isAnnual) return "Later";
+  if (!theme.date.isAnnual) return "Year Round";
   if (daysUntil <= 30) return "Coming Soon";
   if (daysUntil <= 90) return "Upcoming";
-  return "Later";
+  return "Later This Year";
 }
 
 export function sortThemesByProximity(themes: Theme[], currentDate: Date = new Date()): Theme[] {
   return [...themes].sort((a, b) => {
+    // Year-round themes go last
     if (!a.date.isAnnual && b.date.isAnnual) return 1;
     if (a.date.isAnnual && !b.date.isAnnual) return -1;
     if (!a.date.isAnnual && !b.date.isAnnual) return 0;
 
-    const aNext = calculateNextOccurrence(a.date, currentDate);
-    const bNext = calculateNextOccurrence(b.date, currentDate);
-    const aPrev = calculatePreviousOccurrence(a.date, currentDate);
-    const bPrev = calculatePreviousOccurrence(b.date, currentDate);
-
-    // Calculate closest occurrence (past or future) for each theme
-    const aClosest = getDaysBetween(currentDate, aPrev) < getDaysBetween(currentDate, aNext) ? aPrev : aNext;
-    const bClosest = getDaysBetween(currentDate, bPrev) < getDaysBetween(currentDate, bNext) ? bPrev : bNext;
+    const aNextDate = calculateNextOccurrence(a.date, currentDate);
+    const bNextDate = calculateNextOccurrence(b.date, currentDate);
     
-    return aClosest.getTime() - bClosest.getTime();
+    return aNextDate.getTime() - bNextDate.getTime();
   });
 }
 
 export function groupThemesByCategory(themes: Theme[], currentDate: Date = new Date()) {
   const sorted = sortThemesByProximity(themes, currentDate);
-  const grouped = sorted.reduce((acc, theme) => {
+  return sorted.reduce((acc, theme) => {
     const category = getThemeCategory(theme, currentDate);
     if (!acc[category]) {
       acc[category] = [];
@@ -87,16 +59,4 @@ export function groupThemesByCategory(themes: Theme[], currentDate: Date = new D
     acc[category].push(theme);
     return acc;
   }, {} as Record<string, Theme[]>);
-
-  // Create a new object with categories in the desired order
-  const orderedCategories = ['Coming Soon', 'Upcoming', 'Later'];
-  const orderedGroups: Record<string, Theme[]> = {};
-  
-  orderedCategories.forEach(category => {
-    if (grouped[category]) {
-      orderedGroups[category] = grouped[category];
-    }
-  });
-
-  return orderedGroups;
 }
