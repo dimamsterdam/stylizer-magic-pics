@@ -34,10 +34,10 @@ function AppContent() {
   }
 
   return (
-    <SidebarProvider>
-      <div className="min-h-screen w-full">
-        <NavBar />
-        <div className="flex h-[calc(100vh-4rem)] pt-16">
+    <div className="min-h-screen w-full flex flex-col">
+      <NavBar />
+      <SidebarProvider>
+        <div className="flex flex-1 pt-16">
           <GlobalSidebar />
           <main className="flex-1 overflow-y-auto bg-[#F6F6F7]">
             <Routes>
@@ -52,8 +52,8 @@ function AppContent() {
             </Routes>
           </main>
         </div>
-      </div>
-    </SidebarProvider>
+      </SidebarProvider>
+    </div>
   );
 }
 
