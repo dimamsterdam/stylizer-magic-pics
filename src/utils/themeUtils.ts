@@ -79,7 +79,7 @@ export function sortThemesByProximity(themes: Theme[], currentDate: Date = new D
 
 export function groupThemesByCategory(themes: Theme[], currentDate: Date = new Date()) {
   const sorted = sortThemesByProximity(themes, currentDate);
-  return sorted.reduce((acc, theme) => {
+  const grouped = sorted.reduce((acc, theme) => {
     const category = getThemeCategory(theme, currentDate);
     if (!acc[category]) {
       acc[category] = [];
@@ -87,4 +87,16 @@ export function groupThemesByCategory(themes: Theme[], currentDate: Date = new D
     acc[category].push(theme);
     return acc;
   }, {} as Record<string, Theme[]>);
+
+  // Create a new object with categories in the desired order
+  const orderedCategories = ['Coming Soon', 'Upcoming', 'Later'];
+  const orderedGroups: Record<string, Theme[]> = {};
+  
+  orderedCategories.forEach(category => {
+    if (grouped[category]) {
+      orderedGroups[category] = grouped[category];
+    }
+  });
+
+  return orderedGroups;
 }
