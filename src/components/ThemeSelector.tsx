@@ -19,13 +19,19 @@ export function ThemeSelector({ value, onChange }: ThemeSelectorProps) {
   const groupedThemes = groupThemesByCategory(THEMES);
   const categories = Object.keys(groupedThemes);
   
-  // Track the currently open category
-  const [openCategory, setOpenCategory] = useState<string | null>('Coming Soon');
+  // Initialize open state for categories, with "Coming Soon" open by default
+  const [openCategories, setOpenCategories] = useState<Record<string, boolean>>(() => {
+    return categories.reduce((acc, category) => ({
+      ...acc,
+      [category]: category === "Coming Soon"
+    }), {});
+  });
 
   const toggleCategory = (category: string) => {
-    setOpenCategory(currentOpen => 
-      currentOpen === category ? null : category
-    );
+    setOpenCategories(prev => ({
+      ...prev,
+      [category]: !prev[category]
+    }));
   };
 
   return (
@@ -33,7 +39,7 @@ export function ThemeSelector({ value, onChange }: ThemeSelectorProps) {
       {categories.map((category) => (
         <Collapsible
           key={category}
-          open={openCategory === category}
+          open={openCategories[category]}
           onOpenChange={() => toggleCategory(category)}
         >
           <div className="border border-[#E3E5E7] rounded-lg p-4">
@@ -41,7 +47,7 @@ export function ThemeSelector({ value, onChange }: ThemeSelectorProps) {
               <div className="flex items-center space-x-2">
                 <ChevronRight 
                   className={`h-4 w-4 text-[#6D7175] transition-transform duration-200 ${
-                    openCategory === category ? 'rotate-90' : ''
+                    openCategories[category] ? 'rotate-90' : ''
                   }`}
                 />
                 <h3 className="text-sm font-medium text-[#1A1F2C]">
