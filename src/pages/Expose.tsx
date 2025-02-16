@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { ProductPicker } from "@/components/ProductPicker";
 import { supabase } from "@/integrations/supabase/client";
-import { Loader2, ArrowLeft, Grid3X3 } from "lucide-react";
+import { Loader2, ArrowLeft, Plus, Equal } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -28,6 +28,7 @@ const Expose = () => {
   const [selectedProducts, setSelectedProducts] = useState<Product[]>([]);
   const [selectedTheme, setSelectedTheme] = useState("");
   const [brandConstraints, setBrandConstraints] = useState("");
+  const [negativePrompt, setNegativePrompt] = useState("");
   const [isGenerating, setIsGenerating] = useState(false);
   const [exposeId, setExposeId] = useState<string | null>(null);
   const { toast } = useToast();
@@ -148,7 +149,10 @@ const Expose = () => {
       const response = await fetch('/api/generate-ai-image', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ prompt }),
+        body: JSON.stringify({ 
+          prompt,
+          negativePrompt: negativePrompt 
+        }),
       });
 
       if (!response.ok) {
@@ -162,7 +166,8 @@ const Expose = () => {
         .update({
           hero_image_url: imageUrl,
           theme: selectedTheme,
-          brand_constraints: brandConstraints
+          brand_constraints: brandConstraints,
+          negative_prompt: negativePrompt
         })
         .eq('id', exposeId);
 
@@ -323,8 +328,8 @@ const Expose = () => {
                   <ArrowLeft className="h-4 w-4" />
                 </Button>
                 <div>
-                  <h2 className="text-lg font-semibold text-[#1A1F2C] mb-1">Preview Configuration</h2>
-                  <p className="text-[#6D7175]">Review your settings before generating the hero image</p>
+                  <h2 className="text-lg font-semibold text-[#1A1F2C] mb-1">Final Prompt</h2>
+                  <p className="text-[#6D7175]">Review and customize your generation settings</p>
                 </div>
               </div>
             </CardHeader>
@@ -332,7 +337,7 @@ const Expose = () => {
               <div className="space-y-8">
                 <div className="space-y-4">
                   <div>
-                    <h3 className="text-sm font-medium text-[#1A1F2C] mb-2">Selected Products</h3>
+                    <h3 className="text-sm font-medium text-[#1A1F2C]">Selected Products</h3>
                     <div className="grid grid-cols-3 gap-4">
                       {selectedProducts.map(product => (
                         <div key={product.id} className="relative">
@@ -354,50 +359,68 @@ const Expose = () => {
                     </div>
                   </div>
 
+                  <div className="flex items-center justify-center">
+                    <div className="bg-polaris-border flex-grow h-px" />
+                    <Plus className="mx-4 text-polaris-text" />
+                    <div className="bg-polaris-border flex-grow h-px" />
+                  </div>
+
+                  <div className="space-y-4">
+                    <div className="space-y-2">
+                      <Label>Theme</Label>
+                      <div className="p-4 rounded-lg bg-[#F6F6F7] text-[#1A1F2C]">
+                        {selectedThemeData?.label}
+                      </div>
+                    </div>
+                    <div className="space-y-2">
+                      <Label>AI Generated Prompt (Editable)</Label>
+                      <Textarea
+                        value={brandConstraints}
+                        onChange={(e) => setBrandConstraints(e.target.value)}
+                        className="h-24"
+                        placeholder="Customize the AI prompt to refine the generation..."
+                      />
+                    </div>
+                  </div>
+
+                  <div className="flex items-center justify-center">
+                    <div className="bg-polaris-border flex-grow h-px" />
+                    <Plus className="mx-4 text-polaris-text" />
+                    <div className="bg-polaris-border flex-grow h-px" />
+                  </div>
+
                   <div className="space-y-2">
-                    <h3 className="text-sm font-medium text-[#1A1F2C]">Layout Preview</h3>
-                    <div className="bg-gray-50 p-4 rounded-lg border border-[#E3E5E7]">
-                      <div className="flex items-center justify-center">
-                        <Grid3X3 className="h-32 w-32 text-[#6D7175]" />
-                      </div>
-                      <p className="text-sm text-[#6D7175] text-center mt-2">
-                        Products will be arranged in a visually appealing composition
-                      </p>
-                    </div>
+                    <Label>Anything to exclude? (Negative Prompt)</Label>
+                    <Textarea
+                      value={negativePrompt}
+                      onChange={(e) => setNegativePrompt(e.target.value)}
+                      className="h-24"
+                      placeholder="Specify elements you want to exclude from the generation..."
+                    />
                   </div>
 
-                  <div>
-                    <h3 className="text-sm font-medium text-[#1A1F2C] mb-2">Generation Settings</h3>
-                    <div className="bg-gray-50 p-4 rounded-lg border border-[#E3E5E7] space-y-2">
-                      <div>
-                        <span className="text-sm font-medium text-[#1A1F2C]">Theme: </span>
-                        <span className="text-sm text-[#6D7175]">{selectedThemeData?.label}</span>
-                      </div>
-                      {brandConstraints && (
-                        <div>
-                          <span className="text-sm font-medium text-[#1A1F2C]">Style Guidelines: </span>
-                          <span className="text-sm text-[#6D7175]">{brandConstraints}</span>
-                        </div>
+                  <div className="flex items-center justify-center">
+                    <div className="bg-polaris-border flex-grow h-px" />
+                    <Equal className="mx-4 text-polaris-text" />
+                    <div className="bg-polaris-border flex-grow h-px" />
+                  </div>
+
+                  <div className="flex justify-end">
+                    <Button
+                      onClick={handleGenerateHero}
+                      disabled={isGenerating}
+                      className="bg-[#008060] hover:bg-[#006e52] text-white px-6"
+                    >
+                      {isGenerating ? (
+                        <>
+                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                          Generating...
+                        </>
+                      ) : (
+                        'Generate Hero Image'
                       )}
-                    </div>
+                    </Button>
                   </div>
-                </div>
-
-                <div className="flex justify-end pt-4">
-                  <Button
-                    onClick={handleGenerateHero}
-                    disabled={isGenerating}
-                    className="bg-[#008060] hover:bg-[#006e52] text-white px-6"
-                  >
-                    {isGenerating ? (
-                      <>
-                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                        Generating...
-                      </>
-                    ) : (
-                      'Generate Hero Image'
-                    )}
-                  </Button>
                 </div>
               </div>
             </CardContent>
