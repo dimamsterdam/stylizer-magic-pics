@@ -15,13 +15,19 @@ serve(async (req) => {
   }
 
   try {
+    if (!openAIApiKey) {
+      throw new Error('OpenAI API key is not configured');
+    }
+
     const { type, products, theme } = await req.json();
 
-    console.log('Generating content for:', { type, productsCount: products.length, theme });
+    console.log('Starting content generation with params:', { type, productsCount: products.length, theme });
 
     const prompt = type === 'headline' 
       ? `Create a compelling, short headline for ${products.length} product${products.length > 1 ? 's' : ''} in a ${theme} theme. Make it catchy and professional, focusing on the key benefits or features. The headline should be less than 10 words.`
       : `Write compelling body copy for ${products.length} product${products.length > 1 ? 's' : ''} in a ${theme} theme. Focus on the value proposition and key features. Keep it between 2-3 sentences.`;
+
+    console.log('Sending request to OpenAI with prompt:', prompt);
 
     const response = await fetch('https://api.openai.com/v1/chat/completions', {
       method: 'POST',
@@ -30,29 +36,32 @@ serve(async (req) => {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: 'gpt-4o-mini',
+        model: 'gpt-3.5-turbo',
         messages: [
           { role: 'system', content: 'You are a professional copywriter creating content for product marketing.' },
           { role: 'user', content: prompt }
         ],
+        temperature: 0.7,
+        max_tokens: 150
       }),
     });
 
     if (!response.ok) {
-      const error = await response.text();
-      console.error('OpenAI API error:', error);
-      throw new Error('Failed to generate content from OpenAI');
+      const errorText = await response.text();
+      console.error('OpenAI API error response:', errorText);
+      throw new Error(`OpenAI API error: ${errorText}`);
     }
 
     const data = await response.json();
-    console.log('OpenAI response:', data);
+    console.log('Received response from OpenAI:', data);
 
-    if (!data.choices || !data.choices[0] || !data.choices[0].message) {
+    if (!data.choices?.[0]?.message?.content) {
       console.error('Unexpected OpenAI response format:', data);
       throw new Error('Invalid response format from OpenAI');
     }
 
     const generatedText = data.choices[0].message.content;
+    console.log('Successfully generated text:', generatedText);
 
     return new Response(JSON.stringify({ generatedText }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
