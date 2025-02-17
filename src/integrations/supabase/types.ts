@@ -95,6 +95,10 @@ export type Database = {
           created_at: string
           end_date: string | null
           headline: string | null
+          hero_image_desktop_url: string | null
+          hero_image_generation_status: string | null
+          hero_image_mobile_url: string | null
+          hero_image_tablet_url: string | null
           hero_image_url: string | null
           id: string
           occasion: string | null
@@ -112,6 +116,10 @@ export type Database = {
           created_at?: string
           end_date?: string | null
           headline?: string | null
+          hero_image_desktop_url?: string | null
+          hero_image_generation_status?: string | null
+          hero_image_mobile_url?: string | null
+          hero_image_tablet_url?: string | null
           hero_image_url?: string | null
           id?: string
           occasion?: string | null
@@ -129,6 +137,10 @@ export type Database = {
           created_at?: string
           end_date?: string | null
           headline?: string | null
+          hero_image_desktop_url?: string | null
+          hero_image_generation_status?: string | null
+          hero_image_mobile_url?: string | null
+          hero_image_tablet_url?: string | null
           hero_image_url?: string | null
           id?: string
           occasion?: string | null

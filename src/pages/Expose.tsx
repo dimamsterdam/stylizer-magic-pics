@@ -214,42 +214,57 @@ const Expose = () => {
     if (!exposeId) return;
     setIsGenerating(true);
     try {
-      const prompt = `Create a hero product image. Theme description: ${themeDescription}. The image should feature ${selectedProducts.length} product${selectedProducts.length > 1 ? 's' : ''} in an engaging and professional composition.`;
-      const response = await fetch('/api/generate-ai-image', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          prompt
-        })
+      const { data, error } = await supabase.functions.invoke('generate-ai-image', {
+        body: {
+          exposeId,
+          products: selectedProducts.map(product => ({
+            title: product.title,
+            sku: product.sku,
+            image: product.image
+          })),
+          theme: themeDescription,
+          headline,
+          bodyCopy
+        }
       });
-      if (!response.ok) {
-        throw new Error('Failed to generate image');
-      }
-      const {
-        imageUrl
-      } = await response.json();
-      const {
-        error: updateError
-      } = await supabase.from('exposes').update({
-        hero_image_url: imageUrl
-      }).eq('id', exposeId);
-      if (updateError) throw updateError;
-      toast({
-        title: "Success",
-        description: "Hero image generated successfully!"
-      });
-      setCurrentStep('generation');
+
+      if (error) throw error;
+
+      const pollInterval = setInterval(async () => {
+        const { data: exposeData } = await supabase
+          .from('exposes')
+          .select('hero_image_generation_status, hero_image_desktop_url, hero_image_tablet_url, hero_image_mobile_url')
+          .eq('id', exposeId)
+          .single();
+
+        if (exposeData?.hero_image_generation_status === 'completed') {
+          clearInterval(pollInterval);
+          setIsGenerating(false);
+          toast({
+            title: "Success",
+            description: "Hero images generated successfully!"
+          });
+          setCurrentStep('generation');
+        } else if (exposeData?.hero_image_generation_status === 'error') {
+          clearInterval(pollInterval);
+          setIsGenerating(false);
+          toast({
+            title: "Error",
+            description: "Failed to generate hero images. Please try again.",
+            variant: "destructive"
+          });
+        }
+      }, 2000);
+
+      return () => clearInterval(pollInterval);
     } catch (error) {
       console.error('Error generating hero:', error);
+      setIsGenerating(false);
       toast({
         title: "Error",
-        description: "Failed to generate hero image. Please try again.",
+        description: "Failed to generate hero images. Please try again.",
         variant: "destructive"
       });
-    } finally {
-      setIsGenerating(false);
     }
   };
 
