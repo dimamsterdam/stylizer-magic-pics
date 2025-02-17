@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
@@ -349,7 +348,7 @@ const Expose = () => {
             <CardContent className="p-6">
               <div className="space-y-6">
                 <div className="space-y-2">
-                  <Label htmlFor="theme-description">Theme Description</Label>
+                  <Label htmlFor="theme-description">Creative Brief</Label>
                   <Textarea
                     id="theme-description"
                     value={themeDescription}
