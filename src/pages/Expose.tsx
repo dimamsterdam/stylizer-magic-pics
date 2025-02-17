@@ -171,6 +171,11 @@ const Expose = () => {
     }
   };
 
+  const handleHeadlineChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const cleanedValue = e.target.value.replace(/["']/g, '');
+    setHeadline(cleanedValue);
+  };
+
   const generateContent = async (type: 'headline' | 'body') => {
     try {
       const { data, error } = await supabase.functions.invoke('generate-content', {
@@ -188,7 +193,7 @@ const Expose = () => {
       const { generatedText } = data;
       
       if (type === 'headline') {
-        setHeadline(generatedText);
+        setHeadline(generatedText.replace(/["']/g, ''));
       } else {
         const words = generatedText.split(' ');
         if (words.length > 40) {
@@ -400,7 +405,7 @@ const Expose = () => {
                   <Input 
                     id="headline" 
                     value={headline} 
-                    onChange={e => setHeadline(e.target.value)} 
+                    onChange={handleHeadlineChange}
                     placeholder="Enter a compelling headline" 
                     className="text-lg" 
                   />
