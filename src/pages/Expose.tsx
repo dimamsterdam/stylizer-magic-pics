@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { ProductPicker } from "@/components/ProductPicker";
 import { supabase } from "@/integrations/supabase/client";
-import { Loader2, WandSparkles, Plus, Equal } from "lucide-react";
+import { Loader2, WandSparkles, Plus, Equal, Pen } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -445,54 +445,104 @@ const Expose = () => {
         return (
           <Card className="border-0 shadow-sm">
             <CardHeader className="p-6 pb-2">
-            </CardHeader>
-            <StepProgress currentStep={currentStep} onStepClick={handleStepClick} />
-            <div className="px-6 pt-4">
-              <div>
+              <StepProgress currentStep={currentStep} onStepClick={handleStepClick} />
+              <div className="mt-4">
                 <h2 className="text-lg font-semibold text-[#1A1F2C] mb-1">Review Your Expose</h2>
                 <p className="text-[#6D7175]">Review all details before generating</p>
               </div>
-            </div>
+            </CardHeader>
             <CardContent className="p-6">
-              <div className="space-y-8">
-                <section className="space-y-4">
-                  <h3 className="font-medium text-[#1A1F2C]">Selected Products</h3>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-                    {selectedProducts.map(product => <div key={product.id} className="border rounded-lg p-4 bg-white">
-                        <img src={product.image} alt={product.title} className="w-full h-32 object-cover rounded-lg mb-2" />
-                        <h4 className="font-medium text-sm">{product.title}</h4>
-                        <p className="text-xs text-[#6D7175]">SKU: {product.sku}</p>
-                      </div>)}
+              <div className="space-y-6">
+                {/* Products Section */}
+                <div className="bg-white rounded-lg border border-[#E3E5E7] p-6">
+                  <div className="flex justify-between items-center mb-4">
+                    <h3 className="font-medium text-[#1A1F2C]">Selected Products</h3>
+                    <Button 
+                      variant="ghost" 
+                      size="sm" 
+                      onClick={() => setCurrentStep('products')}
+                      className="text-[#008060] hover:text-[#006e52]"
+                    >
+                      <Pen className="h-4 w-4 mr-1" />
+                      Edit
+                    </Button>
                   </div>
-                </section>
-
-                <section className="space-y-4">
-                  <h3 className="font-medium text-[#1A1F2C]">Theme</h3>
-                  <div className="bg-gray-50 rounded-lg p-4">
-                    <p className="text-sm text-[#1A1F2C]">{themeDescription}</p>
+                  <div className="flex flex-wrap gap-4">
+                    {selectedProducts.map(product => (
+                      <div key={product.id} className="flex items-center space-x-3 bg-gray-50 rounded-lg p-3 flex-1 min-w-[250px]">
+                        <img 
+                          src={product.image} 
+                          alt={product.title} 
+                          className="w-16 h-16 object-cover rounded-lg"
+                          onError={e => {
+                            e.currentTarget.src = '/placeholder.svg';
+                          }} 
+                        />
+                        <div>
+                          <h4 className="font-medium text-sm text-[#1A1F2C]">{product.title}</h4>
+                          <p className="text-xs text-[#6D7175]">SKU: {product.sku}</p>
+                        </div>
+                      </div>
+                    ))}
                   </div>
-                </section>
+                </div>
 
-                <section className="space-y-4">
-                  <h3 className="font-medium text-[#1A1F2C]">Content</h3>
+                {/* Theme Section */}
+                <div className="bg-white rounded-lg border border-[#E3E5E7] p-6">
+                  <div className="flex justify-between items-center mb-4">
+                    <h3 className="font-medium text-[#1A1F2C]">Theme Description</h3>
+                    <Button 
+                      variant="ghost" 
+                      size="sm" 
+                      onClick={() => setCurrentStep('theme')}
+                      className="text-[#008060] hover:text-[#006e52]"
+                    >
+                      <Pen className="h-4 w-4 mr-1" />
+                      Edit
+                    </Button>
+                  </div>
+                  <p className="text-sm text-[#1A1F2C] bg-gray-50 rounded-lg p-4">{themeDescription}</p>
+                </div>
+
+                {/* Content Section */}
+                <div className="bg-white rounded-lg border border-[#E3E5E7] p-6">
+                  <div className="flex justify-between items-center mb-4">
+                    <h3 className="font-medium text-[#1A1F2C]">Content</h3>
+                    <Button 
+                      variant="ghost" 
+                      size="sm" 
+                      onClick={() => setCurrentStep('content')}
+                      className="text-[#008060] hover:text-[#006e52]"
+                    >
+                      <Pen className="h-4 w-4 mr-1" />
+                      Edit
+                    </Button>
+                  </div>
                   <div className="space-y-4">
-                    <div>
-                      <h4 className="text-sm text-[#6D7175] mb-1">Headline</h4>
-                      <p className="text-lg font-medium text-[#1A1F2C]">{headline}</p>
+                    <div className="bg-gray-50 rounded-lg p-4">
+                      <h4 className="text-sm font-medium text-[#6D7175] mb-2">Headline</h4>
+                      <p className="text-lg text-[#1A1F2C]">{headline}</p>
                     </div>
-                    <div>
-                      <h4 className="text-sm text-[#6D7175] mb-1">Body Copy</h4>
-                      <p className="text-sm text-[#1A1F2C] whitespace-pre-wrap">{bodyCopy}</p>
+                    <div className="bg-gray-50 rounded-lg p-4">
+                      <h4 className="text-sm font-medium text-[#6D7175] mb-2">Body Copy</h4>
+                      <p className="text-sm text-[#1A1F2C]">{bodyCopy}</p>
+                      <p className="text-xs text-[#6D7175] mt-2">{bodyCopy.split(' ').length}/40 words</p>
                     </div>
                   </div>
-                </section>
+                </div>
 
                 <div className="flex justify-end pt-4">
-                  <Button onClick={handleGenerateHero} disabled={isGenerating} className="bg-[#008060] hover:bg-[#006e52] text-white px-6">
-                    {isGenerating ? <>
+                  <Button 
+                    onClick={handleGenerateHero} 
+                    disabled={isGenerating} 
+                    className="bg-[#008060] hover:bg-[#006e52] text-white px-6"
+                  >
+                    {isGenerating ? (
+                      <>
                         <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                         Generating...
-                      </> : 'Generate Hero Image'}
+                      </>
+                    ) : 'Generate Hero Image'}
                   </Button>
                 </div>
               </div>
