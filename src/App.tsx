@@ -5,6 +5,7 @@ import {
   RouterProvider,
   Outlet,
 } from "react-router-dom";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
 import Settings from "./pages/Settings";
@@ -15,6 +16,9 @@ import Expose from "./pages/Expose";
 import Library from "./pages/Library";
 import Stylizer from "./pages/Stylizer";
 import NavBar from "./components/NavBar";
+
+// Create a client
+const queryClient = new QueryClient();
 
 const Root = () => {
   return (
@@ -75,7 +79,9 @@ const router = createBrowserRouter([
 
 function App() {
   return (
-    <RouterProvider router={router} />
+    <QueryClientProvider client={queryClient}>
+      <RouterProvider router={router} />
+    </QueryClientProvider>
   );
 }
 
