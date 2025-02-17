@@ -9,6 +9,33 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      ai_provider_settings: {
+        Row: {
+          created_at: string | null
+          feature_name: string
+          feature_type: Database["public"]["Enums"]["ai_feature_type"]
+          id: string
+          provider: string
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          feature_name: string
+          feature_type: Database["public"]["Enums"]["ai_feature_type"]
+          id?: string
+          provider: string
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          feature_name?: string
+          feature_type?: Database["public"]["Enums"]["ai_feature_type"]
+          id?: string
+          provider?: string
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       expose_localizations: {
         Row: {
           created_at: string
@@ -261,6 +288,7 @@ export type Database = {
       [_ in never]: never
     }
     Enums: {
+      ai_feature_type: "text_generation" | "image_generation"
       expose_status: "draft" | "published" | "scheduled" | "archived"
       task_priority: "low" | "medium" | "high"
     }

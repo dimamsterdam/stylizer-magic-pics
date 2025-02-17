@@ -1,216 +1,122 @@
+import "https://deno.land/x/xhr@0.1.0/mod.ts";
+import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.39.3';
 
-import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
-import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.7.1'
+const falKey = Deno.env.get('FAL_KEY');
+const deepseekKey = Deno.env.get('DEEPSEEK_API_KEY');
+const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
+const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
-}
+};
 
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
-    return new Response(null, { headers: corsHeaders })
+    return new Response(null, { headers: corsHeaders });
   }
 
   try {
-    const { products, theme, headline, bodyCopy, exposeId } = await req.json();
+    const supabase = createClient(supabaseUrl, supabaseServiceKey);
+    const { exposeId, products, theme, headline, bodyCopy } = await req.json();
 
-    // Initialize Supabase client
-    const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
-    const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
-    const supabase = createClient(supabaseUrl, supabaseKey);
-
-    // Update status to generating
-    await supabase
-      .from('exposes')
-      .update({ hero_image_generation_status: 'generating' })
-      .eq('id', exposeId);
-
-    // Fetch current AI provider from feature flags
-    const { data: featureFlags, error: flagError } = await supabase
-      .from('feature_flags')
-      .select('value')
-      .eq('name', 'ai_provider')
+    // Get the AI provider setting for image generation
+    const { data: providerSetting, error: settingError } = await supabase
+      .from('ai_provider_settings')
+      .select('provider')
+      .eq('feature_name', 'expose_image')
+      .eq('feature_type', 'image_generation')
       .single();
 
-    if (flagError) {
-      throw new Error(`Error fetching AI provider: ${flagError.message}`);
+    if (settingError) {
+      throw new Error(`Failed to fetch AI provider setting: ${settingError.message}`);
     }
 
-    // Common prompt structure for all sizes
-    const basePrompt = `Create a professional e-commerce hero banner image featuring ${products.map(p => p.title).join(', ')}. 
-    Theme description: ${theme}
-    Headline: ${headline}
-    Content context: ${bodyCopy}
-    Style: Modern e-commerce hero banner, high-end product photography
-    Requirements: Clear product focus, professional lighting, engaging composition`;
+    let imageUrl;
+    const provider = providerSetting.provider;
 
-    // Generate images for different sizes
-    const sizes = [
-      { name: 'desktop', width: 1920, height: 750 },
-      { name: 'tablet', width: 1024, height: 400 },
-      { name: 'mobile', width: 640, height: 400 }
-    ];
+    switch (provider) {
+      case 'fal':
+        if (!falKey) {
+          throw new Error('FAL API key is not configured');
+        }
+        const falResponse = await fetch('https://fal.run/fal-ai/ip-adapter-face-id', {
+          method: 'POST',
+          headers: {
+            'Authorization': `Key ${falKey}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            prompt: `${theme} style product photo featuring ${products.map(p => p.title).join(', ')}. ${headline}`,
+            negative_prompt: "blurry, low quality, distorted, deformed",
+            image_url: products[0].image,
+            num_inference_steps: 30,
+            guidance_scale: 7.5,
+            seed: Math.floor(Math.random() * 1000000)
+          }),
+        });
 
-    const imageUrls: Record<string, string> = {};
+        const falData = await falResponse.json();
+        if (!falResponse.ok) {
+          throw new Error(`FAL API error: ${falData.error || 'Unknown error'}`);
+        }
+        imageUrl = falData.image_url;
+        break;
 
-    for (const size of sizes) {
-      const sizePrompt = `${basePrompt}
-      Image size: ${size.width}x${size.height}px
-      Viewport: ${size.name} view`;
+      case 'deepseek':
+        if (!deepseekKey) {
+          throw new Error('Deepseek API key is not configured');
+        }
+        const deepseekResponse = await fetch('https://api.deepseek.com/v1/images/generations', {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${deepseekKey}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            prompt: `${theme} style product photo featuring ${products.map(p => p.title).join(', ')}. ${headline}`,
+            negative_prompt: "blurry, low quality, distorted, deformed",
+            width: 1024,
+            height: 1024,
+            num_images: 1,
+            guidance_scale: 7.5,
+            seed: Math.floor(Math.random() * 1000000)
+          }),
+        });
 
-      let imageUrl;
-      switch (featureFlags.value) {
-        case 'fal':
-          imageUrl = await generateWithFal(sizePrompt, size);
-          break;
-        case 'deepseek':
-          imageUrl = await generateWithDeepseek(sizePrompt);
-          break;
-        default:
-          throw new Error(`Unknown AI provider: ${featureFlags.value}`);
-      }
+        const deepseekData = await deepseekResponse.json();
+        if (!deepseekResponse.ok) {
+          throw new Error(`Deepseek API error: ${deepseekData.error?.message || 'Unknown error'}`);
+        }
+        imageUrl = deepseekData.data[0].url;
+        break;
 
-      imageUrls[`hero_image_${size.name}_url`] = imageUrl;
-
-      // Update the database with each generated image
-      await supabase
-        .from('exposes')
-        .update({
-          [`hero_image_${size.name}_url`]: imageUrl,
-        })
-        .eq('id', exposeId);
+      default:
+        throw new Error(`Unsupported AI provider: ${provider}`);
     }
 
-    // Update final status
-    await supabase
+    // Update expose with generation status
+    const { error: updateError } = await supabase
       .from('exposes')
       .update({
         hero_image_generation_status: 'completed',
+        hero_image_url: imageUrl
       })
       .eq('id', exposeId);
 
-    return new Response(
-      JSON.stringify({ imageUrls }),
-      { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-    );
+    if (updateError) {
+      throw new Error(`Failed to update expose: ${updateError.message}`);
+    }
 
+    return new Response(JSON.stringify({ success: true }), {
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+    });
   } catch (error) {
-    console.error('Error:', error);
-    return new Response(
-      JSON.stringify({ error: error.message }),
-      { 
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        status: 500
-      }
-    );
+    console.error('Error in generate-ai-image function:', error);
+    return new Response(JSON.stringify({ error: error.message }), {
+      status: 500,
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+    });
   }
 });
-
-async function generateWithFal(prompt: string, size: { width: number, height: number }) {
-  const falKey = Deno.env.get('FAL_KEY')!;
-
-  try {
-    const response = await fetch('https://fal.run/api/v1/art/models/1.6-turbo', {
-      method: 'POST',
-      headers: {
-        'Authorization': `Key ${falKey}`,
-        'Content-Type': 'application/json',
-        'Accept': 'application/json'
-      },
-      body: JSON.stringify({
-        prompt,
-        image_size: `${size.width}x${size.height}`,
-        num_images: 1,
-        output_format: "jpeg",
-        guidance_scale: 7.5,
-        num_inference_steps: 50
-      })
-    });
-
-    if (!response.ok) {
-      const errorText = await response.text();
-      console.error('FAL API error response:', errorText);
-      throw new Error(`FAL API error: ${response.status} - ${errorText}`);
-    }
-
-    const data = await response.json();
-    if (!data.id) {
-      throw new Error('No request ID in FAL API response');
-    }
-
-    const imageResult = await waitForImageGeneration(data.id, falKey);
-    if (!imageResult.image?.url) {
-      throw new Error('No image URL in FAL API response');
-    }
-
-    return imageResult.image.url;
-  } catch (error) {
-    console.error('Error in generateWithFal:', error);
-    throw error;
-  }
-}
-
-async function generateWithDeepseek(prompt: string) {
-  const deepseekKey = Deno.env.get('DEEPSEEK_API_KEY')!;
-  
-  const response = await fetch('https://api.deepseek.ai/v1/images/generations', {
-    method: 'POST',
-    headers: {
-      'Authorization': `Bearer ${deepseekKey}`,
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({
-      prompt,
-      n: 1,
-      size: "1024x1024",
-      response_format: "url"
-    })
-  });
-
-  if (!response.ok) {
-    throw new Error(`Deepseek API error: ${response.status}`);
-  }
-
-  const data = await response.json();
-  return data.data[0].url;
-}
-
-async function waitForImageGeneration(requestId: string, apiKey: string) {
-  const maxAttempts = 30;
-  const delayMs = 1000;
-
-  for (let attempt = 0; attempt < maxAttempts; attempt++) {
-    try {
-      const response = await fetch(`https://fal.run/api/v1/art/requests/${requestId}`, {
-        method: 'GET',
-        headers: {
-          'Authorization': `Key ${apiKey}`,
-          'Accept': 'application/json'
-        },
-      });
-
-      if (!response.ok) {
-        const errorText = await response.text();
-        console.error(`Status check attempt ${attempt + 1} failed:`, errorText);
-        throw new Error(`Status check failed: ${response.status}`);
-      }
-
-      const result = await response.json();
-      console.log(`Status check attempt ${attempt + 1} result:`, result);
-
-      if (result.status === 'completed') {
-        return result;
-      } else if (result.status === 'failed') {
-        throw new Error('Image generation failed: ' + (result.error || 'Unknown error'));
-      }
-
-      await new Promise(resolve => setTimeout(resolve, delayMs));
-    } catch (error) {
-      console.error(`Error in attempt ${attempt + 1}:`, error);
-      throw error;
-    }
-  }
-
-  throw new Error('Timeout waiting for image generation');
-}
