@@ -315,16 +315,21 @@ const Expose = () => {
   const handleAddToLibrary = async () => {
     if (!exposeId) return;
     try {
-      const {
-        error
-      } = await supabase.from('exposes').update({
-        status: 'published'
-      }).eq('id', exposeId);
+      const { error } = await supabase
+        .from('exposes')
+        .update({
+          status: 'published'
+        })
+        .eq('id', exposeId);
+      
       if (error) throw error;
+      
       toast({
         title: "Success",
         description: "Expose added to library successfully!"
       });
+      
+      navigate('/library');
     } catch (error) {
       console.error('Error adding to library:', error);
       toast({
