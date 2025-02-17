@@ -38,6 +38,8 @@ serve(async (req) => {
     let imageUrl;
     const provider = providerSetting.provider;
 
+    console.log(`Using provider: ${provider}`);
+
     switch (provider) {
       case 'fal':
         if (!falKey) {
@@ -98,37 +100,65 @@ serve(async (req) => {
         if (!googleApiKey) {
           throw new Error('Google API key is not configured');
         }
-        const imagenResponse = await fetch('https://generativelanguage.googleapis.com/v1/models/gemini-pro-vision:generateImage', {
+
+        console.log('Preparing Imagen request...');
+
+        const prompt = `High-quality professional product photography in ${theme} style featuring ${products.map(p => p.title).join(', ')}. ${headline}`;
+        console.log('Imagen prompt:', prompt);
+
+        const imagenResponse = await fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-1.0-pro-vision-latest:generateContent', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
             'x-goog-api-key': googleApiKey,
           },
           body: JSON.stringify({
-            prompt: {
-              text: `${theme} style product photo featuring ${products.map(p => p.title).join(', ')}. ${headline}`,
+            contents: [{
+              parts: [{
+                text: prompt
+              }]
+            }],
+            generationConfig: {
+              temperature: 0.4,
+              topK: 32,
+              topP: 1,
+              maxOutputTokens: 2048,
             },
-            parameters: {
-              size: {
-                width: 1024,
-                height: 1024,
-              },
-              sampleCount: 1,
-              negativePrompt: "blurry, low quality, distorted, deformed",
-            }
+            safety_settings: [{
+              category: "HARM_CATEGORY_DANGEROUS",
+              threshold: "BLOCK_MEDIUM_AND_ABOVE"
+            }]
           }),
         });
 
-        const imagenData = await imagenResponse.json();
         if (!imagenResponse.ok) {
-          throw new Error(`Google Imagen API error: ${imagenData.error?.message || 'Unknown error'}`);
+          const errorText = await imagenResponse.text();
+          console.error('Imagen API error response:', errorText);
+          throw new Error(`Google Imagen API error: ${errorText}`);
         }
-        imageUrl = imagenData.image.url;
+
+        const imagenData = await imagenResponse.json();
+        console.log('Imagen API response:', JSON.stringify(imagenData, null, 2));
+
+        if (!imagenData.candidates || !imagenData.candidates[0]?.content?.parts[0]?.text) {
+          throw new Error('Invalid response format from Imagen API');
+        }
+
+        // For Imagen, we get back a URL in the response text
+        imageUrl = imagenData.candidates[0].content.parts[0].text;
+        
+        // Verify the URL is valid
+        if (!imageUrl.startsWith('http')) {
+          throw new Error('Invalid image URL received from Imagen API');
+        }
+
         break;
 
       default:
         throw new Error(`Unsupported AI provider: ${provider}`);
     }
+
+    console.log(`Generated image URL: ${imageUrl}`);
 
     // Update expose with generation status
     const { error: updateError } = await supabase
