@@ -205,10 +205,6 @@ const Expose = () => {
           setBodyCopy(generatedText);
         }
       }
-      toast({
-        title: "Success",
-        description: `Generated ${type} successfully!`
-      });
     } catch (error) {
       console.error('Error generating content:', error);
       toast({
@@ -290,6 +286,23 @@ const Expose = () => {
         variant: "destructive"
       });
     }
+  };
+
+  const handleGenerateAll = async () => {
+    toast({
+      title: "Generating content",
+      description: "Generating headline and body copy...",
+    });
+    
+    await Promise.all([
+      generateContent('headline'),
+      generateContent('body')
+    ]);
+    
+    toast({
+      title: "Success",
+      description: "Content generated successfully!"
+    });
   };
 
   const handleStepClick = (step: Step) => {
@@ -398,7 +411,7 @@ const Expose = () => {
                 <div className="space-y-2">
                   <div className="flex justify-between items-center">
                     <Label htmlFor="headline">Headline</Label>
-                    <Button variant="ghost" size="sm" onClick={() => generateContent('headline')} className="text-[#008060] hover:text-[#006e52]">
+                    <Button variant="ghost" size="sm" onClick={handleGenerateAll} className="text-[#008060] hover:text-[#006e52]">
                       <WandSparkles className="h-4 w-4 mr-1" />
                       Generate
                     </Button>
@@ -415,10 +428,6 @@ const Expose = () => {
                 <div className="space-y-2">
                   <div className="flex justify-between items-center">
                     <Label htmlFor="body-copy">Body Copy (40 words max)</Label>
-                    <Button variant="ghost" size="sm" onClick={() => generateContent('body')} className="text-[#008060] hover:text-[#006e52]">
-                      <WandSparkles className="h-4 w-4 mr-1" />
-                      Generate
-                    </Button>
                   </div>
                   <Textarea 
                     id="body-copy" 
