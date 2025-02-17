@@ -13,16 +13,13 @@ import { useNavigate } from "react-router-dom";
 import Breadcrumbs from "@/components/Breadcrumbs";
 import StepProgress from "@/components/StepProgress";
 import GeneratedImagePreview from "@/components/GeneratedImagePreview";
-
 interface Product {
   id: string;
   title: string;
   sku: string;
   image: string;
 }
-
 type Step = 'products' | 'theme' | 'content' | 'review' | 'results';
-
 const Expose = () => {
   const [currentStep, setCurrentStep] = useState<Step>('products');
   const [searchTerm, setSearchTerm] = useState("");
@@ -32,27 +29,28 @@ const Expose = () => {
   const [bodyCopy, setBodyCopy] = useState("");
   const [isGenerating, setIsGenerating] = useState(false);
   const [exposeId, setExposeId] = useState<string | null>(null);
-  const { toast } = useToast();
+  const {
+    toast
+  } = useToast();
   const navigate = useNavigate();
-
-  const { data: exposeData, isLoading: isLoadingExpose } = useQuery({
+  const {
+    data: exposeData,
+    isLoading: isLoadingExpose
+  } = useQuery({
     queryKey: ['expose', exposeId],
     queryFn: async () => {
       if (!exposeId) throw new Error('No expose ID');
       console.log('Fetching expose data for ID:', exposeId);
-      const { data, error } = await supabase
-        .from('exposes')
-        .select('hero_image_url, hero_image_desktop_url')
-        .eq('id', exposeId)
-        .maybeSingle();
-      
+      const {
+        data,
+        error
+      } = await supabase.from('exposes').select('hero_image_url, hero_image_desktop_url').eq('id', exposeId).maybeSingle();
       console.log('Fetched expose data:', data);
       if (error) throw error;
       return data;
     },
-    enabled: !!exposeId && currentStep === 'results',
+    enabled: !!exposeId && currentStep === 'results'
   });
-
   const {
     data: searchResults = [],
     isLoading,
@@ -61,11 +59,10 @@ const Expose = () => {
     queryKey: ['products', searchTerm],
     queryFn: async () => {
       if (searchTerm.length < 2) return [];
-      const { data, error } = await supabase
-        .from('products')
-        .select('id, title, sku, image_url')
-        .ilike('title', `%${searchTerm}%`)
-        .limit(10);
+      const {
+        data,
+        error
+      } = await supabase.from('products').select('id, title, sku, image_url').ilike('title', `%${searchTerm}%`).limit(10);
       if (error) throw error;
       return data.map(product => ({
         id: product.id,
@@ -76,21 +73,17 @@ const Expose = () => {
     },
     enabled: searchTerm.length >= 2
   });
-
   const handleProductSelect = (product: Product) => {
     if (selectedProducts.length < 3) {
       setSelectedProducts(prev => [...prev, product]);
     }
   };
-
   const handleProductRemove = (productId: string) => {
     setSelectedProducts(prev => prev.filter(p => p.id !== productId));
   };
-
   const handleSearchChange = (term: string) => {
     setSearchTerm(term);
   };
-
   const handleContinue = async () => {
     if (currentStep === 'products' && selectedProducts.length === 0) return;
     if (currentStep === 'theme' && !themeDescription.trim()) return;
@@ -169,15 +162,16 @@ const Expose = () => {
       }
     }
   };
-
   const handleHeadlineChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const cleanedValue = e.target.value.replace(/["']/g, '');
     setHeadline(cleanedValue);
   };
-
   const generateContent = async (type: 'headline' | 'body') => {
     try {
-      const { data, error } = await supabase.functions.invoke('generate-content', {
+      const {
+        data,
+        error
+      } = await supabase.functions.invoke('generate-content', {
         body: {
           type,
           products: selectedProducts.map(product => ({
@@ -189,8 +183,9 @@ const Expose = () => {
         }
       });
       if (error) throw error;
-      const { generatedText } = data;
-      
+      const {
+        generatedText
+      } = data;
       if (type === 'headline') {
         setHeadline(generatedText.replace(/["']/g, ''));
       } else {
@@ -199,7 +194,7 @@ const Expose = () => {
           setBodyCopy(words.slice(0, 40).join(' '));
           toast({
             title: "Content trimmed",
-            description: "Body copy has been trimmed to 40 words",
+            description: "Body copy has been trimmed to 40 words"
           });
         } else {
           setBodyCopy(generatedText);
@@ -214,25 +209,26 @@ const Expose = () => {
       });
     }
   };
-
   const handleBodyCopyChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     const words = e.target.value.split(' ');
     if (words.length > 40) {
       setBodyCopy(words.slice(0, 40).join(' '));
       toast({
         title: "Word limit reached",
-        description: "Body copy is limited to 40 words",
+        description: "Body copy is limited to 40 words"
       });
     } else {
       setBodyCopy(e.target.value);
     }
   };
-
   const handleGenerateHero = async () => {
     if (!exposeId) return;
     setIsGenerating(true);
     try {
-      const { data, error } = await supabase.functions.invoke('generate-ai-image', {
+      const {
+        data,
+        error
+      } = await supabase.functions.invoke('generate-ai-image', {
         body: {
           exposeId,
           products: selectedProducts.map(product => ({
@@ -245,18 +241,12 @@ const Expose = () => {
           bodyCopy
         }
       });
-
       if (error) throw error;
-
       const pollInterval = setInterval(async () => {
-        const { data: exposeData } = await supabase
-          .from('exposes')
-          .select('hero_image_generation_status, hero_image_desktop_url, hero_image_tablet_url, hero_image_mobile_url')
-          .eq('id', exposeId)
-          .single();
-
+        const {
+          data: exposeData
+        } = await supabase.from('exposes').select('hero_image_generation_status, hero_image_desktop_url, hero_image_tablet_url, hero_image_mobile_url').eq('id', exposeId).single();
         console.log('Polling expose data:', exposeData);
-
         if (exposeData?.hero_image_generation_status === 'completed') {
           clearInterval(pollInterval);
           setIsGenerating(false);
@@ -275,7 +265,6 @@ const Expose = () => {
           });
         }
       }, 2000);
-
       return () => clearInterval(pollInterval);
     } catch (error) {
       console.error('Error generating hero:', error);
@@ -287,33 +276,24 @@ const Expose = () => {
       });
     }
   };
-
   const handleGenerateAll = async () => {
     toast({
       title: "Generating content",
-      description: "Generating headline and body copy...",
+      description: "Generating headline and body copy..."
     });
-    
-    await Promise.all([
-      generateContent('headline'),
-      generateContent('body')
-    ]);
-    
+    await Promise.all([generateContent('headline'), generateContent('body')]);
     toast({
       title: "Success",
       description: "Content generated successfully!"
     });
   };
-
   const handleStepClick = (step: Step) => {
     setCurrentStep(step);
   };
-
   const renderStep = () => {
     switch (currentStep) {
       case 'products':
-        return (
-          <Card className="border-0 shadow-sm">
+        return <Card className="border-0 shadow-sm">
             <CardHeader className="p-6 pb-2">
             </CardHeader>
             <StepProgress currentStep={currentStep} onStepClick={handleStepClick} />
@@ -354,12 +334,9 @@ const Expose = () => {
                 </div>
               </div>
             </CardContent>
-          </Card>
-        );
-
+          </Card>;
       case 'theme':
-        return (
-          <Card className="border-0 shadow-sm">
+        return <Card className="border-0 shadow-sm">
             <CardHeader className="p-6 pb-2">
               <div>
                 <h2 className="text-lg font-semibold text-[#1A1F2C] mb-1">Describe Your Theme</h2>
@@ -371,32 +348,19 @@ const Expose = () => {
               <div className="space-y-6">
                 <div className="space-y-2">
                   <Label htmlFor="theme-description">Creative Brief</Label>
-                  <Textarea 
-                    id="theme-description" 
-                    value={themeDescription} 
-                    onChange={e => setThemeDescription(e.target.value)} 
-                    placeholder="Describe your desired theme (e.g., Minimalist product photography with soft lighting and neutral background)" 
-                    className="h-32" 
-                  />
+                  <Textarea id="theme-description" value={themeDescription} onChange={e => setThemeDescription(e.target.value)} placeholder="Describe your desired theme (e.g., Minimalist product photography with soft lighting and neutral background)" className="h-32" />
                 </div>
 
                 <div className="flex justify-end pt-4">
-                  <Button 
-                    onClick={handleContinue} 
-                    disabled={!themeDescription.trim()} 
-                    className="bg-[#008060] hover:bg-[#006e52] text-white px-6"
-                  >
+                  <Button onClick={handleContinue} disabled={!themeDescription.trim()} className="bg-[#008060] hover:bg-[#006e52] text-white px-6">
                     Continue to Content
                   </Button>
                 </div>
               </div>
             </CardContent>
-          </Card>
-        );
-
+          </Card>;
       case 'content':
-        return (
-          <Card className="border-0 shadow-sm">
+        return <Card className="border-0 shadow-sm">
             <CardHeader className="p-6 pb-2">
             </CardHeader>
             <StepProgress currentStep={currentStep} onStepClick={handleStepClick} />
@@ -416,26 +380,14 @@ const Expose = () => {
                       Generate
                     </Button>
                   </div>
-                  <Input 
-                    id="headline" 
-                    value={headline} 
-                    onChange={handleHeadlineChange}
-                    placeholder="Enter a compelling headline" 
-                    className="text-lg" 
-                  />
+                  <Input id="headline" value={headline} onChange={handleHeadlineChange} placeholder="Enter a compelling headline" className="text-lg" />
                 </div>
 
                 <div className="space-y-2">
                   <div className="flex justify-between items-center">
                     <Label htmlFor="body-copy">Body Copy (40 words max)</Label>
                   </div>
-                  <Textarea 
-                    id="body-copy" 
-                    value={bodyCopy} 
-                    onChange={handleBodyCopyChange} 
-                    placeholder="Enter the main content of your expose..." 
-                    className="h-48" 
-                  />
+                  <Textarea id="body-copy" value={bodyCopy} onChange={handleBodyCopyChange} placeholder="Enter the main content of your expose..." className="h-48" />
                   <p className="text-sm text-[#6D7175]">
                     {bodyCopy.split(' ').length}/40 words
                   </p>
@@ -448,12 +400,9 @@ const Expose = () => {
                 </div>
               </div>
             </CardContent>
-          </Card>
-        );
-
+          </Card>;
       case 'review':
-        return (
-          <Card className="border-0 shadow-sm">
+        return <Card className="border-0 shadow-sm">
             <CardHeader className="p-6 pb-2">
               <StepProgress currentStep={currentStep} onStepClick={handleStepClick} />
               <div className="mt-4">
@@ -467,33 +416,21 @@ const Expose = () => {
                 <div className="bg-white rounded-lg border border-[#E3E5E7] p-6">
                   <div className="flex justify-between items-center mb-4">
                     <h3 className="font-medium text-[#1A1F2C]">Selected Products</h3>
-                    <Button 
-                      variant="ghost" 
-                      size="sm" 
-                      onClick={() => setCurrentStep('products')}
-                      className="text-[#008060] hover:text-[#006e52]"
-                    >
+                    <Button variant="ghost" size="sm" onClick={() => setCurrentStep('products')} className="text-[#008060] hover:text-[#006e52]">
                       <Pen className="h-4 w-4 mr-1" />
                       Edit
                     </Button>
                   </div>
                   <div className="flex flex-wrap gap-4">
-                    {selectedProducts.map(product => (
-                      <div key={product.id} className="flex items-center space-x-3 bg-gray-50 rounded-lg p-3 flex-1 min-w-[250px]">
-                        <img 
-                          src={product.image} 
-                          alt={product.title} 
-                          className="w-16 h-16 object-cover rounded-lg"
-                          onError={e => {
-                            e.currentTarget.src = '/placeholder.svg';
-                          }} 
-                        />
+                    {selectedProducts.map(product => <div key={product.id} className="flex items-center space-x-3 bg-gray-50 rounded-lg p-3 flex-1 min-w-[250px]">
+                        <img src={product.image} alt={product.title} className="w-16 h-16 object-cover rounded-lg" onError={e => {
+                      e.currentTarget.src = '/placeholder.svg';
+                    }} />
                         <div>
                           <h4 className="font-medium text-sm text-[#1A1F2C]">{product.title}</h4>
                           <p className="text-xs text-[#6D7175]">SKU: {product.sku}</p>
                         </div>
-                      </div>
-                    ))}
+                      </div>)}
                   </div>
                 </div>
 
@@ -501,12 +438,7 @@ const Expose = () => {
                 <div className="bg-white rounded-lg border border-[#E3E5E7] p-6">
                   <div className="flex justify-between items-center mb-4">
                     <h3 className="font-medium text-[#1A1F2C]">Theme Description</h3>
-                    <Button 
-                      variant="ghost" 
-                      size="sm" 
-                      onClick={() => setCurrentStep('theme')}
-                      className="text-[#008060] hover:text-[#006e52]"
-                    >
+                    <Button variant="ghost" size="sm" onClick={() => setCurrentStep('theme')} className="text-[#008060] hover:text-[#006e52]">
                       <Pen className="h-4 w-4 mr-1" />
                       Edit
                     </Button>
@@ -518,12 +450,7 @@ const Expose = () => {
                 <div className="bg-white rounded-lg border border-[#E3E5E7] p-6">
                   <div className="flex justify-between items-center mb-4">
                     <h3 className="font-medium text-[#1A1F2C]">Content</h3>
-                    <Button 
-                      variant="ghost" 
-                      size="sm" 
-                      onClick={() => setCurrentStep('content')}
-                      className="text-[#008060] hover:text-[#006e52]"
-                    >
+                    <Button variant="ghost" size="sm" onClick={() => setCurrentStep('content')} className="text-[#008060] hover:text-[#006e52]">
                       <Pen className="h-4 w-4 mr-1" />
                       Edit
                     </Button>
@@ -542,77 +469,52 @@ const Expose = () => {
                 </div>
 
                 <div className="flex justify-end pt-4">
-                  <Button 
-                    onClick={handleGenerateHero} 
-                    disabled={isGenerating} 
-                    className="bg-[#008060] hover:bg-[#006e52] text-white px-6"
-                  >
-                    {isGenerating ? (
-                      <>
+                  <Button onClick={handleGenerateHero} disabled={isGenerating} className="bg-[#008060] hover:bg-[#006e52] text-white px-6">
+                    {isGenerating ? <>
                         <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                         Generating...
-                      </>
-                    ) : 'Generate Hero Image'}
+                      </> : 'Generate Hero Image'}
                   </Button>
                 </div>
               </div>
             </CardContent>
-          </Card>
-        );
-
+          </Card>;
       case 'results':
-        return (
-          <Card className="border-0 shadow-sm">
+        return <Card className="border-0 shadow-sm">
             <CardHeader className="p-6 pb-2">
             </CardHeader>
             <StepProgress currentStep={currentStep} onStepClick={handleStepClick} />
             <div className="px-6 pt-4">
               <h2 className="text-lg font-semibold text-[#1A1F2C] mb-1">Results</h2>
-              <p className="text-[#6D7175]">Your expose has been generated successfully</p>
+              <p className="text-[#6D7175]">Your Expose feature</p>
             </div>
             <CardContent className="p-6">
               <div className="space-y-6">
-                {isLoadingExpose ? (
-                  <div className="flex items-center justify-center py-12">
+                {isLoadingExpose ? <div className="flex items-center justify-center py-12">
                     <Loader2 className="h-8 w-8 animate-spin text-[#008060]" />
-                  </div>
-                ) : exposeData ? (
-                  <GeneratedImagePreview
-                    imageUrl={exposeData.hero_image_desktop_url || exposeData.hero_image_url}
-                    headline={headline}
-                    bodyCopy={bodyCopy}
-                  />
-                ) : (
-                  <div className="text-center py-12 border rounded-lg bg-gray-50">
+                  </div> : exposeData ? <GeneratedImagePreview imageUrl={exposeData.hero_image_desktop_url || exposeData.hero_image_url} headline={headline} bodyCopy={bodyCopy} /> : <div className="text-center py-12 border rounded-lg bg-gray-50">
                     <p className="text-[#6D7175]">No generated image found. Please try generating again.</p>
-                  </div>
-                )}
+                  </div>}
                 <div className="flex justify-end space-x-4">
-                  <Button
-                    onClick={() => navigate('/brand')}
-                    className="bg-[#008060] hover:bg-[#006e52] text-white px-6"
-                  >
+                  <Button onClick={() => navigate('/brand')} className="bg-[#008060] hover:bg-[#006e52] text-white px-6">
                     Continue to Brand
                   </Button>
                 </div>
               </div>
             </CardContent>
-          </Card>
-        );
+          </Card>;
     }
   };
-
-  return (
-    <div className="min-h-screen bg-[#F6F6F7]">
+  return <div className="min-h-screen bg-[#F6F6F7]">
       <div className="p-4 sm:p-6">
         <div className="mb-6">
           <Breadcrumbs className="mb-4" items={[{
-            label: 'Home',
-            href: '/'
-          }, {
-            label: 'Create Expose',
-            href: '/expose'
-          }]} />
+          label: 'Home',
+          href: '/'
+        }, {
+          label: 'Create Expose',
+          href: '/expose'
+        }]} />
           <h1 className="text-[#1A1F2C] text-2xl font-medium mt-4">Create an Expose</h1>
           <p className="text-[#6D7175] mt-1">Generate AI-driven hero images with your products</p>
         </div>
@@ -621,8 +523,6 @@ const Expose = () => {
           {renderStep()}
         </div>
       </div>
-    </div>
-  );
+    </div>;
 };
-
 export default Expose;
