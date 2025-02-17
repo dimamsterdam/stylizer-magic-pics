@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
@@ -179,8 +180,13 @@ const Expose = () => {
       } = await supabase.functions.invoke('generate-content', {
         body: {
           type,
-          products: selectedProducts,
-          theme: themeDescription
+          products: selectedProducts.map(product => ({
+            title: product.title,
+            sku: product.sku,
+            description: product.description || ''
+          })),
+          theme: themeDescription,
+          promptContext: `Create ${type === 'headline' ? 'a compelling headline' : 'engaging body copy'} for an expose featuring ${selectedProducts.map(p => p.title).join(', ')}. The theme/mood is: ${themeDescription}`
         }
       });
       if (error) throw error;
