@@ -12,6 +12,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { useNavigate } from "react-router-dom";
 import Breadcrumbs from "@/components/Breadcrumbs";
 import StepProgress from "@/components/StepProgress";
+import GeneratedImagePreview from "@/components/GeneratedImagePreview";
 
 interface Product {
   id: string;
@@ -557,26 +558,19 @@ const Expose = () => {
             </div>
             <CardContent className="p-6">
               <div className="space-y-6">
-                <div className="rounded-lg overflow-hidden border border-[#E3E5E7]">
-                  <img 
-                    src={exposeData?.hero_image_url || exposeData?.hero_image_desktop_url} 
-                    alt="Generated hero image"
-                    className="w-full h-auto"
+                {exposeData?.hero_image_url && (
+                  <GeneratedImagePreview
+                    imageUrl={exposeData.hero_image_url || exposeData.hero_image_desktop_url}
+                    headline={headline}
+                    bodyCopy={bodyCopy}
                   />
-                </div>
+                )}
                 <div className="flex justify-end space-x-4">
-                  <Button 
-                    onClick={() => navigate('/generation-results', { 
-                      state: { 
-                        selectedProducts,
-                        selectedAngles: ['Front View'], // Default angle
-                        prompt: themeDescription,
-                        exposeId
-                      } 
-                    })} 
+                  <Button
+                    onClick={() => navigate('/brand')}
                     className="bg-[#008060] hover:bg-[#006e52] text-white px-6"
                   >
-                    View Results
+                    Continue to Brand
                   </Button>
                 </div>
               </div>
