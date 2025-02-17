@@ -1,9 +1,11 @@
+
 import "https://deno.land/x/xhr@0.1.0/mod.ts";
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.39.3';
 
 const falKey = Deno.env.get('FAL_KEY');
 const deepseekKey = Deno.env.get('DEEPSEEK_API_KEY');
+const googleApiKey = Deno.env.get('GOOGLE_API_KEY');
 const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
 const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
 
@@ -90,6 +92,38 @@ serve(async (req) => {
           throw new Error(`Deepseek API error: ${deepseekData.error?.message || 'Unknown error'}`);
         }
         imageUrl = deepseekData.data[0].url;
+        break;
+
+      case 'imagen':
+        if (!googleApiKey) {
+          throw new Error('Google API key is not configured');
+        }
+        const imagenResponse = await fetch('https://generativelanguage.googleapis.com/v1/models/gemini-pro-vision:generateImage', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'x-goog-api-key': googleApiKey,
+          },
+          body: JSON.stringify({
+            prompt: {
+              text: `${theme} style product photo featuring ${products.map(p => p.title).join(', ')}. ${headline}`,
+            },
+            parameters: {
+              size: {
+                width: 1024,
+                height: 1024,
+              },
+              sampleCount: 1,
+              negativePrompt: "blurry, low quality, distorted, deformed",
+            }
+          }),
+        });
+
+        const imagenData = await imagenResponse.json();
+        if (!imagenResponse.ok) {
+          throw new Error(`Google Imagen API error: ${imagenData.error?.message || 'Unknown error'}`);
+        }
+        imageUrl = imagenData.image.url;
         break;
 
       default:
