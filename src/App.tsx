@@ -13,12 +13,17 @@ import Auth from "./pages/Auth";
 import Publish from "./pages/Publish";
 import Expose from "./pages/Expose";
 import Library from "./pages/Library";
+import Stylizer from "./pages/Stylizer";
+import NavBar from "./components/NavBar";
 
 const Root = () => {
   return (
-    <div className="container py-6">
-      <Outlet />
-    </div>
+    <>
+      <NavBar />
+      <div className="container py-6">
+        <Outlet />
+      </div>
+    </>
   );
 };
 
@@ -56,6 +61,10 @@ const router = createBrowserRouter([
         path: "library",
         element: <Library />,
       },
+      {
+        path: "stylizer",
+        element: <Stylizer />,
+      }
     ],
   },
   {
