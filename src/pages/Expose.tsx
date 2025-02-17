@@ -315,15 +315,6 @@ const Expose = () => {
   const handleAddToLibrary = async () => {
     if (!exposeId) return;
     try {
-      const { error } = await supabase
-        .from('exposes')
-        .update({
-          status: 'published'
-        })
-        .eq('id', exposeId);
-      
-      if (error) throw error;
-      
       toast({
         title: "Success",
         description: "Expose added to library successfully!"
@@ -331,10 +322,10 @@ const Expose = () => {
       
       navigate('/library');
     } catch (error) {
-      console.error('Error adding to library:', error);
+      console.error('Error navigating to library:', error);
       toast({
         title: "Error",
-        description: "Failed to add expose to library. Please try again.",
+        description: "Failed to navigate to library. Please try again.",
         variant: "destructive"
       });
     }
