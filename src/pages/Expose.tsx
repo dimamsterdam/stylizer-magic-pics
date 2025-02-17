@@ -13,13 +13,16 @@ import { useNavigate } from "react-router-dom";
 import Breadcrumbs from "@/components/Breadcrumbs";
 import StepProgress from "@/components/StepProgress";
 import GeneratedImagePreview from "@/components/GeneratedImagePreview";
+
 interface Product {
   id: string;
   title: string;
   sku: string;
   image: string;
 }
+
 type Step = 'products' | 'theme' | 'content' | 'review' | 'results';
+
 const Expose = () => {
   const [currentStep, setCurrentStep] = useState<Step>('products');
   const [searchTerm, setSearchTerm] = useState("");
@@ -33,6 +36,7 @@ const Expose = () => {
     toast
   } = useToast();
   const navigate = useNavigate();
+
   const {
     data: exposeData,
     isLoading: isLoadingExpose
@@ -51,6 +55,7 @@ const Expose = () => {
     },
     enabled: !!exposeId && currentStep === 'results'
   });
+
   const {
     data: searchResults = [],
     isLoading,
@@ -73,17 +78,21 @@ const Expose = () => {
     },
     enabled: searchTerm.length >= 2
   });
+
   const handleProductSelect = (product: Product) => {
     if (selectedProducts.length < 3) {
       setSelectedProducts(prev => [...prev, product]);
     }
   };
+
   const handleProductRemove = (productId: string) => {
     setSelectedProducts(prev => prev.filter(p => p.id !== productId));
   };
+
   const handleSearchChange = (term: string) => {
     setSearchTerm(term);
   };
+
   const handleContinue = async () => {
     if (currentStep === 'products' && selectedProducts.length === 0) return;
     if (currentStep === 'theme' && !themeDescription.trim()) return;
@@ -162,10 +171,12 @@ const Expose = () => {
       }
     }
   };
+
   const handleHeadlineChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const cleanedValue = e.target.value.replace(/["']/g, '');
     setHeadline(cleanedValue);
   };
+
   const generateContent = async (type: 'headline' | 'body') => {
     try {
       const {
@@ -209,6 +220,7 @@ const Expose = () => {
       });
     }
   };
+
   const handleBodyCopyChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     const words = e.target.value.split(' ');
     if (words.length > 40) {
@@ -221,6 +233,7 @@ const Expose = () => {
       setBodyCopy(e.target.value);
     }
   };
+
   const handleGenerateHero = async () => {
     if (!exposeId) return;
     setIsGenerating(true);
@@ -276,6 +289,7 @@ const Expose = () => {
       });
     }
   };
+
   const handleGenerateAll = async () => {
     toast({
       title: "Generating content",
@@ -287,9 +301,11 @@ const Expose = () => {
       description: "Content generated successfully!"
     });
   };
+
   const handleStepClick = (step: Step) => {
     setCurrentStep(step);
   };
+
   const handleAddToLibrary = async () => {
     if (!exposeId) return;
     try {
@@ -312,6 +328,7 @@ const Expose = () => {
       });
     }
   };
+
   const handleRegenerate = async () => {
     setCurrentStep('review');
     toast({
@@ -319,6 +336,7 @@ const Expose = () => {
       description: "You can now modify your settings and generate a new image."
     });
   };
+
   const renderStep = () => {
     switch (currentStep) {
       case 'products':
@@ -509,7 +527,8 @@ const Expose = () => {
             </CardContent>
           </Card>;
       case 'results':
-        return <Card className="border-0 shadow-sm">
+        return (
+          <Card className="border-0 shadow-sm">
             <CardHeader className="p-6 pb-2">
             </CardHeader>
             <StepProgress currentStep={currentStep} onStepClick={handleStepClick} />
@@ -519,13 +538,22 @@ const Expose = () => {
                   <h2 className="text-lg font-semibold text-[#1A1F2C] mb-1">Results</h2>
                   <p className="text-[#6D7175]">Your expose has been generated successfully</p>
                 </div>
-                <div className="flex gap-3">
-                  <Button onClick={handleRegenerate} variant="outline" className="text-[#008060] border-[#008060] hover:bg-[#008060]/10">
-                    <RotateCw className="mr-2 h-4 w-4" />
+                <div className="flex gap-2">
+                  <Button
+                    onClick={handleRegenerate}
+                    variant="outline"
+                    size="sm"
+                    className="text-[#008060] border-[#008060] hover:bg-[#008060]/10 h-8 text-xs"
+                  >
+                    <RotateCw className="mr-1.5 h-3 w-3" />
                     Regenerate
                   </Button>
-                  <Button onClick={handleAddToLibrary} className="bg-[#008060] hover:bg-[#006e52] text-white">
-                    <Save className="mr-2 h-4 w-4" />
+                  <Button
+                    onClick={handleAddToLibrary}
+                    size="sm"
+                    className="bg-[#008060] hover:bg-[#006e52] text-white h-8 text-xs"
+                  >
+                    <Save className="mr-1.5 h-3 w-3" />
                     Add to Library
                   </Button>
                 </div>
@@ -545,9 +573,11 @@ const Expose = () => {
                 </div>
               </div>
             </CardContent>
-          </Card>;
+          </Card>
+        );
     }
   };
+
   return <div className="min-h-screen bg-[#F6F6F7]">
       <div className="p-4 sm:p-6">
         <div className="mb-6">
@@ -568,4 +598,5 @@ const Expose = () => {
       </div>
     </div>;
 };
+
 export default Expose;
