@@ -379,7 +379,13 @@ const Expose = () => {
                       Generate
                     </Button>
                   </div>
-                  <Input id="headline" value={headline} onChange={e => setHeadline(e.target.value)} placeholder="Enter a compelling headline..." className="text-lg" />
+                  <Input 
+                    id="headline" 
+                    value={headline} 
+                    onChange={e => setHeadline(e.target.value)} 
+                    placeholder="Enter a compelling headline" 
+                    className="text-lg" 
+                  />
                 </div>
 
                 <div className="space-y-2">
