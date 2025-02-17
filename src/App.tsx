@@ -16,18 +16,22 @@ import Expose from "./pages/Expose";
 import Library from "./pages/Library";
 import Stylizer from "./pages/Stylizer";
 import NavBar from "./components/NavBar";
+import { GlobalSidebar } from "./components/GlobalSidebar";
 
 // Create a client
 const queryClient = new QueryClient();
 
 const Root = () => {
   return (
-    <>
-      <NavBar />
-      <div className="container py-6">
-        <Outlet />
+    <div className="min-h-screen flex w-full">
+      <GlobalSidebar />
+      <div className="flex-1">
+        <NavBar />
+        <div className="container py-6 mt-16">
+          <Outlet />
+        </div>
       </div>
-    </>
+    </div>
   );
 };
 
