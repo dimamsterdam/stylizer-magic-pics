@@ -9,7 +9,6 @@ import { GlobalSidebar } from "@/components/GlobalSidebar";
 import Expose from "@/pages/Expose";
 import Brand from "@/pages/Brand";
 import Stylizer from "@/pages/Stylizer";
-import GenerationResults from "@/pages/GenerationResults";
 import Publish from "@/pages/Publish";
 import Settings from "@/pages/Settings";
 import NotFound from "@/pages/NotFound";
@@ -45,10 +44,6 @@ function AppContent() {
               <Route path="/expose" element={<Expose />} />
               <Route path="/brand" element={<Brand />} />
               <Route path="/stylizer" element={<Stylizer />} />
-              <Route
-                path="/generation-results"
-                element={<GenerationResults />}
-              />
               <Route path="/publish" element={<Publish />} />
               <Route path="/settings" element={<Settings />} />
               <Route path="*" element={<NotFound />} />
