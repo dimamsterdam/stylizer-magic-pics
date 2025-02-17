@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
@@ -263,7 +262,7 @@ const Expose = () => {
             title: "Success",
             description: "Hero images generated successfully!"
           });
-          setCurrentStep('generation');
+          setCurrentStep('review');
         } else if (exposeData?.hero_image_generation_status === 'error') {
           clearInterval(pollInterval);
           setIsGenerating(false);
