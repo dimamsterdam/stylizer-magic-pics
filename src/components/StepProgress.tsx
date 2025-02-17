@@ -11,13 +11,14 @@ interface StepProgressProps {
 
 const StepProgress = ({ currentStep, onStepClick }: StepProgressProps) => {
   const steps = [
-    { id: 'products', label: 'Products', icon: ShoppingCart },
-    { id: 'theme', label: 'Theme', icon: WandSparkles },
-    { id: 'content', label: 'Content', icon: Text },
-    { id: 'review', label: 'Review', icon: CheckCircle },
-  ] as const;
+    { id: 'products' as const, label: 'Products', icon: ShoppingCart },
+    { id: 'theme' as const, label: 'Theme', icon: WandSparkles },
+    { id: 'content' as const, label: 'Content', icon: Text },
+    { id: 'review' as const, label: 'Review', icon: CheckCircle },
+  ];
 
-  const getStepStatus = (stepId: typeof steps[number]['id']) => {
+  const getStepStatus = (stepId: Step) => {
+    if (stepId === 'generation') return 'upcoming';
     const stepOrder = steps.findIndex(s => s.id === stepId);
     const currentStepOrder = steps.findIndex(s => s.id === currentStep);
     
