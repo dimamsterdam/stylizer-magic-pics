@@ -3,145 +3,82 @@ import "https://deno.land/x/xhr@0.1.0/mod.ts";
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.39.3';
 
-const falKey = Deno.env.get('FAL_KEY');
-const deepseekKey = Deno.env.get('DEEPSEEK_API_KEY');
-const openaiKey = Deno.env.get('OPENAI_API_KEY');
-const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
-const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
-
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
 serve(async (req) => {
+  // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
   }
 
   try {
+    const requestBody = await req.json();
+    console.log('Received request body:', requestBody);
+
+    // Validate required fields
+    if (!requestBody) {
+      throw new Error('Request body is missing');
+    }
+
+    const { exposeId, products, theme, headline, bodyCopy } = requestBody;
+
+    if (!exposeId) {
+      throw new Error('exposeId is required');
+    }
+
+    if (!products || !Array.isArray(products) || products.length === 0) {
+      throw new Error('products array is required and must not be empty');
+    }
+
+    // Get environment variables
+    const openaiKey = Deno.env.get('OPENAI_API_KEY');
+    const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
+    const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
+
+    if (!openaiKey) {
+      throw new Error('OpenAI API key is not configured');
+    }
+
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
-    const { exposeId, products, theme, headline, bodyCopy } = await req.json();
 
-    // Get the AI provider setting for image generation
-    const { data: providerSetting, error: settingError } = await supabase
-      .from('ai_provider_settings')
-      .select('provider')
-      .eq('feature_name', 'expose_image')
-      .eq('feature_type', 'image_generation')
-      .single();
+    console.log('Preparing DALL-E request...');
 
-    if (settingError) {
-      throw new Error(`Failed to fetch AI provider setting: ${settingError.message}`);
+    const prompt = `High-quality professional product photography in ${theme} style featuring ${products.map(p => p.title).join(', ')}. ${headline}`;
+    console.log('DALL-E prompt:', prompt);
+
+    const openaiResponse = await fetch('https://api.openai.com/v1/images/generations', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${openaiKey}`,
+      },
+      body: JSON.stringify({
+        model: "dall-e-3",
+        prompt: prompt,
+        n: 1,
+        size: "1024x1024",
+        quality: "hd",
+        style: "natural"
+      }),
+    });
+
+    if (!openaiResponse.ok) {
+      const errorText = await openaiResponse.text();
+      console.error('DALL-E API error response:', errorText);
+      throw new Error(`DALL-E API error: ${errorText}`);
     }
 
-    let imageUrl;
-    const provider = providerSetting.provider;
+    const openaiData = await openaiResponse.json();
+    console.log('DALL-E API response:', JSON.stringify(openaiData, null, 2));
 
-    console.log(`Using provider: ${provider}`);
-
-    switch (provider) {
-      case 'fal':
-        if (!falKey) {
-          throw new Error('FAL API key is not configured');
-        }
-        const falResponse = await fetch('https://fal.run/fal-ai/ip-adapter-face-id', {
-          method: 'POST',
-          headers: {
-            'Authorization': `Key ${falKey}`,
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            prompt: `${theme} style product photo featuring ${products.map(p => p.title).join(', ')}. ${headline}`,
-            negative_prompt: "blurry, low quality, distorted, deformed",
-            image_url: products[0].image,
-            num_inference_steps: 30,
-            guidance_scale: 7.5,
-            seed: Math.floor(Math.random() * 1000000)
-          }),
-        });
-
-        const falData = await falResponse.json();
-        if (!falResponse.ok) {
-          throw new Error(`FAL API error: ${falData.error || 'Unknown error'}`);
-        }
-        imageUrl = falData.image_url;
-        break;
-
-      case 'deepseek':
-        if (!deepseekKey) {
-          throw new Error('Deepseek API key is not configured');
-        }
-        const deepseekResponse = await fetch('https://api.deepseek.com/v1/images/generations', {
-          method: 'POST',
-          headers: {
-            'Authorization': `Bearer ${deepseekKey}`,
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            prompt: `${theme} style product photo featuring ${products.map(p => p.title).join(', ')}. ${headline}`,
-            negative_prompt: "blurry, low quality, distorted, deformed",
-            width: 1024,
-            height: 1024,
-            num_images: 1,
-            guidance_scale: 7.5,
-            seed: Math.floor(Math.random() * 1000000)
-          }),
-        });
-
-        const deepseekData = await deepseekResponse.json();
-        if (!deepseekResponse.ok) {
-          throw new Error(`Deepseek API error: ${deepseekData.error?.message || 'Unknown error'}`);
-        }
-        imageUrl = deepseekData.data[0].url;
-        break;
-
-      case 'imagen':
-        if (!openaiKey) {
-          throw new Error('OpenAI API key is not configured');
-        }
-
-        console.log('Preparing DALL-E request...');
-
-        const prompt = `High-quality professional product photography in ${theme} style featuring ${products.map(p => p.title).join(', ')}. ${headline}`;
-        console.log('DALL-E prompt:', prompt);
-
-        const openaiResponse = await fetch('https://api.openai.com/v1/images/generations', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${openaiKey}`,
-          },
-          body: JSON.stringify({
-            model: "dall-e-3",
-            prompt: prompt,
-            n: 1,
-            size: "1024x1024",
-            quality: "hd",
-            style: "natural"
-          }),
-        });
-
-        if (!openaiResponse.ok) {
-          const errorText = await openaiResponse.text();
-          console.error('DALL-E API error response:', errorText);
-          throw new Error(`DALL-E API error: ${errorText}`);
-        }
-
-        const openaiData = await openaiResponse.json();
-        console.log('DALL-E API response:', JSON.stringify(openaiData, null, 2));
-
-        if (!openaiData.data?.[0]?.url) {
-          throw new Error('Invalid response format from DALL-E API');
-        }
-
-        imageUrl = openaiData.data[0].url;
-        break;
-
-      default:
-        throw new Error(`Unsupported AI provider: ${provider}`);
+    if (!openaiData.data?.[0]?.url) {
+      throw new Error('Invalid response format from DALL-E API');
     }
 
+    const imageUrl = openaiData.data[0].url;
     console.log(`Generated image URL: ${imageUrl}`);
 
     // Update expose with generation status and all image URLs
