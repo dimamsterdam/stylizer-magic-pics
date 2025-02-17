@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
@@ -21,7 +20,7 @@ interface Product {
   image: string;
 }
 
-type Step = 'products' | 'theme' | 'content' | 'review' | 'generation';
+type Step = 'products' | 'theme' | 'content' | 'review';
 
 const Expose = () => {
   const [currentStep, setCurrentStep] = useState<Step>('products');
@@ -263,7 +262,14 @@ const Expose = () => {
             title: "Success",
             description: "Hero images generated successfully!"
           });
-          setCurrentStep('generation');
+          navigate('/generation-results', { 
+            state: { 
+              selectedProducts,
+              selectedAngles: ['Front View'],
+              prompt: themeDescription,
+              exposeId
+            } 
+          });
         } else if (exposeData?.hero_image_generation_status === 'error') {
           clearInterval(pollInterval);
           setIsGenerating(false);
@@ -539,45 +545,6 @@ const Expose = () => {
                         Generating...
                       </>
                     ) : 'Generate Hero Image'}
-                  </Button>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        );
-
-      case 'generation':
-        return (
-          <Card className="border-0 shadow-sm">
-            <CardHeader className="p-6 pb-2">
-            </CardHeader>
-            <StepProgress currentStep={currentStep} onStepClick={handleStepClick} />
-            <div className="px-6 pt-4">
-              <h2 className="text-lg font-semibold text-[#1A1F2C] mb-1">Generation Complete</h2>
-              <p className="text-[#6D7175]">Your expose has been generated successfully</p>
-            </div>
-            <CardContent className="p-6">
-              <div className="space-y-6">
-                <div className="rounded-lg overflow-hidden border border-[#E3E5E7]">
-                  <img 
-                    src={exposeData?.hero_image_url || exposeData?.hero_image_desktop_url} 
-                    alt="Generated hero image"
-                    className="w-full h-auto"
-                  />
-                </div>
-                <div className="flex justify-end space-x-4">
-                  <Button 
-                    onClick={() => navigate('/generation-results', { 
-                      state: { 
-                        selectedProducts,
-                        selectedAngles: ['Front View'], // Default angle
-                        prompt: themeDescription,
-                        exposeId
-                      } 
-                    })} 
-                    className="bg-[#008060] hover:bg-[#006e52] text-white px-6"
-                  >
-                    View Results
                   </Button>
                 </div>
               </div>
