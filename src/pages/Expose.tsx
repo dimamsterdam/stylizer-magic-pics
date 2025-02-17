@@ -173,10 +173,7 @@ const Expose = () => {
 
   const generateContent = async (type: 'headline' | 'body') => {
     try {
-      const {
-        data,
-        error
-      } = await supabase.functions.invoke('generate-content', {
+      const { data, error } = await supabase.functions.invoke('generate-content', {
         body: {
           type,
           products: selectedProducts.map(product => ({
@@ -184,17 +181,25 @@ const Expose = () => {
             sku: product.sku
           })),
           theme: themeDescription,
-          promptContext: `Create ${type === 'headline' ? 'a compelling headline' : 'engaging body copy'} for an expose featuring ${selectedProducts.map(p => p.title).join(', ')}. The theme/mood is: ${themeDescription}`
+          promptContext: `Create ${type === 'headline' ? 'a compelling headline' : 'a concise body copy of maximum 40 words'} for an expose featuring ${selectedProducts.map(p => p.title).join(', ')}. The theme/mood is: ${themeDescription}`
         }
       });
       if (error) throw error;
-      const {
-        generatedText
-      } = data;
+      const { generatedText } = data;
+      
       if (type === 'headline') {
         setHeadline(generatedText);
       } else {
-        setBodyCopy(generatedText);
+        const words = generatedText.split(' ');
+        if (words.length > 40) {
+          setBodyCopy(words.slice(0, 40).join(' '));
+          toast({
+            title: "Content trimmed",
+            description: "Body copy has been trimmed to 40 words",
+          });
+        } else {
+          setBodyCopy(generatedText);
+        }
       }
       toast({
         title: "Success",
@@ -207,6 +212,19 @@ const Expose = () => {
         description: `Failed to generate ${type}. Please try again.`,
         variant: "destructive"
       });
+    }
+  };
+
+  const handleBodyCopyChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    const words = e.target.value.split(' ');
+    if (words.length > 40) {
+      setBodyCopy(words.slice(0, 40).join(' '));
+      toast({
+        title: "Word limit reached",
+        description: "Body copy is limited to 40 words",
+      });
+    } else {
+      setBodyCopy(e.target.value);
     }
   };
 
@@ -390,13 +408,22 @@ const Expose = () => {
 
                 <div className="space-y-2">
                   <div className="flex justify-between items-center">
-                    <Label htmlFor="body-copy">Body Copy</Label>
+                    <Label htmlFor="body-copy">Body Copy (40 words max)</Label>
                     <Button variant="ghost" size="sm" onClick={() => generateContent('body')} className="text-[#008060] hover:text-[#006e52]">
                       <WandSparkles className="h-4 w-4 mr-1" />
                       Generate
                     </Button>
                   </div>
-                  <Textarea id="body-copy" value={bodyCopy} onChange={e => setBodyCopy(e.target.value)} placeholder="Enter the main content of your expose..." className="h-48" />
+                  <Textarea 
+                    id="body-copy" 
+                    value={bodyCopy} 
+                    onChange={handleBodyCopyChange} 
+                    placeholder="Enter the main content of your expose..." 
+                    className="h-48" 
+                  />
+                  <p className="text-sm text-[#6D7175]">
+                    {bodyCopy.split(' ').length}/40 words
+                  </p>
                 </div>
 
                 <div className="flex justify-end">
