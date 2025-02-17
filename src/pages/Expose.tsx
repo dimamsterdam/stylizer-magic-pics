@@ -11,6 +11,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { useNavigate } from "react-router-dom";
 import Breadcrumbs from "@/components/Breadcrumbs";
+import StepProgress from "@/components/StepProgress";
 
 interface Product {
   id: string;
@@ -262,6 +263,7 @@ const Expose = () => {
               <h2 className="text-lg font-semibold text-[#1A1F2C] mb-1">Select Products</h2>
               <p className="text-[#6D7175]">Choose up to three products to feature in your hero image</p>
             </CardHeader>
+            <StepProgress currentStep={currentStep} />
             <CardContent className="p-6">
               <div className="space-y-6">
                 <ProductPicker
@@ -345,6 +347,7 @@ const Expose = () => {
                 </div>
               </div>
             </CardHeader>
+            <StepProgress currentStep={currentStep} />
             <CardContent className="p-6">
               <div className="space-y-6">
                 <div className="space-y-2">
@@ -391,6 +394,7 @@ const Expose = () => {
                 </div>
               </div>
             </CardHeader>
+            <StepProgress currentStep={currentStep} />
             <CardContent className="p-6">
               <div className="space-y-6">
                 <div className="space-y-2">
@@ -470,6 +474,7 @@ const Expose = () => {
                 </div>
               </div>
             </CardHeader>
+            <StepProgress currentStep={currentStep} />
             <CardContent className="p-6">
               <div className="space-y-8">
                 <section className="space-y-4">
