@@ -5,7 +5,7 @@ import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.39.3';
 
 const falKey = Deno.env.get('FAL_KEY');
 const deepseekKey = Deno.env.get('DEEPSEEK_API_KEY');
-const googleApiKey = Deno.env.get('GOOGLE_API_KEY');
+const openaiKey = Deno.env.get('OPENAI_API_KEY');
 const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
 const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
 
@@ -97,70 +97,45 @@ serve(async (req) => {
         break;
 
       case 'imagen':
-        if (!googleApiKey) {
-          throw new Error('Google API key is not configured');
+        if (!openaiKey) {
+          throw new Error('OpenAI API key is not configured');
         }
 
-        console.log('Preparing Imagen request...');
+        console.log('Preparing DALL-E request...');
 
         const prompt = `High-quality professional product photography in ${theme} style featuring ${products.map(p => p.title).join(', ')}. ${headline}`;
-        console.log('Imagen prompt:', prompt);
+        console.log('DALL-E prompt:', prompt);
 
-        const imagenResponse = await fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent', {
+        const openaiResponse = await fetch('https://api.openai.com/v1/images/generations', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
-            'x-goog-api-key': googleApiKey,
+            'Authorization': `Bearer ${openaiKey}`,
           },
           body: JSON.stringify({
-            contents: [{
-              parts: [{
-                text: prompt
-              }]
-            }],
-            generationConfig: {
-              temperature: 0.4,
-              topK: 32,
-              topP: 1,
-              maxOutputTokens: 2048,
-            },
-            safetySettings: [{
-              category: "HARM_CATEGORY_SEXUALLY_EXPLICIT",
-              threshold: "BLOCK_MEDIUM_AND_ABOVE"
-            }, {
-              category: "HARM_CATEGORY_HATE_SPEECH",
-              threshold: "BLOCK_MEDIUM_AND_ABOVE"
-            }, {
-              category: "HARM_CATEGORY_HARASSMENT",
-              threshold: "BLOCK_MEDIUM_AND_ABOVE"
-            }, {
-              category: "HARM_CATEGORY_DANGEROUS_CONTENT",
-              threshold: "BLOCK_MEDIUM_AND_ABOVE"
-            }]
+            model: "dall-e-3",
+            prompt: prompt,
+            n: 1,
+            size: "1024x1024",
+            quality: "hd",
+            style: "natural"
           }),
         });
 
-        if (!imagenResponse.ok) {
-          const errorText = await imagenResponse.text();
-          console.error('Imagen API error response:', errorText);
-          throw new Error(`Google Imagen API error: ${errorText}`);
+        if (!openaiResponse.ok) {
+          const errorText = await openaiResponse.text();
+          console.error('DALL-E API error response:', errorText);
+          throw new Error(`DALL-E API error: ${errorText}`);
         }
 
-        const imagenData = await imagenResponse.json();
-        console.log('Imagen API response:', JSON.stringify(imagenData, null, 2));
+        const openaiData = await openaiResponse.json();
+        console.log('DALL-E API response:', JSON.stringify(openaiData, null, 2));
 
-        if (!imagenData.candidates || !imagenData.candidates[0]?.content?.parts[0]?.text) {
-          throw new Error('Invalid response format from Imagen API');
+        if (!openaiData.data?.[0]?.url) {
+          throw new Error('Invalid response format from DALL-E API');
         }
 
-        // For Imagen, we get back a URL in the response text
-        imageUrl = imagenData.candidates[0].content.parts[0].text;
-        
-        // Verify the URL is valid
-        if (!imageUrl.startsWith('http')) {
-          throw new Error('Invalid image URL received from Imagen API');
-        }
-
+        imageUrl = openaiData.data[0].url;
         break;
 
       default:
