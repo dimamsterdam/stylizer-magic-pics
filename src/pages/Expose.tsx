@@ -12,16 +12,13 @@ import { Textarea } from "@/components/ui/textarea";
 import { useNavigate } from "react-router-dom";
 import Breadcrumbs from "@/components/Breadcrumbs";
 import StepProgress from "@/components/StepProgress";
-
 interface Product {
   id: string;
   title: string;
   sku: string;
   image: string;
 }
-
 type Step = 'products' | 'theme' | 'content' | 'review' | 'generation';
-
 const Expose = () => {
   const [currentStep, setCurrentStep] = useState<Step>('products');
   const [searchTerm, setSearchTerm] = useState("");
@@ -35,7 +32,6 @@ const Expose = () => {
     toast
   } = useToast();
   const navigate = useNavigate();
-
   useEffect(() => {
     const checkAuth = async () => {
       const {
@@ -54,7 +50,6 @@ const Expose = () => {
     };
     checkAuth();
   }, [navigate, toast]);
-
   const {
     data: searchResults = [],
     isLoading,
@@ -77,21 +72,17 @@ const Expose = () => {
     },
     enabled: searchTerm.length >= 2
   });
-
   const handleProductSelect = (product: Product) => {
     if (selectedProducts.length < 3) {
       setSelectedProducts(prev => [...prev, product]);
     }
   };
-
   const handleProductRemove = (productId: string) => {
     setSelectedProducts(prev => prev.filter(p => p.id !== productId));
   };
-
   const handleSearchChange = (term: string) => {
     setSearchTerm(term);
   };
-
   const handleContinue = async () => {
     if (currentStep === 'products' && selectedProducts.length === 0) return;
     if (currentStep === 'theme' && !themeDescription.trim()) return;
@@ -170,7 +161,6 @@ const Expose = () => {
       }
     }
   };
-
   const generateContent = async (type: 'headline' | 'body') => {
     try {
       const {
@@ -205,7 +195,6 @@ const Expose = () => {
       });
     }
   };
-
   const handleGenerateHero = async () => {
     if (!exposeId) return;
     setIsGenerating(true);
@@ -248,12 +237,10 @@ const Expose = () => {
       setIsGenerating(false);
     }
   };
-
   const renderStep = () => {
     switch (currentStep) {
       case 'products':
-        return (
-          <Card className="border-0 shadow-sm">
+        return <Card className="border-0 shadow-sm">
             <CardHeader className="p-6 pb-2">
             </CardHeader>
             <StepProgress currentStep={currentStep} />
@@ -294,24 +281,14 @@ const Expose = () => {
                 </div>
               </div>
             </CardContent>
-          </Card>
-        );
-
+          </Card>;
       case 'theme':
-        return (
-          <Card className="border-0 shadow-sm">
+        return <Card className="border-0 shadow-sm">
             <CardHeader className="p-6 pb-2">
-              <div className="flex items-center">
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  onClick={() => setCurrentStep('products')}
-                  className="mr-2"
-                >
-                  <ArrowLeft className="h-4 w-4" />
-                </Button>
+              <div className="flex items-center mb-4">
+                
                 <div>
-                  <h2 className="text-lg font-semibold text-[#1A1F2C] mb-1">Describe Your Theme</h2>
+                  
                   <p className="text-[#6D7175]">Tell us how you want your products to be presented</p>
                 </div>
               </div>
@@ -321,43 +298,22 @@ const Expose = () => {
               <div className="space-y-6">
                 <div className="space-y-2">
                   <Label htmlFor="theme-description">Creative Brief</Label>
-                  <Textarea 
-                    id="theme-description" 
-                    value={themeDescription} 
-                    onChange={e => setThemeDescription(e.target.value)} 
-                    placeholder="Describe your desired theme (e.g., Minimalist product photography with soft lighting and neutral background)" 
-                    className="h-32" 
-                  />
+                  <Textarea id="theme-description" value={themeDescription} onChange={e => setThemeDescription(e.target.value)} placeholder="Describe your desired theme (e.g., Minimalist product photography with soft lighting and neutral background)" className="h-32" />
                 </div>
 
                 <div className="flex justify-end pt-4">
-                  <Button 
-                    onClick={handleContinue} 
-                    disabled={!themeDescription.trim()} 
-                    className="bg-[#008060] hover:bg-[#006e52] text-white px-6"
-                  >
+                  <Button onClick={handleContinue} disabled={!themeDescription.trim()} className="bg-[#008060] hover:bg-[#006e52] text-white px-6">
                     Continue to Content
                   </Button>
                 </div>
               </div>
             </CardContent>
-          </Card>
-        );
-
+          </Card>;
       case 'content':
-        return (
-          <Card className="border-0 shadow-sm">
+        return <Card className="border-0 shadow-sm">
             <CardHeader className="p-6 pb-2">
-            </CardHeader>
-            <StepProgress currentStep={currentStep} />
-            <div className="px-6 pt-4">
-              <div className="flex items-center">
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  onClick={() => setCurrentStep('theme')}
-                  className="mr-2"
-                >
+              <div className="flex items-center mb-4">
+                <Button variant="ghost" size="icon" onClick={() => setCurrentStep('theme')} className="mr-2">
                   <ArrowLeft className="h-4 w-4" />
                 </Button>
                 <div>
@@ -365,7 +321,8 @@ const Expose = () => {
                   <p className="text-[#6D7175]">Enter the text content for your expose</p>
                 </div>
               </div>
-            </div>
+            </CardHeader>
+            <StepProgress currentStep={currentStep} />
             <CardContent className="p-6">
               <div className="space-y-6">
                 <div className="space-y-2">
@@ -379,16 +336,7 @@ const Expose = () => {
                   <Input id="headline" value={headline} onChange={e => setHeadline(e.target.value)} placeholder="Enter a compelling headline..." className="text-lg" />
                 </div>
 
-                <div className="space-y-2">
-                  <div className="flex justify-between items-center">
-                    <Label htmlFor="body-copy">Body Copy</Label>
-                    <Button variant="ghost" size="sm" onClick={() => generateContent('body')} className="text-[#008060] hover:text-[#006e52]">
-                      <WandSparkles className="h-4 w-4 mr-1" />
-                      Generate
-                    </Button>
-                  </div>
-                  <Textarea id="body-copy" value={bodyCopy} onChange={e => setBodyCopy(e.target.value)} placeholder="Enter the main content of your expose..." className="h-48" />
-                </div>
+                
 
                 <div className="flex justify-end">
                   <Button onClick={handleContinue} disabled={!headline.trim() || !bodyCopy.trim()} className="bg-[#008060] hover:bg-[#006e52] text-white px-6">
@@ -397,23 +345,12 @@ const Expose = () => {
                 </div>
               </div>
             </CardContent>
-          </Card>
-        );
-
+          </Card>;
       case 'review':
-        return (
-          <Card className="border-0 shadow-sm">
+        return <Card className="border-0 shadow-sm">
             <CardHeader className="p-6 pb-2">
-            </CardHeader>
-            <StepProgress currentStep={currentStep} />
-            <div className="px-6 pt-4">
-              <div className="flex items-center">
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  onClick={() => setCurrentStep('content')}
-                  className="mr-2"
-                >
+              <div className="flex items-center mb-4">
+                <Button variant="ghost" size="icon" onClick={() => setCurrentStep('content')} className="mr-2">
                   <ArrowLeft className="h-4 w-4" />
                 </Button>
                 <div>
@@ -421,7 +358,8 @@ const Expose = () => {
                   <p className="text-[#6D7175]">Review all details before generating</p>
                 </div>
               </div>
-            </div>
+            </CardHeader>
+            <StepProgress currentStep={currentStep} />
             <CardContent className="p-6">
               <div className="space-y-8">
                 <section className="space-y-4">
@@ -466,40 +404,31 @@ const Expose = () => {
                 </div>
               </div>
             </CardContent>
-          </Card>
-        );
-
+          </Card>;
       case 'generation':
-        return (
-          <Card className="border-0 shadow-sm">
+        return <Card className="border-0 shadow-sm">
             <CardHeader className="p-6 pb-2">
-            </CardHeader>
-            <StepProgress currentStep={currentStep} />
-            <div className="px-6 pt-4">
               <h2 className="text-lg font-semibold text-[#1A1F2C] mb-1">Generation Complete</h2>
               <p className="text-[#6D7175]">Your expose has been generated successfully</p>
-            </div>
+            </CardHeader>
             <CardContent className="p-6">
               <div className="text-center text-[#6D7175]">
                 Hero image and content generated successfully!
               </div>
             </CardContent>
-          </Card>
-        );
+          </Card>;
     }
   };
-
-  return (
-    <div className="min-h-screen bg-[#F6F6F7]">
+  return <div className="min-h-screen bg-[#F6F6F7]">
       <div className="p-4 sm:p-6">
         <div className="mb-6">
           <Breadcrumbs className="mb-4" items={[{
-            label: 'Home',
-            href: '/'
-          }, {
-            label: 'Create Expose',
-            href: '/expose'
-          }]} />
+          label: 'Home',
+          href: '/'
+        }, {
+          label: 'Create Expose',
+          href: '/expose'
+        }]} />
           <h1 className="text-[#1A1F2C] text-2xl font-medium mt-4">Create an Expose</h1>
           <p className="text-[#6D7175] mt-1">Generate AI-driven hero images with your products</p>
         </div>
@@ -508,8 +437,6 @@ const Expose = () => {
           {renderStep()}
         </div>
       </div>
-    </div>
-  );
+    </div>;
 };
-
 export default Expose;
