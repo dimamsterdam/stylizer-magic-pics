@@ -6,15 +6,6 @@ import { Card, CardHeader, CardContent } from "@/components/ui/card";
 const Index = () => {
   return (
     <div className="p-4 sm:p-6">
-      <div className="w-full h-[400px] mb-6 overflow-hidden rounded-lg relative">
-        <img
-          src="https://images.unsplash.com/photo-1502716119720-b23a93e5fe1b"
-          alt="Fashion inspiration"
-          className="w-full h-full object-cover"
-        />
-        <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent"></div>
-      </div>
-
       <Card className="border-0 shadow-sm">
         <CardHeader className="p-6">
           <p className="text-[#6D7175] mt-2">
