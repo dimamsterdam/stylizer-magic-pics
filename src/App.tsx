@@ -17,6 +17,7 @@ import Library from "./pages/Library";
 import Stylizer from "./pages/Stylizer";
 import NavBar from "./components/NavBar";
 import { GlobalSidebar } from "./components/GlobalSidebar";
+import { SidebarProvider } from "./components/ui/sidebar";
 
 // Create a client
 const queryClient = new QueryClient();
@@ -84,7 +85,9 @@ const router = createBrowserRouter([
 function App() {
   return (
     <QueryClientProvider client={queryClient}>
-      <RouterProvider router={router} />
+      <SidebarProvider>
+        <RouterProvider router={router} />
+      </SidebarProvider>
     </QueryClientProvider>
   );
 }
