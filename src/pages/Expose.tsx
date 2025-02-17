@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
@@ -555,10 +556,13 @@ const Expose = () => {
     <div className="min-h-screen bg-[#F6F6F7]">
       <div className="p-4 sm:p-6">
         <div className="mb-6">
-          <Breadcrumbs items={[
-            { label: 'Home', href: '/' },
-            { label: 'Create Expose', href: '/expose' }
-          ]} />
+          <Breadcrumbs 
+            className="mb-4"
+            items={[
+              { label: 'Home', href: '/' },
+              { label: 'Create Expose', href: '/expose' }
+            ]} 
+          />
           <h1 className="text-[#1A1F2C] text-2xl font-medium mt-4">Create an Expose</h1>
           <p className="text-[#6D7175] mt-1">Generate AI-driven hero images with your products</p>
         </div>
