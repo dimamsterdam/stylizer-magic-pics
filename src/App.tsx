@@ -45,6 +45,10 @@ const router = createBrowserRouter([
         element: <Publish />,
       },
       {
+        path: "expose",
+        element: <Expose />,
+      },
+      {
         path: "expose/:id",
         element: <Expose />,
       },
