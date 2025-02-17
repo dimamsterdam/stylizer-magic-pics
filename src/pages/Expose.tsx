@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { ProductPicker } from "@/components/ProductPicker";
 import { supabase } from "@/integrations/supabase/client";
-import { Loader2, ArrowLeft, Plus, Equal, WandSparkles } from "lucide-react";
+import { Loader2, WandSparkles, Plus, Equal } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -345,19 +345,9 @@ const Expose = () => {
             </CardHeader>
             <StepProgress currentStep={currentStep} onStepClick={handleStepClick} />
             <div className="px-6 pt-4">
-              <div className="flex items-center">
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  onClick={() => setCurrentStep('theme')}
-                  className="mr-2"
-                >
-                  <ArrowLeft className="h-4 w-4" />
-                </Button>
-                <div>
-                  <h2 className="text-lg font-semibold text-[#1A1F2C] mb-1">Add Content</h2>
-                  <p className="text-[#6D7175]">Enter the text content for your expose</p>
-                </div>
+              <div>
+                <h2 className="text-lg font-semibold text-[#1A1F2C] mb-1">Add Content</h2>
+                <p className="text-[#6D7175]">Enter the text content for your expose</p>
               </div>
             </div>
             <CardContent className="p-6">
@@ -401,19 +391,9 @@ const Expose = () => {
             </CardHeader>
             <StepProgress currentStep={currentStep} onStepClick={handleStepClick} />
             <div className="px-6 pt-4">
-              <div className="flex items-center">
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  onClick={() => setCurrentStep('content')}
-                  className="mr-2"
-                >
-                  <ArrowLeft className="h-4 w-4" />
-                </Button>
-                <div>
-                  <h2 className="text-lg font-semibold text-[#1A1F2C] mb-1">Review Your Expose</h2>
-                  <p className="text-[#6D7175]">Review all details before generating</p>
-                </div>
+              <div>
+                <h2 className="text-lg font-semibold text-[#1A1F2C] mb-1">Review Your Expose</h2>
+                <p className="text-[#6D7175]">Review all details before generating</p>
               </div>
             </div>
             <CardContent className="p-6">
