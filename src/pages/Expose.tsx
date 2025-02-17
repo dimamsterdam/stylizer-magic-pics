@@ -21,7 +21,7 @@ interface Product {
   image: string;
 }
 
-type Step = 'products' | 'theme' | 'content' | 'review' | 'generation';
+type Step = 'products' | 'theme' | 'content' | 'review' | 'results';
 
 const Expose = () => {
   const [currentStep, setCurrentStep] = useState<Step>('products');
@@ -39,18 +39,18 @@ const Expose = () => {
     queryKey: ['expose', exposeId],
     queryFn: async () => {
       if (!exposeId) throw new Error('No expose ID');
-      console.log('Fetching expose data for ID:', exposeId); // Debug log
+      console.log('Fetching expose data for ID:', exposeId);
       const { data, error } = await supabase
         .from('exposes')
         .select('hero_image_url, hero_image_desktop_url')
         .eq('id', exposeId)
         .maybeSingle();
       
-      console.log('Fetched expose data:', data); // Debug log
+      console.log('Fetched expose data:', data);
       if (error) throw error;
       return data;
     },
-    enabled: !!exposeId && currentStep === 'generation',
+    enabled: !!exposeId && currentStep === 'results',
   });
 
   const {
@@ -259,7 +259,7 @@ const Expose = () => {
           .eq('id', exposeId)
           .single();
 
-        console.log('Polling expose data:', exposeData); // Debug log
+        console.log('Polling expose data:', exposeData);
 
         if (exposeData?.hero_image_generation_status === 'completed') {
           clearInterval(pollInterval);
@@ -268,7 +268,7 @@ const Expose = () => {
             title: "Success",
             description: "Hero images generated successfully!"
           });
-          setCurrentStep('generation');
+          setCurrentStep('results');
         } else if (exposeData?.hero_image_generation_status === 'error') {
           clearInterval(pollInterval);
           setIsGenerating(false);
@@ -551,14 +551,14 @@ const Expose = () => {
           </Card>
         );
 
-      case 'generation':
+      case 'results':
         return (
           <Card className="border-0 shadow-sm">
             <CardHeader className="p-6 pb-2">
             </CardHeader>
             <StepProgress currentStep={currentStep} onStepClick={handleStepClick} />
             <div className="px-6 pt-4">
-              <h2 className="text-lg font-semibold text-[#1A1F2C] mb-1">Generation Complete</h2>
+              <h2 className="text-lg font-semibold text-[#1A1F2C] mb-1">Results</h2>
               <p className="text-[#6D7175]">Your expose has been generated successfully</p>
             </div>
             <CardContent className="p-6">

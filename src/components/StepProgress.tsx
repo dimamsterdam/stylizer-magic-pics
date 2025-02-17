@@ -2,7 +2,7 @@
 import React from 'react';
 import { ShoppingCart, WandSparkles, Text, CheckCircle, Image } from 'lucide-react';
 
-type Step = 'products' | 'theme' | 'content' | 'review' | 'generation';
+type Step = 'products' | 'theme' | 'content' | 'review' | 'results';
 
 interface StepProgressProps {
   currentStep: Step;
@@ -15,7 +15,7 @@ const StepProgress = ({ currentStep, onStepClick }: StepProgressProps) => {
     { id: 'theme' as const, label: 'Theme', icon: WandSparkles },
     { id: 'content' as const, label: 'Content', icon: Text },
     { id: 'review' as const, label: 'Review', icon: CheckCircle },
-    { id: 'generation' as const, label: 'Results', icon: Image },
+    { id: 'results' as const, label: 'Results', icon: Image },
   ];
 
   const getStepStatus = (stepId: Step) => {
