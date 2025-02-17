@@ -301,19 +301,9 @@ const Expose = () => {
         return (
           <Card className="border-0 shadow-sm">
             <CardHeader className="p-6 pb-2">
-              <div className="flex items-center">
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  onClick={() => setCurrentStep('products')}
-                  className="mr-2"
-                >
-                  <ArrowLeft className="h-4 w-4" />
-                </Button>
-                <div>
-                  <h2 className="text-lg font-semibold text-[#1A1F2C] mb-1">Describe Your Theme</h2>
-                  <p className="text-[#6D7175]">Tell us how you want your products to be presented</p>
-                </div>
+              <div>
+                <h2 className="text-lg font-semibold text-[#1A1F2C] mb-1">Describe Your Theme</h2>
+                <p className="text-[#6D7175]">Tell us how you want your products to be presented</p>
               </div>
             </CardHeader>
             <StepProgress currentStep={currentStep} />
