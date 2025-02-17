@@ -39,12 +39,14 @@ const Expose = () => {
     queryKey: ['expose', exposeId],
     queryFn: async () => {
       if (!exposeId) throw new Error('No expose ID');
+      console.log('Fetching expose data for ID:', exposeId); // Debug log
       const { data, error } = await supabase
         .from('exposes')
         .select('hero_image_url, hero_image_desktop_url')
         .eq('id', exposeId)
         .maybeSingle();
       
+      console.log('Fetched expose data:', data); // Debug log
       if (error) throw error;
       return data;
     },
@@ -257,6 +259,8 @@ const Expose = () => {
           .eq('id', exposeId)
           .single();
 
+        console.log('Polling expose data:', exposeData); // Debug log
+
         if (exposeData?.hero_image_generation_status === 'completed') {
           clearInterval(pollInterval);
           setIsGenerating(false);
@@ -264,7 +268,7 @@ const Expose = () => {
             title: "Success",
             description: "Hero images generated successfully!"
           });
-          setCurrentStep('review');
+          setCurrentStep('generation');
         } else if (exposeData?.hero_image_generation_status === 'error') {
           clearInterval(pollInterval);
           setIsGenerating(false);
@@ -565,7 +569,7 @@ const Expose = () => {
                   </div>
                 ) : exposeData ? (
                   <GeneratedImagePreview
-                    imageUrl={exposeData.hero_image_url || exposeData.hero_image_desktop_url}
+                    imageUrl={exposeData.hero_image_desktop_url || exposeData.hero_image_url}
                     headline={headline}
                     bodyCopy={bodyCopy}
                   />
