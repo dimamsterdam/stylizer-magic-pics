@@ -347,8 +347,12 @@ const Expose = () => {
             </CardHeader>
             <StepProgress currentStep={currentStep} onStepClick={handleStepClick} />
             <div className="px-6 pt-4">
-              <h2 className="text-lg font-semibold text-[#1A1F2C] mb-1">Select Products</h2>
-              <p className="text-[#6D7175]">Choose up to three products to feature in your hero image</p>
+              <div className="mt-4">
+                <h2 className="text-display-md text-polaris-text mb-1">Select Products</h2>
+                <p className="text-body-md text-polaris-secondary">
+                  Choose up to three products to feature in your hero image
+                </p>
+              </div>
             </div>
             <CardContent className="p-6">
               <div className="space-y-6">
@@ -377,8 +381,15 @@ const Expose = () => {
                   </div>}
 
                 <div className="flex justify-end pt-4">
-                  <Button onClick={handleContinue} disabled={selectedProducts.length === 0} className="bg-[#008060] hover:bg-[#006e52] text-white px-6">
-                    Continue
+                  <Button onClick={handleContinue} disabled={selectedProducts.length === 0} className="bg-polaris-green hover:bg-polaris-teal text-white">
+                    {isGenerating ? (
+                      <>
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        Generating...
+                      </>
+                    ) : (
+                      'Continue'
+                    )}
                   </Button>
                 </div>
               </div>
@@ -592,18 +603,20 @@ const Expose = () => {
     }
   };
 
-  return <div className="min-h-screen bg-[#F6F6F7]">
+  return <div className="min-h-screen bg-polaris-background">
       <div className="p-4 sm:p-6">
         <div className="mb-6">
-          <Breadcrumbs className="mb-4" items={[{
-          label: 'Home',
-          href: '/'
-        }, {
-          label: 'Create Expose',
-          href: '/expose'
-        }]} />
-          <h1 className="text-[#1A1F2C] text-2xl font-medium mt-4">Create an Expose</h1>
-          <p className="text-[#6D7175] mt-1">Generate AI-driven hero images with your products</p>
+          <Breadcrumbs 
+            className="mb-4" 
+            items={[
+              { label: 'Home', href: '/' },
+              { label: 'Create Expose', href: '/expose' }
+            ]} 
+          />
+          <h1 className="text-display-lg text-polaris-text mt-4">Create an Expose</h1>
+          <p className="text-body-md text-polaris-secondary mt-1">
+            Generate AI-driven hero images with your products
+          </p>
         </div>
 
         <div className="max-w-3xl mx-auto">
