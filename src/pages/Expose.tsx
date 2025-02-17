@@ -35,7 +35,7 @@ const Expose = () => {
   const { toast } = useToast();
   const navigate = useNavigate();
 
-  const { data: exposeData } = useQuery({
+  const { data: exposeData, isLoading: isLoadingExpose } = useQuery({
     queryKey: ['expose', exposeId],
     queryFn: async () => {
       if (!exposeId) throw new Error('No expose ID');
@@ -43,7 +43,8 @@ const Expose = () => {
         .from('exposes')
         .select('hero_image_url, hero_image_desktop_url')
         .eq('id', exposeId)
-        .single();
+        .maybeSingle();
+      
       if (error) throw error;
       return data;
     },
@@ -558,12 +559,20 @@ const Expose = () => {
             </div>
             <CardContent className="p-6">
               <div className="space-y-6">
-                {exposeData?.hero_image_url && (
+                {isLoadingExpose ? (
+                  <div className="flex items-center justify-center py-12">
+                    <Loader2 className="h-8 w-8 animate-spin text-[#008060]" />
+                  </div>
+                ) : exposeData ? (
                   <GeneratedImagePreview
                     imageUrl={exposeData.hero_image_url || exposeData.hero_image_desktop_url}
                     headline={headline}
                     bodyCopy={bodyCopy}
                   />
+                ) : (
+                  <div className="text-center py-12 border rounded-lg bg-gray-50">
+                    <p className="text-[#6D7175]">No generated image found. Please try generating again.</p>
+                  </div>
                 )}
                 <div className="flex justify-end space-x-4">
                   <Button
