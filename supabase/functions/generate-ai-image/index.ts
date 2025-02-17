@@ -106,7 +106,7 @@ serve(async (req) => {
         const prompt = `High-quality professional product photography in ${theme} style featuring ${products.map(p => p.title).join(', ')}. ${headline}`;
         console.log('Imagen prompt:', prompt);
 
-        const imagenResponse = await fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-1.0-pro-vision-latest:generateContent', {
+        const imagenResponse = await fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
