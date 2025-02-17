@@ -551,6 +551,20 @@ const Expose = () => {
         );
 
       case 'generation':
+        const { data } = useQuery({
+          queryKey: ['expose', exposeId],
+          queryFn: async () => {
+            if (!exposeId) throw new Error('No expose ID');
+            const { data, error } = await supabase
+              .from('exposes')
+              .select('hero_image_url, hero_image_desktop_url')
+              .eq('id', exposeId)
+              .single();
+            if (error) throw error;
+            return data;
+          },
+          enabled: !!exposeId,
+        });
         return (
           <Card className="border-0 shadow-sm">
             <CardHeader className="p-6 pb-2">
@@ -561,8 +575,19 @@ const Expose = () => {
               <p className="text-[#6D7175]">Your expose has been generated successfully</p>
             </div>
             <CardContent className="p-6">
-              <div className="text-center text-[#6D7175]">
-                Hero image and content generated successfully!
+              <div className="space-y-6">
+                <div className="rounded-lg overflow-hidden border border-[#E3E5E7]">
+                  <img 
+                    src={data?.hero_image_url || data?.hero_image_desktop_url} 
+                    alt="Generated hero image"
+                    className="w-full h-auto"
+                  />
+                </div>
+                <div className="flex justify-end space-x-4">
+                  <Button onClick={() => navigate('/generation-results')} className="bg-[#008060] hover:bg-[#006e52] text-white px-6">
+                    View Results
+                  </Button>
+                </div>
               </div>
             </CardContent>
           </Card>

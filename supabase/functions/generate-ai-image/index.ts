@@ -144,12 +144,15 @@ serve(async (req) => {
 
     console.log(`Generated image URL: ${imageUrl}`);
 
-    // Update expose with generation status
+    // Update expose with generation status and all image URLs
     const { error: updateError } = await supabase
       .from('exposes')
       .update({
         hero_image_generation_status: 'completed',
-        hero_image_url: imageUrl
+        hero_image_url: imageUrl,
+        hero_image_desktop_url: imageUrl,
+        hero_image_tablet_url: imageUrl,
+        hero_image_mobile_url: imageUrl
       })
       .eq('id', exposeId);
 
