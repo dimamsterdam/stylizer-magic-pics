@@ -1,3 +1,4 @@
+
 import React from 'react';
 import {
   createBrowserRouter,
@@ -9,7 +10,6 @@ import Settings from "./pages/Settings";
 import Brand from "./pages/Brand";
 import Auth from "./pages/Auth";
 import Publish from "./pages/Publish";
-import GenerationResults from "./pages/GenerationResults";
 import Expose from "./pages/Expose";
 import Library from "./pages/Library";
 
@@ -38,10 +38,6 @@ const router = createBrowserRouter([
       {
         path: "publish",
         element: <Publish />,
-      },
-      {
-        path: "generation-results",
-        element: <GenerationResults />,
       },
       {
         path: "expose/:id",
