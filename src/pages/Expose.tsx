@@ -2,9 +2,15 @@ import React, { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { ProductPicker } from "@/components/ProductPicker";
 import { supabase } from "@/integrations/supabase/client";
-import { Loader2, WandSparkles, Plus, Equal, Pen, Save, RotateCw } from "lucide-react";
+import { Loader2, WandSparkles, Plus, Equal, Pen, Save, RotateCw, MoreVertical } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -538,34 +544,46 @@ const Expose = () => {
                   <h2 className="text-lg font-semibold text-[#1A1F2C] mb-1">Results</h2>
                   <p className="text-[#6D7175]">Your expose has been generated successfully</p>
                 </div>
-                <div className="flex gap-2">
-                  <Button
-                    onClick={handleRegenerate}
-                    variant="outline"
-                    size="sm"
-                    className="text-[#008060] border-[#008060] hover:bg-[#008060]/10 h-8 text-xs"
-                  >
-                    <RotateCw className="mr-1.5 h-3 w-3" />
-                    Regenerate
-                  </Button>
-                  <Button
-                    onClick={handleAddToLibrary}
-                    size="sm"
-                    className="bg-[#008060] hover:bg-[#006e52] text-white h-8 text-xs"
-                  >
-                    <Save className="mr-1.5 h-3 w-3" />
-                    Add to Library
-                  </Button>
-                </div>
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button 
+                      variant="ghost" 
+                      size="sm"
+                      className="h-8 w-8 p-0"
+                    >
+                      <MoreVertical className="h-4 w-4 text-[#6D7175]" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end" className="w-[180px]">
+                    <DropdownMenuItem onClick={handleRegenerate}>
+                      <RotateCw className="mr-2 h-4 w-4" />
+                      <span>Regenerate</span>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={handleAddToLibrary}>
+                      <Save className="mr-2 h-4 w-4" />
+                      <span>Add to Library</span>
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
               </div>
             </div>
             <CardContent className="p-6">
               <div className="space-y-6">
-                {isLoadingExpose ? <div className="flex items-center justify-center py-12">
+                {isLoadingExpose ? (
+                  <div className="flex items-center justify-center py-12">
                     <Loader2 className="h-8 w-8 animate-spin text-[#008060]" />
-                  </div> : exposeData ? <GeneratedImagePreview imageUrl={exposeData.hero_image_desktop_url || exposeData.hero_image_url} headline={headline} bodyCopy={bodyCopy} /> : <div className="text-center py-12 border rounded-lg bg-gray-50">
+                  </div>
+                ) : exposeData ? (
+                  <GeneratedImagePreview
+                    imageUrl={exposeData.hero_image_desktop_url || exposeData.hero_image_url}
+                    headline={headline}
+                    bodyCopy={bodyCopy}
+                  />
+                ) : (
+                  <div className="text-center py-12 border rounded-lg bg-gray-50">
                     <p className="text-[#6D7175]">No generated image found. Please try generating again.</p>
-                  </div>}
+                  </div>
+                )}
                 <div className="flex justify-end space-x-4">
                   <Button onClick={() => navigate('/brand')} className="bg-[#008060] hover:bg-[#006e52] text-white px-6">
                     Continue to Brand
