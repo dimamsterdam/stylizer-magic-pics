@@ -249,6 +249,10 @@ const Expose = () => {
     }
   };
 
+  const handleStepClick = (step: Step) => {
+    setCurrentStep(step);
+  };
+
   const renderStep = () => {
     switch (currentStep) {
       case 'products':
@@ -256,7 +260,7 @@ const Expose = () => {
           <Card className="border-0 shadow-sm">
             <CardHeader className="p-6 pb-2">
             </CardHeader>
-            <StepProgress currentStep={currentStep} />
+            <StepProgress currentStep={currentStep} onStepClick={handleStepClick} />
             <div className="px-6 pt-4">
               <h2 className="text-lg font-semibold text-[#1A1F2C] mb-1">Select Products</h2>
               <p className="text-[#6D7175]">Choose up to three products to feature in your hero image</p>
@@ -306,7 +310,7 @@ const Expose = () => {
                 <p className="text-[#6D7175]">Tell us how you want your products to be presented</p>
               </div>
             </CardHeader>
-            <StepProgress currentStep={currentStep} />
+            <StepProgress currentStep={currentStep} onStepClick={handleStepClick} />
             <CardContent className="p-6">
               <div className="space-y-6">
                 <div className="space-y-2">
@@ -339,7 +343,7 @@ const Expose = () => {
           <Card className="border-0 shadow-sm">
             <CardHeader className="p-6 pb-2">
             </CardHeader>
-            <StepProgress currentStep={currentStep} />
+            <StepProgress currentStep={currentStep} onStepClick={handleStepClick} />
             <div className="px-6 pt-4">
               <div className="flex items-center">
                 <Button
@@ -395,7 +399,7 @@ const Expose = () => {
           <Card className="border-0 shadow-sm">
             <CardHeader className="p-6 pb-2">
             </CardHeader>
-            <StepProgress currentStep={currentStep} />
+            <StepProgress currentStep={currentStep} onStepClick={handleStepClick} />
             <div className="px-6 pt-4">
               <div className="flex items-center">
                 <Button
@@ -464,7 +468,7 @@ const Expose = () => {
           <Card className="border-0 shadow-sm">
             <CardHeader className="p-6 pb-2">
             </CardHeader>
-            <StepProgress currentStep={currentStep} />
+            <StepProgress currentStep={currentStep} onStepClick={handleStepClick} />
             <div className="px-6 pt-4">
               <h2 className="text-lg font-semibold text-[#1A1F2C] mb-1">Generation Complete</h2>
               <p className="text-[#6D7175]">Your expose has been generated successfully</p>
