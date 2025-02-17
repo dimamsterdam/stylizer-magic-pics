@@ -31,29 +31,23 @@ const Expose = () => {
   const [bodyCopy, setBodyCopy] = useState("");
   const [isGenerating, setIsGenerating] = useState(false);
   const [exposeId, setExposeId] = useState<string | null>(null);
-  const {
-    toast
-  } = useToast();
+  const { toast } = useToast();
   const navigate = useNavigate();
 
-  useEffect(() => {
-    const checkAuth = async () => {
-      const {
-        data: {
-          session
-        }
-      } = await supabase.auth.getSession();
-      if (!session) {
-        toast({
-          title: "Authentication required",
-          description: "Please log in to create exposes",
-          variant: "destructive"
-        });
-        navigate('/auth');
-      }
-    };
-    checkAuth();
-  }, [navigate, toast]);
+  const { data: exposeData } = useQuery({
+    queryKey: ['expose', exposeId],
+    queryFn: async () => {
+      if (!exposeId) throw new Error('No expose ID');
+      const { data, error } = await supabase
+        .from('exposes')
+        .select('hero_image_url, hero_image_desktop_url')
+        .eq('id', exposeId)
+        .single();
+      if (error) throw error;
+      return data;
+    },
+    enabled: !!exposeId && currentStep === 'generation',
+  });
 
   const {
     data: searchResults = [],
@@ -63,10 +57,11 @@ const Expose = () => {
     queryKey: ['products', searchTerm],
     queryFn: async () => {
       if (searchTerm.length < 2) return [];
-      const {
-        data,
-        error
-      } = await supabase.from('products').select('id, title, sku, image_url').ilike('title', `%${searchTerm}%`).limit(10);
+      const { data, error } = await supabase
+        .from('products')
+        .select('id, title, sku, image_url')
+        .ilike('title', `%${searchTerm}%`)
+        .limit(10);
       if (error) throw error;
       return data.map(product => ({
         id: product.id,
@@ -551,20 +546,6 @@ const Expose = () => {
         );
 
       case 'generation':
-        const { data } = useQuery({
-          queryKey: ['expose', exposeId],
-          queryFn: async () => {
-            if (!exposeId) throw new Error('No expose ID');
-            const { data, error } = await supabase
-              .from('exposes')
-              .select('hero_image_url, hero_image_desktop_url')
-              .eq('id', exposeId)
-              .single();
-            if (error) throw error;
-            return data;
-          },
-          enabled: !!exposeId,
-        });
         return (
           <Card className="border-0 shadow-sm">
             <CardHeader className="p-6 pb-2">
@@ -578,7 +559,7 @@ const Expose = () => {
               <div className="space-y-6">
                 <div className="rounded-lg overflow-hidden border border-[#E3E5E7]">
                   <img 
-                    src={data?.hero_image_url || data?.hero_image_desktop_url} 
+                    src={exposeData?.hero_image_url || exposeData?.hero_image_desktop_url} 
                     alt="Generated hero image"
                     className="w-full h-auto"
                   />
