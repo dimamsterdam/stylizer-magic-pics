@@ -298,17 +298,27 @@ const Expose = () => {
         );
 
       case 'theme':
-        return <Card className="border-0 shadow-sm">
+        return (
+          <Card className="border-0 shadow-sm">
             <CardHeader className="p-6 pb-2">
-              <div className="flex items-center mb-4">
-                
+            </CardHeader>
+            <StepProgress currentStep={currentStep} />
+            <div className="px-6 pt-4">
+              <div className="flex items-center">
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => setCurrentStep('products')}
+                  className="mr-2"
+                >
+                  <ArrowLeft className="h-4 w-4" />
+                </Button>
                 <div>
-                  
+                  <h2 className="text-lg font-semibold text-[#1A1F2C] mb-1">Describe Your Theme</h2>
                   <p className="text-[#6D7175]">Tell us how you want your products to be presented</p>
                 </div>
               </div>
-            </CardHeader>
-            <StepProgress currentStep={currentStep} />
+            </div>
             <CardContent className="p-6">
               <div className="space-y-6">
                 <div className="space-y-2">
@@ -323,13 +333,23 @@ const Expose = () => {
                 </div>
               </div>
             </CardContent>
-          </Card>;
+          </Card>
+        );
 
       case 'content':
-        return <Card className="border-0 shadow-sm">
+        return (
+          <Card className="border-0 shadow-sm">
             <CardHeader className="p-6 pb-2">
-              <div className="flex items-center mb-4">
-                <Button variant="ghost" size="icon" onClick={() => setCurrentStep('theme')} className="mr-2">
+            </CardHeader>
+            <StepProgress currentStep={currentStep} />
+            <div className="px-6 pt-4">
+              <div className="flex items-center">
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => setCurrentStep('theme')}
+                  className="mr-2"
+                >
                   <ArrowLeft className="h-4 w-4" />
                 </Button>
                 <div>
@@ -337,8 +357,7 @@ const Expose = () => {
                   <p className="text-[#6D7175]">Enter the text content for your expose</p>
                 </div>
               </div>
-            </CardHeader>
-            <StepProgress currentStep={currentStep} />
+            </div>
             <CardContent className="p-6">
               <div className="space-y-6">
                 <div className="space-y-2">
@@ -370,13 +389,23 @@ const Expose = () => {
                 </div>
               </div>
             </CardContent>
-          </Card>;
+          </Card>
+        );
 
       case 'review':
-        return <Card className="border-0 shadow-sm">
+        return (
+          <Card className="border-0 shadow-sm">
             <CardHeader className="p-6 pb-2">
-              <div className="flex items-center mb-4">
-                <Button variant="ghost" size="icon" onClick={() => setCurrentStep('content')} className="mr-2">
+            </CardHeader>
+            <StepProgress currentStep={currentStep} />
+            <div className="px-6 pt-4">
+              <div className="flex items-center">
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => setCurrentStep('content')}
+                  className="mr-2"
+                >
                   <ArrowLeft className="h-4 w-4" />
                 </Button>
                 <div>
@@ -384,8 +413,7 @@ const Expose = () => {
                   <p className="text-[#6D7175]">Review all details before generating</p>
                 </div>
               </div>
-            </CardHeader>
-            <StepProgress currentStep={currentStep} />
+            </div>
             <CardContent className="p-6">
               <div className="space-y-8">
                 <section className="space-y-4">
@@ -430,33 +458,40 @@ const Expose = () => {
                 </div>
               </div>
             </CardContent>
-          </Card>;
+          </Card>
+        );
 
       case 'generation':
-        return <Card className="border-0 shadow-sm">
+        return (
+          <Card className="border-0 shadow-sm">
             <CardHeader className="p-6 pb-2">
+            </CardHeader>
+            <StepProgress currentStep={currentStep} />
+            <div className="px-6 pt-4">
               <h2 className="text-lg font-semibold text-[#1A1F2C] mb-1">Generation Complete</h2>
               <p className="text-[#6D7175]">Your expose has been generated successfully</p>
-            </CardHeader>
+            </div>
             <CardContent className="p-6">
               <div className="text-center text-[#6D7175]">
                 Hero image and content generated successfully!
               </div>
             </CardContent>
-          </Card>;
+          </Card>
+        );
     }
   };
 
-  return <div className="min-h-screen bg-[#F6F6F7]">
+  return (
+    <div className="min-h-screen bg-[#F6F6F7]">
       <div className="p-4 sm:p-6">
         <div className="mb-6">
           <Breadcrumbs className="mb-4" items={[{
-          label: 'Home',
-          href: '/'
-        }, {
-          label: 'Create Expose',
-          href: '/expose'
-        }]} />
+            label: 'Home',
+            href: '/'
+          }, {
+            label: 'Create Expose',
+            href: '/expose'
+          }]} />
           <h1 className="text-[#1A1F2C] text-2xl font-medium mt-4">Create an Expose</h1>
           <p className="text-[#6D7175] mt-1">Generate AI-driven hero images with your products</p>
         </div>
@@ -465,7 +500,8 @@ const Expose = () => {
           {renderStep()}
         </div>
       </div>
-    </div>;
+    </div>
+  );
 };
 
 export default Expose;
