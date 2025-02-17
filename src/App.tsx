@@ -3,6 +3,7 @@ import React from 'react';
 import {
   createBrowserRouter,
   RouterProvider,
+  Outlet,
 } from "react-router-dom";
 import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
@@ -16,7 +17,7 @@ import Library from "./pages/Library";
 const Root = () => {
   return (
     <div className="container py-6">
-      <Index />
+      <Outlet />
     </div>
   );
 };
@@ -27,6 +28,10 @@ const router = createBrowserRouter([
     element: <Root />,
     errorElement: <NotFound />,
     children: [
+      {
+        index: true,
+        element: <Index />,
+      },
       {
         path: "settings",
         element: <Settings />,
