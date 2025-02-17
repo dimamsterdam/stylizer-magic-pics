@@ -13,16 +13,13 @@ import { useNavigate } from "react-router-dom";
 import Breadcrumbs from "@/components/Breadcrumbs";
 import StepProgress from "@/components/StepProgress";
 import GeneratedImagePreview from "@/components/GeneratedImagePreview";
-
 interface Product {
   id: string;
   title: string;
   sku: string;
   image: string;
 }
-
 type Step = 'products' | 'theme' | 'content' | 'review' | 'results';
-
 const Expose = () => {
   const [currentStep, setCurrentStep] = useState<Step>('products');
   const [searchTerm, setSearchTerm] = useState("");
@@ -32,12 +29,10 @@ const Expose = () => {
   const [bodyCopy, setBodyCopy] = useState("");
   const [isGenerating, setIsGenerating] = useState(false);
   const [exposeId, setExposeId] = useState<string | null>(null);
-
   const {
     toast
   } = useToast();
   const navigate = useNavigate();
-
   const {
     data: exposeData,
     isLoading: isLoadingExpose
@@ -56,7 +51,6 @@ const Expose = () => {
     },
     enabled: !!exposeId && currentStep === 'results'
   });
-
   const {
     data: searchResults = [],
     isLoading,
@@ -79,21 +73,17 @@ const Expose = () => {
     },
     enabled: searchTerm.length >= 2
   });
-
   const handleProductSelect = (product: Product) => {
     if (selectedProducts.length < 3) {
       setSelectedProducts(prev => [...prev, product]);
     }
   };
-
   const handleProductRemove = (productId: string) => {
     setSelectedProducts(prev => prev.filter(p => p.id !== productId));
   };
-
   const handleSearchChange = (term: string) => {
     setSearchTerm(term);
   };
-
   const handleContinue = async () => {
     if (currentStep === 'products' && selectedProducts.length === 0) return;
     if (currentStep === 'theme' && !themeDescription.trim()) return;
@@ -172,12 +162,10 @@ const Expose = () => {
       }
     }
   };
-
   const handleHeadlineChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const cleanedValue = e.target.value.replace(/["']/g, '');
     setHeadline(cleanedValue);
   };
-
   const generateContent = async (type: 'headline' | 'body') => {
     try {
       const {
@@ -221,7 +209,6 @@ const Expose = () => {
       });
     }
   };
-
   const handleBodyCopyChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     const words = e.target.value.split(' ');
     if (words.length > 40) {
@@ -234,7 +221,6 @@ const Expose = () => {
       setBodyCopy(e.target.value);
     }
   };
-
   const handleGenerateHero = async () => {
     if (!exposeId) return;
     setIsGenerating(true);
@@ -290,7 +276,6 @@ const Expose = () => {
       });
     }
   };
-
   const handleGenerateAll = async () => {
     toast({
       title: "Generating content",
@@ -302,43 +287,38 @@ const Expose = () => {
       description: "Content generated successfully!"
     });
   };
-
   const handleStepClick = (step: Step) => {
     setCurrentStep(step);
   };
-
   const handleAddToLibrary = async () => {
     if (!exposeId) return;
     try {
-      const { error } = await supabase
-        .from('exposes')
-        .update({ status: 'published' })
-        .eq('id', exposeId);
-
+      const {
+        error
+      } = await supabase.from('exposes').update({
+        status: 'published'
+      }).eq('id', exposeId);
       if (error) throw error;
-
       toast({
         title: "Success",
-        description: "Expose added to library successfully!",
+        description: "Expose added to library successfully!"
       });
     } catch (error) {
       console.error('Error adding to library:', error);
       toast({
         title: "Error",
         description: "Failed to add expose to library. Please try again.",
-        variant: "destructive",
+        variant: "destructive"
       });
     }
   };
-
   const handleRegenerate = async () => {
     setCurrentStep('review');
     toast({
       title: "Ready to regenerate",
-      description: "You can now modify your settings and generate a new image.",
+      description: "You can now modify your settings and generate a new image."
     });
   };
-
   const renderStep = () => {
     switch (currentStep) {
       case 'products':
@@ -416,7 +396,7 @@ const Expose = () => {
             <div className="px-6 pt-4">
               <div>
                 <h2 className="text-lg font-semibold text-[#1A1F2C] mb-1">Add Content</h2>
-                <p className="text-[#6D7175]">Enter the text content for your expose</p>
+                <p className="text-[#6D7175]">Manage the Expose headline and subtext</p>
               </div>
             </div>
             <CardContent className="p-6">
@@ -540,18 +520,11 @@ const Expose = () => {
                   <p className="text-[#6D7175]">Your expose has been generated successfully</p>
                 </div>
                 <div className="flex gap-3">
-                  <Button
-                    onClick={handleRegenerate}
-                    variant="outline"
-                    className="text-[#008060] border-[#008060] hover:bg-[#008060]/10"
-                  >
+                  <Button onClick={handleRegenerate} variant="outline" className="text-[#008060] border-[#008060] hover:bg-[#008060]/10">
                     <RotateCw className="mr-2 h-4 w-4" />
                     Regenerate
                   </Button>
-                  <Button
-                    onClick={handleAddToLibrary}
-                    className="bg-[#008060] hover:bg-[#006e52] text-white"
-                  >
+                  <Button onClick={handleAddToLibrary} className="bg-[#008060] hover:bg-[#006e52] text-white">
                     <Save className="mr-2 h-4 w-4" />
                     Add to Library
                   </Button>
@@ -560,26 +533,13 @@ const Expose = () => {
             </div>
             <CardContent className="p-6">
               <div className="space-y-6">
-                {isLoadingExpose ? (
-                  <div className="flex items-center justify-center py-12">
+                {isLoadingExpose ? <div className="flex items-center justify-center py-12">
                     <Loader2 className="h-8 w-8 animate-spin text-[#008060]" />
-                  </div>
-                ) : exposeData ? (
-                  <GeneratedImagePreview
-                    imageUrl={exposeData.hero_image_desktop_url || exposeData.hero_image_url}
-                    headline={headline}
-                    bodyCopy={bodyCopy}
-                  />
-                ) : (
-                  <div className="text-center py-12 border rounded-lg bg-gray-50">
+                  </div> : exposeData ? <GeneratedImagePreview imageUrl={exposeData.hero_image_desktop_url || exposeData.hero_image_url} headline={headline} bodyCopy={bodyCopy} /> : <div className="text-center py-12 border rounded-lg bg-gray-50">
                     <p className="text-[#6D7175]">No generated image found. Please try generating again.</p>
-                  </div>
-                )}
+                  </div>}
                 <div className="flex justify-end space-x-4">
-                  <Button
-                    onClick={() => navigate('/brand')}
-                    className="bg-[#008060] hover:bg-[#006e52] text-white px-6"
-                  >
+                  <Button onClick={() => navigate('/brand')} className="bg-[#008060] hover:bg-[#006e52] text-white px-6">
                     Continue to Brand
                   </Button>
                 </div>
@@ -588,7 +548,6 @@ const Expose = () => {
           </Card>;
     }
   };
-
   return <div className="min-h-screen bg-[#F6F6F7]">
       <div className="p-4 sm:p-6">
         <div className="mb-6">
@@ -609,5 +568,4 @@ const Expose = () => {
       </div>
     </div>;
 };
-
 export default Expose;
