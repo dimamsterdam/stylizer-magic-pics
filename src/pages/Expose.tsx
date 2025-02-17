@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
@@ -565,7 +566,17 @@ const Expose = () => {
                   />
                 </div>
                 <div className="flex justify-end space-x-4">
-                  <Button onClick={() => navigate('/generation-results')} className="bg-[#008060] hover:bg-[#006e52] text-white px-6">
+                  <Button 
+                    onClick={() => navigate('/generation-results', { 
+                      state: { 
+                        selectedProducts,
+                        selectedAngles: ['Front View'], // Default angle
+                        prompt: themeDescription,
+                        exposeId
+                      } 
+                    })} 
+                    className="bg-[#008060] hover:bg-[#006e52] text-white px-6"
+                  >
                     View Results
                   </Button>
                 </div>
