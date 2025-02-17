@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
@@ -10,8 +11,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { useNavigate } from "react-router-dom";
-import { ThemeSelector } from "@/components/ThemeSelector";
-import { THEMES } from "@/lib/themes";
+import { Breadcrumbs } from "@/components/Breadcrumbs";
 
 interface Product {
   id: string;
@@ -20,15 +20,13 @@ interface Product {
   image: string;
 }
 
-type Step = 'products' | 'configuration' | 'content' | 'preview' | 'generation';
+type Step = 'products' | 'theme' | 'content' | 'review' | 'generation';
 
 const Expose = () => {
   const [currentStep, setCurrentStep] = useState<Step>('products');
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedProducts, setSelectedProducts] = useState<Product[]>([]);
-  const [selectedTheme, setSelectedTheme] = useState("");
-  const [brandConstraints, setBrandConstraints] = useState("");
-  const [negativePrompt, setNegativePrompt] = useState("");
+  const [themeDescription, setThemeDescription] = useState("");
   const [headline, setHeadline] = useState("");
   const [bodyCopy, setBodyCopy] = useState("");
   const [isGenerating, setIsGenerating] = useState(false);
@@ -88,128 +86,104 @@ const Expose = () => {
     setSearchTerm(term);
   };
 
-  const handleThemeSelect = (themeId: string, styleGuide: string) => {
-    setSelectedTheme(themeId);
-    setBrandConstraints(styleGuide);
-  };
-
   const handleContinue = async () => {
-    if (selectedProducts.length === 0) return;
+    if (currentStep === 'products' && selectedProducts.length === 0) return;
+    if (currentStep === 'theme' && !themeDescription.trim()) return;
+    if (currentStep === 'content' && (!headline.trim() || !bodyCopy.trim())) return;
 
-    try {
-      const { data: { session } } = await supabase.auth.getSession();
-      
-      if (!session?.user) {
-        toast({
-          title: "Authentication required",
-          description: "Please log in to create exposes",
-          variant: "destructive",
-        });
-        navigate('/auth');
-        return;
-      }
+    if (currentStep === 'products') {
+      try {
+        const { data: { session } } = await supabase.auth.getSession();
+        
+        if (!session?.user) {
+          toast({
+            title: "Authentication required",
+            description: "Please log in to create exposes",
+            variant: "destructive",
+          });
+          navigate('/auth');
+          return;
+        }
 
-      const { data, error } = await supabase
-        .from('exposes')
-        .insert({
-          selected_product_ids: selectedProducts.map(p => p.id),
-          status: 'draft',
-          user_id: session.user.id
-        })
-        .select()
-        .single();
+        const { data, error } = await supabase
+          .from('exposes')
+          .insert({
+            selected_product_ids: selectedProducts.map(p => p.id),
+            status: 'draft',
+            user_id: session.user.id
+          })
+          .select()
+          .single();
 
-      if (error) {
+        if (error) throw error;
+
+        setExposeId(data.id);
+        setCurrentStep('theme');
+      } catch (error) {
         console.error('Error creating expose:', error);
-        throw error;
+        toast({
+          title: "Error",
+          description: "Failed to create expose. Please try again.",
+          variant: "destructive"
+        });
       }
+    } else if (currentStep === 'theme') {
+      try {
+        if (!exposeId) throw new Error('No expose ID');
 
-      setExposeId(data.id);
-      setCurrentStep('configuration');
-    } catch (error) {
-      console.error('Error creating expose:', error);
-      toast({
-        title: "Error",
-        description: "Failed to create expose. Please try again.",
-        variant: "destructive"
-      });
-    }
-  };
+        const { error } = await supabase
+          .from('exposes')
+          .update({
+            theme_description: themeDescription
+          })
+          .eq('id', exposeId);
 
-  const handleGenerateHero = async () => {
-    if (!exposeId || !selectedTheme) return;
-
-    setIsGenerating(true);
-    try {
-      const selectedThemeData = THEMES.find(t => t.id === selectedTheme);
-      const prompt = `Create a hero product image for ${selectedThemeData?.label}. ${
-        brandConstraints ? `Style guidelines: ${brandConstraints}.` : ''
-      } The image should feature ${selectedProducts.length} product${
-        selectedProducts.length > 1 ? 's' : ''
-      } in an engaging and professional composition.`;
-
-      const response = await fetch('/api/generate-ai-image', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ 
-          prompt,
-          negativePrompt 
-        }),
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to generate image');
+        if (error) throw error;
+        setCurrentStep('content');
+      } catch (error) {
+        console.error('Error updating theme:', error);
+        toast({
+          title: "Error",
+          description: "Failed to save theme. Please try again.",
+          variant: "destructive"
+        });
       }
+    } else if (currentStep === 'content') {
+      try {
+        if (!exposeId) throw new Error('No expose ID');
 
-      const { imageUrl } = await response.json();
+        const { error } = await supabase
+          .from('exposes')
+          .update({
+            headline,
+            body_copy: bodyCopy
+          })
+          .eq('id', exposeId);
 
-      const { error: updateError } = await supabase
-        .from('exposes')
-        .update({
-          hero_image_url: imageUrl,
-          theme: selectedTheme,
-          brand_constraints: brandConstraints,
-          negative_prompt: negativePrompt,
-          headline: headline,
-          body_copy: bodyCopy
-        })
-        .eq('id', exposeId);
-
-      if (updateError) throw updateError;
-
-      toast({
-        title: "Success",
-        description: "Hero image generated successfully!",
-      });
-      setCurrentStep('generation');
-    } catch (error) {
-      console.error('Error generating hero:', error);
-      toast({
-        title: "Error",
-        description: "Failed to generate hero image. Please try again.",
-        variant: "destructive"
-      });
-    } finally {
-      setIsGenerating(false);
+        if (error) throw error;
+        setCurrentStep('review');
+      } catch (error) {
+        console.error('Error updating content:', error);
+        toast({
+          title: "Error",
+          description: "Failed to save content. Please try again.",
+          variant: "destructive"
+        });
+      }
     }
   };
 
   const generateContent = async (type: 'headline' | 'body') => {
     try {
-      const selectedThemeData = THEMES.find(t => t.id === selectedTheme);
-      if (!selectedThemeData) return;
-
       const { data, error } = await supabase.functions.invoke('generate-content', {
         body: {
           type,
           products: selectedProducts,
-          theme: selectedThemeData.label
+          theme: themeDescription
         },
       });
 
-      if (error) {
-        throw error;
-      }
+      if (error) throw error;
 
       const { generatedText } = data;
 
@@ -230,6 +204,53 @@ const Expose = () => {
         description: `Failed to generate ${type}. Please try again.`,
         variant: "destructive"
       });
+    }
+  };
+
+  const handleGenerateHero = async () => {
+    if (!exposeId) return;
+
+    setIsGenerating(true);
+    try {
+      const prompt = `Create a hero product image. Theme description: ${themeDescription}. The image should feature ${selectedProducts.length} product${
+        selectedProducts.length > 1 ? 's' : ''
+      } in an engaging and professional composition.`;
+
+      const response = await fetch('/api/generate-ai-image', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ prompt }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to generate image');
+      }
+
+      const { imageUrl } = await response.json();
+
+      const { error: updateError } = await supabase
+        .from('exposes')
+        .update({
+          hero_image_url: imageUrl,
+        })
+        .eq('id', exposeId);
+
+      if (updateError) throw updateError;
+
+      toast({
+        title: "Success",
+        description: "Hero image generated successfully!",
+      });
+      setCurrentStep('generation');
+    } catch (error) {
+      console.error('Error generating hero:', error);
+      toast({
+        title: "Error",
+        description: "Failed to generate hero image. Please try again.",
+        variant: "destructive"
+      });
+    } finally {
+      setIsGenerating(false);
     }
   };
 
@@ -306,7 +327,7 @@ const Expose = () => {
           </Card>
         );
 
-      case 'configuration':
+      case 'theme':
         return (
           <Card className="border-0 shadow-sm">
             <CardHeader className="p-6 pb-2">
@@ -320,32 +341,28 @@ const Expose = () => {
                   <ArrowLeft className="h-4 w-4" />
                 </Button>
                 <div>
-                  <h2 className="text-lg font-semibold text-[#1A1F2C] mb-1">Select Theme</h2>
-                  <p className="text-[#6D7175]">Choose a theme for your hero image</p>
+                  <h2 className="text-lg font-semibold text-[#1A1F2C] mb-1">Describe Your Theme</h2>
+                  <p className="text-[#6D7175]">Tell us how you want your products to be presented</p>
                 </div>
               </div>
             </CardHeader>
             <CardContent className="p-6">
               <div className="space-y-6">
-                <ThemeSelector
-                  value={selectedTheme}
-                  onChange={handleThemeSelect}
-                />
-                
                 <div className="space-y-2">
-                  <Label htmlFor="brand-constraints">Brand Style Guidelines</Label>
+                  <Label htmlFor="theme-description">Theme Description</Label>
                   <Textarea
-                    id="brand-constraints"
-                    value={brandConstraints}
-                    onChange={(e) => setBrandConstraints(e.target.value)}
-                    className="h-24"
+                    id="theme-description"
+                    value={themeDescription}
+                    onChange={(e) => setThemeDescription(e.target.value)}
+                    placeholder="Describe your desired theme (e.g., Minimalist product photography with soft lighting and neutral background)"
+                    className="h-32"
                   />
                 </div>
 
                 <div className="flex justify-end pt-4">
                   <Button
-                    onClick={() => setCurrentStep('content')}
-                    disabled={!selectedTheme}
+                    onClick={handleContinue}
+                    disabled={!themeDescription.trim()}
                     className="bg-[#008060] hover:bg-[#006e52] text-white px-6"
                   >
                     Continue to Content
@@ -364,7 +381,7 @@ const Expose = () => {
                 <Button
                   variant="ghost"
                   size="icon"
-                  onClick={() => setCurrentStep('configuration')}
+                  onClick={() => setCurrentStep('theme')}
                   className="mr-2"
                 >
                   <ArrowLeft className="h-4 w-4" />
@@ -423,11 +440,11 @@ const Expose = () => {
 
                 <div className="flex justify-end">
                   <Button
-                    onClick={() => setCurrentStep('preview')}
+                    onClick={handleContinue}
                     disabled={!headline.trim() || !bodyCopy.trim()}
                     className="bg-[#008060] hover:bg-[#006e52] text-white px-6"
                   >
-                    Continue to Preview
+                    Continue to Review
                   </Button>
                 </div>
               </div>
@@ -435,8 +452,7 @@ const Expose = () => {
           </Card>
         );
 
-      case 'preview':
-        const selectedThemeData = THEMES.find(t => t.id === selectedTheme);
+      case 'review':
         return (
           <Card className="border-0 shadow-sm">
             <CardHeader className="p-6 pb-2">
@@ -450,91 +466,69 @@ const Expose = () => {
                   <ArrowLeft className="h-4 w-4" />
                 </Button>
                 <div>
-                  <h2 className="text-lg font-semibold text-[#1A1F2C] mb-1">Final Prompt</h2>
-                  <p className="text-[#6D7175]">Review and customize your generation settings</p>
+                  <h2 className="text-lg font-semibold text-[#1A1F2C] mb-1">Review Your Expose</h2>
+                  <p className="text-[#6D7175]">Review all details before generating</p>
                 </div>
               </div>
             </CardHeader>
             <CardContent className="p-6">
               <div className="space-y-8">
-                <div className="space-y-4">
-                  <div>
-                    <h3 className="text-sm font-medium text-[#1A1F2C]">Selected Products</h3>
-                    <div className="grid grid-cols-3 gap-4">
-                      {selectedProducts.map(product => (
-                        <div key={product.id} className="relative">
-                          <img
-                            src={product.image}
-                            alt={product.title}
-                            className="w-full aspect-square object-cover rounded-lg"
-                            onError={(e) => {
-                              e.currentTarget.src = '/placeholder.svg';
-                            }}
-                          />
-                          <div className="absolute inset-0 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity bg-black/50 rounded-lg">
-                            <p className="text-white text-sm font-medium px-2 text-center">
-                              {product.title}
-                            </p>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-
-                  <div className="flex items-center justify-center">
-                    <div className="bg-polaris-border flex-grow h-px" />
-                    <Plus className="mx-4 text-polaris-text" />
-                    <div className="bg-polaris-border flex-grow h-px" />
-                  </div>
-
-                  <div className="space-y-4">
-                    <div className="space-y-2">
-                      <Label>Theme</Label>
-                      <div className="p-4 rounded-lg bg-[#F6F6F7] text-[#1A1F2C]">
-                        {selectedThemeData?.label}
+                <section className="space-y-4">
+                  <h3 className="font-medium text-[#1A1F2C]">Selected Products</h3>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+                    {selectedProducts.map(product => (
+                      <div
+                        key={product.id}
+                        className="border rounded-lg p-4 bg-white"
+                      >
+                        <img
+                          src={product.image}
+                          alt={product.title}
+                          className="w-full h-32 object-cover rounded-lg mb-2"
+                        />
+                        <h4 className="font-medium text-sm">{product.title}</h4>
+                        <p className="text-xs text-[#6D7175]">SKU: {product.sku}</p>
                       </div>
+                    ))}
+                  </div>
+                </section>
+
+                <section className="space-y-4">
+                  <h3 className="font-medium text-[#1A1F2C]">Theme</h3>
+                  <div className="bg-gray-50 rounded-lg p-4">
+                    <p className="text-sm text-[#1A1F2C]">{themeDescription}</p>
+                  </div>
+                </section>
+
+                <section className="space-y-4">
+                  <h3 className="font-medium text-[#1A1F2C]">Content</h3>
+                  <div className="space-y-4">
+                    <div>
+                      <h4 className="text-sm text-[#6D7175] mb-1">Headline</h4>
+                      <p className="text-lg font-medium text-[#1A1F2C]">{headline}</p>
                     </div>
-                    <div className="space-y-2">
-                      <Label>Image Generation Prompt</Label>
-                      <Textarea
-                        value={brandConstraints}
-                        onChange={(e) => setBrandConstraints(e.target.value)}
-                        className="h-24"
-                        placeholder="Customize the AI prompt to refine the generation..."
-                      />
+                    <div>
+                      <h4 className="text-sm text-[#6D7175] mb-1">Body Copy</h4>
+                      <p className="text-sm text-[#1A1F2C] whitespace-pre-wrap">{bodyCopy}</p>
                     </div>
                   </div>
+                </section>
 
-                  <div className="flex items-center justify-center">
-                    <div className="bg-polaris-border flex-grow h-px" />
-                    <Plus className="mx-4 text-polaris-text" />
-                    <div className="bg-polaris-border flex-grow h-px" />
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label>Anything to exclude? (Negative Prompt)</Label>
-                    <Textarea
-                      value={negativePrompt}
-                      onChange={(e) => setNegativePrompt(e.target.value)}
-                      className="h-24"
-                      placeholder="Specify elements you want to exclude from the generation..."
-                    />
-                  </div>
-
-                  <div className="flex items-center justify-center">
-                    <div className="bg-polaris-border flex-grow h-px" />
-                    <Equal className="mx-4 text-polaris-text" />
-                    <div className="bg-polaris-border flex-grow h-px" />
-                  </div>
-
-                  <div className="flex justify-end">
-                    <Button
-                      onClick={() => setCurrentStep('generation')}
-                      className="bg-[#008060] hover:bg-[#006e52] text-white px-6"
-                    >
-                      Generate Hero Image
-                    </Button>
-                  </div>
+                <div className="flex justify-end pt-4">
+                  <Button
+                    onClick={handleGenerateHero}
+                    disabled={isGenerating}
+                    className="bg-[#008060] hover:bg-[#006e52] text-white px-6"
+                  >
+                    {isGenerating ? (
+                      <>
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        Generating...
+                      </>
+                    ) : (
+                      'Generate Hero Image'
+                    )}
+                  </Button>
                 </div>
               </div>
             </CardContent>
@@ -562,11 +556,15 @@ const Expose = () => {
     <div className="min-h-screen bg-[#F6F6F7]">
       <div className="p-4 sm:p-6">
         <div className="mb-6">
-          <h1 className="text-[#1A1F2C] text-2xl font-medium">Create an Expose</h1>
+          <Breadcrumbs items={[
+            { label: 'Home', href: '/' },
+            { label: 'Create Expose', href: '/expose' }
+          ]} />
+          <h1 className="text-[#1A1F2C] text-2xl font-medium mt-4">Create an Expose</h1>
           <p className="text-[#6D7175] mt-1">Generate AI-driven hero images with your products</p>
         </div>
 
-        <div className="max-w-3xl">
+        <div className="max-w-3xl mx-auto">
           {renderStep()}
         </div>
       </div>

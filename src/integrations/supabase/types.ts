@@ -102,6 +102,7 @@ export type Database = {
           start_date: string | null
           status: Database["public"]["Enums"]["expose_status"]
           theme: string | null
+          theme_description: string | null
           updated_at: string
           user_id: string
         }
@@ -118,6 +119,7 @@ export type Database = {
           start_date?: string | null
           status?: Database["public"]["Enums"]["expose_status"]
           theme?: string | null
+          theme_description?: string | null
           updated_at?: string
           user_id: string
         }
@@ -134,6 +136,7 @@ export type Database = {
           start_date?: string | null
           status?: Database["public"]["Enums"]["expose_status"]
           theme?: string | null
+          theme_description?: string | null
           updated_at?: string
           user_id?: string
         }
