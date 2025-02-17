@@ -21,7 +21,7 @@ interface Product {
   image: string;
 }
 
-type Step = 'products' | 'theme' | 'content' | 'review';
+type Step = 'products' | 'theme' | 'content' | 'review' | 'generation';
 
 const Expose = () => {
   const [currentStep, setCurrentStep] = useState<Step>('products');
@@ -230,95 +230,41 @@ const Expose = () => {
   };
 
   const handleGenerateHero = async () => {
-    if (!exposeId) {
-      toast({
-        title: "Error",
-        description: "No expose ID found. Please try again.",
-        variant: "destructive"
-      });
-      return;
-    }
-
-    if (!selectedProducts || selectedProducts.length === 0) {
-      toast({
-        title: "Error",
-        description: "No products selected. Please select at least one product.",
-        variant: "destructive"
-      });
-      return;
-    }
-
+    if (!exposeId) return;
     setIsGenerating(true);
-    console.log('Starting hero generation with products:', selectedProducts);
-
     try {
-      const requestBody = {
-        exposeId,
-        products: selectedProducts.map(product => ({
-          title: product.title,
-          sku: product.sku,
-          image: product.image
-        })),
-        theme: themeDescription,
-        headline,
-        bodyCopy
-      };
-
-      console.log('Sending request to generate-ai-image with body:', requestBody);
-
       const { data, error } = await supabase.functions.invoke('generate-ai-image', {
-        body: requestBody
+        body: {
+          exposeId,
+          products: selectedProducts.map(product => ({
+            title: product.title,
+            sku: product.sku,
+            image: product.image
+          })),
+          theme: themeDescription,
+          headline,
+          bodyCopy
+        }
       });
 
-      if (error) {
-        console.error('Error invoking generate-ai-image:', error);
-        throw error;
-      }
-
-      console.log('Successfully initiated image generation:', data);
+      if (error) throw error;
 
       const pollInterval = setInterval(async () => {
-        console.log('Polling for generation status...');
-        
-        const { data: exposeData, error: pollError } = await supabase
+        const { data: exposeData } = await supabase
           .from('exposes')
           .select('hero_image_generation_status, hero_image_desktop_url, hero_image_tablet_url, hero_image_mobile_url')
           .eq('id', exposeId)
           .single();
 
-        if (pollError) {
-          console.error('Error polling generation status:', pollError);
-          clearInterval(pollInterval);
-          setIsGenerating(false);
-          toast({
-            title: "Error",
-            description: "Failed to check generation status. Please try again.",
-            variant: "destructive"
-          });
-          return;
-        }
-
-        console.log('Poll response:', exposeData);
-
         if (exposeData?.hero_image_generation_status === 'completed') {
-          console.log('Generation completed successfully');
           clearInterval(pollInterval);
           setIsGenerating(false);
           toast({
             title: "Success",
             description: "Hero images generated successfully!"
           });
-          
-          navigate('/generation-results', { 
-            state: { 
-              selectedProducts,
-              selectedAngles: ['Front View'],
-              prompt: themeDescription,
-              exposeId
-            } 
-          });
+          setCurrentStep('generation');
         } else if (exposeData?.hero_image_generation_status === 'error') {
-          console.error('Generation failed with status:', exposeData?.hero_image_generation_status);
           clearInterval(pollInterval);
           setIsGenerating(false);
           toast({
@@ -331,7 +277,7 @@ const Expose = () => {
 
       return () => clearInterval(pollInterval);
     } catch (error) {
-      console.error('Error in handleGenerateHero:', error);
+      console.error('Error generating hero:', error);
       setIsGenerating(false);
       toast({
         title: "Error",
@@ -593,6 +539,45 @@ const Expose = () => {
                         Generating...
                       </>
                     ) : 'Generate Hero Image'}
+                  </Button>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        );
+
+      case 'generation':
+        return (
+          <Card className="border-0 shadow-sm">
+            <CardHeader className="p-6 pb-2">
+            </CardHeader>
+            <StepProgress currentStep={currentStep} onStepClick={handleStepClick} />
+            <div className="px-6 pt-4">
+              <h2 className="text-lg font-semibold text-[#1A1F2C] mb-1">Generation Complete</h2>
+              <p className="text-[#6D7175]">Your expose has been generated successfully</p>
+            </div>
+            <CardContent className="p-6">
+              <div className="space-y-6">
+                <div className="rounded-lg overflow-hidden border border-[#E3E5E7]">
+                  <img 
+                    src={exposeData?.hero_image_url || exposeData?.hero_image_desktop_url} 
+                    alt="Generated hero image"
+                    className="w-full h-auto"
+                  />
+                </div>
+                <div className="flex justify-end space-x-4">
+                  <Button 
+                    onClick={() => navigate('/generation-results', { 
+                      state: { 
+                        selectedProducts,
+                        selectedAngles: ['Front View'], // Default angle
+                        prompt: themeDescription,
+                        exposeId
+                      } 
+                    })} 
+                    className="bg-[#008060] hover:bg-[#006e52] text-white px-6"
+                  >
+                    View Results
                   </Button>
                 </div>
               </div>
