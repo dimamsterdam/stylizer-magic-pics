@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
@@ -229,39 +230,85 @@ const Expose = () => {
   };
 
   const handleGenerateHero = async () => {
-    if (!exposeId) return;
+    if (!exposeId) {
+      toast({
+        title: "Error",
+        description: "No expose ID found. Please try again.",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    if (!selectedProducts || selectedProducts.length === 0) {
+      toast({
+        title: "Error",
+        description: "No products selected. Please select at least one product.",
+        variant: "destructive"
+      });
+      return;
+    }
+
     setIsGenerating(true);
+    console.log('Starting hero generation with products:', selectedProducts);
+
     try {
+      const requestBody = {
+        exposeId,
+        products: selectedProducts.map(product => ({
+          title: product.title,
+          sku: product.sku,
+          image: product.image
+        })),
+        theme: themeDescription,
+        headline,
+        bodyCopy
+      };
+
+      console.log('Sending request to generate-ai-image with body:', requestBody);
+
       const { data, error } = await supabase.functions.invoke('generate-ai-image', {
-        body: {
-          exposeId,
-          products: selectedProducts.map(product => ({
-            title: product.title,
-            sku: product.sku,
-            image: product.image
-          })),
-          theme: themeDescription,
-          headline,
-          bodyCopy
-        }
+        body: requestBody
       });
 
-      if (error) throw error;
+      if (error) {
+        console.error('Error invoking generate-ai-image:', error);
+        throw error;
+      }
+
+      console.log('Successfully initiated image generation:', data);
 
       const pollInterval = setInterval(async () => {
-        const { data: exposeData } = await supabase
+        console.log('Polling for generation status...');
+        
+        const { data: exposeData, error: pollError } = await supabase
           .from('exposes')
           .select('hero_image_generation_status, hero_image_desktop_url, hero_image_tablet_url, hero_image_mobile_url')
           .eq('id', exposeId)
           .single();
 
+        if (pollError) {
+          console.error('Error polling generation status:', pollError);
+          clearInterval(pollInterval);
+          setIsGenerating(false);
+          toast({
+            title: "Error",
+            description: "Failed to check generation status. Please try again.",
+            variant: "destructive"
+          });
+          return;
+        }
+
+        console.log('Poll response:', exposeData);
+
         if (exposeData?.hero_image_generation_status === 'completed') {
+          console.log('Generation completed successfully');
           clearInterval(pollInterval);
           setIsGenerating(false);
           toast({
             title: "Success",
             description: "Hero images generated successfully!"
           });
+          
           navigate('/generation-results', { 
             state: { 
               selectedProducts,
@@ -271,6 +318,7 @@ const Expose = () => {
             } 
           });
         } else if (exposeData?.hero_image_generation_status === 'error') {
+          console.error('Generation failed with status:', exposeData?.hero_image_generation_status);
           clearInterval(pollInterval);
           setIsGenerating(false);
           toast({
@@ -283,7 +331,7 @@ const Expose = () => {
 
       return () => clearInterval(pollInterval);
     } catch (error) {
-      console.error('Error generating hero:', error);
+      console.error('Error in handleGenerateHero:', error);
       setIsGenerating(false);
       toast({
         title: "Error",
