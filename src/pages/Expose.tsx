@@ -301,11 +301,20 @@ const Expose = () => {
       title: "Generating content",
       description: "Generating headline and body copy..."
     });
-    await Promise.all([generateContent('headline'), generateContent('body')]);
-    toast({
-      title: "Success",
-      description: "Content generated successfully!"
-    });
+    try {
+      await Promise.all([generateContent('headline'), generateContent('body')]);
+      toast({
+        title: "Success",
+        description: "Content generated successfully!"
+      });
+    } catch (error) {
+      console.error('Error generating content:', error);
+      toast({
+        title: "Error",
+        description: "Failed to generate content. Please try again.",
+        variant: "destructive"
+      });
+    }
   };
 
   const handleStepClick = (step: Step) => {
@@ -338,6 +347,12 @@ const Expose = () => {
       description: "You can now modify your settings and generate a new image."
     });
   };
+
+  useEffect(() => {
+    if (currentStep === 'content' && !headline && !bodyCopy) {
+      handleGenerateAll();
+    }
+  }, [currentStep]);
 
   const renderStep = () => {
     switch (currentStep) {
@@ -437,7 +452,7 @@ const Expose = () => {
                     <Label htmlFor="headline">Headline</Label>
                     <Button variant="ghost" size="sm" onClick={handleGenerateAll} className="text-[#008060] hover:text-[#006e52]">
                       <WandSparkles className="h-4 w-4 mr-1" />
-                      Generate
+                      Regenerate
                     </Button>
                   </div>
                   <Input id="headline" value={headline} onChange={handleHeadlineChange} placeholder="Enter a compelling headline" className="text-lg" />
