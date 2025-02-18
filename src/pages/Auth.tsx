@@ -56,24 +56,22 @@ const Auth = () => {
           email,
           password,
           options: {
-            emailRedirectTo: `${window.location.origin}`,
+            emailRedirectTo: `${window.location.origin}/auth`,
           }
         });
         
-        if (error) {
-          console.error("Sign up error:", error);
-          throw error;
-        }
+        if (error) throw error;
         
         console.log("Sign up response:", data);
         
+        // Check if the user already exists
         if (data.user && data.user.identities && data.user.identities.length === 0) {
           throw new Error("Email already registered");
         }
         
         toast({
-          title: "Account created",
-          description: "You can now sign in with your credentials.",
+          title: "Verification email sent",
+          description: "Please check your email to confirm your account.",
         });
         
         setEmail("");
@@ -86,10 +84,7 @@ const Auth = () => {
           password,
         });
         
-        if (error) {
-          console.error("Sign in error:", error);
-          throw error;
-        }
+        if (error) throw error;
         
         console.log("Sign in successful:", data);
         navigate("/");
@@ -98,12 +93,14 @@ const Auth = () => {
       console.error("Auth error:", error);
       
       let errorMessage = error.message;
-      if (error.message.includes("Email already registered")) {
-        errorMessage = "This email is already registered. Please sign in instead.";
+      if (error.message.includes("Email not confirmed")) {
+        errorMessage = "Please check your email and confirm your account before signing in.";
       } else if (error.message.includes("Invalid login credentials")) {
-        errorMessage = "Invalid email or password. Please try again.";
+        errorMessage = "Invalid email or password. If you haven't registered yet, please sign up first.";
       } else if (error.message.includes("Email rate limit exceeded")) {
         errorMessage = "Too many attempts. Please try again later.";
+      } else if (error.message.includes("Email already registered")) {
+        errorMessage = "This email is already registered. Please sign in instead.";
       }
       
       toast({
