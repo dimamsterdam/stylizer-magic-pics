@@ -469,8 +469,8 @@ const Expose = () => {
                     value={headline} 
                     onChange={(e) => handleHeadlineChange(e as any)}
                     placeholder="Enter a compelling headline" 
-                    className="text-lg min-h-[60px] resize-none overflow-hidden"
-                    rows={2}
+                    className="text-lg min-h-[40px] resize-none overflow-hidden"
+                    rows={1}
                   />
                 </div>
 
