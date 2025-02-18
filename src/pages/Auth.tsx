@@ -1,6 +1,6 @@
 
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -14,7 +14,11 @@ const Auth = () => {
   const [password, setPassword] = useState("");
   const [isSignUp, setIsSignUp] = useState(false);
   const navigate = useNavigate();
+  const location = useLocation();
   const { toast } = useToast();
+
+  // Get the return URL from the location state or default to "/"
+  const returnUrl = location.state?.returnUrl || "/";
 
   // Check if user is already logged in
   useEffect(() => {
@@ -24,7 +28,7 @@ const Auth = () => {
         console.log("Session check:", { session, error }); // Debug log
         if (error) throw error;
         if (session) {
-          navigate("/");
+          navigate(returnUrl);
         }
       } catch (error) {
         console.error("Session check error:", error);
@@ -36,14 +40,14 @@ const Auth = () => {
     const { data: authListener } = supabase.auth.onAuthStateChange((event, session) => {
       console.log("Auth state changed:", { event, session }); // Debug log
       if (session) {
-        navigate("/");
+        navigate(returnUrl);
       }
     });
 
     return () => {
       authListener.subscription.unsubscribe();
     };
-  }, [navigate]);
+  }, [navigate, returnUrl]);
 
   const handleAuth = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -87,7 +91,7 @@ const Auth = () => {
         if (error) throw error;
         
         console.log("Sign in successful:", data);
-        navigate("/");
+        navigate(returnUrl);
       }
     } catch (error: any) {
       console.error("Auth error:", error);

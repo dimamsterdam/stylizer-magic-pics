@@ -45,6 +45,21 @@ const Expose = () => {
   } = useToast();
   const navigate = useNavigate();
 
+  useEffect(() => {
+    const checkAuth = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session?.user) {
+        toast({
+          title: "Authentication required",
+          description: "Please log in to create exposes",
+          variant: "destructive"
+        });
+        navigate('/auth', { state: { returnUrl: '/expose' } });
+      }
+    };
+    checkAuth();
+  }, [navigate]);
+
   const {
     data: exposeData,
     isLoading: isLoadingExpose
@@ -105,30 +120,15 @@ const Expose = () => {
     if (currentStep === 'products' && selectedProducts.length === 0) return;
     if (currentStep === 'theme' && !themeDescription.trim()) return;
     if (currentStep === 'content' && (!headline.trim() || !bodyCopy.trim())) return;
+    
     if (currentStep === 'products') {
       try {
-        const {
-          data: {
-            session
-          }
-        } = await supabase.auth.getSession();
-        if (!session?.user) {
-          toast({
-            title: "Authentication required",
-            description: "Please log in to create exposes",
-            variant: "destructive"
-          });
-          navigate('/auth');
-          return;
-        }
-        const {
-          data,
-          error
-        } = await supabase.from('exposes').insert({
+        const { data, error } = await supabase.from('exposes').insert({
           selected_product_ids: selectedProducts.map(p => p.id),
           status: 'draft',
-          user_id: session.user.id
+          user_id: (await supabase.auth.getSession()).data.session!.user.id
         }).select().single();
+        
         if (error) throw error;
         setExposeId(data.id);
         setCurrentStep('theme');
