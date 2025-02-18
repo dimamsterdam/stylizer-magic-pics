@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
@@ -465,7 +464,14 @@ const Expose = () => {
                       Regenerate
                     </Button>
                   </div>
-                  <Input id="headline" value={headline} onChange={handleHeadlineChange} placeholder="Enter a compelling headline" className="text-lg" />
+                  <Textarea 
+                    id="headline" 
+                    value={headline} 
+                    onChange={(e) => handleHeadlineChange(e as any)}
+                    placeholder="Enter a compelling headline" 
+                    className="text-lg min-h-[60px] resize-none overflow-hidden"
+                    rows={2}
+                  />
                 </div>
 
                 <div className="space-y-2">
