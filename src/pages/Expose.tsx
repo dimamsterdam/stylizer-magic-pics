@@ -19,6 +19,7 @@ import { useNavigate } from "react-router-dom";
 import Breadcrumbs from "@/components/Breadcrumbs";
 import StepProgress from "@/components/StepProgress";
 import GeneratedImagePreview from "@/components/GeneratedImagePreview";
+import { ToneSelector, type ToneStyle } from "@/components/ToneSelector";
 
 interface Product {
   id: string;
@@ -38,6 +39,7 @@ const Expose = () => {
   const [bodyCopy, setBodyCopy] = useState("");
   const [isGenerating, setIsGenerating] = useState(false);
   const [exposeId, setExposeId] = useState<string | null>(null);
+  const [selectedTone, setSelectedTone] = useState<number>(2);
   const {
     toast
   } = useToast();
@@ -185,6 +187,9 @@ const Expose = () => {
 
   const generateContent = async (type: 'headline' | 'body') => {
     try {
+      const toneStyles: ToneStyle[] = ['formal', 'elegant', 'informal', 'playful', 'edgy'];
+      const currentTone = toneStyles[selectedTone];
+      
       const {
         data,
         error
@@ -196,7 +201,8 @@ const Expose = () => {
             sku: product.sku
           })),
           theme: themeDescription,
-          promptContext: `Create ${type === 'headline' ? 'a compelling headline of maximum 12 words' : 'a concise body copy of maximum 40 words'} for an expose featuring ${selectedProducts.map(p => p.title).join(', ')}. The theme/mood is: ${themeDescription}`
+          tone: currentTone,
+          promptContext: `Create ${type === 'headline' ? 'a compelling headline of maximum 12 words' : 'a concise body copy of maximum 40 words'} for an expose featuring ${selectedProducts.map(p => p.title).join(', ')}. The theme/mood is: ${themeDescription}. Use a ${currentTone} tone that is ${getToneDescription(currentTone)}`
         }
       });
       if (error) throw error;
@@ -234,6 +240,17 @@ const Expose = () => {
         variant: "destructive"
       });
     }
+  };
+
+  const getToneDescription = (tone: ToneStyle) => {
+    const descriptions: Record<ToneStyle, string> = {
+      formal: "polished, professional, and authoritative",
+      elegant: "graceful, refined, and slightly poetic",
+      informal: "friendly, casual, and conversational",
+      playful: "fun, energetic, and a bit cheeky",
+      edgy: "bold, daring, and provocative"
+    };
+    return descriptions[tone];
   };
 
   const handleBodyCopyChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
@@ -474,18 +491,35 @@ const Expose = () => {
                   />
                 </div>
 
+                <div className="py-2 px-4 bg-gray-50 rounded-lg">
+                  <ToneSelector
+                    value={selectedTone}
+                    onChange={setSelectedTone}
+                  />
+                </div>
+
                 <div className="space-y-2">
                   <div className="flex justify-between items-center">
                     <Label htmlFor="body-copy">Body Copy (40 words max)</Label>
                   </div>
-                  <Textarea id="body-copy" value={bodyCopy} onChange={handleBodyCopyChange} placeholder="Enter the main content of your expose..." className="h-48" />
+                  <Textarea 
+                    id="body-copy" 
+                    value={bodyCopy} 
+                    onChange={handleBodyCopyChange} 
+                    placeholder="Enter the main content of your expose..." 
+                    className="h-48" 
+                  />
                   <p className="text-sm text-[#6D7175]">
                     {bodyCopy.split(' ').length}/40 words
                   </p>
                 </div>
 
                 <div className="flex justify-end">
-                  <Button onClick={handleContinue} disabled={!headline.trim() || !bodyCopy.trim()} className="bg-[#008060] hover:bg-[#006e52] text-white px-6">
+                  <Button 
+                    onClick={handleContinue} 
+                    disabled={!headline.trim() || !bodyCopy.trim()} 
+                    className="bg-[#008060] hover:bg-[#006e52] text-white px-6"
+                  >
                     Continue to Review
                   </Button>
                 </div>

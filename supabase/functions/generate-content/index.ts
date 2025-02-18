@@ -19,9 +19,8 @@ serve(async (req) => {
 
   try {
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
-    const { type, products, theme, promptContext } = await req.json();
+    const { type, products, theme, tone, promptContext } = await req.json();
 
-    // Get the AI provider setting for text generation
     const { data: providerSetting, error: settingError } = await supabase
       .from('ai_provider_settings')
       .select('provider')
@@ -41,6 +40,9 @@ serve(async (req) => {
       throw new Error('OpenAI API key is not configured');
     }
 
+    console.log('Generating content with tone:', tone);
+    console.log('Prompt context:', promptContext);
+
     const response = await fetch('https://api.openai.com/v1/chat/completions', {
       method: 'POST',
       headers: {
@@ -48,18 +50,18 @@ serve(async (req) => {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: 'gpt-4o-mini',
+        model: 'gpt-3.5-turbo',
         messages: [
           {
             role: 'system',
-            content: 'You are a skilled marketing copywriter specializing in creating compelling product descriptions and headlines.'
+            content: `You are a skilled marketing copywriter specializing in creating compelling product descriptions and headlines. You excel at writing in various tones, from formal to playful, while maintaining brand consistency.`
           },
           {
             role: 'user',
             content: promptContext
           }
         ],
-        temperature: 0.7,
+        temperature: tone === 'formal' || tone === 'elegant' ? 0.5 : 0.7,
         max_tokens: type === 'headline' ? 50 : 200,
       }),
     });
@@ -67,9 +69,11 @@ serve(async (req) => {
     const data = await response.json();
     
     if (!response.ok) {
+      console.error('OpenAI API error:', data.error);
       throw new Error(`OpenAI API error: ${data.error?.message || 'Unknown error'}`);
     }
 
+    console.log('Generated content successfully');
     const generatedText = data.choices[0].message.content;
 
     return new Response(JSON.stringify({ generatedText }), {
