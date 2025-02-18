@@ -4,7 +4,6 @@ import { useNavigate, useLocation } from "react-router-dom";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { useToast } from "@/components/ui/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -17,30 +16,23 @@ const Auth = () => {
   const location = useLocation();
   const { toast } = useToast();
 
-  // Get the return URL from the location state or default to "/"
   const returnUrl = location.state?.returnUrl || "/";
 
-  // Check if user is already logged in
   useEffect(() => {
     const checkSession = async () => {
-      try {
-        const { data: { session }, error } = await supabase.auth.getSession();
-        console.log("Session check:", { session, error }); // Debug log
-        if (error) throw error;
-        if (session) {
-          navigate(returnUrl);
-        }
-      } catch (error) {
-        console.error("Session check error:", error);
+      const { data: { session }, error } = await supabase.auth.getSession();
+      console.log("Session check:", { session, error });
+      if (session) {
+        navigate(returnUrl, { replace: true });
       }
     };
 
     checkSession();
 
     const { data: authListener } = supabase.auth.onAuthStateChange((event, session) => {
-      console.log("Auth state changed:", { event, session }); // Debug log
+      console.log("Auth state changed:", { event, session });
       if (session) {
-        navigate(returnUrl);
+        navigate(returnUrl, { replace: true });
       }
     });
 
@@ -55,7 +47,6 @@ const Auth = () => {
 
     try {
       if (isSignUp) {
-        console.log("Attempting to sign up with:", { email }); // Debug log
         const { data, error } = await supabase.auth.signUp({
           email,
           password,
@@ -66,9 +57,6 @@ const Auth = () => {
         
         if (error) throw error;
         
-        console.log("Sign up response:", data);
-        
-        // Check if the user already exists
         if (data.user && data.user.identities && data.user.identities.length === 0) {
           throw new Error("Email already registered");
         }
@@ -82,16 +70,13 @@ const Auth = () => {
         setPassword("");
         setIsSignUp(false);
       } else {
-        console.log("Attempting to sign in with:", { email }); // Debug log
         const { data, error } = await supabase.auth.signInWithPassword({
           email,
           password,
         });
         
         if (error) throw error;
-        
-        console.log("Sign in successful:", data);
-        navigate(returnUrl);
+        navigate(returnUrl, { replace: true });
       }
     } catch (error: any) {
       console.error("Auth error:", error);
@@ -118,63 +103,63 @@ const Auth = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[#F6F6F7] flex items-center justify-center">
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-[#f8f9fa] to-[#f1f3f5]">
       <div className="w-full max-w-[400px] px-4">
-        <Card className="w-full shadow-sm border-0">
+        <Card className="w-full border-0 shadow-none bg-white/80 backdrop-blur-sm">
           <CardHeader className="space-y-1 p-6">
-            <h1 className="text-2xl font-semibold tracking-tight">
-              {isSignUp ? "Create an Account" : "Welcome Back"}
+            <h1 className="text-2xl font-medium text-[#212529]">
+              {isSignUp ? "Create account" : "Welcome back"}
             </h1>
-            <p className="text-sm text-muted-foreground">
+            <p className="text-sm text-[#6c757d]">
               {isSignUp
-                ? "Sign up to start creating exposes"
-                : "Sign in to your account"}
+                ? "Sign up to get started"
+                : "Sign in to continue"}
             </p>
           </CardHeader>
           <CardContent className="p-6 pt-0">
             <form onSubmit={handleAuth} className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="email">Email</Label>
+              <div className="space-y-1">
                 <Input
                   id="email"
                   type="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  placeholder="Enter your email"
+                  placeholder="Email address"
+                  className="h-11 bg-white border-[#dee2e6] focus:border-[#008060] focus:ring-1 focus:ring-[#008060]"
                   required
                 />
               </div>
-              <div className="space-y-2">
-                <Label htmlFor="password">Password</Label>
+              <div className="space-y-1">
                 <Input
                   id="password"
                   type="password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  placeholder="Enter your password"
+                  placeholder="Password"
+                  className="h-11 bg-white border-[#dee2e6] focus:border-[#008060] focus:ring-1 focus:ring-[#008060]"
                   minLength={6}
                   required
                 />
               </div>
               <Button
                 type="submit"
-                className="w-full bg-[#008060] hover:bg-[#006e52] text-white"
+                className="w-full h-11 bg-[#008060] hover:bg-[#006e52] text-white font-medium"
                 disabled={isLoading}
               >
                 {isLoading ? (
                   <span className="flex items-center justify-center">
                     <span className="animate-spin mr-2">⌛</span>
-                    {isSignUp ? "Creating Account..." : "Signing In..."}
+                    {isSignUp ? "Creating account..." : "Signing in..."}
                   </span>
                 ) : isSignUp ? (
-                  "Create Account"
+                  "Create account"
                 ) : (
-                  "Sign In"
+                  "Sign in"
                 )}
               </Button>
             </form>
 
-            <div className="mt-4 text-center">
+            <div className="mt-6 text-center">
               <button
                 type="button"
                 onClick={() => {
@@ -182,11 +167,11 @@ const Auth = () => {
                   setEmail("");
                   setPassword("");
                 }}
-                className="text-sm text-[#006e52] hover:underline"
+                className="text-sm text-[#008060] hover:text-[#006e52] hover:underline"
               >
                 {isSignUp
                   ? "Already have an account? Sign in"
-                  : "Need an account? Sign up"}
+                  : "Don't have an account? Sign up"}
               </button>
             </div>
           </CardContent>

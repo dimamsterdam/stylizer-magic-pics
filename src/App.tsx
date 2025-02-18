@@ -4,6 +4,7 @@ import {
   createBrowserRouter,
   RouterProvider,
   Outlet,
+  Navigate
 } from "react-router-dom";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import Index from "./pages/Index";
@@ -18,6 +19,7 @@ import Stylizer from "./pages/Stylizer";
 import NavBar from "./components/NavBar";
 import { GlobalSidebar } from "./components/GlobalSidebar";
 import { SidebarProvider } from "./components/ui/sidebar";
+import ProtectedRoute from "./components/ProtectedRoute";
 
 // Create a client
 const queryClient = new QueryClient();
@@ -43,41 +45,46 @@ const router = createBrowserRouter([
   },
   {
     path: "/",
-    element: <Root />,
+    element: <ProtectedRoute />,
     errorElement: <NotFound />,
     children: [
       {
-        index: true,
-        element: <Index />,
+        element: <Root />,
+        children: [
+          {
+            index: true,
+            element: <Index />,
+          },
+          {
+            path: "settings",
+            element: <Settings />,
+          },
+          {
+            path: "brand",
+            element: <Brand />,
+          },
+          {
+            path: "publish",
+            element: <Publish />,
+          },
+          {
+            path: "expose",
+            element: <Expose />,
+          },
+          {
+            path: "expose/:id",
+            element: <Expose />,
+          },
+          {
+            path: "library",
+            element: <Library />,
+          },
+          {
+            path: "stylizer",
+            element: <Stylizer />,
+          }
+        ],
       },
-      {
-        path: "settings",
-        element: <Settings />,
-      },
-      {
-        path: "brand",
-        element: <Brand />,
-      },
-      {
-        path: "publish",
-        element: <Publish />,
-      },
-      {
-        path: "expose",
-        element: <Expose />,
-      },
-      {
-        path: "expose/:id",
-        element: <Expose />,
-      },
-      {
-        path: "library",
-        element: <Library />,
-      },
-      {
-        path: "stylizer",
-        element: <Stylizer />,
-      }
     ],
   },
 ]);
