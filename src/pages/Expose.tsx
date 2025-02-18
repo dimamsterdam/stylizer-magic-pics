@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
@@ -196,7 +197,7 @@ const Expose = () => {
             sku: product.sku
           })),
           theme: themeDescription,
-          promptContext: `Create ${type === 'headline' ? 'a compelling headline' : 'a concise body copy of maximum 40 words'} for an expose featuring ${selectedProducts.map(p => p.title).join(', ')}. The theme/mood is: ${themeDescription}`
+          promptContext: `Create ${type === 'headline' ? 'a compelling headline of maximum 12 words' : 'a concise body copy of maximum 40 words'} for an expose featuring ${selectedProducts.map(p => p.title).join(', ')}. The theme/mood is: ${themeDescription}`
         }
       });
       if (error) throw error;
@@ -204,7 +205,16 @@ const Expose = () => {
         generatedText
       } = data;
       if (type === 'headline') {
-        setHeadline(generatedText.replace(/["']/g, ''));
+        const words = generatedText.split(' ');
+        if (words.length > 12) {
+          setHeadline(words.slice(0, 12).join(' ').replace(/["']/g, ''));
+          toast({
+            title: "Headline trimmed",
+            description: "Headline has been trimmed to 12 words"
+          });
+        } else {
+          setHeadline(generatedText.replace(/["']/g, ''));
+        }
       } else {
         const words = generatedText.split(' ');
         if (words.length > 40) {
