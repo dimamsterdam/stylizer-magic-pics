@@ -38,6 +38,10 @@ const Root = () => {
 
 const router = createBrowserRouter([
   {
+    path: "/auth",
+    element: <Auth />,
+  },
+  {
     path: "/",
     element: <Root />,
     errorElement: <NotFound />,
@@ -75,10 +79,6 @@ const router = createBrowserRouter([
         element: <Stylizer />,
       }
     ],
-  },
-  {
-    path: "/auth",
-    element: <Auth />,
   },
 ]);
 
