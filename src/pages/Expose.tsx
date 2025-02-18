@@ -178,7 +178,7 @@ const Expose = () => {
     }
   };
 
-  const handleHeadlineChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleHeadlineChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     const cleanedValue = e.target.value.replace(/["']/g, '');
     setHeadline(cleanedValue);
   };
