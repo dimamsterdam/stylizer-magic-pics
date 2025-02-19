@@ -1,6 +1,7 @@
 import React from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { useNavigate } from "react-router-dom";
 import Breadcrumbs from "@/components/Breadcrumbs";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -101,6 +102,7 @@ const LoadingSkeleton = () => {
 };
 
 const Brand = () => {
+  const navigate = useNavigate();
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [newValue, setNewValue] = React.useState("");
@@ -112,19 +114,25 @@ const Brand = () => {
   const { data: brandIdentity, isLoading } = useQuery({
     queryKey: ['brandIdentity'],
     queryFn: async () => {
-      const user = await supabase.auth.getUser();
+      const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+      
+      if (!session?.user?.id) {
+        throw new Error("No authenticated user");
+      }
+
       const { data, error } = await supabase
         .from('brand_identity')
         .select('*')
-        .eq('user_id', user.data.user?.id)
+        .eq('user_id', session.user.id)
         .maybeSingle();
       
       if (error) throw error;
-      if (!data && user.data.user) {
+      
+      if (!data) {
         const { data: newData, error: insertError } = await supabase
           .from('brand_identity')
           .insert([{
-            user_id: user.data.user.id,
+            user_id: session.user.id,
             values: [],
             characteristics: [],
             gender: 'all',
@@ -146,11 +154,28 @@ const Brand = () => {
       }
       
       return data as BrandIdentity;
+    },
+    onError: (error) => {
+      console.error('Error fetching brand identity:', error);
+      if (error.message === "No authenticated user") {
+        navigate("/auth");
+      } else {
+        toast({
+          title: "Error",
+          description: "Failed to load brand identity",
+          variant: "destructive"
+        });
+      }
     }
   });
 
   const mutation = useMutation({
     mutationFn: async (values: Partial<BrandIdentity>) => {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session?.user?.id) {
+        throw new Error("No authenticated user");
+      }
+
       if (brandIdentity?.id) {
         const { data, error } = await supabase
           .from('brand_identity')
@@ -171,12 +196,16 @@ const Brand = () => {
       });
     },
     onError: error => {
-      toast({
-        title: "Error",
-        description: "Failed to update brand identity",
-        variant: "destructive"
-      });
       console.error('Error updating brand identity:', error);
+      if (error.message === "No authenticated user") {
+        navigate("/auth");
+      } else {
+        toast({
+          title: "Error",
+          description: "Failed to update brand identity",
+          variant: "destructive"
+        });
+      }
     }
   });
 
