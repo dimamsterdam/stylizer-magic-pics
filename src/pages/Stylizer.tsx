@@ -359,7 +359,7 @@ const Stylizer = () => {
                     <Button 
                       onClick={handleConfirmSelection} 
                       disabled={selectedProducts.length === 0}
-                      className="bg-polaris-green hover:bg-polaris-teal text-white"
+                      className="bg-polaris-text hover:bg-black text-white"
                     >
                       Continue
                     </Button>

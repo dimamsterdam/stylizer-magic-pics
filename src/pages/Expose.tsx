@@ -482,7 +482,7 @@ const Expose = () => {
                   </div>}
 
                 <div className="flex justify-end pt-4">
-                  <Button onClick={handleContinue} disabled={selectedProducts.length === 0} className="bg-polaris-green hover:bg-polaris-teal text-white">
+                  <Button onClick={handleContinue} disabled={selectedProducts.length === 0} className="bg-polaris-text hover:bg-black text-white">
                     {isGenerating ? <>
                         <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                         Generating...
@@ -515,7 +515,7 @@ const Expose = () => {
                 </div>
 
                 <div className="flex justify-end pt-4">
-                  <Button onClick={handleContinue} disabled={!themeDescription.trim()} className="bg-[#008060] hover:bg-[#006e52] text-white px-6">
+                  <Button onClick={handleContinue} disabled={!themeDescription.trim()} className="bg-polaris-text hover:bg-black text-white px-6">
                     Continue to Content
                   </Button>
                 </div>
@@ -565,7 +565,7 @@ const Expose = () => {
                 </div>
 
                 <div className="flex justify-end">
-                  <Button onClick={handleContinue} disabled={!headline.trim() || !bodyCopy.trim()} className="bg-[#008060] hover:bg-[#006e52] text-white px-6">
+                  <Button onClick={handleContinue} disabled={!headline.trim() || !bodyCopy.trim()} className="bg-polaris-text hover:bg-black text-white px-6">
                     Continue to Review
                   </Button>
                 </div>
@@ -640,7 +640,7 @@ const Expose = () => {
                 </div>
 
                 <div className="flex justify-end pt-4">
-                  <Button onClick={handleGenerateHero} disabled={isGenerating} className="bg-[#008060] hover:bg-[#006e52] text-white px-6">
+                  <Button onClick={handleGenerateHero} disabled={isGenerating} className="bg-polaris-text hover:bg-black text-white px-6">
                     {isGenerating ? <>
                         <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                         Generating...
