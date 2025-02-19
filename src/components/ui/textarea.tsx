@@ -60,7 +60,7 @@ const Textarea = React.forwardRef<HTMLTextAreaElement, TextareaProps>(
           <div 
             className={cn(
               "absolute left-3 top-3 text-[16px] text-muted-foreground pointer-events-none",
-              "before:content-['|'] before:mr-0.5 before:animate-cursor-blink before:text-current before:-ml-0.5",
+              "before:content-['|'] before:animate-cursor-blink before:text-current",
               "whitespace-nowrap overflow-hidden",
               isAnimating ? "w-0 animate-typing" : "w-full"
             )}
