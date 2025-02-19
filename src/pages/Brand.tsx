@@ -11,16 +11,31 @@ import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTr
 import { useToast } from "@/hooks/use-toast";
 import { Palette, Users, Camera } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
-
-const AGE_RANGES = [
-  { label: "18-24", min: 18, max: 24 },
-  { label: "25-34", min: 25, max: 34 },
-  { label: "35-44", min: 35, max: 44 },
-  { label: "45-54", min: 45, max: 54 },
-  { label: "55-64", min: 55, max: 64 },
-  { label: "65+", min: 65, max: 100 }
-] as const;
-
+const AGE_RANGES = [{
+  label: "18-24",
+  min: 18,
+  max: 24
+}, {
+  label: "25-34",
+  min: 25,
+  max: 34
+}, {
+  label: "35-44",
+  min: 35,
+  max: 44
+}, {
+  label: "45-54",
+  min: 45,
+  max: 54
+}, {
+  label: "55-64",
+  min: 55,
+  max: 64
+}, {
+  label: "65+",
+  min: 65,
+  max: 100
+}] as const;
 interface BrandIdentity {
   id: string;
   values: string[];
@@ -32,10 +47,8 @@ interface BrandIdentity {
   photography_mood: string;
   photography_lighting: string;
 }
-
 const LoadingSkeleton = () => {
-  return (
-    <div className="space-y-8">
+  return <div className="space-y-8">
       {/* Brand Values Section Skeleton */}
       <section className="space-y-4">
         <div className="flex items-center gap-2">
@@ -48,9 +61,7 @@ const LoadingSkeleton = () => {
             <Skeleton className="h-10 w-20" />
           </div>
           <div className="flex flex-wrap gap-2">
-            {[1, 2, 3].map((i) => (
-              <Skeleton key={i} className="h-10 w-32" />
-            ))}
+            {[1, 2, 3].map(i => <Skeleton key={i} className="h-10 w-32" />)}
           </div>
         </div>
       </section>
@@ -62,12 +73,10 @@ const LoadingSkeleton = () => {
           <Skeleton className="h-6 w-40" />
         </div>
         <div className="grid grid-cols-2 gap-4">
-          {[1, 2, 3, 4].map((i) => (
-            <div key={i} className="space-y-2">
+          {[1, 2, 3, 4].map(i => <div key={i} className="space-y-2">
               <Skeleton className="h-4 w-24" />
               <Skeleton className="h-10 w-full" />
-            </div>
-          ))}
+            </div>)}
         </div>
       </section>
 
@@ -78,127 +87,121 @@ const LoadingSkeleton = () => {
           <Skeleton className="h-6 w-32" />
         </div>
         <div className="space-y-4">
-          {[1, 2].map((i) => (
-            <div key={i} className="space-y-2">
+          {[1, 2].map(i => <div key={i} className="space-y-2">
               <Skeleton className="h-4 w-24" />
               <Skeleton className="h-24 w-full" />
-            </div>
-          ))}
+            </div>)}
         </div>
       </section>
-    </div>
-  );
+    </div>;
 };
-
 const Brand = () => {
-  const { toast } = useToast();
+  const {
+    toast
+  } = useToast();
   const queryClient = useQueryClient();
   const [newValue, setNewValue] = React.useState("");
   const [newCharacteristic, setNewCharacteristic] = React.useState("");
-
-  const { data: brandIdentity, isLoading } = useQuery({
+  const {
+    data: brandIdentity,
+    isLoading
+  } = useQuery({
     queryKey: ['brandIdentity'],
     queryFn: async () => {
       const user = await supabase.auth.getUser();
-      const { data, error } = await supabase
-        .from('brand_identity')
-        .select('*')
-        .eq('user_id', user.data.user?.id)
-        .maybeSingle();
-
+      const {
+        data,
+        error
+      } = await supabase.from('brand_identity').select('*').eq('user_id', user.data.user?.id).maybeSingle();
       if (error) throw error;
-      
       if (!data && user.data.user) {
-        const { data: newData, error: insertError } = await supabase
-          .from('brand_identity')
-          .insert([{ 
-            user_id: user.data.user.id,
-            values: [],
-            characteristics: [],
-            gender: 'all',
-            income_level: 'medium'
-          }])
-          .select()
-          .single();
-          
+        const {
+          data: newData,
+          error: insertError
+        } = await supabase.from('brand_identity').insert([{
+          user_id: user.data.user.id,
+          values: [],
+          characteristics: [],
+          gender: 'all',
+          income_level: 'medium'
+        }]).select().single();
         if (insertError) throw insertError;
         return newData as BrandIdentity;
       }
-
       console.log("Fetched brand identity data:", data);
       return data as BrandIdentity;
     }
   });
-
   const mutation = useMutation({
     mutationFn: async (values: Partial<BrandIdentity>) => {
       if (brandIdentity?.id) {
-        const { data, error } = await supabase
-          .from('brand_identity')
-          .update(values)
-          .eq('id', brandIdentity.id)
-          .select()
-          .single();
+        const {
+          data,
+          error
+        } = await supabase.from('brand_identity').update(values).eq('id', brandIdentity.id).select().single();
         if (error) throw error;
         return data;
       }
     },
-    onSuccess: (data) => {
+    onSuccess: data => {
       queryClient.setQueryData(['brandIdentity'], data);
       toast({
         title: "Success",
-        description: "Brand identity updated successfully",
+        description: "Brand identity updated successfully"
       });
     },
-    onError: (error) => {
+    onError: error => {
       toast({
         title: "Error",
         description: "Failed to update brand identity",
-        variant: "destructive",
+        variant: "destructive"
       });
       console.error('Error updating brand identity:', error);
     }
   });
-
   const handleAddValue = () => {
     if (!newValue.trim()) return;
     console.log("Adding value:", newValue);
     const updatedValues = [...(brandIdentity?.values || []), newValue.trim()];
     console.log("Updated values array:", updatedValues);
-    mutation.mutate({ values: updatedValues });
+    mutation.mutate({
+      values: updatedValues
+    });
     setNewValue("");
   };
-
   const handleRemoveValue = (index: number) => {
     const updatedValues = (brandIdentity?.values || []).filter((_, i) => i !== index);
-    mutation.mutate({ values: updatedValues });
+    mutation.mutate({
+      values: updatedValues
+    });
   };
-
   const handleAddCharacteristic = () => {
     if (!newCharacteristic.trim()) return;
     const updatedCharacteristics = [...(brandIdentity?.characteristics || []), newCharacteristic.trim()];
-    mutation.mutate({ characteristics: updatedCharacteristics });
+    mutation.mutate({
+      characteristics: updatedCharacteristics
+    });
     setNewCharacteristic("");
   };
-
   const handleRemoveCharacteristic = (index: number) => {
     const updatedCharacteristics = (brandIdentity?.characteristics || []).filter((_, i) => i !== index);
-    mutation.mutate({ characteristics: updatedCharacteristics });
+    mutation.mutate({
+      characteristics: updatedCharacteristics
+    });
   };
-
   const getCurrentAgeRangeValue = () => {
     if (!brandIdentity?.age_range_min || !brandIdentity?.age_range_max) return "";
     return `${brandIdentity.age_range_min}-${brandIdentity.age_range_max}`;
   };
-
-  const breadcrumbItems = [
-    { label: "Home", href: "/" },
-    { label: "Brand Identity", href: "/brand" },
-  ];
-
+  const breadcrumbItems = [{
+    label: "Home",
+    href: "/"
+  }, {
+    label: "Brand Identity",
+    href: "/brand"
+  }];
   if (isLoading) {
-    return (
-      <div className="container py-6">
+    return <div className="container py-6">
         <Breadcrumbs items={breadcrumbItems} className="mb-6" />
         <Skeleton className="h-8 w-48 mb-8" />
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
@@ -209,12 +212,9 @@ const Brand = () => {
             <Skeleton className="h-10 w-full" />
           </div>
         </div>
-      </div>
-    );
+      </div>;
   }
-
-  return (
-    <div className="container py-6">
+  return <div className="container py-6">
       <Breadcrumbs items={breadcrumbItems} className="mb-6" />
       
       <h1 className="text-2xl font-semibold text-polaris-text mb-8">Brand Identity</h1>
@@ -228,32 +228,19 @@ const Brand = () => {
               <h2>Brand Values</h2>
             </div>
             <div className="flex flex-wrap gap-2 mt-2 mb-4">
-              {brandIdentity?.values?.map((value, index) => (
-                <div
-                  key={index}
-                  className="flex items-center gap-2 bg-[#8B5CF6] text-white px-3 py-1 rounded-full text-sm"
-                >
+              {brandIdentity?.values?.map((value, index) => <div key={index} className="flex items-center gap-2 bg-[#8B5CF6] text-white px-3 py-1 rounded-full text-sm">
                   <span>{value}</span>
-                  <button
-                    onClick={() => handleRemoveValue(index)}
-                    className="text-white/70 hover:text-white transition-colors"
-                  >
+                  <button onClick={() => handleRemoveValue(index)} className="text-white/70 hover:text-white transition-colors">
                     ×
                   </button>
-                </div>
-              ))}
+                </div>)}
             </div>
             <div className="space-y-4">
               <div className="flex gap-2">
                 <div className="flex-1">
                   <div className="space-y-2">
-                    <Input
-                      placeholder="Add a brand value"
-                      value={newValue}
-                      onChange={(e) => setNewValue(e.target.value)}
-                      onKeyDown={(e) => e.key === 'Enter' && handleAddValue()}
-                    />
-                    <Label>Brand Value</Label>
+                    <Input placeholder="Add a brand value" value={newValue} onChange={e => setNewValue(e.target.value)} onKeyDown={e => e.key === 'Enter' && handleAddValue()} />
+                    
                   </div>
                 </div>
                 <Button onClick={handleAddValue}>Add</Button>
@@ -270,25 +257,20 @@ const Brand = () => {
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <div className="space-y-2">
-                  <Select
-                    value={getCurrentAgeRangeValue()}
-                    onValueChange={(value) => {
-                      const [min, max] = value.split('-').map(Number);
-                      mutation.mutate({ age_range_min: min, age_range_max: max });
-                    }}
-                  >
+                  <Select value={getCurrentAgeRangeValue()} onValueChange={value => {
+                  const [min, max] = value.split('-').map(Number);
+                  mutation.mutate({
+                    age_range_min: min,
+                    age_range_max: max
+                  });
+                }}>
                     <SelectTrigger>
                       <SelectValue placeholder="Select age range" />
                     </SelectTrigger>
                     <SelectContent>
-                      {AGE_RANGES.map((range) => (
-                        <SelectItem 
-                          key={range.label} 
-                          value={`${range.min}-${range.max}`}
-                        >
+                      {AGE_RANGES.map(range => <SelectItem key={range.label} value={`${range.min}-${range.max}`}>
                           {range.label}
-                        </SelectItem>
-                      ))}
+                        </SelectItem>)}
                     </SelectContent>
                   </Select>
                   <Label>Age Range</Label>
@@ -296,12 +278,9 @@ const Brand = () => {
               </div>
               <div>
                 <div className="space-y-2">
-                  <Select
-                    value={brandIdentity?.gender || 'all'}
-                    onValueChange={(value: 'all' | 'male' | 'female' | 'non_binary') => 
-                      mutation.mutate({ gender: value })
-                    }
-                  >
+                  <Select value={brandIdentity?.gender || 'all'} onValueChange={(value: 'all' | 'male' | 'female' | 'non_binary') => mutation.mutate({
+                  gender: value
+                })}>
                     <SelectTrigger>
                       <SelectValue />
                     </SelectTrigger>
@@ -317,12 +296,9 @@ const Brand = () => {
               </div>
               <div>
                 <div className="space-y-2">
-                  <Select
-                    value={brandIdentity?.income_level || 'medium'}
-                    onValueChange={(value: 'low' | 'medium' | 'high' | 'luxury') => 
-                      mutation.mutate({ income_level: value })
-                    }
-                  >
+                  <Select value={brandIdentity?.income_level || 'medium'} onValueChange={(value: 'low' | 'medium' | 'high' | 'luxury') => mutation.mutate({
+                  income_level: value
+                })}>
                     <SelectTrigger>
                       <SelectValue />
                     </SelectTrigger>
@@ -341,32 +317,19 @@ const Brand = () => {
               <div className="flex gap-2">
                 <div className="flex-1">
                   <div className="space-y-2">
-                    <Input
-                      placeholder="Add an audience characteristic"
-                      value={newCharacteristic}
-                      onChange={(e) => setNewCharacteristic(e.target.value)}
-                      onKeyDown={(e) => e.key === 'Enter' && handleAddCharacteristic()}
-                    />
+                    <Input placeholder="Add an audience characteristic" value={newCharacteristic} onChange={e => setNewCharacteristic(e.target.value)} onKeyDown={e => e.key === 'Enter' && handleAddCharacteristic()} />
                     <Label>Characteristics</Label>
                   </div>
                 </div>
                 <Button onClick={handleAddCharacteristic}>Add</Button>
               </div>
               <div className="flex flex-wrap gap-2 mt-2">
-                {brandIdentity?.characteristics?.map((characteristic, index) => (
-                  <div
-                    key={index}
-                    className="flex items-center gap-2 bg-polaris-background px-3 py-2 rounded-md"
-                  >
+                {brandIdentity?.characteristics?.map((characteristic, index) => <div key={index} className="flex items-center gap-2 bg-polaris-background px-3 py-2 rounded-md">
                     <span>{characteristic}</span>
-                    <button
-                      onClick={() => handleRemoveCharacteristic(index)}
-                      className="text-polaris-secondary hover:text-polaris-text"
-                    >
+                    <button onClick={() => handleRemoveCharacteristic(index)} className="text-polaris-secondary hover:text-polaris-text">
                       ×
                     </button>
-                  </div>
-                ))}
+                  </div>)}
               </div>
             </div>
           </section>
@@ -380,21 +343,17 @@ const Brand = () => {
             <div className="space-y-4">
               <div>
                 <div className="space-y-2">
-                  <Textarea
-                    placeholder="Describe the mood and tone of your brand's photography"
-                    value={brandIdentity?.photography_mood || ""}
-                    onChange={(e) => mutation.mutate({ photography_mood: e.target.value })}
-                  />
+                  <Textarea placeholder="Describe the mood and tone of your brand's photography" value={brandIdentity?.photography_mood || ""} onChange={e => mutation.mutate({
+                  photography_mood: e.target.value
+                })} />
                   <Label>Mood and Tone</Label>
                 </div>
               </div>
               <div>
                 <div className="space-y-2">
-                  <Textarea
-                    placeholder="Describe your preferred lighting style"
-                    value={brandIdentity?.photography_lighting || ""}
-                    onChange={(e) => mutation.mutate({ photography_lighting: e.target.value })}
-                  />
+                  <Textarea placeholder="Describe your preferred lighting style" value={brandIdentity?.photography_lighting || ""} onChange={e => mutation.mutate({
+                  photography_lighting: e.target.value
+                })} />
                   <Label>Lighting</Label>
                 </div>
               </div>
@@ -452,8 +411,6 @@ const Brand = () => {
           </Sheet>
         </div>
       </div>
-    </div>
-  );
+    </div>;
 };
-
 export default Brand;
