@@ -379,15 +379,12 @@ const Brand = () => {
           <div>
             <div className="flex items-end gap-2">
               <div className="flex-1">
-                <div className="space-y-2">
-                  <Label className="text-polaris-secondary">Brand Value</Label>
-                  <Input 
-                    placeholder="Add a brand value" 
-                    value={newValue} 
-                    onChange={e => setNewValue(e.target.value)} 
-                    onKeyDown={e => e.key === 'Enter' && handleAddValue()} 
-                  />
-                </div>
+                <Input 
+                  placeholder="Add a brand value" 
+                  value={newValue} 
+                  onChange={e => setNewValue(e.target.value)} 
+                  onKeyDown={e => e.key === 'Enter' && handleAddValue()} 
+                />
               </div>
               <Button onClick={handleAddValue}>Add</Button>
             </div>
