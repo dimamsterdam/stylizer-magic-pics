@@ -8,6 +8,9 @@ const corsHeaders = {
   'Access-Control-Allow-Methods': 'POST, OPTIONS',
 };
 
+const SHOPIFY_STORE_URL = 'https://quickstart-50d94e13.myshopify.com';
+const SHOPIFY_API_VERSION = '2024-01';
+
 serve(async (req) => {
   // Handle CORS preflight
   if (req.method === 'OPTIONS') {
@@ -46,10 +49,11 @@ serve(async (req) => {
     const { searchTerm } = await req.json();
     console.log("Search term:", searchTerm);
 
-    // Construct GraphQL query
+    // Construct GraphQL query with proper error handling for special characters
+    const sanitizedSearchTerm = searchTerm ? searchTerm.replace(/"/g, '\\"') : '';
     const query = `
       query {
-        products(first: 10${searchTerm ? `, query: "${searchTerm}"` : ''}) {
+        products(first: 10${sanitizedSearchTerm ? `, query: "${sanitizedSearchTerm}"` : ''}) {
           edges {
             node {
               id
@@ -79,10 +83,10 @@ serve(async (req) => {
     `;
 
     console.log("Sending request to Shopify API");
-    const shopifyResponse = await fetch('https://quickstart-50d94e13.myshopify.com/api/2024-01/graphql.json', {
+    const shopifyResponse = await fetch(`${SHOPIFY_STORE_URL}/api/${SHOPIFY_API_VERSION}/graphql.json`, {
       method: 'POST',
       headers: {
-        'Authorization': `Bearer ${shopifyToken}`,
+        'X-Shopify-Storefront-Access-Token': shopifyToken,
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({ query }),
@@ -109,7 +113,7 @@ serve(async (req) => {
 
     const data = await shopifyResponse.json();
     
-    // Transform products data
+    // Transform products data with null checks
     const products = data.data.products.edges.map((edge: any) => ({
       id: edge.node.id.split('/').pop(),
       shopify_gid: edge.node.id,
