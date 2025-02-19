@@ -223,11 +223,17 @@ const Brand = () => {
     clearForm();
     
     try {
+      console.log("Generating brand identity for:", brandName.trim());
       const { data, error } = await supabase.functions.invoke('generate-brand-identity', {
         body: { brandName: brandName.trim() }
       });
 
       if (error) throw error;
+      console.log("Received AI response:", data);
+
+      if (data.age_range_min && data.age_range_max) {
+        setAgeRange(`${data.age_range_min}-${data.age_range_max}`);
+      }
 
       await mutation.mutateAsync({
         brand_name: brandName.trim(),
