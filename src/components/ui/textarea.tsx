@@ -61,9 +61,9 @@ const Textarea = React.forwardRef<HTMLTextAreaElement, TextareaProps>(
           <div 
             className={cn(
               "absolute left-3 top-2 text-sm text-muted-foreground pointer-events-none",
-              isAnimating && "animate-typing-cursor after:content-[''] after:inline-block after:w-0.5 after:h-4 after:bg-current after:animate-cursor-blink after:ml-0.5 after:-mb-1",
+              "before:content-['|'] before:mr-1 before:animate-cursor-blink before:text-current",
               "whitespace-nowrap overflow-hidden",
-              isAnimating ? "w-0 animate-typing" : "w-full"
+              isAnimating ? "w-0 animate-typing pl-[0.7rem]" : "w-full pl-[0.7rem]"
             )}
           >
             {placeholder}
