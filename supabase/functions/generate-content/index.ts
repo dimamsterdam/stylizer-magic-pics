@@ -17,54 +17,33 @@ interface ToneConfig {
   systemPrompt: string;
   temperature: number;
   topP: number;
-  examples: string[];
 }
 
 const toneConfigurations: Record<ToneStyle, ToneConfig> = {
   formal: {
     systemPrompt: "You are a professional copywriter specializing in formal, authoritative marketing content. Use sophisticated vocabulary, maintain a professional distance, and focus on facts and specifications. Avoid colloquialisms and informal language.",
     temperature: 0.5,
-    topP: 0.7,
-    examples: [
-      "Experience unparalleled sophistication with our premium collection.",
-      "Meticulously crafted to exemplify excellence in every detail."
-    ]
+    topP: 0.7
   },
   elegant: {
     systemPrompt: "You are a luxury brand copywriter who creates refined, poetic content. Use graceful language, artistic expressions, and evocative imagery. Focus on aesthetics and emotional resonance while maintaining sophistication.",
     temperature: 0.6,
-    topP: 0.8,
-    examples: [
-      "A masterpiece of artisanal craftsmanship, where elegance meets innovation.",
-      "Immerse yourself in the timeless beauty of handcrafted excellence."
-    ]
+    topP: 0.8
   },
   informal: {
     systemPrompt: "You are a conversational copywriter who creates friendly, approachable content. Write as if speaking to a friend, use natural language, and maintain a warm, welcoming tone. Keep it professional but personable.",
     temperature: 0.7,
-    topP: 0.9,
-    examples: [
-      "Ready to add some awesome new pieces to your collection?",
-      "Trust us, you're going to love how this fits into your style."
-    ]
+    topP: 0.9
   },
   playful: {
     systemPrompt: "You are an energetic copywriter who creates fun, engaging content. Use witty wordplay, inject humor, and maintain an upbeat, enthusiastic tone. Be creative and entertaining while still being professional.",
     temperature: 0.8,
-    topP: 0.9,
-    examples: [
-      "Get ready to turn heads and drop jaws with these showstoppers!",
-      "Warning: These pieces may cause excessive compliments and style envy."
-    ]
+    topP: 0.9
   },
   edgy: {
     systemPrompt: "You are a bold, innovative copywriter who creates provocative, boundary-pushing content. Use strong, impactful language, challenge conventions, and maintain a confident, assertive tone. Be daring while staying tasteful.",
     temperature: 0.9,
-    topP: 1.0,
-    examples: [
-      "Break the rules. Rewrite the game. Own your style.",
-      "Dare to stand out in a world of conformity."
-    ]
+    topP: 1.0
   }
 };
 
@@ -74,29 +53,15 @@ serve(async (req) => {
   }
 
   try {
-    const { data: providerSetting, error: settingError } = await fetch(`${supabaseUrl}/rest/v1/ai_provider_settings?feature_name=eq.expose_text&feature_type=eq.text_generation`, {
-      headers: {
-        'Authorization': `Bearer ${supabaseServiceKey}`,
-        'apikey': supabaseServiceKey,
-      },
-    }).then(res => res.json());
-
-    if (settingError) {
-      throw new Error(`Failed to fetch AI provider setting: ${settingError.message}`);
-    }
-
-    if (!providerSetting?.[0]?.provider || providerSetting[0].provider !== 'openai') {
-      throw new Error(`Unsupported AI provider for text generation: ${providerSetting?.[0]?.provider}`);
-    }
-
+    const { type, products, theme, tone, promptContext } = await req.json();
+    
     if (!openAIApiKey) {
+      console.error('OpenAI API key is not configured');
       throw new Error('OpenAI API key is not configured');
     }
 
-    const { type, products, theme, tone, promptContext } = await req.json();
-    const toneConfig = toneConfigurations[tone as ToneStyle];
-
     console.log('Generating content with tone:', tone);
+    const toneConfig = toneConfigurations[tone as ToneStyle];
     console.log('Using tone configuration:', {
       temperature: toneConfig.temperature,
       topP: toneConfig.topP
@@ -117,7 +82,7 @@ serve(async (req) => {
           },
           {
             role: 'user',
-            content: `Write in a ${tone} tone. Here are examples of this tone:\n${toneConfig.examples.join('\n')}\n\nNow, create content for: ${promptContext}`
+            content: promptContext
           }
         ],
         temperature: toneConfig.temperature,
