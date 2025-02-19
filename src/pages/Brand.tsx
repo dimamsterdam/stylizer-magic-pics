@@ -1,3 +1,4 @@
+
 import React from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -175,6 +176,24 @@ const Brand = () => {
     }
   });
 
+  const clearForm = () => {
+    // Clear all form fields
+    if (brandIdentity?.id) {
+      mutation.mutate({
+        values: [],
+        characteristics: [],
+        age_range_min: undefined,
+        age_range_max: undefined,
+        gender: 'all',
+        income_level: 'medium',
+        photography_mood: '',
+        photography_lighting: ''
+      });
+    }
+    setNewValue("");
+    setNewCharacteristic("");
+  };
+
   const generateBrandIdentity = async () => {
     if (!brandName.trim()) {
       toast({
@@ -186,6 +205,9 @@ const Brand = () => {
     }
 
     setIsGenerating(true);
+    // Clear the form before starting generation
+    clearForm();
+    
     try {
       const { data, error } = await supabase.functions.invoke('generate-brand-identity', {
         body: { brandName: brandName.trim() }
