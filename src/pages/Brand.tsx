@@ -11,6 +11,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { useToast } from "@/hooks/use-toast";
 import { Palette, Users, Camera } from "lucide-react";
+import { Skeleton } from "@/components/ui/skeleton";
 
 interface BrandIdentity {
   id: string;
@@ -23,6 +24,63 @@ interface BrandIdentity {
   photography_mood: string;
   photography_lighting: string;
 }
+
+const LoadingSkeleton = () => {
+  return (
+    <div className="space-y-8">
+      {/* Brand Values Section Skeleton */}
+      <section className="space-y-4">
+        <div className="flex items-center gap-2">
+          <Skeleton className="h-6 w-6" />
+          <Skeleton className="h-6 w-32" />
+        </div>
+        <div className="space-y-4">
+          <div className="flex gap-2">
+            <Skeleton className="h-10 flex-1" />
+            <Skeleton className="h-10 w-20" />
+          </div>
+          <div className="flex flex-wrap gap-2">
+            {[1, 2, 3].map((i) => (
+              <Skeleton key={i} className="h-10 w-32" />
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Target Audience Section Skeleton */}
+      <section className="space-y-4">
+        <div className="flex items-center gap-2">
+          <Skeleton className="h-6 w-6" />
+          <Skeleton className="h-6 w-40" />
+        </div>
+        <div className="grid grid-cols-2 gap-4">
+          {[1, 2, 3, 4].map((i) => (
+            <div key={i} className="space-y-2">
+              <Skeleton className="h-4 w-24" />
+              <Skeleton className="h-10 w-full" />
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* Photography Section Skeleton */}
+      <section className="space-y-4">
+        <div className="flex items-center gap-2">
+          <Skeleton className="h-6 w-6" />
+          <Skeleton className="h-6 w-32" />
+        </div>
+        <div className="space-y-4">
+          {[1, 2].map((i) => (
+            <div key={i} className="space-y-2">
+              <Skeleton className="h-4 w-24" />
+              <Skeleton className="h-24 w-full" />
+            </div>
+          ))}
+        </div>
+      </section>
+    </div>
+  );
+};
 
 const Brand = () => {
   const { toast } = useToast();
@@ -103,7 +161,20 @@ const Brand = () => {
   ];
 
   if (isLoading) {
-    return <div>Loading...</div>;
+    return (
+      <div className="container py-6">
+        <Breadcrumbs items={breadcrumbItems} className="mb-6" />
+        <Skeleton className="h-8 w-48 mb-8" />
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+          <div className="col-span-2">
+            <LoadingSkeleton />
+          </div>
+          <div className="col-span-1">
+            <Skeleton className="h-10 w-full" />
+          </div>
+        </div>
+      </div>
+    );
   }
 
   return (
@@ -323,3 +394,4 @@ const Brand = () => {
 };
 
 export default Brand;
+
