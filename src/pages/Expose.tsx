@@ -391,7 +391,11 @@ const Expose = () => {
   const handleVariationSelect = async (index: number) => {
     if (!exposeId) return;
     try {
-      const selectedUrl = exposeData?.image_variations[index];
+      const selectedUrl = exposeData?.image_variations?.[index];
+      if (typeof selectedUrl !== 'string') {
+        throw new Error('Invalid image URL');
+      }
+      
       const { error } = await supabase
         .from('exposes')
         .update({
@@ -702,7 +706,7 @@ const Expose = () => {
                   </div>
                 ) : exposeData ? (
                   <ImageGrid
-                    variations={exposeData.image_variations || [exposeData.hero_image_url]}
+                    variations={(exposeData.image_variations as string[]) || [exposeData.hero_image_url!]}
                     selectedIndex={exposeData.selected_variation_index || 0}
                     onSelect={handleVariationSelect}
                     headline={headline}

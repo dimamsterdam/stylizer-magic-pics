@@ -31,52 +31,69 @@ serve(async (req) => {
 
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
-    console.log('Preparing DALL-E request...');
+    console.log('Preparing DALL-E requests...');
 
-    const prompt = `High-quality professional product photography in ${theme} style featuring ${products.map(p => p.title).join(', ')}. ${headline}`;
-    console.log('DALL-E prompt:', prompt);
+    const basePrompt = `High-quality professional product photography in ${theme} style featuring ${products.map(p => p.title).join(', ')}. ${headline}`;
+    
+    // Generate variations with slightly different prompts
+    const prompts = [
+      basePrompt + " Main hero shot.",
+      basePrompt + " Alternative angle.",
+      basePrompt + " Close-up detail view.",
+      basePrompt + " Lifestyle context shot."
+    ];
 
-    const openaiResponse = await fetch('https://api.openai.com/v1/images/generations', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${openaiKey}`,
-      },
-      body: JSON.stringify({
-        model: "dall-e-3",
-        prompt: prompt,
-        n: 4,
-        size: "1024x1024",
-        quality: "hd",
-        style: "natural"
-      }),
-    });
+    console.log('Generating multiple variations...');
+    
+    const imageUrls: string[] = [];
+    
+    // Generate images sequentially
+    for (const prompt of prompts) {
+      console.log('Generating variation with prompt:', prompt);
+      
+      const openaiResponse = await fetch('https://api.openai.com/v1/images/generations', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${openaiKey}`,
+        },
+        body: JSON.stringify({
+          model: "dall-e-3",
+          prompt: prompt,
+          n: 1,
+          size: "1024x1024",
+          quality: "hd",
+          style: "natural"
+        }),
+      });
 
-    if (!openaiResponse.ok) {
-      const errorText = await openaiResponse.text();
-      console.error('DALL-E API error response:', errorText);
-      throw new Error(`DALL-E API error: ${errorText}`);
+      if (!openaiResponse.ok) {
+        const errorText = await openaiResponse.text();
+        console.error('DALL-E API error response:', errorText);
+        throw new Error(`DALL-E API error: ${errorText}`);
+      }
+
+      const openaiData = await openaiResponse.json();
+      console.log('DALL-E API response:', JSON.stringify(openaiData, null, 2));
+
+      if (!openaiData.data?.[0]?.url) {
+        throw new Error('Invalid response format from DALL-E API');
+      }
+
+      imageUrls.push(openaiData.data[0].url);
     }
 
-    const openaiData = await openaiResponse.json();
-    console.log('DALL-E API response:', JSON.stringify(openaiData, null, 2));
-
-    if (!openaiData.data?.[0]?.url) {
-      throw new Error('Invalid response format from DALL-E API');
-    }
-
-    const imageVariations = openaiData.data.map((variation: any) => variation.url);
-    console.log(`Generated ${imageVariations.length} image variations`);
+    console.log(`Generated ${imageUrls.length} image variations`);
 
     const { error: updateError } = await supabase
       .from('exposes')
       .update({
         hero_image_generation_status: 'completed',
-        hero_image_url: imageVariations[0],
-        hero_image_desktop_url: imageVariations[0],
-        hero_image_tablet_url: imageVariations[0],
-        hero_image_mobile_url: imageVariations[0],
-        image_variations: imageVariations,
+        hero_image_url: imageUrls[0],
+        hero_image_desktop_url: imageUrls[0],
+        hero_image_tablet_url: imageUrls[0],
+        hero_image_mobile_url: imageUrls[0],
+        image_variations: imageUrls,
         selected_variation_index: 0
       })
       .eq('id', exposeId);
