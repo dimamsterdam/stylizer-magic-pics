@@ -1,13 +1,13 @@
 
 import React from "react";
-import { Breadcrumbs } from "@/components/ui/breadcrumb";
+import { Breadcrumb } from "@/components/ui/breadcrumb";
 
 const Dashboard = () => {
   return (
     <div className="min-h-screen">
       <div className="p-4 sm:p-6">
         <div className="mb-6">
-          <Breadcrumbs 
+          <Breadcrumb 
             className="mb-4" 
             items={[
               {

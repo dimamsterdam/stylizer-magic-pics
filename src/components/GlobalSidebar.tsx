@@ -5,10 +5,6 @@ import { Sidebar, SidebarContent, SidebarGroup, SidebarGroupContent, SidebarGrou
 import { useState, useEffect } from "react";
 
 const mainNavItems = [{
-  title: "Dashboard",
-  icon: LayoutDashboard,
-  url: "/dashboard"
-}, {
   title: "Stylizer",
   icon: Palette,
   url: "/stylizer"
@@ -47,6 +43,19 @@ export function GlobalSidebar() {
     <div className="h-[calc(100vh-64px)] border-r border-polaris-border">
       <Sidebar className="h-full">
         <SidebarContent className="space-y-1 pt-20">
+          <SidebarGroup>
+            <SidebarMenuItem>
+              <SidebarMenuButton asChild className={location.pathname === "/dashboard" ? "bg-[#F6F6F7]" : "hover:bg-gray-50"}>
+                <Link to="/dashboard" className="flex items-center gap-2">
+                  <LayoutDashboard className={`h-5 w-5 ${location.pathname === "/dashboard" ? "text-black" : ""}`} />
+                  <span className={location.pathname === "/dashboard" ? "text-black font-medium" : ""}>Dashboard</span>
+                </Link>
+              </SidebarMenuButton>
+            </SidebarMenuItem>
+          </SidebarGroup>
+
+          <div className="h-px bg-polaris-border mx-4" />
+
           <SidebarGroup>
             <SidebarGroupLabel>Applications</SidebarGroupLabel>
             <SidebarGroupContent>
