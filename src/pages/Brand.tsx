@@ -40,6 +40,7 @@ const AGE_RANGES = [{
 
 interface BrandIdentity {
   id: string;
+  brand_name?: string;
   values: string[];
   age_range_min: number;
   age_range_max: number;

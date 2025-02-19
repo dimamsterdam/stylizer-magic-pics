@@ -40,6 +40,7 @@ export type Database = {
         Row: {
           age_range_max: number | null
           age_range_min: number | null
+          brand_name: string | null
           characteristics: string[] | null
           created_at: string
           gender: Database["public"]["Enums"]["brand_audience_gender"] | null
@@ -54,6 +55,7 @@ export type Database = {
         Insert: {
           age_range_max?: number | null
           age_range_min?: number | null
+          brand_name?: string | null
           characteristics?: string[] | null
           created_at?: string
           gender?: Database["public"]["Enums"]["brand_audience_gender"] | null
@@ -68,6 +70,7 @@ export type Database = {
         Update: {
           age_range_max?: number | null
           age_range_min?: number | null
+          brand_name?: string | null
           characteristics?: string[] | null
           created_at?: string
           gender?: Database["public"]["Enums"]["brand_audience_gender"] | null
