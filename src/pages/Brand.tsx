@@ -245,12 +245,15 @@ const Brand = () => {
             </div>
             <div className="space-y-4">
               <div className="flex gap-2">
-                <Input
-                  placeholder="Add a brand value"
-                  value={newValue}
-                  onChange={(e) => setNewValue(e.target.value)}
-                  onKeyDown={(e) => e.key === 'Enter' && handleAddValue()}
-                />
+                <div className="flex-1 space-y-2">
+                  <Input
+                    placeholder="Add a brand value"
+                    value={newValue}
+                    onChange={(e) => setNewValue(e.target.value)}
+                    onKeyDown={(e) => e.key === 'Enter' && handleAddValue()}
+                  />
+                  <Label>Brand Value</Label>
+                </div>
                 <Button onClick={handleAddValue}>Add</Button>
               </div>
             </div>
@@ -264,7 +267,6 @@ const Brand = () => {
             </div>
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label>Age Range</Label>
                 <Select
                   value={getCurrentAgeRangeValue()}
                   onValueChange={(value) => {
@@ -286,9 +288,9 @@ const Brand = () => {
                     ))}
                   </SelectContent>
                 </Select>
+                <Label>Age Range</Label>
               </div>
               <div className="space-y-2">
-                <Label>Gender</Label>
                 <Select
                   value={brandIdentity?.gender || 'all'}
                   onValueChange={(value: 'all' | 'male' | 'female' | 'non_binary') => 
@@ -305,9 +307,9 @@ const Brand = () => {
                     <SelectItem value="non_binary">Non-binary</SelectItem>
                   </SelectContent>
                 </Select>
+                <Label>Gender</Label>
               </div>
               <div className="space-y-2">
-                <Label>Income Level</Label>
                 <Select
                   value={brandIdentity?.income_level || 'medium'}
                   onValueChange={(value: 'low' | 'medium' | 'high' | 'luxury') => 
@@ -324,17 +326,20 @@ const Brand = () => {
                     <SelectItem value="luxury">Luxury</SelectItem>
                   </SelectContent>
                 </Select>
+                <Label>Income Level</Label>
               </div>
             </div>
             <div className="space-y-2">
-              <Label>Characteristics</Label>
               <div className="flex gap-2">
-                <Input
-                  placeholder="Add an audience characteristic"
-                  value={newCharacteristic}
-                  onChange={(e) => setNewCharacteristic(e.target.value)}
-                  onKeyDown={(e) => e.key === 'Enter' && handleAddCharacteristic()}
-                />
+                <div className="flex-1 space-y-2">
+                  <Input
+                    placeholder="Add an audience characteristic"
+                    value={newCharacteristic}
+                    onChange={(e) => setNewCharacteristic(e.target.value)}
+                    onKeyDown={(e) => e.key === 'Enter' && handleAddCharacteristic()}
+                  />
+                  <Label>Characteristics</Label>
+                </div>
                 <Button onClick={handleAddCharacteristic}>Add</Button>
               </div>
               <div className="flex flex-wrap gap-2 mt-2">
@@ -364,20 +369,20 @@ const Brand = () => {
             </div>
             <div className="space-y-4">
               <div className="space-y-2">
-                <Label>Mood and Tone</Label>
                 <Textarea
                   placeholder="Describe the mood and tone of your brand's photography"
                   value={brandIdentity?.photography_mood || ""}
                   onChange={(e) => mutation.mutate({ photography_mood: e.target.value })}
                 />
+                <Label>Mood and Tone</Label>
               </div>
               <div className="space-y-2">
-                <Label>Lighting</Label>
                 <Textarea
                   placeholder="Describe your preferred lighting style"
                   value={brandIdentity?.photography_lighting || ""}
                   onChange={(e) => mutation.mutate({ photography_lighting: e.target.value })}
                 />
+                <Label>Lighting</Label>
               </div>
             </div>
           </section>
