@@ -1,4 +1,3 @@
-
 import React from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -12,6 +11,15 @@ import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTr
 import { useToast } from "@/hooks/use-toast";
 import { Palette, Users, Camera } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
+
+const AGE_RANGES = [
+  { label: "18-24", min: 18, max: 24 },
+  { label: "25-34", min: 25, max: 34 },
+  { label: "35-44", min: 35, max: 44 },
+  { label: "45-54", min: 45, max: 54 },
+  { label: "55-64", min: 55, max: 64 },
+  { label: "65+", min: 65, max: 100 }
+] as const;
 
 interface BrandIdentity {
   id: string;
@@ -100,13 +108,12 @@ const Brand = () => {
 
       if (error) throw error;
       
-      // If no brand identity exists, create one
       if (!data && user.data.user) {
         const { data: newData, error: insertError } = await supabase
           .from('brand_identity')
           .insert([{ 
             user_id: user.data.user.id,
-            values: [], // Ensure this is an empty array
+            values: [],
             characteristics: [],
             gender: 'all',
             income_level: 'medium'
@@ -137,7 +144,6 @@ const Brand = () => {
       }
     },
     onSuccess: (data) => {
-      // Update cache instead of refetching
       queryClient.setQueryData(['brandIdentity'], data);
       toast({
         title: "Success",
@@ -178,6 +184,11 @@ const Brand = () => {
   const handleRemoveCharacteristic = (index: number) => {
     const updatedCharacteristics = (brandIdentity?.characteristics || []).filter((_, i) => i !== index);
     mutation.mutate({ characteristics: updatedCharacteristics });
+  };
+
+  const getCurrentAgeRangeValue = () => {
+    if (!brandIdentity?.age_range_min || !brandIdentity?.age_range_max) return "";
+    return `${brandIdentity.age_range_min}-${brandIdentity.age_range_max}`;
   };
 
   const breadcrumbItems = [
@@ -253,20 +264,28 @@ const Brand = () => {
             </div>
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label>Age Range (Minimum)</Label>
-                <Input
-                  type="number"
-                  value={brandIdentity?.age_range_min || ""}
-                  onChange={(e) => mutation.mutate({ age_range_min: parseInt(e.target.value) })}
-                />
-              </div>
-              <div className="space-y-2">
-                <Label>Age Range (Maximum)</Label>
-                <Input
-                  type="number"
-                  value={brandIdentity?.age_range_max || ""}
-                  onChange={(e) => mutation.mutate({ age_range_max: parseInt(e.target.value) })}
-                />
+                <Label>Age Range</Label>
+                <Select
+                  value={getCurrentAgeRangeValue()}
+                  onValueChange={(value) => {
+                    const [min, max] = value.split('-').map(Number);
+                    mutation.mutate({ age_range_min: min, age_range_max: max });
+                  }}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select age range" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {AGE_RANGES.map((range) => (
+                      <SelectItem 
+                        key={range.label} 
+                        value={`${range.min}-${range.max}`}
+                      >
+                        {range.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
               <div className="space-y-2">
                 <Label>Gender</Label>
