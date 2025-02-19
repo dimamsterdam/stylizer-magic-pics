@@ -16,13 +16,24 @@ import StepProgress from "@/components/StepProgress";
 import GeneratedImagePreview from "@/components/GeneratedImagePreview";
 import { ToneSelector, type ToneStyle } from "@/components/ToneSelector";
 import ImageGrid from '@/components/ImageGrid';
+
 interface Product {
   id: string;
   title: string;
   sku: string;
   image: string;
 }
+
 type Step = 'products' | 'theme' | 'content' | 'review' | 'results';
+
+const themeExamples = [
+  "Festive red theme with soft lighting and night club background",
+  "Minimalist white studio setup with dramatic shadows",
+  "Natural outdoor setting with morning sunlight and autumn colors",
+  "Modern urban environment with neon lights and city backdrop",
+  "Elegant marble surface with gold accents and soft diffused lighting"
+];
+
 const Expose = () => {
   const [currentStep, setCurrentStep] = useState<Step>('products');
   const [searchTerm, setSearchTerm] = useState("");
@@ -33,10 +44,13 @@ const Expose = () => {
   const [isGenerating, setIsGenerating] = useState(false);
   const [exposeId, setExposeId] = useState<string | null>(null);
   const [selectedTone, setSelectedTone] = useState<number>(2);
+  const [currentPlaceholderIndex, setCurrentPlaceholderIndex] = useState(0);
+
   const {
     toast
   } = useToast();
   const navigate = useNavigate();
+
   useEffect(() => {
     const checkAuth = async () => {
       const {
@@ -59,6 +73,15 @@ const Expose = () => {
     };
     checkAuth();
   }, [navigate]);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setCurrentPlaceholderIndex((prev) => (prev + 1) % themeExamples.length);
+    }, 5000);
+
+    return () => clearInterval(interval);
+  }, []);
+
   const {
     data: exposeData,
     isLoading: isLoadingExpose
@@ -85,6 +108,7 @@ const Expose = () => {
     },
     enabled: !!exposeId && currentStep === 'results'
   });
+
   const {
     data: searchResults = [],
     isLoading,
@@ -107,17 +131,21 @@ const Expose = () => {
     },
     enabled: searchTerm.length >= 2
   });
+
   const handleProductSelect = (product: Product) => {
     if (selectedProducts.length < 3) {
       setSelectedProducts(prev => [...prev, product]);
     }
   };
+
   const handleProductRemove = (productId: string) => {
     setSelectedProducts(prev => prev.filter(p => p.id !== productId));
   };
+
   const handleSearchChange = (term: string) => {
     setSearchTerm(term);
   };
+
   const handleContinue = async () => {
     if (currentStep === 'products' && selectedProducts.length === 0) return;
     if (currentStep === 'theme' && !themeDescription.trim()) return;
@@ -182,10 +210,12 @@ const Expose = () => {
       }
     }
   };
+
   const handleHeadlineChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     const cleanedValue = e.target.value.replace(/["']/g, '');
     setHeadline(cleanedValue);
   };
+
   const generateContent = async (type: 'headline' | 'body') => {
     try {
       const toneStyles: ToneStyle[] = ['formal', 'elegant', 'informal', 'playful', 'edgy'];
@@ -241,6 +271,7 @@ const Expose = () => {
       });
     }
   };
+
   const getToneDescription = (tone: ToneStyle) => {
     const descriptions: Record<ToneStyle, string> = {
       formal: "polished, professional, and authoritative",
@@ -251,6 +282,7 @@ const Expose = () => {
     };
     return descriptions[tone];
   };
+
   const handleBodyCopyChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     const words = e.target.value.split(' ');
     if (words.length > 40) {
@@ -263,6 +295,7 @@ const Expose = () => {
       setBodyCopy(e.target.value);
     }
   };
+
   const handleGenerateHero = async () => {
     if (!exposeId) return;
     setIsGenerating(true);
@@ -318,6 +351,7 @@ const Expose = () => {
       });
     }
   };
+
   const handleGenerateAll = async () => {
     toast({
       title: "Generating content",
@@ -338,9 +372,11 @@ const Expose = () => {
       });
     }
   };
+
   const handleStepClick = (step: Step) => {
     setCurrentStep(step);
   };
+
   const handleAddToLibrary = async () => {
     if (!exposeId) return;
     try {
@@ -358,6 +394,7 @@ const Expose = () => {
       });
     }
   };
+
   const handleRegenerate = async () => {
     setCurrentStep('review');
     toast({
@@ -365,6 +402,7 @@ const Expose = () => {
       description: "You can now modify your settings and generate a new image."
     });
   };
+
   const handleVariationSelect = async (index: number) => {
     if (!exposeId) return;
     try {
@@ -395,11 +433,13 @@ const Expose = () => {
       });
     }
   };
+
   useEffect(() => {
     if (currentStep === 'content' && !headline && !bodyCopy) {
       handleGenerateAll();
     }
   }, [currentStep]);
+
   const renderStep = () => {
     switch (currentStep) {
       case 'products':
@@ -465,7 +505,13 @@ const Expose = () => {
               <div className="space-y-6">
                 <div className="space-y-2">
                   <Label htmlFor="theme-description">Creative Brief</Label>
-                  <Textarea id="theme-description" value={themeDescription} onChange={e => setThemeDescription(e.target.value)} placeholder="Festive red theme with soft lighting and night club background" className="h-32" />
+                  <Textarea 
+                    id="theme-description" 
+                    value={themeDescription} 
+                    onChange={e => setThemeDescription(e.target.value)} 
+                    placeholder={themeExamples[currentPlaceholderIndex]}
+                    className="h-32" 
+                  />
                 </div>
 
                 <div className="flex justify-end pt-4">
@@ -649,6 +695,7 @@ const Expose = () => {
           </Card>;
     }
   };
+
   return <div className="min-h-screen bg-polaris-background">
       <div className="p-4 sm:p-6">
         <div className="mb-6">
@@ -671,4 +718,5 @@ const Expose = () => {
       </div>
     </div>;
 };
+
 export default Expose;
