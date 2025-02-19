@@ -24,7 +24,7 @@ const ImageGrid = ({ variations, selectedIndex, onSelect, headline, bodyCopy }: 
           <DialogTrigger asChild>
             <Card 
               className={`cursor-pointer overflow-hidden ${
-                index === selectedIndex ? 'ring-2 ring-polaris-teal' : ''
+                index === selectedIndex ? 'ring-2 ring-[#1A1F2C]' : ''
               }`}
             >
               <img
