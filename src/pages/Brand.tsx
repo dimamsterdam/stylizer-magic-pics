@@ -11,6 +11,7 @@ import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTr
 import { useToast } from "@/hooks/use-toast";
 import { Palette, Users, Camera } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
+
 const AGE_RANGES = [{
   label: "18-24",
   min: 18,
@@ -36,6 +37,7 @@ const AGE_RANGES = [{
   min: 65,
   max: 100
 }] as const;
+
 interface BrandIdentity {
   id: string;
   values: string[];
@@ -47,6 +49,7 @@ interface BrandIdentity {
   photography_mood: string;
   photography_lighting: string;
 }
+
 const LoadingSkeleton = () => {
   return <div className="space-y-8">
       {/* Brand Values Section Skeleton */}
@@ -95,6 +98,7 @@ const LoadingSkeleton = () => {
       </section>
     </div>;
 };
+
 const Brand = () => {
   const {
     toast
@@ -102,6 +106,7 @@ const Brand = () => {
   const queryClient = useQueryClient();
   const [newValue, setNewValue] = React.useState("");
   const [newCharacteristic, setNewCharacteristic] = React.useState("");
+
   const {
     data: brandIdentity,
     isLoading
@@ -132,6 +137,7 @@ const Brand = () => {
       return data as BrandIdentity;
     }
   });
+
   const mutation = useMutation({
     mutationFn: async (values: Partial<BrandIdentity>) => {
       if (brandIdentity?.id) {
@@ -159,6 +165,7 @@ const Brand = () => {
       console.error('Error updating brand identity:', error);
     }
   });
+
   const handleAddValue = () => {
     if (!newValue.trim()) return;
     console.log("Adding value:", newValue);
@@ -169,12 +176,14 @@ const Brand = () => {
     });
     setNewValue("");
   };
+
   const handleRemoveValue = (index: number) => {
     const updatedValues = (brandIdentity?.values || []).filter((_, i) => i !== index);
     mutation.mutate({
       values: updatedValues
     });
   };
+
   const handleAddCharacteristic = () => {
     if (!newCharacteristic.trim()) return;
     const updatedCharacteristics = [...(brandIdentity?.characteristics || []), newCharacteristic.trim()];
@@ -183,16 +192,19 @@ const Brand = () => {
     });
     setNewCharacteristic("");
   };
+
   const handleRemoveCharacteristic = (index: number) => {
     const updatedCharacteristics = (brandIdentity?.characteristics || []).filter((_, i) => i !== index);
     mutation.mutate({
       characteristics: updatedCharacteristics
     });
   };
+
   const getCurrentAgeRangeValue = () => {
     if (!brandIdentity?.age_range_min || !brandIdentity?.age_range_max) return "";
     return `${brandIdentity.age_range_min}-${brandIdentity.age_range_max}`;
   };
+
   const breadcrumbItems = [{
     label: "Home",
     href: "/"
@@ -200,6 +212,7 @@ const Brand = () => {
     label: "Brand Identity",
     href: "/brand"
   }];
+
   if (isLoading) {
     return <div className="container py-6">
         <Breadcrumbs items={breadcrumbItems} className="mb-6" />
@@ -214,6 +227,7 @@ const Brand = () => {
         </div>
       </div>;
   }
+
   return <div className="container py-6">
       <Breadcrumbs items={breadcrumbItems} className="mb-6" />
       
@@ -231,11 +245,18 @@ const Brand = () => {
               <div className="flex gap-2">
                 <div className="flex-1">
                   <div className="space-y-2">
-                    
-                    <Input placeholder="Add a brand value" value={newValue} onChange={e => setNewValue(e.target.value)} onKeyDown={e => e.key === 'Enter' && handleAddValue()} />
+                    <Label className="text-polaris-secondary">Brand Value</Label>
+                    <Input
+                      placeholder="Add a brand value"
+                      value={newValue}
+                      onChange={(e) => setNewValue(e.target.value)}
+                      onKeyDown={(e) => e.key === 'Enter' && handleAddValue()}
+                    />
                   </div>
                 </div>
-                <Button onClick={handleAddValue}>Add</Button>
+                <div className="pt-8">
+                  <Button onClick={handleAddValue}>Add</Button>
+                </div>
               </div>
               <div className="flex flex-wrap gap-2 mt-4">
                 {brandIdentity?.values?.map((value, index) => <div key={index} className="flex items-center gap-2 bg-polaris-background px-3 py-2 rounded-md">
@@ -318,10 +339,17 @@ const Brand = () => {
                 <div className="flex-1">
                   <div className="space-y-2">
                     <Label className="text-polaris-secondary">Characteristics</Label>
-                    <Input placeholder="Add an audience characteristic" value={newCharacteristic} onChange={e => setNewCharacteristic(e.target.value)} onKeyDown={e => e.key === 'Enter' && handleAddCharacteristic()} />
+                    <Input
+                      placeholder="Add an audience characteristic"
+                      value={newCharacteristic}
+                      onChange={(e) => setNewCharacteristic(e.target.value)}
+                      onKeyDown={(e) => e.key === 'Enter' && handleAddCharacteristic()}
+                    />
                   </div>
                 </div>
-                <Button onClick={handleAddCharacteristic}>Add</Button>
+                <div className="pt-8">
+                  <Button onClick={handleAddCharacteristic}>Add</Button>
+                </div>
               </div>
               <div className="flex flex-wrap gap-2 mt-2">
                 {brandIdentity?.characteristics?.map((characteristic, index) => <div key={index} className="flex items-center gap-2 bg-polaris-background px-3 py-2 rounded-md">
@@ -413,4 +441,5 @@ const Brand = () => {
       </div>
     </div>;
 };
+
 export default Brand;
