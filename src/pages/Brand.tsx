@@ -1,4 +1,3 @@
-
 import React from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -12,6 +11,19 @@ import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTr
 import { useToast } from "@/hooks/use-toast";
 import { Palette, Users, Camera, Wand2 } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
+
+interface BrandIdentity {
+  id: string;
+  brand_name?: string;
+  values: string[];
+  age_range_min: number;
+  age_range_max: number;
+  gender: 'all' | 'male' | 'female' | 'non_binary';
+  income_level: 'low' | 'medium' | 'high' | 'luxury';
+  characteristics: string[];
+  photography_mood: string;
+  photography_lighting: string;
+}
 
 const AGE_RANGES = [{
   label: "18-24",
@@ -38,19 +50,6 @@ const AGE_RANGES = [{
   min: 65,
   max: 100
 }] as const;
-
-interface BrandIdentity {
-  id: string;
-  brand_name?: string;
-  values: string[];
-  age_range_min: number;
-  age_range_max: number;
-  gender: 'all' | 'male' | 'female' | 'non_binary';
-  income_level: 'low' | 'medium' | 'high' | 'luxury';
-  characteristics: string[];
-  photography_mood: string;
-  photography_lighting: string;
-}
 
 const LoadingSkeleton = () => {
   return <div className="space-y-8">
@@ -108,6 +107,7 @@ const Brand = () => {
   const [newCharacteristic, setNewCharacteristic] = React.useState("");
   const [brandName, setBrandName] = React.useState("");
   const [isGenerating, setIsGenerating] = React.useState(false);
+  const [ageRange, setAgeRange] = React.useState("");
 
   const { data: brandIdentity, isLoading } = useQuery({
     queryKey: ['brandIdentity'],
@@ -139,6 +139,10 @@ const Brand = () => {
       
       if (data?.brand_name) {
         setBrandName(data.brand_name);
+      }
+      
+      if (data?.age_range_min && data?.age_range_max) {
+        setAgeRange(`${data.age_range_min}-${data.age_range_max}`);
       }
       
       return data as BrandIdentity;
@@ -176,8 +180,18 @@ const Brand = () => {
     }
   });
 
+  const handleAgeRangeChange = (value: string) => {
+    setAgeRange(value);
+    const [min, max] = value.split('-').map(Number);
+    if (!isNaN(min) && !isNaN(max) && min < max && min >= 0 && max <= 120) {
+      mutation.mutate({
+        age_range_min: min,
+        age_range_max: max
+      });
+    }
+  };
+
   const clearForm = () => {
-    // Clear all form fields
     if (brandIdentity?.id) {
       mutation.mutate({
         values: [],
@@ -192,6 +206,7 @@ const Brand = () => {
     }
     setNewValue("");
     setNewCharacteristic("");
+    setAgeRange("");
   };
 
   const generateBrandIdentity = async () => {
@@ -205,7 +220,6 @@ const Brand = () => {
     }
 
     setIsGenerating(true);
-    // Clear the form before starting generation
     clearForm();
     
     try {
@@ -365,22 +379,12 @@ const Brand = () => {
             <div>
               <div className="space-y-2">
                 <Label className="text-polaris-secondary">Age Range</Label>
-                <Select value={getCurrentAgeRangeValue()} onValueChange={value => {
-                const [min, max] = value.split('-').map(Number);
-                mutation.mutate({
-                  age_range_min: min,
-                  age_range_max: max
-                });
-              }}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select age range" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {AGE_RANGES.map(range => <SelectItem key={range.label} value={`${range.min}-${range.max}`}>
-                        {range.label}
-                      </SelectItem>)}
-                  </SelectContent>
-                </Select>
+                <Input
+                  placeholder="e.g., 25-35"
+                  value={ageRange}
+                  onChange={e => handleAgeRangeChange(e.target.value)}
+                  className="w-full"
+                />
               </div>
             </div>
             <div>
