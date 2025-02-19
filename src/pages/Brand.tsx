@@ -1,6 +1,6 @@
 
 import React from "react";
-import { useQuery, useMutation } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import Breadcrumbs from "@/components/Breadcrumbs";
 import { Button } from "@/components/ui/button";
@@ -84,10 +84,11 @@ const LoadingSkeleton = () => {
 
 const Brand = () => {
   const { toast } = useToast();
+  const queryClient = useQueryClient();
   const [newValue, setNewValue] = React.useState("");
   const [newCharacteristic, setNewCharacteristic] = React.useState("");
 
-  const { data: brandIdentity, isLoading, refetch } = useQuery({
+  const { data: brandIdentity, isLoading } = useQuery({
     queryKey: ['brandIdentity'],
     queryFn: async () => {
       const user = await supabase.auth.getUser();
@@ -105,7 +106,7 @@ const Brand = () => {
           .from('brand_identity')
           .insert([{ 
             user_id: user.data.user.id,
-            values: [],
+            values: [], // Ensure this is an empty array
             characteristics: [],
             gender: 'all',
             income_level: 'medium'
@@ -125,15 +126,19 @@ const Brand = () => {
   const mutation = useMutation({
     mutationFn: async (values: Partial<BrandIdentity>) => {
       if (brandIdentity?.id) {
-        const { error } = await supabase
+        const { data, error } = await supabase
           .from('brand_identity')
           .update(values)
-          .eq('id', brandIdentity.id);
+          .eq('id', brandIdentity.id)
+          .select()
+          .single();
         if (error) throw error;
+        return data;
       }
     },
-    onSuccess: () => {
-      refetch(); // Refetch the data after mutation
+    onSuccess: (data) => {
+      // Update cache instead of refetching
+      queryClient.setQueryData(['brandIdentity'], data);
       toast({
         title: "Success",
         description: "Brand identity updated successfully",
@@ -151,9 +156,9 @@ const Brand = () => {
 
   const handleAddValue = () => {
     if (!newValue.trim()) return;
-    console.log("Adding value:", newValue); // Added logging
+    console.log("Adding value:", newValue);
     const updatedValues = [...(brandIdentity?.values || []), newValue.trim()];
-    console.log("Updated values array:", updatedValues); // Added logging
+    console.log("Updated values array:", updatedValues);
     mutation.mutate({ values: updatedValues });
     setNewValue("");
   };
@@ -196,8 +201,6 @@ const Brand = () => {
       </div>
     );
   }
-
-  console.log("Current brand values:", brandIdentity?.values); // Added logging
 
   return (
     <div className="container py-6">
