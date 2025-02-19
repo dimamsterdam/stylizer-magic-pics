@@ -497,10 +497,14 @@ const Expose = () => {
                   />
                 </div>
 
-                <div className="py-2 px-4 bg-gray-50 rounded-lg">
+                <div className="space-y-2">
+                  <Label>Writing Tone</Label>
                   <ToneSelector
                     value={selectedTone}
-                    onChange={setSelectedTone}
+                    onChange={(newTone) => {
+                      setSelectedTone(newTone);
+                      handleGenerateAll();
+                    }}
                   />
                 </div>
 
