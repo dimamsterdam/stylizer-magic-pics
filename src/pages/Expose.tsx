@@ -71,7 +71,12 @@ const Expose = () => {
       const {
         data,
         error
-      } = await supabase.from('exposes').select('hero_image_url, hero_image_desktop_url').eq('id', exposeId).maybeSingle();
+      } = await supabase
+        .from('exposes')
+        .select('hero_image_url, hero_image_desktop_url, hero_image_tablet_url, hero_image_mobile_url, hero_image_generation_status')
+        .eq('id', exposeId)
+        .maybeSingle();
+      
       console.log('Fetched expose data:', data);
       if (error) throw error;
       return data;
