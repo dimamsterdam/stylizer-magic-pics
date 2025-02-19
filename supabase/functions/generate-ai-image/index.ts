@@ -9,31 +9,18 @@ const corsHeaders = {
 };
 
 serve(async (req) => {
-  // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
   }
 
   try {
     const requestBody = await req.json();
-    console.log('Received request body:', requestBody);
-
-    // Validate required fields
-    if (!requestBody) {
-      throw new Error('Request body is missing');
-    }
-
     const { exposeId, products, theme, headline, bodyCopy } = requestBody;
 
     if (!exposeId) {
       throw new Error('exposeId is required');
     }
 
-    if (!products || !Array.isArray(products) || products.length === 0) {
-      throw new Error('products array is required and must not be empty');
-    }
-
-    // Get environment variables
     const openaiKey = Deno.env.get('OPENAI_API_KEY');
     const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
     const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
@@ -58,7 +45,7 @@ serve(async (req) => {
       body: JSON.stringify({
         model: "dall-e-3",
         prompt: prompt,
-        n: 1,
+        n: 4,
         size: "1024x1024",
         quality: "hd",
         style: "natural"
@@ -78,18 +65,19 @@ serve(async (req) => {
       throw new Error('Invalid response format from DALL-E API');
     }
 
-    const imageUrl = openaiData.data[0].url;
-    console.log(`Generated image URL: ${imageUrl}`);
+    const imageVariations = openaiData.data.map((variation: any) => variation.url);
+    console.log(`Generated ${imageVariations.length} image variations`);
 
-    // Update expose with generation status and all image URLs
     const { error: updateError } = await supabase
       .from('exposes')
       .update({
         hero_image_generation_status: 'completed',
-        hero_image_url: imageUrl,
-        hero_image_desktop_url: imageUrl,
-        hero_image_tablet_url: imageUrl,
-        hero_image_mobile_url: imageUrl
+        hero_image_url: imageVariations[0],
+        hero_image_desktop_url: imageVariations[0],
+        hero_image_tablet_url: imageVariations[0],
+        hero_image_mobile_url: imageVariations[0],
+        image_variations: imageVariations,
+        selected_variation_index: 0
       })
       .eq('id', exposeId);
 

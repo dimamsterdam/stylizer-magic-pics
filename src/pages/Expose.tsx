@@ -20,6 +20,7 @@ import Breadcrumbs from "@/components/Breadcrumbs";
 import StepProgress from "@/components/StepProgress";
 import GeneratedImagePreview from "@/components/GeneratedImagePreview";
 import { ToneSelector, type ToneStyle } from "@/components/ToneSelector";
+import ImageGrid from '@/components/ImageGrid';
 
 interface Product {
   id: string;
@@ -73,7 +74,15 @@ const Expose = () => {
         error
       } = await supabase
         .from('exposes')
-        .select('hero_image_url, hero_image_desktop_url, hero_image_tablet_url, hero_image_mobile_url, hero_image_generation_status')
+        .select(`
+          hero_image_url,
+          hero_image_desktop_url,
+          hero_image_tablet_url,
+          hero_image_mobile_url,
+          hero_image_generation_status,
+          image_variations,
+          selected_variation_index
+        `)
         .eq('id', exposeId)
         .maybeSingle();
       
@@ -379,6 +388,37 @@ const Expose = () => {
     });
   };
 
+  const handleVariationSelect = async (index: number) => {
+    if (!exposeId) return;
+    try {
+      const selectedUrl = exposeData?.image_variations[index];
+      const { error } = await supabase
+        .from('exposes')
+        .update({
+          selected_variation_index: index,
+          hero_image_url: selectedUrl,
+          hero_image_desktop_url: selectedUrl,
+          hero_image_tablet_url: selectedUrl,
+          hero_image_mobile_url: selectedUrl
+        })
+        .eq('id', exposeId);
+      
+      if (error) throw error;
+      
+      toast({
+        title: "Success",
+        description: "Selected variation has been updated"
+      });
+    } catch (error) {
+      console.error('Error updating selected variation:', error);
+      toast({
+        title: "Error",
+        description: "Failed to update selected variation",
+        variant: "destructive"
+      });
+    }
+  };
+
   useEffect(() => {
     if (currentStep === 'content' && !headline && !bodyCopy) {
       handleGenerateAll();
@@ -661,8 +701,10 @@ const Expose = () => {
                     <Loader2 className="h-8 w-8 animate-spin text-[#008060]" />
                   </div>
                 ) : exposeData ? (
-                  <GeneratedImagePreview
-                    imageUrl={exposeData.hero_image_desktop_url || exposeData.hero_image_url}
+                  <ImageGrid
+                    variations={exposeData.image_variations || [exposeData.hero_image_url]}
+                    selectedIndex={exposeData.selected_variation_index || 0}
+                    onSelect={handleVariationSelect}
                     headline={headline}
                     bodyCopy={bodyCopy}
                   />
