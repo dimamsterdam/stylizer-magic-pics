@@ -96,6 +96,7 @@ const Brand = () => {
         .maybeSingle();
 
       if (error) throw error;
+      console.log("Fetched brand identity data:", data); // Added logging
       return data as BrandIdentity;
     }
   });
@@ -133,7 +134,9 @@ const Brand = () => {
 
   const handleAddValue = () => {
     if (!newValue.trim()) return;
+    console.log("Adding value:", newValue); // Added logging
     const updatedValues = [...(brandIdentity?.values || []), newValue.trim()];
+    console.log("Updated values array:", updatedValues); // Added logging
     mutation.mutate({ values: updatedValues });
     setNewValue("");
   };
@@ -176,6 +179,8 @@ const Brand = () => {
       </div>
     );
   }
+
+  console.log("Current brand values:", brandIdentity?.values); // Added logging
 
   return (
     <div className="container py-6">
