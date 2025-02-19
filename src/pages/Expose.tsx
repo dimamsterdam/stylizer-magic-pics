@@ -449,7 +449,13 @@ const Expose = () => {
               <div className="space-y-6">
                 <div className="space-y-2">
                   <Label htmlFor="theme-description">Creative Brief</Label>
-                  <Textarea id="theme-description" value={themeDescription} onChange={e => setThemeDescription(e.target.value)} placeholder="Describe your desired theme (e.g., Minimalist product photography with soft lighting and neutral background)" className="h-32" />
+                  <Textarea 
+                    id="theme-description"
+                    value={themeDescription}
+                    onChange={e => setThemeDescription(e.target.value)}
+                    placeholder="Festive red theme with soft lighting and night club background"
+                    className="h-32"
+                  />
                 </div>
 
                 <div className="flex justify-end pt-4">
