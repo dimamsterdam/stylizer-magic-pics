@@ -52,8 +52,8 @@ const StepProgress = ({ currentStep, onStepClick }: StepProgressProps) => {
                 <div 
                   className={`
                     flex items-center justify-center w-10 h-10 rounded-full border-2 mb-2
-                    ${status === 'active' ? 'border-[#008060] bg-[#008060] text-white' : ''}
-                    ${status === 'completed' ? 'border-[#008060] text-[#008060] hover:bg-[#F6F6F7]' : ''}
+                    ${status === 'active' ? 'border-black bg-black text-white' : ''}
+                    ${status === 'completed' ? 'border-[#333333] text-[#333333] hover:bg-[#F6F6F7]' : ''}
                     ${status === 'upcoming' ? 'border-[#6D7175] text-[#6D7175]' : ''}
                     ${isClickable ? 'transition-colors' : ''}
                   `}
@@ -63,8 +63,8 @@ const StepProgress = ({ currentStep, onStepClick }: StepProgressProps) => {
                 <span 
                   className={`
                     text-sm font-medium
-                    ${status === 'active' ? 'text-[#008060]' : ''}
-                    ${status === 'completed' ? 'text-[#008060]' : ''}
+                    ${status === 'active' ? 'text-black' : ''}
+                    ${status === 'completed' ? 'text-[#333333]' : ''}
                     ${status === 'upcoming' ? 'text-[#6D7175]' : ''}
                   `}
                 >
@@ -75,7 +75,7 @@ const StepProgress = ({ currentStep, onStepClick }: StepProgressProps) => {
                 <div 
                   className={`
                     flex-1 h-[2px] mx-4 mt-[-20px]
-                    ${getStepStatus(steps[index + 1].id) === 'upcoming' ? 'bg-[#E3E5E7]' : 'bg-[#008060]'}
+                    ${getStepStatus(steps[index + 1].id) === 'upcoming' ? 'bg-[#E3E5E7]' : 'bg-black'}
                   `}
                 />
               )}
