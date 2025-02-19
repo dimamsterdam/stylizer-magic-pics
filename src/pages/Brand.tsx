@@ -243,12 +243,12 @@ const Brand = () => {
               {brandIdentity?.values?.map((value, index) => (
                 <div
                   key={index}
-                  className="flex items-center gap-2 bg-[#8B5CF6] text-white px-3 py-1 rounded-full text-sm"
+                  className="flex items-center gap-2 bg-polaris-background px-3 py-2 rounded-md"
                 >
-                  <span>{value}</span>
+                  <span className="text-polaris-text">{value}</span>
                   <button
                     onClick={() => handleRemoveValue(index)}
-                    className="text-white/70 hover:text-white transition-colors"
+                    className="text-polaris-secondary hover:text-polaris-text transition-colors"
                   >
                     ×
                   </button>
@@ -282,31 +282,38 @@ const Brand = () => {
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <div className="space-y-2">
-                  <Label>Age Range</Label>
-                  <Select value={getCurrentAgeRangeValue()} onValueChange={value => {
-                  const [min, max] = value.split('-').map(Number);
-                  mutation.mutate({
-                    age_range_min: min,
-                    age_range_max: max
-                  });
-                }}>
+                  <Select
+                    value={getCurrentAgeRangeValue()}
+                    onValueChange={(value) => {
+                      const [min, max] = value.split('-').map(Number);
+                      mutation.mutate({ age_range_min: min, age_range_max: max });
+                    }}
+                  >
                     <SelectTrigger>
                       <SelectValue placeholder="Select age range" />
                     </SelectTrigger>
                     <SelectContent>
-                      {AGE_RANGES.map(range => <SelectItem key={range.label} value={`${range.min}-${range.max}`}>
+                      {AGE_RANGES.map((range) => (
+                        <SelectItem 
+                          key={range.label} 
+                          value={`${range.min}-${range.max}`}
+                        >
                           {range.label}
-                        </SelectItem>)}
+                        </SelectItem>
+                      ))}
                     </SelectContent>
                   </Select>
+                  <Label className="text-polaris-secondary">Age Range</Label>
                 </div>
               </div>
               <div>
                 <div className="space-y-2">
-                  <Label>Gender</Label>
-                  <Select value={brandIdentity?.gender || 'all'} onValueChange={(value: 'all' | 'male' | 'female' | 'non_binary') => mutation.mutate({
-                  gender: value
-                })}>
+                  <Select
+                    value={brandIdentity?.gender || 'all'}
+                    onValueChange={(value: 'all' | 'male' | 'female' | 'non_binary') => 
+                      mutation.mutate({ gender: value })
+                    }
+                  >
                     <SelectTrigger>
                       <SelectValue />
                     </SelectTrigger>
@@ -317,14 +324,17 @@ const Brand = () => {
                       <SelectItem value="non_binary">Non-binary</SelectItem>
                     </SelectContent>
                   </Select>
+                  <Label className="text-polaris-secondary">Gender</Label>
                 </div>
               </div>
               <div>
                 <div className="space-y-2">
-                  <Label>Income Level</Label>
-                  <Select value={brandIdentity?.income_level || 'medium'} onValueChange={(value: 'low' | 'medium' | 'high' | 'luxury') => mutation.mutate({
-                  income_level: value
-                })}>
+                  <Select
+                    value={brandIdentity?.income_level || 'medium'}
+                    onValueChange={(value: 'low' | 'medium' | 'high' | 'luxury') => 
+                      mutation.mutate({ income_level: value })
+                    }
+                  >
                     <SelectTrigger>
                       <SelectValue />
                     </SelectTrigger>
@@ -335,6 +345,7 @@ const Brand = () => {
                       <SelectItem value="luxury">Luxury</SelectItem>
                     </SelectContent>
                   </Select>
+                  <Label className="text-polaris-secondary">Income Level</Label>
                 </div>
               </div>
             </div>
@@ -342,20 +353,32 @@ const Brand = () => {
               <div className="flex gap-2">
                 <div className="flex-1">
                   <div className="space-y-2">
-                    <Label>Characteristics</Label>
-                    <Input placeholder="Add an audience characteristic" value={newCharacteristic} onChange={e => setNewCharacteristic(e.target.value)} onKeyDown={e => e.key === 'Enter' && handleAddCharacteristic()} />
-                    
+                    <Input
+                      placeholder="Add an audience characteristic"
+                      value={newCharacteristic}
+                      onChange={(e) => setNewCharacteristic(e.target.value)}
+                      onKeyDown={(e) => e.key === 'Enter' && handleAddCharacteristic()}
+                    />
+                    <Label className="text-polaris-secondary">Characteristics</Label>
                   </div>
                 </div>
                 <Button onClick={handleAddCharacteristic}>Add</Button>
               </div>
               <div className="flex flex-wrap gap-2 mt-2">
-                {brandIdentity?.characteristics?.map((characteristic, index) => <div key={index} className="flex items-center gap-2 bg-polaris-background px-3 py-2 rounded-md">
-                    <span>{characteristic}</span>
-                    <button onClick={() => handleRemoveCharacteristic(index)} className="text-polaris-secondary hover:text-polaris-text">
+                {brandIdentity?.characteristics?.map((characteristic, index) => (
+                  <div
+                    key={index}
+                    className="flex items-center gap-2 bg-polaris-background px-3 py-2 rounded-md"
+                  >
+                    <span className="text-polaris-text">{characteristic}</span>
+                    <button
+                      onClick={() => handleRemoveCharacteristic(index)}
+                      className="text-polaris-secondary hover:text-polaris-text"
+                    >
                       ×
                     </button>
-                  </div>)}
+                  </div>
+                ))}
               </div>
             </div>
           </section>
@@ -369,20 +392,22 @@ const Brand = () => {
             <div className="space-y-4">
               <div>
                 <div className="space-y-2">
-                  <Label>Mood and Tone</Label>
-                  <Textarea placeholder="Describe the mood and tone of your brand's photography" value={brandIdentity?.photography_mood || ""} onChange={e => mutation.mutate({
-                  photography_mood: e.target.value
-                })} />
-                  
+                  <Textarea
+                    placeholder="Describe the mood and tone of your brand's photography"
+                    value={brandIdentity?.photography_mood || ""}
+                    onChange={(e) => mutation.mutate({ photography_mood: e.target.value })}
+                  />
+                  <Label className="text-polaris-secondary">Mood and Tone</Label>
                 </div>
               </div>
               <div>
                 <div className="space-y-2">
-                  <Label>Lighting</Label>
-                  <Textarea placeholder="Describe your preferred lighting style" value={brandIdentity?.photography_lighting || ""} onChange={e => mutation.mutate({
-                  photography_lighting: e.target.value
-                })} />
-                  
+                  <Textarea
+                    placeholder="Describe your preferred lighting style"
+                    value={brandIdentity?.photography_lighting || ""}
+                    onChange={(e) => mutation.mutate({ photography_lighting: e.target.value })}
+                  />
+                  <Label className="text-polaris-secondary">Lighting</Label>
                 </div>
               </div>
             </div>
