@@ -82,8 +82,8 @@ serve(async (req) => {
     const shopifyResponse = await fetch('https://quickstart-50d94e13.myshopify.com/api/2024-01/graphql.json', {
       method: 'POST',
       headers: {
+        'Authorization': `Bearer ${shopifyToken}`,
         'Content-Type': 'application/json',
-        'X-Shopify-Storefront-Access-Token': shopifyToken,
       },
       body: JSON.stringify({ query }),
     });
@@ -108,7 +108,7 @@ serve(async (req) => {
     }
 
     const data = await shopifyResponse.json();
-
+    
     // Transform products data
     const products = data.data.products.edges.map((edge: any) => ({
       id: edge.node.id.split('/').pop(),
