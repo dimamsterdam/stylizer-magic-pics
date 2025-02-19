@@ -11,6 +11,7 @@ import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTr
 import { useToast } from "@/hooks/use-toast";
 import { Palette, Users, Camera } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
+
 const AGE_RANGES = [{
   label: "18-24",
   min: 18,
@@ -36,6 +37,7 @@ const AGE_RANGES = [{
   min: 65,
   max: 100
 }] as const;
+
 interface BrandIdentity {
   id: string;
   values: string[];
@@ -47,6 +49,7 @@ interface BrandIdentity {
   photography_mood: string;
   photography_lighting: string;
 }
+
 const LoadingSkeleton = () => {
   return <div className="space-y-8">
       {/* Brand Values Section Skeleton */}
@@ -95,6 +98,7 @@ const LoadingSkeleton = () => {
       </section>
     </div>;
 };
+
 const Brand = () => {
   const {
     toast
@@ -159,6 +163,7 @@ const Brand = () => {
       console.error('Error updating brand identity:', error);
     }
   });
+
   const handleAddValue = () => {
     if (!newValue.trim()) return;
     console.log("Adding value:", newValue);
@@ -169,12 +174,14 @@ const Brand = () => {
     });
     setNewValue("");
   };
+
   const handleRemoveValue = (index: number) => {
     const updatedValues = (brandIdentity?.values || []).filter((_, i) => i !== index);
     mutation.mutate({
       values: updatedValues
     });
   };
+
   const handleAddCharacteristic = () => {
     if (!newCharacteristic.trim()) return;
     const updatedCharacteristics = [...(brandIdentity?.characteristics || []), newCharacteristic.trim()];
@@ -183,16 +190,19 @@ const Brand = () => {
     });
     setNewCharacteristic("");
   };
+
   const handleRemoveCharacteristic = (index: number) => {
     const updatedCharacteristics = (brandIdentity?.characteristics || []).filter((_, i) => i !== index);
     mutation.mutate({
       characteristics: updatedCharacteristics
     });
   };
+
   const getCurrentAgeRangeValue = () => {
     if (!brandIdentity?.age_range_min || !brandIdentity?.age_range_max) return "";
     return `${brandIdentity.age_range_min}-${brandIdentity.age_range_max}`;
   };
+
   const breadcrumbItems = [{
     label: "Home",
     href: "/"
@@ -200,6 +210,7 @@ const Brand = () => {
     label: "Brand Identity",
     href: "/brand"
   }];
+
   if (isLoading) {
     return <div className="container py-6">
         <Breadcrumbs items={breadcrumbItems} className="mb-6" />
@@ -214,6 +225,7 @@ const Brand = () => {
         </div>
       </div>;
   }
+
   return <div className="container py-6">
       <Breadcrumbs items={breadcrumbItems} className="mb-6" />
       
@@ -228,20 +240,32 @@ const Brand = () => {
               <h2>Brand Values</h2>
             </div>
             <div className="flex flex-wrap gap-2 mt-2 mb-4">
-              {brandIdentity?.values?.map((value, index) => <div key={index} className="flex items-center gap-2 bg-[#8B5CF6] text-white px-3 py-1 rounded-full text-sm">
+              {brandIdentity?.values?.map((value, index) => (
+                <div
+                  key={index}
+                  className="flex items-center gap-2 bg-[#8B5CF6] text-white px-3 py-1 rounded-full text-sm"
+                >
                   <span>{value}</span>
-                  <button onClick={() => handleRemoveValue(index)} className="text-white/70 hover:text-white transition-colors">
+                  <button
+                    onClick={() => handleRemoveValue(index)}
+                    className="text-white/70 hover:text-white transition-colors"
+                  >
                     ×
                   </button>
-                </div>)}
+                </div>
+              ))}
             </div>
             <div className="space-y-4">
               <div className="flex gap-2">
                 <div className="flex-1">
                   <div className="space-y-2">
-                    <Label>Brand Value</Label>
-                    <Input placeholder="Add a brand value" value={newValue} onChange={e => setNewValue(e.target.value)} onKeyDown={e => e.key === 'Enter' && handleAddValue()} />
-                    
+                    <Input
+                      placeholder="Add a brand value"
+                      value={newValue}
+                      onChange={(e) => setNewValue(e.target.value)}
+                      onKeyDown={(e) => e.key === 'Enter' && handleAddValue()}
+                    />
+                    <Label className="text-polaris-secondary">Brand Value</Label>
                   </div>
                 </div>
                 <Button onClick={handleAddValue}>Add</Button>
@@ -417,4 +441,5 @@ const Brand = () => {
       </div>
     </div>;
 };
+
 export default Brand;
