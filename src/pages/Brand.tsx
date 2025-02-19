@@ -239,23 +239,7 @@ const Brand = () => {
               <Palette className="h-6 w-6" />
               <h2>Brand Values</h2>
             </div>
-            <div className="flex flex-wrap gap-2 mt-2 mb-4">
-              {brandIdentity?.values?.map((value, index) => (
-                <div
-                  key={index}
-                  className="flex items-center gap-2 bg-polaris-background px-3 py-2 rounded-md"
-                >
-                  <span className="text-polaris-text">{value}</span>
-                  <button
-                    onClick={() => handleRemoveValue(index)}
-                    className="text-polaris-secondary hover:text-polaris-text transition-colors"
-                  >
-                    ×
-                  </button>
-                </div>
-              ))}
-            </div>
-            <div className="space-y-4">
+            <div>
               <div className="flex gap-2">
                 <div className="flex-1">
                   <div className="space-y-2">
@@ -269,6 +253,22 @@ const Brand = () => {
                   </div>
                 </div>
                 <Button onClick={handleAddValue}>Add</Button>
+              </div>
+              <div className="flex flex-wrap gap-2 mt-4">
+                {brandIdentity?.values?.map((value, index) => (
+                  <div
+                    key={index}
+                    className="flex items-center gap-2 bg-polaris-background px-3 py-2 rounded-md"
+                  >
+                    <span className="text-polaris-text">{value}</span>
+                    <button
+                      onClick={() => handleRemoveValue(index)}
+                      className="text-polaris-secondary hover:text-polaris-text transition-colors"
+                    >
+                      ×
+                    </button>
+                  </div>
+                ))}
               </div>
             </div>
           </section>
