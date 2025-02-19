@@ -515,7 +515,7 @@ const Expose = () => {
                 </div>
 
                 <div className="flex justify-end pt-4">
-                  <Button onClick={handleContinue} disabled={!themeDescription.trim()} className="bg-polaris-text hover:bg-black text-white px-6">
+                  <Button onClick={handleContinue} disabled={!themeDescription.trim()} className="bg-polaris-text hover:bg-black text-white">
                     Continue to Content
                   </Button>
                 </div>
@@ -696,7 +696,7 @@ const Expose = () => {
     }
   };
 
-  return <div className="min-h-screen bg-polaris-background">
+  return <div className="min-h-screen">
       <div className="p-4 sm:p-6">
         <div className="mb-6">
           <Breadcrumbs className="mb-4" items={[{
