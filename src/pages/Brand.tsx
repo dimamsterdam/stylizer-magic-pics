@@ -243,13 +243,13 @@ const Brand = () => {
               <div className="flex gap-2">
                 <div className="flex-1">
                   <div className="space-y-2">
+                    <Label className="text-polaris-secondary">Brand Value</Label>
                     <Input
                       placeholder="Add a brand value"
                       value={newValue}
                       onChange={(e) => setNewValue(e.target.value)}
                       onKeyDown={(e) => e.key === 'Enter' && handleAddValue()}
                     />
-                    <Label className="text-polaris-secondary">Brand Value</Label>
                   </div>
                 </div>
                 <Button onClick={handleAddValue}>Add</Button>
@@ -282,6 +282,7 @@ const Brand = () => {
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <div className="space-y-2">
+                  <Label className="text-polaris-secondary">Age Range</Label>
                   <Select
                     value={getCurrentAgeRangeValue()}
                     onValueChange={(value) => {
@@ -303,11 +304,11 @@ const Brand = () => {
                       ))}
                     </SelectContent>
                   </Select>
-                  <Label className="text-polaris-secondary">Age Range</Label>
                 </div>
               </div>
               <div>
                 <div className="space-y-2">
+                  <Label className="text-polaris-secondary">Gender</Label>
                   <Select
                     value={brandIdentity?.gender || 'all'}
                     onValueChange={(value: 'all' | 'male' | 'female' | 'non_binary') => 
@@ -324,11 +325,11 @@ const Brand = () => {
                       <SelectItem value="non_binary">Non-binary</SelectItem>
                     </SelectContent>
                   </Select>
-                  <Label className="text-polaris-secondary">Gender</Label>
                 </div>
               </div>
               <div>
                 <div className="space-y-2">
+                  <Label className="text-polaris-secondary">Income Level</Label>
                   <Select
                     value={brandIdentity?.income_level || 'medium'}
                     onValueChange={(value: 'low' | 'medium' | 'high' | 'luxury') => 
@@ -345,7 +346,6 @@ const Brand = () => {
                       <SelectItem value="luxury">Luxury</SelectItem>
                     </SelectContent>
                   </Select>
-                  <Label className="text-polaris-secondary">Income Level</Label>
                 </div>
               </div>
             </div>
@@ -353,13 +353,13 @@ const Brand = () => {
               <div className="flex gap-2">
                 <div className="flex-1">
                   <div className="space-y-2">
+                    <Label className="text-polaris-secondary">Characteristics</Label>
                     <Input
                       placeholder="Add an audience characteristic"
                       value={newCharacteristic}
                       onChange={(e) => setNewCharacteristic(e.target.value)}
                       onKeyDown={(e) => e.key === 'Enter' && handleAddCharacteristic()}
                     />
-                    <Label className="text-polaris-secondary">Characteristics</Label>
                   </div>
                 </div>
                 <Button onClick={handleAddCharacteristic}>Add</Button>
@@ -392,22 +392,22 @@ const Brand = () => {
             <div className="space-y-4">
               <div>
                 <div className="space-y-2">
+                  <Label className="text-polaris-secondary">Mood and Tone</Label>
                   <Textarea
                     placeholder="Describe the mood and tone of your brand's photography"
                     value={brandIdentity?.photography_mood || ""}
                     onChange={(e) => mutation.mutate({ photography_mood: e.target.value })}
                   />
-                  <Label className="text-polaris-secondary">Mood and Tone</Label>
                 </div>
               </div>
               <div>
                 <div className="space-y-2">
+                  <Label className="text-polaris-secondary">Lighting</Label>
                   <Textarea
                     placeholder="Describe your preferred lighting style"
                     value={brandIdentity?.photography_lighting || ""}
                     onChange={(e) => mutation.mutate({ photography_lighting: e.target.value })}
                   />
-                  <Label className="text-polaris-secondary">Lighting</Label>
                 </div>
               </div>
             </div>
