@@ -32,6 +32,8 @@ serve(async (req) => {
   }
 
   try {
+    console.log("Starting sync-shopify-products function");
+    
     // Get and validate Shopify token
     const shopifyToken = Deno.env.get('SHOPIFY_STOREFRONT_API_KEY');
     if (!shopifyToken) {
@@ -49,7 +51,7 @@ serve(async (req) => {
     const { searchTerm } = await req.json();
     console.log("Search term:", searchTerm);
 
-    // Construct GraphQL query with proper error handling for special characters
+    // Construct GraphQL query
     const sanitizedSearchTerm = searchTerm ? searchTerm.replace(/"/g, '\\"') : '';
     const query = `
       query {
@@ -113,7 +115,7 @@ serve(async (req) => {
 
     const data = await shopifyResponse.json();
     
-    // Transform products data with null checks
+    // Transform products data
     const products = data.data.products.edges.map((edge: any) => ({
       id: edge.node.id.split('/').pop(),
       shopify_gid: edge.node.id,
