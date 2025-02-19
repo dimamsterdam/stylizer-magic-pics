@@ -191,6 +191,22 @@ const Brand = () => {
               <Palette className="h-6 w-6" />
               <h2>Brand Values</h2>
             </div>
+            <div className="flex flex-wrap gap-2 mt-2 mb-4">
+              {brandIdentity?.values?.map((value, index) => (
+                <div
+                  key={index}
+                  className="flex items-center gap-2 bg-[#8B5CF6] text-white px-3 py-1 rounded-full text-sm"
+                >
+                  <span>{value}</span>
+                  <button
+                    onClick={() => handleRemoveValue(index)}
+                    className="text-white/70 hover:text-white transition-colors"
+                  >
+                    ×
+                  </button>
+                </div>
+              ))}
+            </div>
             <div className="space-y-4">
               <div className="flex gap-2">
                 <Input
@@ -200,22 +216,6 @@ const Brand = () => {
                   onKeyDown={(e) => e.key === 'Enter' && handleAddValue()}
                 />
                 <Button onClick={handleAddValue}>Add</Button>
-              </div>
-              <div className="flex flex-wrap gap-2">
-                {brandIdentity?.values?.map((value, index) => (
-                  <div
-                    key={index}
-                    className="flex items-center gap-2 bg-polaris-background px-3 py-2 rounded-md"
-                  >
-                    <span>{value}</span>
-                    <button
-                      onClick={() => handleRemoveValue(index)}
-                      className="text-polaris-secondary hover:text-polaris-text"
-                    >
-                      ×
-                    </button>
-                  </div>
-                ))}
               </div>
             </div>
           </section>
