@@ -245,14 +245,16 @@ const Brand = () => {
             </div>
             <div className="space-y-4">
               <div className="flex gap-2">
-                <div className="flex-1 space-y-2">
-                  <Input
-                    placeholder="Add a brand value"
-                    value={newValue}
-                    onChange={(e) => setNewValue(e.target.value)}
-                    onKeyDown={(e) => e.key === 'Enter' && handleAddValue()}
-                  />
-                  <Label>Brand Value</Label>
+                <div className="flex-1">
+                  <div className="space-y-2">
+                    <Input
+                      placeholder="Add a brand value"
+                      value={newValue}
+                      onChange={(e) => setNewValue(e.target.value)}
+                      onKeyDown={(e) => e.key === 'Enter' && handleAddValue()}
+                    />
+                    <Label>Brand Value</Label>
+                  </div>
                 </div>
                 <Button onClick={handleAddValue}>Add</Button>
               </div>
@@ -266,79 +268,87 @@ const Brand = () => {
               <h2>Target Audience</h2>
             </div>
             <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Select
-                  value={getCurrentAgeRangeValue()}
-                  onValueChange={(value) => {
-                    const [min, max] = value.split('-').map(Number);
-                    mutation.mutate({ age_range_min: min, age_range_max: max });
-                  }}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select age range" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {AGE_RANGES.map((range) => (
-                      <SelectItem 
-                        key={range.label} 
-                        value={`${range.min}-${range.max}`}
-                      >
-                        {range.label}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                <Label>Age Range</Label>
+              <div>
+                <div className="space-y-2">
+                  <Select
+                    value={getCurrentAgeRangeValue()}
+                    onValueChange={(value) => {
+                      const [min, max] = value.split('-').map(Number);
+                      mutation.mutate({ age_range_min: min, age_range_max: max });
+                    }}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select age range" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {AGE_RANGES.map((range) => (
+                        <SelectItem 
+                          key={range.label} 
+                          value={`${range.min}-${range.max}`}
+                        >
+                          {range.label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <Label>Age Range</Label>
+                </div>
               </div>
-              <div className="space-y-2">
-                <Select
-                  value={brandIdentity?.gender || 'all'}
-                  onValueChange={(value: 'all' | 'male' | 'female' | 'non_binary') => 
-                    mutation.mutate({ gender: value })
-                  }
-                >
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">All</SelectItem>
-                    <SelectItem value="male">Male</SelectItem>
-                    <SelectItem value="female">Female</SelectItem>
-                    <SelectItem value="non_binary">Non-binary</SelectItem>
-                  </SelectContent>
-                </Select>
-                <Label>Gender</Label>
+              <div>
+                <div className="space-y-2">
+                  <Select
+                    value={brandIdentity?.gender || 'all'}
+                    onValueChange={(value: 'all' | 'male' | 'female' | 'non_binary') => 
+                      mutation.mutate({ gender: value })
+                    }
+                  >
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">All</SelectItem>
+                      <SelectItem value="male">Male</SelectItem>
+                      <SelectItem value="female">Female</SelectItem>
+                      <SelectItem value="non_binary">Non-binary</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <Label>Gender</Label>
+                </div>
               </div>
-              <div className="space-y-2">
-                <Select
-                  value={brandIdentity?.income_level || 'medium'}
-                  onValueChange={(value: 'low' | 'medium' | 'high' | 'luxury') => 
-                    mutation.mutate({ income_level: value })
-                  }
-                >
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="low">Low</SelectItem>
-                    <SelectItem value="medium">Medium</SelectItem>
-                    <SelectItem value="high">High</SelectItem>
-                    <SelectItem value="luxury">Luxury</SelectItem>
-                  </SelectContent>
-                </Select>
-                <Label>Income Level</Label>
+              <div>
+                <div className="space-y-2">
+                  <Select
+                    value={brandIdentity?.income_level || 'medium'}
+                    onValueChange={(value: 'low' | 'medium' | 'high' | 'luxury') => 
+                      mutation.mutate({ income_level: value })
+                    }
+                  >
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="low">Low</SelectItem>
+                      <SelectItem value="medium">Medium</SelectItem>
+                      <SelectItem value="high">High</SelectItem>
+                      <SelectItem value="luxury">Luxury</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <Label>Income Level</Label>
+                </div>
               </div>
             </div>
-            <div className="space-y-2">
+            <div>
               <div className="flex gap-2">
-                <div className="flex-1 space-y-2">
-                  <Input
-                    placeholder="Add an audience characteristic"
-                    value={newCharacteristic}
-                    onChange={(e) => setNewCharacteristic(e.target.value)}
-                    onKeyDown={(e) => e.key === 'Enter' && handleAddCharacteristic()}
-                  />
-                  <Label>Characteristics</Label>
+                <div className="flex-1">
+                  <div className="space-y-2">
+                    <Input
+                      placeholder="Add an audience characteristic"
+                      value={newCharacteristic}
+                      onChange={(e) => setNewCharacteristic(e.target.value)}
+                      onKeyDown={(e) => e.key === 'Enter' && handleAddCharacteristic()}
+                    />
+                    <Label>Characteristics</Label>
+                  </div>
                 </div>
                 <Button onClick={handleAddCharacteristic}>Add</Button>
               </div>
@@ -368,21 +378,25 @@ const Brand = () => {
               <h2>Photography</h2>
             </div>
             <div className="space-y-4">
-              <div className="space-y-2">
-                <Textarea
-                  placeholder="Describe the mood and tone of your brand's photography"
-                  value={brandIdentity?.photography_mood || ""}
-                  onChange={(e) => mutation.mutate({ photography_mood: e.target.value })}
-                />
-                <Label>Mood and Tone</Label>
+              <div>
+                <div className="space-y-2">
+                  <Textarea
+                    placeholder="Describe the mood and tone of your brand's photography"
+                    value={brandIdentity?.photography_mood || ""}
+                    onChange={(e) => mutation.mutate({ photography_mood: e.target.value })}
+                  />
+                  <Label>Mood and Tone</Label>
+                </div>
               </div>
-              <div className="space-y-2">
-                <Textarea
-                  placeholder="Describe your preferred lighting style"
-                  value={brandIdentity?.photography_lighting || ""}
-                  onChange={(e) => mutation.mutate({ photography_lighting: e.target.value })}
-                />
-                <Label>Lighting</Label>
+              <div>
+                <div className="space-y-2">
+                  <Textarea
+                    placeholder="Describe your preferred lighting style"
+                    value={brandIdentity?.photography_lighting || ""}
+                    onChange={(e) => mutation.mutate({ photography_lighting: e.target.value })}
+                  />
+                  <Label>Lighting</Label>
+                </div>
               </div>
             </div>
           </section>
