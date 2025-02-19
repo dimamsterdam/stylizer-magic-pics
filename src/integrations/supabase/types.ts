@@ -36,6 +36,51 @@ export type Database = {
         }
         Relationships: []
       }
+      brand_identity: {
+        Row: {
+          age_range_max: number | null
+          age_range_min: number | null
+          characteristics: string[] | null
+          created_at: string
+          gender: Database["public"]["Enums"]["brand_audience_gender"] | null
+          id: string
+          income_level: Database["public"]["Enums"]["income_level"] | null
+          photography_lighting: string | null
+          photography_mood: string | null
+          updated_at: string
+          user_id: string
+          values: string[] | null
+        }
+        Insert: {
+          age_range_max?: number | null
+          age_range_min?: number | null
+          characteristics?: string[] | null
+          created_at?: string
+          gender?: Database["public"]["Enums"]["brand_audience_gender"] | null
+          id?: string
+          income_level?: Database["public"]["Enums"]["income_level"] | null
+          photography_lighting?: string | null
+          photography_mood?: string | null
+          updated_at?: string
+          user_id: string
+          values?: string[] | null
+        }
+        Update: {
+          age_range_max?: number | null
+          age_range_min?: number | null
+          characteristics?: string[] | null
+          created_at?: string
+          gender?: Database["public"]["Enums"]["brand_audience_gender"] | null
+          id?: string
+          income_level?: Database["public"]["Enums"]["income_level"] | null
+          photography_lighting?: string | null
+          photography_mood?: string | null
+          updated_at?: string
+          user_id?: string
+          values?: string[] | null
+        }
+        Relationships: []
+      }
       expose_localizations: {
         Row: {
           created_at: string
@@ -295,7 +340,9 @@ export type Database = {
     }
     Enums: {
       ai_feature_type: "text_generation" | "image_generation"
+      brand_audience_gender: "all" | "male" | "female" | "non_binary"
       expose_status: "draft" | "published" | "scheduled" | "archived"
+      income_level: "low" | "medium" | "high" | "luxury"
       task_priority: "low" | "medium" | "high"
     }
     CompositeTypes: {
