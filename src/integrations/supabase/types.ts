@@ -128,8 +128,10 @@ export type Database = {
           hero_image_tablet_url: string | null
           hero_image_url: string | null
           id: string
+          image_variations: Json[] | null
           occasion: string | null
           selected_product_ids: string[]
+          selected_variation_index: number | null
           start_date: string | null
           status: Database["public"]["Enums"]["expose_status"]
           theme: string | null
@@ -149,8 +151,10 @@ export type Database = {
           hero_image_tablet_url?: string | null
           hero_image_url?: string | null
           id?: string
+          image_variations?: Json[] | null
           occasion?: string | null
           selected_product_ids?: string[]
+          selected_variation_index?: number | null
           start_date?: string | null
           status?: Database["public"]["Enums"]["expose_status"]
           theme?: string | null
@@ -170,8 +174,10 @@ export type Database = {
           hero_image_tablet_url?: string | null
           hero_image_url?: string | null
           id?: string
+          image_variations?: Json[] | null
           occasion?: string | null
           selected_product_ids?: string[]
+          selected_variation_index?: number | null
           start_date?: string | null
           status?: Database["public"]["Enums"]["expose_status"]
           theme?: string | null
