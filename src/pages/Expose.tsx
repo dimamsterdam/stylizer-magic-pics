@@ -587,7 +587,7 @@ const Expose = () => {
                 <div className="bg-white rounded-lg border border-[#E3E5E7] p-6">
                   <div className="flex justify-between items-center mb-4">
                     <h3 className="font-medium text-[#1A1F2C]">Selected Products</h3>
-                    <Button variant="ghost" size="sm" onClick={() => setCurrentStep('products')} className="text-[#008060] hover:text-[#006e52]">
+                    <Button variant="ghost" size="sm" onClick={() => setCurrentStep('products')} className="text-[#333333] hover:text-[#1A1F2C] hover:bg-gray-100">
                       <Pen className="h-4 w-4 mr-1" />
                       Edit
                     </Button>
@@ -609,7 +609,7 @@ const Expose = () => {
                 <div className="bg-white rounded-lg border border-[#E3E5E7] p-6">
                   <div className="flex justify-between items-center mb-4">
                     <h3 className="font-medium text-[#1A1F2C]">Theme Description</h3>
-                    <Button variant="ghost" size="sm" onClick={() => setCurrentStep('theme')} className="text-[#008060] hover:text-[#006e52]">
+                    <Button variant="ghost" size="sm" onClick={() => setCurrentStep('theme')} className="text-[#333333] hover:text-[#1A1F2C] hover:bg-gray-100">
                       <Pen className="h-4 w-4 mr-1" />
                       Edit
                     </Button>
@@ -621,7 +621,7 @@ const Expose = () => {
                 <div className="bg-white rounded-lg border border-[#E3E5E7] p-6">
                   <div className="flex justify-between items-center mb-4">
                     <h3 className="font-medium text-[#1A1F2C]">Content</h3>
-                    <Button variant="ghost" size="sm" onClick={() => setCurrentStep('content')} className="text-[#008060] hover:text-[#006e52]">
+                    <Button variant="ghost" size="sm" onClick={() => setCurrentStep('content')} className="text-[#333333] hover:text-[#1A1F2C] hover:bg-gray-100">
                       <Pen className="h-4 w-4 mr-1" />
                       Edit
                     </Button>
