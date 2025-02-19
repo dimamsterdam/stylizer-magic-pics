@@ -239,6 +239,7 @@ const Brand = () => {
               <div className="flex gap-2">
                 <div className="flex-1">
                   <div className="space-y-2">
+                    <Label>Brand Value</Label>
                     <Input placeholder="Add a brand value" value={newValue} onChange={e => setNewValue(e.target.value)} onKeyDown={e => e.key === 'Enter' && handleAddValue()} />
                     
                   </div>
@@ -257,6 +258,7 @@ const Brand = () => {
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <div className="space-y-2">
+                  <Label>Age Range</Label>
                   <Select value={getCurrentAgeRangeValue()} onValueChange={value => {
                   const [min, max] = value.split('-').map(Number);
                   mutation.mutate({
@@ -273,11 +275,11 @@ const Brand = () => {
                         </SelectItem>)}
                     </SelectContent>
                   </Select>
-                  <Label>Age Range</Label>
                 </div>
               </div>
               <div>
                 <div className="space-y-2">
+                  <Label>Gender</Label>
                   <Select value={brandIdentity?.gender || 'all'} onValueChange={(value: 'all' | 'male' | 'female' | 'non_binary') => mutation.mutate({
                   gender: value
                 })}>
@@ -291,11 +293,11 @@ const Brand = () => {
                       <SelectItem value="non_binary">Non-binary</SelectItem>
                     </SelectContent>
                   </Select>
-                  <Label>Gender</Label>
                 </div>
               </div>
               <div>
                 <div className="space-y-2">
+                  <Label>Income Level</Label>
                   <Select value={brandIdentity?.income_level || 'medium'} onValueChange={(value: 'low' | 'medium' | 'high' | 'luxury') => mutation.mutate({
                   income_level: value
                 })}>
@@ -309,7 +311,6 @@ const Brand = () => {
                       <SelectItem value="luxury">Luxury</SelectItem>
                     </SelectContent>
                   </Select>
-                  <Label>Income Level</Label>
                 </div>
               </div>
             </div>
@@ -317,8 +318,9 @@ const Brand = () => {
               <div className="flex gap-2">
                 <div className="flex-1">
                   <div className="space-y-2">
-                    <Input placeholder="Add an audience characteristic" value={newCharacteristic} onChange={e => setNewCharacteristic(e.target.value)} onKeyDown={e => e.key === 'Enter' && handleAddCharacteristic()} />
                     <Label>Characteristics</Label>
+                    <Input placeholder="Add an audience characteristic" value={newCharacteristic} onChange={e => setNewCharacteristic(e.target.value)} onKeyDown={e => e.key === 'Enter' && handleAddCharacteristic()} />
+                    
                   </div>
                 </div>
                 <Button onClick={handleAddCharacteristic}>Add</Button>
@@ -343,18 +345,20 @@ const Brand = () => {
             <div className="space-y-4">
               <div>
                 <div className="space-y-2">
+                  <Label>Mood and Tone</Label>
                   <Textarea placeholder="Describe the mood and tone of your brand's photography" value={brandIdentity?.photography_mood || ""} onChange={e => mutation.mutate({
                   photography_mood: e.target.value
                 })} />
-                  <Label>Mood and Tone</Label>
+                  
                 </div>
               </div>
               <div>
                 <div className="space-y-2">
+                  <Label>Lighting</Label>
                   <Textarea placeholder="Describe your preferred lighting style" value={brandIdentity?.photography_lighting || ""} onChange={e => mutation.mutate({
                   photography_lighting: e.target.value
                 })} />
-                  <Label>Lighting</Label>
+                  
                 </div>
               </div>
             </div>
