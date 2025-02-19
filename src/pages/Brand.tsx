@@ -87,16 +87,37 @@ const Brand = () => {
   const [newValue, setNewValue] = React.useState("");
   const [newCharacteristic, setNewCharacteristic] = React.useState("");
 
-  const { data: brandIdentity, isLoading } = useQuery({
+  const { data: brandIdentity, isLoading, refetch } = useQuery({
     queryKey: ['brandIdentity'],
     queryFn: async () => {
+      const user = await supabase.auth.getUser();
       const { data, error } = await supabase
         .from('brand_identity')
         .select('*')
+        .eq('user_id', user.data.user?.id)
         .maybeSingle();
 
       if (error) throw error;
-      console.log("Fetched brand identity data:", data); // Added logging
+      
+      // If no brand identity exists, create one
+      if (!data && user.data.user) {
+        const { data: newData, error: insertError } = await supabase
+          .from('brand_identity')
+          .insert([{ 
+            user_id: user.data.user.id,
+            values: [],
+            characteristics: [],
+            gender: 'all',
+            income_level: 'medium'
+          }])
+          .select()
+          .single();
+          
+        if (insertError) throw insertError;
+        return newData as BrandIdentity;
+      }
+
+      console.log("Fetched brand identity data:", data);
       return data as BrandIdentity;
     }
   });
@@ -109,14 +130,10 @@ const Brand = () => {
           .update(values)
           .eq('id', brandIdentity.id);
         if (error) throw error;
-      } else {
-        const { error } = await supabase
-          .from('brand_identity')
-          .insert([{ ...values, user_id: (await supabase.auth.getUser()).data.user?.id }]);
-        if (error) throw error;
       }
     },
     onSuccess: () => {
+      refetch(); // Refetch the data after mutation
       toast({
         title: "Success",
         description: "Brand identity updated successfully",
@@ -399,4 +416,3 @@ const Brand = () => {
 };
 
 export default Brand;
-
