@@ -1,10 +1,14 @@
 
-import { ChevronDown, ChevronRight, Image, Video, Palette, Settings, ChevronLeft, Library } from "lucide-react";
+import { ChevronDown, ChevronRight, Image, Video, Palette, Settings, ChevronLeft, Library, LayoutDashboard } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
 import { Sidebar, SidebarContent, SidebarGroup, SidebarGroupContent, SidebarGroupLabel, SidebarMenu, SidebarMenuButton, SidebarMenuItem, SidebarTrigger } from "@/components/ui/sidebar";
 import { useState, useEffect } from "react";
 
 const mainNavItems = [{
+  title: "Dashboard",
+  icon: LayoutDashboard,
+  url: "/dashboard"
+}, {
   title: "Stylizer",
   icon: Palette,
   url: "/stylizer"

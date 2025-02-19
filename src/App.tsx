@@ -16,6 +16,7 @@ import Publish from "./pages/Publish";
 import Expose from "./pages/Expose";
 import Library from "./pages/Library";
 import Stylizer from "./pages/Stylizer";
+import Dashboard from "./pages/Dashboard";
 import NavBar from "./components/NavBar";
 import { GlobalSidebar } from "./components/GlobalSidebar";
 import { SidebarProvider } from "./components/ui/sidebar";
@@ -53,7 +54,11 @@ const router = createBrowserRouter([
         children: [
           {
             index: true,
-            element: <Index />,
+            element: <Navigate to="/dashboard" replace />,
+          },
+          {
+            path: "dashboard",
+            element: <Dashboard />,
           },
           {
             path: "settings",
