@@ -155,16 +155,18 @@ const Brand = () => {
       
       return data as BrandIdentity;
     },
-    onError: (error) => {
-      console.error('Error fetching brand identity:', error);
-      if (error.message === "No authenticated user") {
-        navigate("/auth");
-      } else {
-        toast({
-          title: "Error",
-          description: "Failed to load brand identity",
-          variant: "destructive"
-        });
+    meta: {
+      onError: (error: Error) => {
+        console.error('Error fetching brand identity:', error);
+        if (error.message === "No authenticated user") {
+          navigate("/auth");
+        } else {
+          toast({
+            title: "Error",
+            description: "Failed to load brand identity",
+            variant: "destructive"
+          });
+        }
       }
     }
   });
