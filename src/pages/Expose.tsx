@@ -498,17 +498,6 @@ const Expose = () => {
                 </div>
 
                 <div className="space-y-2">
-                  <Label>Writing Tone</Label>
-                  <ToneSelector
-                    value={selectedTone}
-                    onChange={(newTone) => {
-                      setSelectedTone(newTone);
-                      handleGenerateAll();
-                    }}
-                  />
-                </div>
-
-                <div className="space-y-2">
                   <div className="flex justify-between items-center">
                     <Label htmlFor="body-copy">Body Copy (40 words max)</Label>
                   </div>
@@ -522,6 +511,17 @@ const Expose = () => {
                   <p className="text-sm text-[#6D7175]">
                     {bodyCopy.split(' ').length}/40 words
                   </p>
+                </div>
+
+                <div className="space-y-2">
+                  <Label>Writing Tone</Label>
+                  <ToneSelector
+                    value={selectedTone}
+                    onChange={(newTone) => {
+                      setSelectedTone(newTone);
+                      handleGenerateAll();
+                    }}
+                  />
                 </div>
 
                 <div className="flex justify-end">
