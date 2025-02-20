@@ -1,6 +1,5 @@
 
 import React, { useState, useRef, useEffect } from "react";
-import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { MessageSquare, Send, Loader2 } from "lucide-react";
@@ -50,7 +49,6 @@ export function ToneChatbox({
 
   useEffect(() => {
     if (isOpen && messages.length === 0) {
-      // Add initial welcome message
       setMessages([
         {
           id: "welcome",
@@ -115,6 +113,18 @@ export function ToneChatbox({
       };
 
       setMessages(prev => [...prev, aiResponse]);
+      
+      // Automatically apply changes when receiving AI response
+      if (data.updatedHeadline || data.updatedBodyCopy) {
+        onToneChange({
+          headline: data.updatedHeadline || currentHeadline,
+          bodyCopy: data.updatedBodyCopy || currentBodyCopy
+        });
+        toast({
+          title: "Text updated",
+          description: "The tone adjustments have been applied.",
+        });
+      }
     } catch (error) {
       console.error('Error processing chat:', error);
       toast({
@@ -127,120 +137,110 @@ export function ToneChatbox({
     }
   };
 
-  const handleApplyChanges = () => {
-    const lastAiMessage = [...messages].reverse().find(m => m.type === 'ai' && m.preview);
-    if (lastAiMessage?.preview) {
-      onToneChange({
-        headline: lastAiMessage.preview.headline || currentHeadline,
-        bodyCopy: lastAiMessage.preview.bodyCopy || currentBodyCopy
-      });
-      toast({
-        title: "Changes applied",
-        description: "The tone adjustments have been applied to your text."
-      });
-    }
-  };
+  if (!isOpen) {
+    return (
+      <Button 
+        variant="outline" 
+        className="gap-2" 
+        onClick={() => onOpenChange(true)}
+      >
+        <MessageSquare className="h-4 w-4" />
+        Adjust Tone
+      </Button>
+    );
+  }
 
   return (
-    <Sheet open={isOpen} onOpenChange={onOpenChange}>
-      <SheetTrigger asChild>
-        <Button variant="outline" className="gap-2">
-          <MessageSquare className="h-4 w-4" />
-          Adjust Tone
+    <div className="rounded-lg border bg-card shadow-sm flex flex-col h-[400px]">
+      <div className="flex items-center justify-between px-4 py-2 border-b">
+        <h3 className="font-semibold text-lg">Adjust Your Text</h3>
+        <Button 
+          variant="ghost" 
+          size="sm" 
+          onClick={() => onOpenChange(false)}
+        >
+          Close
         </Button>
-      </SheetTrigger>
-      <SheetContent side="right" className="w-[400px] sm:max-w-[400px] flex flex-col h-full p-0">
-        <SheetHeader className="px-6 py-4 border-b">
-          <SheetTitle>Adjust Your Text</SheetTitle>
-        </SheetHeader>
-        
-        <div className="flex-1 overflow-y-auto px-6 py-4">
-          <div className="space-y-4">
-            {messages.map((message) => (
+      </div>
+      
+      <div className="flex-1 overflow-y-auto px-4 py-4">
+        <div className="space-y-4">
+          {messages.map((message) => (
+            <div
+              key={message.id}
+              className={cn(
+                "flex flex-col space-y-2",
+                message.type === 'user' ? "items-end" : "items-start"
+              )}
+            >
               <div
-                key={message.id}
                 className={cn(
-                  "flex flex-col space-y-2",
-                  message.type === 'user' ? "items-end" : "items-start"
+                  "rounded-lg px-4 py-2 max-w-[80%]",
+                  message.type === 'user'
+                    ? "bg-primary text-primary-foreground"
+                    : "bg-muted"
                 )}
               >
-                <div
-                  className={cn(
-                    "rounded-lg px-4 py-2 max-w-[80%]",
-                    message.type === 'user'
-                      ? "bg-primary text-primary-foreground"
-                      : "bg-muted"
-                  )}
-                >
-                  <p className="text-sm">{message.content}</p>
-                  {message.preview && (
-                    <div className="mt-2 text-xs border-t pt-2">
-                      <p className="font-semibold">{message.preview.headline}</p>
-                      <p className="mt-1">{message.preview.bodyCopy}</p>
-                    </div>
-                  )}
-                </div>
-              </div>
-            ))}
-            <div ref={messagesEndRef} />
-          </div>
-
-          {messages.length > 0 && (
-            <div className="mt-4">
-              <p className="text-sm text-muted-foreground mb-2">Quick suggestions:</p>
-              <div className="flex flex-wrap gap-2">
-                {QUICK_SUGGESTIONS.map((suggestion) => (
-                  <Button
-                    key={suggestion}
-                    variant="outline"
-                    size="sm"
-                    onClick={() => handleSendMessage(suggestion)}
-                    disabled={isProcessing}
-                  >
-                    {suggestion}
-                  </Button>
-                ))}
+                <p className="text-sm">{message.content}</p>
+                {message.preview && (
+                  <div className="mt-2 text-xs border-t pt-2">
+                    <p className="font-semibold">{message.preview.headline}</p>
+                    <p className="mt-1">{message.preview.bodyCopy}</p>
+                  </div>
+                )}
               </div>
             </div>
-          )}
+          ))}
+          <div ref={messagesEndRef} />
         </div>
 
-        <div className="border-t p-4 space-y-4">
-          <div className="flex items-center gap-2">
-            <Input
-              value={inputValue}
-              onChange={(e) => setInputValue(e.target.value)}
-              placeholder="Type your tone adjustment..."
-              onKeyPress={(e) => {
-                if (e.key === 'Enter' && !e.shiftKey) {
-                  e.preventDefault();
-                  handleSendMessage(inputValue);
-                }
-              }}
-              disabled={isProcessing}
-            />
-            <Button
-              size="icon"
-              onClick={() => handleSendMessage(inputValue)}
-              disabled={isProcessing || !inputValue.trim()}
-            >
-              {isProcessing ? (
-                <Loader2 className="h-4 w-4 animate-spin" />
-              ) : (
-                <Send className="h-4 w-4" />
-              )}
-            </Button>
+        {messages.length > 0 && (
+          <div className="mt-4">
+            <p className="text-sm text-muted-foreground mb-2">Quick suggestions:</p>
+            <div className="flex flex-wrap gap-2">
+              {QUICK_SUGGESTIONS.map((suggestion) => (
+                <Button
+                  key={suggestion}
+                  variant="outline"
+                  size="sm"
+                  onClick={() => handleSendMessage(suggestion)}
+                  disabled={isProcessing}
+                >
+                  {suggestion}
+                </Button>
+              ))}
+            </div>
           </div>
-          
-          <Button 
-            className="w-full" 
-            onClick={handleApplyChanges}
-            disabled={isProcessing || messages.length === 0}
+        )}
+      </div>
+
+      <div className="border-t p-4">
+        <div className="flex items-center gap-2">
+          <Input
+            value={inputValue}
+            onChange={(e) => setInputValue(e.target.value)}
+            placeholder="Type your tone adjustment..."
+            onKeyPress={(e) => {
+              if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                handleSendMessage(inputValue);
+              }
+            }}
+            disabled={isProcessing}
+          />
+          <Button
+            size="icon"
+            onClick={() => handleSendMessage(inputValue)}
+            disabled={isProcessing || !inputValue.trim()}
           >
-            Apply Changes
+            {isProcessing ? (
+              <Loader2 className="h-4 w-4 animate-spin" />
+            ) : (
+              <Send className="h-4 w-4" />
+            )}
           </Button>
         </div>
-      </SheetContent>
-    </Sheet>
+      </div>
+    </div>
   );
 }
