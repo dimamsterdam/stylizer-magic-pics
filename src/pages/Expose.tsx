@@ -16,6 +16,7 @@ import StepProgress from "@/components/StepProgress";
 import GeneratedImagePreview from "@/components/GeneratedImagePreview";
 import { ToneSelector, type ToneStyle } from "@/components/ToneSelector";
 import ImageGrid from '@/components/ImageGrid';
+import { ToneChatbox } from "@/components/ToneChatbox";
 
 interface Product {
   id: string;
@@ -45,6 +46,7 @@ const Expose = () => {
   const [exposeId, setExposeId] = useState<string | null>(null);
   const [selectedTone, setSelectedTone] = useState<number>(2);
   const [currentPlaceholderIndex, setCurrentPlaceholderIndex] = useState(0);
+  const [isToneChatOpen, setIsToneChatOpen] = useState(false);
 
   const {
     toast
@@ -440,6 +442,11 @@ const Expose = () => {
     }
   }, [currentStep]);
 
+  const handleToneChange = ({ headline: newHeadline, bodyCopy: newBodyCopy }: { headline: string; bodyCopy: string }) => {
+    setHeadline(newHeadline);
+    setBodyCopy(newBodyCopy);
+  };
+
   const renderStep = () => {
     switch (currentStep) {
       case 'products':
@@ -538,30 +545,42 @@ const Expose = () => {
                 <div className="space-y-2">
                   <div className="flex justify-between items-center">
                     <Label htmlFor="headline">Headline</Label>
-                    <Button variant="ghost" size="sm" onClick={handleGenerateAll} className="text-[#008060] hover:text-[#006e52]">
-                      <WandSparkles className="h-4 w-4 mr-1" />
-                      Regenerate
-                    </Button>
+                    <div className="flex items-center gap-2">
+                      <Button variant="ghost" size="sm" onClick={handleGenerateAll} className="text-[#008060] hover:text-[#006e52]">
+                        <WandSparkles className="h-4 w-4 mr-1" />
+                        Regenerate
+                      </Button>
+                      <ToneChatbox
+                        isOpen={isToneChatOpen}
+                        onOpenChange={setIsToneChatOpen}
+                        currentHeadline={headline}
+                        currentBodyCopy={bodyCopy}
+                        onToneChange={handleToneChange}
+                      />
+                    </div>
                   </div>
-                  <Textarea id="headline" value={headline} onChange={e => handleHeadlineChange(e as any)} placeholder="Enter a compelling headline" className="text-lg min-h-[40px] resize-none overflow-hidden" rows={1} />
+                  <Textarea 
+                    id="headline" 
+                    value={headline} 
+                    onChange={handleHeadlineChange}
+                    placeholder="Enter a compelling headline" 
+                    className="text-lg min-h-[40px] resize-none overflow-hidden"
+                    rows={1}
+                  />
                 </div>
 
                 <div className="space-y-2">
-                  <div className="flex justify-between items-center">
-                    <Label htmlFor="body-copy">Body Copy (40 words max)</Label>
-                  </div>
-                  <Textarea id="body-copy" value={bodyCopy} onChange={handleBodyCopyChange} placeholder="Enter the main content of your expose..." className="h-48" />
+                  <Label htmlFor="body-copy">Body Copy (40 words max)</Label>
+                  <Textarea 
+                    id="body-copy" 
+                    value={bodyCopy} 
+                    onChange={handleBodyCopyChange}
+                    placeholder="Enter the main content of your expose..." 
+                    className="h-48"
+                  />
                   <p className="text-sm text-[#6D7175]">
                     {bodyCopy.split(' ').length}/40 words
                   </p>
-                </div>
-
-                <div className="space-y-2">
-                  <Label>Writing Tone</Label>
-                  <ToneSelector value={selectedTone} onChange={newTone => {
-                  setSelectedTone(newTone);
-                  handleGenerateAll();
-                }} />
                 </div>
 
                 <div className="flex justify-end">
