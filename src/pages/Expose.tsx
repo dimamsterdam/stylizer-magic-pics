@@ -17,6 +17,7 @@ import GeneratedImagePreview from "@/components/GeneratedImagePreview";
 import { ToneSelector, type ToneStyle } from "@/components/ToneSelector";
 import ImageGrid from '@/components/ImageGrid';
 import { ToneChatbox } from "@/components/ToneChatbox";
+import { ThemeGenerator } from "@/components/ThemeGenerator";
 
 interface Product {
   id: string;
@@ -520,6 +521,11 @@ const Expose = () => {
                     className="h-32" 
                   />
                 </div>
+
+                <ThemeGenerator
+                  onThemeSelect={setThemeDescription}
+                  selectedProducts={selectedProducts}
+                />
 
                 <div className="flex justify-end pt-4">
                   <Button onClick={handleContinue} disabled={!themeDescription.trim()} className="bg-polaris-text hover:bg-black text-white">
