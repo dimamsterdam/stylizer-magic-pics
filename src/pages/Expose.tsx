@@ -18,24 +18,14 @@ import { ToneSelector, type ToneStyle } from "@/components/ToneSelector";
 import ImageGrid from '@/components/ImageGrid';
 import { ToneChatbox } from "@/components/ToneChatbox";
 import { ThemeGenerator } from "@/components/ThemeGenerator";
-
 interface Product {
   id: string;
   title: string;
   sku: string;
   image: string;
 }
-
 type Step = 'products' | 'theme' | 'content' | 'review' | 'results';
-
-const themeExamples = [
-  "Festive red theme with soft lighting and night club background",
-  "Minimalist white studio setup with dramatic shadows",
-  "Natural outdoor setting with morning sunlight and autumn colors",
-  "Modern urban environment with neon lights and city backdrop",
-  "Elegant marble surface with gold accents and soft diffused lighting"
-];
-
+const themeExamples = ["Festive red theme with soft lighting and night club background", "Minimalist white studio setup with dramatic shadows", "Natural outdoor setting with morning sunlight and autumn colors", "Modern urban environment with neon lights and city backdrop", "Elegant marble surface with gold accents and soft diffused lighting"];
 const Expose = () => {
   const [currentStep, setCurrentStep] = useState<Step>('products');
   const [searchTerm, setSearchTerm] = useState("");
@@ -48,12 +38,10 @@ const Expose = () => {
   const [selectedTone, setSelectedTone] = useState<number>(2);
   const [currentPlaceholderIndex, setCurrentPlaceholderIndex] = useState(0);
   const [isToneChatOpen, setIsToneChatOpen] = useState(false);
-
   const {
     toast
   } = useToast();
   const navigate = useNavigate();
-
   useEffect(() => {
     const checkAuth = async () => {
       const {
@@ -76,15 +64,12 @@ const Expose = () => {
     };
     checkAuth();
   }, [navigate]);
-
   useEffect(() => {
     const interval = setInterval(() => {
-      setCurrentPlaceholderIndex((prev) => (prev + 1) % themeExamples.length);
+      setCurrentPlaceholderIndex(prev => (prev + 1) % themeExamples.length);
     }, 5000);
-
     return () => clearInterval(interval);
   }, []);
-
   const {
     data: exposeData,
     isLoading: isLoadingExpose
@@ -111,7 +96,6 @@ const Expose = () => {
     },
     enabled: !!exposeId && currentStep === 'results'
   });
-
   const {
     data: searchResults = [],
     isLoading,
@@ -134,21 +118,17 @@ const Expose = () => {
     },
     enabled: searchTerm.length >= 2
   });
-
   const handleProductSelect = (product: Product) => {
     if (selectedProducts.length < 3) {
       setSelectedProducts(prev => [...prev, product]);
     }
   };
-
   const handleProductRemove = (productId: string) => {
     setSelectedProducts(prev => prev.filter(p => p.id !== productId));
   };
-
   const handleSearchChange = (term: string) => {
     setSearchTerm(term);
   };
-
   const handleContinue = async () => {
     if (currentStep === 'products' && selectedProducts.length === 0) return;
     if (currentStep === 'theme' && !themeDescription.trim()) return;
@@ -213,12 +193,10 @@ const Expose = () => {
       }
     }
   };
-
   const handleHeadlineChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     const cleanedValue = e.target.value.replace(/["']/g, '');
     setHeadline(cleanedValue);
   };
-
   const generateContent = async (type: 'headline' | 'body') => {
     try {
       const toneStyles: ToneStyle[] = ['formal', 'elegant', 'informal', 'playful', 'edgy'];
@@ -274,7 +252,6 @@ const Expose = () => {
       });
     }
   };
-
   const getToneDescription = (tone: ToneStyle) => {
     const descriptions: Record<ToneStyle, string> = {
       formal: "polished, professional, and authoritative",
@@ -285,7 +262,6 @@ const Expose = () => {
     };
     return descriptions[tone];
   };
-
   const handleBodyCopyChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     const words = e.target.value.split(' ');
     if (words.length > 40) {
@@ -298,7 +274,6 @@ const Expose = () => {
       setBodyCopy(e.target.value);
     }
   };
-
   const handleGenerateHero = async () => {
     if (!exposeId) return;
     setIsGenerating(true);
@@ -354,7 +329,6 @@ const Expose = () => {
       });
     }
   };
-
   const handleGenerateAll = async () => {
     toast({
       title: "Generating content",
@@ -375,11 +349,9 @@ const Expose = () => {
       });
     }
   };
-
   const handleStepClick = (step: Step) => {
     setCurrentStep(step);
   };
-
   const handleAddToLibrary = async () => {
     if (!exposeId) return;
     try {
@@ -397,7 +369,6 @@ const Expose = () => {
       });
     }
   };
-
   const handleRegenerate = async () => {
     setCurrentStep('review');
     toast({
@@ -405,7 +376,6 @@ const Expose = () => {
       description: "You can now modify your settings and generate a new image."
     });
   };
-
   const handleVariationSelect = async (index: number) => {
     if (!exposeId) return;
     try {
@@ -436,18 +406,21 @@ const Expose = () => {
       });
     }
   };
-
   useEffect(() => {
     if (currentStep === 'content' && !headline && !bodyCopy) {
       handleGenerateAll();
     }
   }, [currentStep]);
-
-  const handleToneChange = ({ headline: newHeadline, bodyCopy: newBodyCopy }: { headline: string; bodyCopy: string }) => {
+  const handleToneChange = ({
+    headline: newHeadline,
+    bodyCopy: newBodyCopy
+  }: {
+    headline: string;
+    bodyCopy: string;
+  }) => {
     setHeadline(newHeadline);
     setBodyCopy(newBodyCopy);
   };
-
   const renderStep = () => {
     switch (currentStep) {
       case 'products':
@@ -490,7 +463,7 @@ const Expose = () => {
                   </div>}
 
                 <div className="flex justify-end pt-4">
-                  <Button onClick={handleContinue} disabled={selectedProducts.length === 0} className="bg-polaris-text hover:bg-black text-white">
+                  <Button onClick={handleContinue} disabled={selectedProducts.length === 0} className="bg-polaris-text hover:bg-black text-slate-50">
                     {isGenerating ? <>
                         <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                         Generating...
@@ -513,19 +486,10 @@ const Expose = () => {
               <div className="space-y-6">
                 <div className="space-y-2">
                   <Label htmlFor="theme-description">Creative Brief</Label>
-                  <Textarea 
-                    id="theme-description" 
-                    value={themeDescription} 
-                    onChange={e => setThemeDescription(e.target.value)} 
-                    placeholder={themeExamples[currentPlaceholderIndex]}
-                    className="h-32" 
-                  />
+                  <Textarea id="theme-description" value={themeDescription} onChange={e => setThemeDescription(e.target.value)} placeholder={themeExamples[currentPlaceholderIndex]} className="h-32" />
                 </div>
 
-                <ThemeGenerator
-                  onThemeSelect={setThemeDescription}
-                  selectedProducts={selectedProducts}
-                />
+                <ThemeGenerator onThemeSelect={setThemeDescription} selectedProducts={selectedProducts} />
 
                 <div className="flex justify-end pt-4">
                   <Button onClick={handleContinue} disabled={!themeDescription.trim()} className="bg-polaris-text hover:bg-black text-white">
@@ -556,34 +520,15 @@ const Expose = () => {
                         <WandSparkles className="h-4 w-4 mr-1" />
                         Regenerate
                       </Button>
-                      <ToneChatbox
-                        isOpen={isToneChatOpen}
-                        onOpenChange={setIsToneChatOpen}
-                        currentHeadline={headline}
-                        currentBodyCopy={bodyCopy}
-                        onToneChange={handleToneChange}
-                      />
+                      <ToneChatbox isOpen={isToneChatOpen} onOpenChange={setIsToneChatOpen} currentHeadline={headline} currentBodyCopy={bodyCopy} onToneChange={handleToneChange} />
                     </div>
                   </div>
-                  <Textarea 
-                    id="headline" 
-                    value={headline} 
-                    onChange={handleHeadlineChange}
-                    placeholder="Enter a compelling headline" 
-                    className="text-lg min-h-[40px] resize-none overflow-hidden"
-                    rows={1}
-                  />
+                  <Textarea id="headline" value={headline} onChange={handleHeadlineChange} placeholder="Enter a compelling headline" className="text-lg min-h-[40px] resize-none overflow-hidden" rows={1} />
                 </div>
 
                 <div className="space-y-2">
                   <Label htmlFor="body-copy">Body Copy (40 words max)</Label>
-                  <Textarea 
-                    id="body-copy" 
-                    value={bodyCopy} 
-                    onChange={handleBodyCopyChange}
-                    placeholder="Enter the main content of your expose..." 
-                    className="h-48"
-                  />
+                  <Textarea id="body-copy" value={bodyCopy} onChange={handleBodyCopyChange} placeholder="Enter the main content of your expose..." className="h-48" />
                   <p className="text-sm text-[#6D7175]">
                     {bodyCopy.split(' ').length}/40 words
                   </p>
@@ -720,7 +665,6 @@ const Expose = () => {
           </Card>;
     }
   };
-
   return <div className="min-h-screen">
       <div className="p-4 sm:p-6">
         <div className="mb-6">
@@ -743,5 +687,4 @@ const Expose = () => {
       </div>
     </div>;
 };
-
 export default Expose;
