@@ -18,14 +18,18 @@ import { ToneSelector, type ToneStyle } from "@/components/ToneSelector";
 import ImageGrid from '@/components/ImageGrid';
 import { ToneChatbox } from "@/components/ToneChatbox";
 import { ThemeGenerator } from "@/components/ThemeGenerator";
+
 interface Product {
   id: string;
   title: string;
   sku: string;
   image: string;
 }
+
 type Step = 'products' | 'theme' | 'content' | 'review' | 'results';
+
 const themeExamples = ["Festive red theme with soft lighting and night club background", "Minimalist white studio setup with dramatic shadows", "Natural outdoor setting with morning sunlight and autumn colors", "Modern urban environment with neon lights and city backdrop", "Elegant marble surface with gold accents and soft diffused lighting"];
+
 const Expose = () => {
   const [currentStep, setCurrentStep] = useState<Step>('products');
   const [searchTerm, setSearchTerm] = useState("");
@@ -38,17 +42,12 @@ const Expose = () => {
   const [selectedTone, setSelectedTone] = useState<number>(2);
   const [currentPlaceholderIndex, setCurrentPlaceholderIndex] = useState(0);
   const [isToneChatOpen, setIsToneChatOpen] = useState(false);
-  const {
-    toast
-  } = useToast();
+  const { toast } = useToast();
   const navigate = useNavigate();
+
   useEffect(() => {
     const checkAuth = async () => {
-      const {
-        data: {
-          session
-        }
-      } = await supabase.auth.getSession();
+      const { data: { session } } = await supabase.auth.getSession();
       if (!session?.user) {
         toast({
           title: "Authentication required",
@@ -64,24 +63,20 @@ const Expose = () => {
     };
     checkAuth();
   }, [navigate]);
+
   useEffect(() => {
     const interval = setInterval(() => {
       setCurrentPlaceholderIndex(prev => (prev + 1) % themeExamples.length);
     }, 5000);
     return () => clearInterval(interval);
   }, []);
-  const {
-    data: exposeData,
-    isLoading: isLoadingExpose
-  } = useQuery({
+
+  const { data: exposeData, isLoading: isLoadingExpose } = useQuery({
     queryKey: ['expose', exposeId],
     queryFn: async () => {
       if (!exposeId) throw new Error('No expose ID');
       console.log('Fetching expose data for ID:', exposeId);
-      const {
-        data,
-        error
-      } = await supabase.from('exposes').select(`
+      const { data, error } = await supabase.from('exposes').select(`
           hero_image_url,
           hero_image_desktop_url,
           hero_image_tablet_url,
@@ -96,18 +91,12 @@ const Expose = () => {
     },
     enabled: !!exposeId && currentStep === 'results'
   });
-  const {
-    data: searchResults = [],
-    isLoading,
-    error
-  } = useQuery({
+
+  const { data: searchResults = [], isLoading, error } = useQuery({
     queryKey: ['products', searchTerm],
     queryFn: async () => {
       if (searchTerm.length < 2) return [];
-      const {
-        data,
-        error
-      } = await supabase.from('products').select('id, title, sku, image_url').ilike('title', `%${searchTerm}%`).limit(10);
+      const { data, error } = await supabase.from('products').select('id, title, sku, image_url').ilike('title', `%${searchTerm}%`).limit(10);
       if (error) throw error;
       return data.map(product => ({
         id: product.id,
@@ -118,27 +107,29 @@ const Expose = () => {
     },
     enabled: searchTerm.length >= 2
   });
+
   const handleProductSelect = (product: Product) => {
     if (selectedProducts.length < 3) {
       setSelectedProducts(prev => [...prev, product]);
     }
   };
+
   const handleProductRemove = (productId: string) => {
     setSelectedProducts(prev => prev.filter(p => p.id !== productId));
   };
+
   const handleSearchChange = (term: string) => {
     setSearchTerm(term);
   };
+
   const handleContinue = async () => {
     if (currentStep === 'products' && selectedProducts.length === 0) return;
     if (currentStep === 'theme' && !themeDescription.trim()) return;
     if (currentStep === 'content' && (!headline.trim() || !bodyCopy.trim())) return;
+
     if (currentStep === 'products') {
       try {
-        const {
-          data,
-          error
-        } = await supabase.from('exposes').insert({
+        const { data, error } = await supabase.from('exposes').insert({
           selected_product_ids: selectedProducts.map(p => p.id),
           status: 'draft',
           user_id: (await supabase.auth.getSession()).data.session!.user.id
@@ -157,9 +148,7 @@ const Expose = () => {
     } else if (currentStep === 'theme') {
       try {
         if (!exposeId) throw new Error('No expose ID');
-        const {
-          error
-        } = await supabase.from('exposes').update({
+        const { error } = await supabase.from('exposes').update({
           theme_description: themeDescription
         }).eq('id', exposeId);
         if (error) throw error;
@@ -175,9 +164,7 @@ const Expose = () => {
     } else if (currentStep === 'content') {
       try {
         if (!exposeId) throw new Error('No expose ID');
-        const {
-          error
-        } = await supabase.from('exposes').update({
+        const { error } = await supabase.from('exposes').update({
           headline,
           body_copy: bodyCopy
         }).eq('id', exposeId);
@@ -193,18 +180,17 @@ const Expose = () => {
       }
     }
   };
+
   const handleHeadlineChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     const cleanedValue = e.target.value.replace(/["']/g, '');
     setHeadline(cleanedValue);
   };
+
   const generateContent = async (type: 'headline' | 'body') => {
     try {
       const toneStyles: ToneStyle[] = ['formal', 'elegant', 'informal', 'playful', 'edgy'];
       const currentTone = toneStyles[selectedTone];
-      const {
-        data,
-        error
-      } = await supabase.functions.invoke('generate-content', {
+      const { data, error } = await supabase.functions.invoke('generate-content', {
         body: {
           type,
           products: selectedProducts.map(product => ({
@@ -217,9 +203,7 @@ const Expose = () => {
         }
       });
       if (error) throw error;
-      const {
-        generatedText
-      } = data;
+      const { generatedText } = data;
       if (type === 'headline') {
         const words = generatedText.split(' ');
         if (words.length > 12) {
@@ -252,6 +236,7 @@ const Expose = () => {
       });
     }
   };
+
   const getToneDescription = (tone: ToneStyle) => {
     const descriptions: Record<ToneStyle, string> = {
       formal: "polished, professional, and authoritative",
@@ -262,6 +247,7 @@ const Expose = () => {
     };
     return descriptions[tone];
   };
+
   const handleBodyCopyChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     const words = e.target.value.split(' ');
     if (words.length > 40) {
@@ -274,14 +260,12 @@ const Expose = () => {
       setBodyCopy(e.target.value);
     }
   };
+
   const handleGenerateHero = async () => {
     if (!exposeId) return;
     setIsGenerating(true);
     try {
-      const {
-        data,
-        error
-      } = await supabase.functions.invoke('generate-ai-image', {
+      const { data, error } = await supabase.functions.invoke('generate-ai-image', {
         body: {
           exposeId,
           products: selectedProducts.map(product => ({
@@ -296,9 +280,7 @@ const Expose = () => {
       });
       if (error) throw error;
       const pollInterval = setInterval(async () => {
-        const {
-          data: exposeData
-        } = await supabase.from('exposes').select('hero_image_generation_status, hero_image_desktop_url, hero_image_tablet_url, hero_image_mobile_url').eq('id', exposeId).single();
+        const { data: exposeData } = await supabase.from('exposes').select('hero_image_generation_status, hero_image_desktop_url, hero_image_tablet_url, hero_image_mobile_url').eq('id', exposeId).single();
         console.log('Polling expose data:', exposeData);
         if (exposeData?.hero_image_generation_status === 'completed') {
           clearInterval(pollInterval);
@@ -329,6 +311,7 @@ const Expose = () => {
       });
     }
   };
+
   const handleGenerateAll = async () => {
     toast({
       title: "Generating content",
@@ -349,9 +332,11 @@ const Expose = () => {
       });
     }
   };
+
   const handleStepClick = (step: Step) => {
     setCurrentStep(step);
   };
+
   const handleAddToLibrary = async () => {
     if (!exposeId) return;
     try {
@@ -369,6 +354,7 @@ const Expose = () => {
       });
     }
   };
+
   const handleRegenerate = async () => {
     setCurrentStep('review');
     toast({
@@ -376,6 +362,7 @@ const Expose = () => {
       description: "You can now modify your settings and generate a new image."
     });
   };
+
   const handleVariationSelect = async (index: number) => {
     if (!exposeId) return;
     try {
@@ -383,9 +370,7 @@ const Expose = () => {
       if (typeof selectedUrl !== 'string') {
         throw new Error('Invalid image URL');
       }
-      const {
-        error
-      } = await supabase.from('exposes').update({
+      const { error } = await supabase.from('exposes').update({
         selected_variation_index: index,
         hero_image_url: selectedUrl,
         hero_image_desktop_url: selectedUrl,
@@ -406,11 +391,13 @@ const Expose = () => {
       });
     }
   };
+
   useEffect(() => {
     if (currentStep === 'content' && !headline && !bodyCopy) {
       handleGenerateAll();
     }
   }, [currentStep]);
+
   const handleToneChange = ({
     headline: newHeadline,
     bodyCopy: newBodyCopy
@@ -421,6 +408,7 @@ const Expose = () => {
     setHeadline(newHeadline);
     setBodyCopy(newBodyCopy);
   };
+
   const renderStep = () => {
     switch (currentStep) {
       case 'products':
@@ -463,7 +451,7 @@ const Expose = () => {
                   </div>}
 
                 <div className="flex justify-end pt-4">
-                  <Button onClick={handleContinue} disabled={selectedProducts.length === 0} className="bg-polaris-text hover:bg-black text-slate-50">
+                  <Button onClick={handleContinue} disabled={selectedProducts.length === 0} className="bg-primary text-primary-foreground hover:bg-primary/90">
                     {isGenerating ? <>
                         <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                         Generating...
@@ -492,7 +480,7 @@ const Expose = () => {
                 <ThemeGenerator onThemeSelect={setThemeDescription} selectedProducts={selectedProducts} />
 
                 <div className="flex justify-end pt-4">
-                  <Button onClick={handleContinue} disabled={!themeDescription.trim()} className="bg-polaris-text hover:bg-black text-white">
+                  <Button onClick={handleContinue} disabled={!themeDescription.trim()} className="bg-primary text-primary-foreground hover:bg-primary/90">
                     Continue to Content
                   </Button>
                 </div>
@@ -535,7 +523,7 @@ const Expose = () => {
                 </div>
 
                 <div className="flex justify-end">
-                  <Button onClick={handleContinue} disabled={!headline.trim() || !bodyCopy.trim()} className="bg-polaris-text hover:bg-black text-white px-6">
+                  <Button onClick={handleContinue} disabled={!headline.trim() || !bodyCopy.trim()} className="bg-primary text-primary-foreground hover:bg-primary/90">
                     Continue to Review
                   </Button>
                 </div>
@@ -610,7 +598,7 @@ const Expose = () => {
                 </div>
 
                 <div className="flex justify-end pt-4">
-                  <Button onClick={handleGenerateHero} disabled={isGenerating} className="bg-polaris-text hover:bg-black text-white px-6">
+                  <Button onClick={handleGenerateHero} disabled={isGenerating} className="bg-primary text-primary-foreground hover:bg-primary/90">
                     {isGenerating ? <>
                         <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                         Generating...
@@ -665,6 +653,7 @@ const Expose = () => {
           </Card>;
     }
   };
+
   return <div className="min-h-screen">
       <div className="p-4 sm:p-6">
         <div className="mb-6">
@@ -687,4 +676,5 @@ const Expose = () => {
       </div>
     </div>;
 };
+
 export default Expose;
