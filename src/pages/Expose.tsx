@@ -508,7 +508,6 @@ const Expose = () => {
                         <WandSparkles className="h-4 w-4 mr-1" />
                         Regenerate
                       </Button>
-                      <ToneChatbox isOpen={isToneChatOpen} onOpenChange={setIsToneChatOpen} currentHeadline={headline} currentBodyCopy={bodyCopy} onToneChange={handleToneChange} />
                     </div>
                   </div>
                   <Textarea id="headline" value={headline} onChange={handleHeadlineChange} placeholder="Enter a compelling headline" className="text-lg min-h-[40px] resize-none overflow-hidden" rows={1} />
@@ -522,7 +521,8 @@ const Expose = () => {
                   </p>
                 </div>
 
-                <div className="flex justify-end">
+                <div className="flex justify-end gap-4">
+                  <ToneChatbox isOpen={isToneChatOpen} onOpenChange={setIsToneChatOpen} currentHeadline={headline} currentBodyCopy={bodyCopy} onToneChange={handleToneChange} />
                   <Button onClick={handleContinue} disabled={!headline.trim() || !bodyCopy.trim()} className="bg-primary text-primary-foreground hover:bg-primary/90">
                     Continue to Review
                   </Button>
@@ -626,10 +626,6 @@ const Expose = () => {
                     </Button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end" className="w-[180px]">
-                    <DropdownMenuItem onClick={handleRegenerate}>
-                      <RotateCw className="mr-2 h-4 w-4" />
-                      <span>Regenerate</span>
-                    </DropdownMenuItem>
                     <DropdownMenuItem onClick={handleAddToLibrary}>
                       <Save className="mr-2 h-4 w-4" />
                       <span>Add to Library</span>
@@ -645,9 +641,6 @@ const Expose = () => {
                   </div> : exposeData ? <ImageGrid variations={exposeData.image_variations as string[] || [exposeData.hero_image_url!]} selectedIndex={exposeData.selected_variation_index || 0} onSelect={handleVariationSelect} headline={headline} bodyCopy={bodyCopy} /> : <div className="text-center py-12 border rounded-lg bg-gray-50">
                     <p className="text-[#6D7175]">No generated image found. Please try generating again.</p>
                   </div>}
-                <div className="flex justify-end space-x-4">
-                  
-                </div>
               </div>
             </CardContent>
           </Card>;
