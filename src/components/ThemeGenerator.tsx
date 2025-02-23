@@ -1,4 +1,3 @@
-
 import React from "react";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/components/ui/use-toast";
@@ -145,7 +144,7 @@ export function ThemeGenerator({ onThemeSelect, selectedProducts }: ThemeGenerat
               variant="outline"
               className={cn(
                 "rounded-full transition-colors group",
-                theme.keyword === "Dramatic" && "text-white",
+                theme.keyword === "Dramatic" && "text-white hover:text-white",
                 generatingTheme === theme.keyword ? "opacity-70" : "hover:opacity-80"
               )}
               style={{
