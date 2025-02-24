@@ -8,6 +8,7 @@ import { MoreVertical, MessageCircle, Star } from "lucide-react";
 interface ContentCardProps {
   title: string;
   description: string;
+  imageUrl: string;
   badge: {
     label: string;
     color: string;
@@ -15,12 +16,17 @@ interface ContentCardProps {
   };
 }
 
-export const ContentCard = ({ title, description, badge }: ContentCardProps) => {
+export const ContentCard = ({ title, description, imageUrl, badge }: ContentCardProps) => {
   return (
     <Card className="group relative overflow-hidden bg-[--p-surface] shadow-[--p-shadow-card] hover:shadow-[--p-shadow-card-hover] transition-all duration-300 h-[360px]">
       {/* Background Image */}
-      <div className="absolute inset-0 w-full h-full bg-[--p-background-subdued]">
-        <div className="w-full h-full bg-gradient-to-b from-transparent via-black/30 to-black/60" />
+      <div className="absolute inset-0 w-full h-full">
+        <img 
+          src={imageUrl} 
+          alt={title}
+          className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+        />
+        <div className="absolute inset-0 w-full h-full bg-gradient-to-b from-transparent via-black/30 to-black/60" />
       </div>
 
       {/* Content Overlay */}
@@ -28,7 +34,7 @@ export const ContentCard = ({ title, description, badge }: ContentCardProps) => 
         {/* Top Section with Badge and Menu */}
         <div className="p-4 flex items-start justify-between">
           <Badge 
-            className="text-caption font-medium"
+            className="text-caption font-medium backdrop-blur-sm"
             style={{ 
               backgroundColor: badge.bgColor,
               color: badge.color
