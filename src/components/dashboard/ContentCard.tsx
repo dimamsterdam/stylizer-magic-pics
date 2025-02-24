@@ -21,7 +21,7 @@ export const ContentCard = ({ title, description, badge }: ContentCardProps) => 
       <CardHeader>
         <div className="flex items-center justify-between">
           <Badge 
-            className="font-medium"
+            className="text-caption font-medium"
             style={{ 
               backgroundColor: badge.bgColor,
               color: badge.color
@@ -33,10 +33,10 @@ export const ContentCard = ({ title, description, badge }: ContentCardProps) => 
             <MoreVertical className="h-4 w-4" />
           </Button>
         </div>
-        <CardTitle className="text-base font-medium text-[--p-text] mt-2">
+        <CardTitle className="text-heading font-medium text-[--p-text] mt-2">
           {title}
         </CardTitle>
-        <CardDescription className="text-[--p-text-subdued]">
+        <CardDescription className="text-body text-[--p-text-subdued]">
           {description}
         </CardDescription>
       </CardHeader>
@@ -48,14 +48,14 @@ export const ContentCard = ({ title, description, badge }: ContentCardProps) => 
           <div className="flex items-center gap-2">
             <Button 
               size="sm"
-              className="bg-[--p-action-primary] hover:bg-[--p-action-primary-hovered] text-white h-8"
+              className="text-body bg-[--p-action-primary] hover:bg-[--p-action-primary-hovered] text-white h-8"
             >
               Approve
             </Button>
             <Button 
               size="sm" 
               variant="outline"
-              className="border-[--p-border] text-[--p-text] h-8"
+              className="text-body border-[--p-border] text-[--p-text] h-8"
             >
               Adjust
             </Button>
