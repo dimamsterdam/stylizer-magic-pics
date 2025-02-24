@@ -1,13 +1,7 @@
 
 import React from 'react';
 import { Button } from "@/components/ui/button";
-import { MoreVertical, RotateCw, Save } from "lucide-react";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+import { RotateCw, Save } from "lucide-react";
 
 interface GalleryControlBarProps {
   currentIndex: number;
@@ -48,18 +42,6 @@ export const GalleryControlBar = ({
           <Save className="h-4 w-4 mr-2" />
           Save to Library
         </Button>
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="ghost" size="icon">
-              <MoreVertical className="h-4 w-4" />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            <DropdownMenuItem disabled>
-              Change Layout
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
       </div>
     </div>
   );
