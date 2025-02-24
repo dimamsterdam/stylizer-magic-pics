@@ -22,7 +22,7 @@ export const ExposeHeader = ({ currentStep, onStepClick }: ExposeHeaderProps) =>
         />
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-display-lg text-[--p-text]">Create an Expose</h1>
+            <h1 className="text-display-xl text-[--p-text]">Create an Expose</h1>
             <p className="mt-1 text-body text-[--p-text-subdued]">
               Generate AI-driven hero images with your products
             </p>
