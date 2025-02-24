@@ -5,10 +5,8 @@ export const DashboardHeader = () => {
       <div className="px-5 py-6">
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-[2rem] leading-[2.8rem] font-medium text-[--p-text]">Content Dashboard</h1>
-            <p className="mt-1 text-[--p-text-subdued] text-base">
-              Review and manage AI-generated content suggestions
-            </p>
+            <h1 className="text-[2rem] leading-[2.8rem] font-medium text-[--p-text]">Made for you</h1>
+            <p className="mt-1 text-[--p-text-subdued] text-base">Review and manage content suggestions Brandmachine made for you</p>
           </div>
           <div className="flex items-center gap-2">
             
