@@ -12,9 +12,7 @@ export const DashboardHeader = () => {
           </div>
           <div className="flex items-center gap-2">
             
-            <Button className="h-9 gap-2 bg-[--p-action-primary]">
-              View Calendar
-            </Button>
+            <Button className="h-9 gap-2 bg-[--p-action-primary]">Brand Calendar</Button>
           </div>
         </div>
       </div>
