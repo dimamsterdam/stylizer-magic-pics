@@ -428,8 +428,8 @@ const Expose = () => {
           <Card className="bg-[--p-surface] shadow-[--p-shadow-card] border-[--p-border-subdued]">
             <CardContent className="p-6 space-y-6">
               <div className="mt-4">
-                <h2 className="text-[1.75rem] leading-[2.4rem] font-medium text-[--p-text] mb-1">Select Products</h2>
-                <p className="text-[--p-text-subdued] text-base">
+                <h2 className="text-display-lg text-[--p-text] mb-1">Select Products</h2>
+                <p className="text-body text-[--p-text-subdued]">
                   Choose up to three products to feature in your hero image
                 </p>
               </div>
@@ -446,7 +446,7 @@ const Expose = () => {
 
               {selectedProducts.length > 0 && (
                 <div className="mt-8">
-                  <h3 className="text-base font-medium text-[--p-text] mb-3">
+                  <h3 className="text-heading text-[--p-text] mb-3">
                     Selected Products ({selectedProducts.length}/3)
                   </h3>
                   <div className="space-y-3">
@@ -462,10 +462,10 @@ const Expose = () => {
                           onError={e => { e.currentTarget.src = '/placeholder.svg'; }}
                         />
                         <div className="ml-3 flex-1 min-w-0">
-                          <h4 className="text-sm font-medium text-[--p-text] truncate">
+                          <h4 className="text-heading text-[--p-text] truncate">
                             {product.title}
                           </h4>
-                          <p className="text-xs text-[--p-text-subdued]">SKU: {product.sku}</p>
+                          <p className="text-caption text-[--p-text-subdued]">SKU: {product.sku}</p>
                         </div>
                         <Button 
                           onClick={() => handleProductRemove(product.id)}
@@ -503,19 +503,19 @@ const Expose = () => {
           <Card className="bg-[--p-surface] shadow-[--p-shadow-card] border-[--p-border-subdued]">
             <CardContent className="p-6 space-y-6">
               <div>
-                <h2 className="text-[1.75rem] leading-[2.4rem] font-medium text-[--p-text] mb-1">Describe Your Theme</h2>
-                <p className="text-[--p-text-subdued] text-base">Tell us how you want your products to be presented</p>
+                <h2 className="text-display-lg text-[--p-text] mb-1">Describe Your Theme</h2>
+                <p className="text-body text-[--p-text-subdued]">Tell us how you want your products to be presented</p>
               </div>
 
               <div className="space-y-4">
                 <div className="space-y-2">
-                  <Label htmlFor="theme-description" className="text-[--p-text]">Creative Brief</Label>
+                  <Label htmlFor="theme-description" className="text-heading text-[--p-text]">Creative Brief</Label>
                   <Textarea 
                     id="theme-description"
                     value={themeDescription}
                     onChange={e => setThemeDescription(e.target.value)}
                     placeholder={themeExamples[currentPlaceholderIndex]}
-                    className="min-h-[8rem] border-[--p-border] focus:border-[--p-focused] bg-[--p-surface]"
+                    className="min-h-[8rem] border-[--p-border] focus:border-[--p-focused] bg-[--p-surface] text-body"
                   />
                 </div>
 
@@ -540,14 +540,14 @@ const Expose = () => {
           <Card className="bg-[--p-surface] shadow-[--p-shadow-card] border-[--p-border-subdued]">
             <CardContent className="p-6 space-y-6">
               <div>
-                <h2 className="text-[1.75rem] leading-[2.4rem] font-medium text-[--p-text] mb-1">Add Content</h2>
-                <p className="text-[--p-text-subdued] text-base">Manage the Expose headline and subtext</p>
+                <h2 className="text-display-lg text-[--p-text] mb-1">Add Content</h2>
+                <p className="text-body text-[--p-text-subdued]">Manage the Expose headline and subtext</p>
               </div>
 
               <div className="space-y-4">
                 <div className="space-y-2">
                   <div className="flex justify-between items-center">
-                    <Label htmlFor="headline" className="text-[--p-text]">Headline</Label>
+                    <Label htmlFor="headline" className="text-heading text-[--p-text]">Headline</Label>
                     <div className="flex items-center gap-2">
                       {/* Additional controls can be added here */}
                     </div>
@@ -563,7 +563,7 @@ const Expose = () => {
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="body-copy" className="text-[--p-text]">Body Copy (40 words max)</Label>
+                  <Label htmlFor="body-copy" className="text-heading text-[--p-text]">Body Copy (40 words max)</Label>
                   <Textarea 
                     id="body-copy" 
                     value={bodyCopy} 
@@ -596,15 +596,15 @@ const Expose = () => {
           <Card className="bg-[--p-surface] shadow-[--p-shadow-card] border-[--p-border-subdued]">
             <CardContent className="p-6 space-y-6">
               <div>
-                <h2 className="text-[1.75rem] leading-[2.4rem] font-medium text-[--p-text] mb-1">Review Your Expose</h2>
-                <p className="text-[--p-text-subdued] text-base">Review all details before generating</p>
+                <h2 className="text-display-lg text-[--p-text] mb-1">Review Your Expose</h2>
+                <p className="text-body text-[--p-text-subdued]">Review all details before generating</p>
               </div>
 
               <div className="space-y-4">
                 {/* Products Section */}
                 <div className="bg-white rounded-lg border border-[#E3E5E7] p-6">
                   <div className="flex justify-between items-center mb-4">
-                    <h3 className="font-medium text-[#1A1F2C]">Selected Products</h3>
+                    <h3 className="text-heading text-[#1A1F2C]">Selected Products</h3>
                     <Button variant="ghost" size="sm" onClick={() => setCurrentStep('products')} className="text-[#333333] hover:text-[#1A1F2C] hover:bg-gray-100">
                       <Pen className="h-4 w-4 mr-1" />
                       Edit
@@ -615,8 +615,8 @@ const Expose = () => {
                       <div key={product.id} className="flex items-center space-x-3 bg-gray-50 rounded-lg p-3 flex-1 min-w-[250px]">
                         <img src={product.image} alt={product.title} className="w-16 h-16 object-cover rounded-lg" onError={e => { e.currentTarget.src = '/placeholder.svg'; }} />
                         <div>
-                          <h4 className="font-medium text-sm text-[#1A1F2C]">{product.title}</h4>
-                          <p className="text-xs text-[#6D7175]">SKU: {product.sku}</p>
+                          <h4 className="text-heading text-[#1A1F2C]">{product.title}</h4>
+                          <p className="text-caption text-[#6D7175]">SKU: {product.sku}</p>
                         </div>
                       </div>
                     ))}
@@ -626,19 +626,19 @@ const Expose = () => {
                 {/* Theme Section */}
                 <div className="bg-white rounded-lg border border-[#E3E5E7] p-6">
                   <div className="flex justify-between items-center mb-4">
-                    <h3 className="font-medium text-[#1A1F2C]">Theme Description</h3>
+                    <h3 className="text-heading text-[#1A1F2C]">Theme Description</h3>
                     <Button variant="ghost" size="sm" onClick={() => setCurrentStep('theme')} className="text-[#333333] hover:text-[#1A1F2C] hover:bg-gray-100">
                       <Pen className="h-4 w-4 mr-1" />
                       Edit
                     </Button>
                   </div>
-                  <p className="text-sm text-[#1A1F2C] bg-gray-50 rounded-lg p-4">{themeDescription}</p>
+                  <p className="text-body text-[#1A1F2C] bg-gray-50 rounded-lg p-4">{themeDescription}</p>
                 </div>
 
                 {/* Content Section */}
                 <div className="bg-white rounded-lg border border-[#E3E5E7] p-6">
                   <div className="flex justify-between items-center mb-4">
-                    <h3 className="font-medium text-[#1A1F2C]">Content</h3>
+                    <h3 className="text-heading text-[#1A1F2C]">Content</h3>
                     <Button variant="ghost" size="sm" onClick={() => setCurrentStep('content')} className="text-[#333333] hover:text-[#1A1F2C] hover:bg-gray-100">
                       <Pen className="h-4 w-4 mr-1" />
                       Edit
@@ -646,13 +646,13 @@ const Expose = () => {
                   </div>
                   <div className="space-y-4">
                     <div className="bg-gray-50 rounded-lg p-4">
-                      <h4 className="text-sm font-medium text-[#6D7175] mb-2">Headline</h4>
-                      <p className="text-lg text-[#1A1F2C]">{headline}</p>
+                      <h4 className="text-heading text-[#6D7175] mb-2">Headline</h4>
+                      <p className="text-body-lg text-[#1A1F2C]">{headline}</p>
                     </div>
                     <div className="bg-gray-50 rounded-lg p-4">
-                      <h4 className="text-sm font-medium text-[#6D7175] mb-2">Body Copy</h4>
-                      <p className="text-sm text-[#1A1F2C]">{bodyCopy}</p>
-                      <p className="text-xs text-[#6D7175] mt-2">{bodyCopy.split(' ').length}/40 words</p>
+                      <h4 className="text-heading text-[#6D7175] mb-2">Body Copy</h4>
+                      <p className="text-body text-[#1A1F2C]">{bodyCopy}</p>
+                      <p className="text-caption text-[#6D7175] mt-2">{bodyCopy.split(' ').length}/40 words</p>
                     </div>
                   </div>
                 </div>
@@ -677,8 +677,8 @@ const Expose = () => {
           <Card className="bg-[--p-surface] shadow-[--p-shadow-card] border-[--p-border-subdued]">
             <CardContent className="p-6 space-y-6">
               <div>
-                <h2 className="text-[1.75rem] leading-[2.4rem] font-medium text-[--p-text] mb-1">Results</h2>
-                <p className="text-[--p-text-subdued] text-base">Your expose has been generated successfully</p>
+                <h2 className="text-display-lg text-[--p-text] mb-1">Results</h2>
+                <p className="text-body text-[--p-text-subdued]">Your expose has been generated successfully</p>
               </div>
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>

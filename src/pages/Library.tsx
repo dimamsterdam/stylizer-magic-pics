@@ -77,8 +77,8 @@ const Library = () => {
       />
       
       <div className="mb-8">
-        <h1 className="text-2xl font-semibold text-[#1A1F2C] mb-2">Expose Library</h1>
-        <p className="text-[#6D7175]">Manage and publish your exposes</p>
+        <h1 className="text-display-lg text-[#1A1F2C] mb-2">Expose Library</h1>
+        <p className="text-body text-[#6D7175]">Manage and publish your exposes</p>
       </div>
 
       {isLoading ? (
@@ -120,14 +120,14 @@ const Library = () => {
                 </div>
               </div>
               <CardContent className="p-4">
-                <h2 className="font-semibold text-lg text-[#1A1F2C] mb-2">
+                <h2 className="text-heading text-[#1A1F2C] mb-2">
                   {expose.headline || 'Untitled Expose'}
                 </h2>
                 <div className="flex items-center justify-between">
-                  <span className="text-sm text-[#6D7175]">
+                  <span className="text-caption text-[#6D7175]">
                     {new Date(expose.created_at).toLocaleDateString()}
                   </span>
-                  <span className={`text-sm px-2 py-1 rounded-full ${
+                  <span className={`text-caption px-2 py-1 rounded-full ${
                     expose.status === 'published' 
                       ? 'bg-green-100 text-green-800' 
                       : 'bg-gray-100 text-gray-800'

@@ -51,7 +51,7 @@ const GeneratedImagePreview = ({
         </div>
         <div className="p-8 lg:p-12 flex flex-col justify-center">
           <div className="flex justify-between items-start mb-4">
-            <h2 className="font-sans font-bold text-display-lg tracking-[-0.02em] text-[#1A1F2C] leading-tight">
+            <h2 className="font-sans text-display-lg text-[#1A1F2C] leading-tight">
               {headline}
             </h2>
             <DropdownMenu>
@@ -76,7 +76,7 @@ const GeneratedImagePreview = ({
               </DropdownMenuContent>
             </DropdownMenu>
           </div>
-          <p className="font-sans text-body-md text-[#6D7175] leading-relaxed">
+          <p className="text-body text-[#6D7175] leading-relaxed">
             {bodyCopy}
           </p>
         </div>
