@@ -1,3 +1,4 @@
+
 import React from "react";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/components/ui/use-toast";
@@ -132,7 +133,7 @@ export function ThemeGenerator({ onThemeSelect, selectedProducts }: ThemeGenerat
 
   return (
     <div className="space-y-3">
-      <h3 className="text-sm font-medium text-muted-foreground">
+      <h3 className="text-sm font-medium text-[--p-text-subdued]">
         Quick Theme Suggestions
       </h3>
       <div className="flex flex-wrap gap-2">
@@ -143,7 +144,7 @@ export function ThemeGenerator({ onThemeSelect, selectedProducts }: ThemeGenerat
               key={theme.keyword}
               variant="outline"
               className={cn(
-                "rounded-full transition-colors group",
+                "rounded-full transition-colors group border-[--p-border]",
                 theme.keyword === "Dramatic" && "text-white hover:text-white",
                 generatingTheme === theme.keyword ? "opacity-70" : "hover:opacity-80"
               )}

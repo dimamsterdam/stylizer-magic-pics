@@ -11,13 +11,13 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { useNavigate } from "react-router-dom";
-import Breadcrumbs from "@/components/Breadcrumbs";
-import StepProgress from "@/components/StepProgress";
+import { ExposeHeader } from "@/components/expose/ExposeHeader";
 import GeneratedImagePreview from "@/components/GeneratedImagePreview";
 import { ToneSelector, type ToneStyle } from "@/components/ToneSelector";
 import ImageGrid from '@/components/ImageGrid';
 import { ToneChatbox } from "@/components/ToneChatbox";
 import { ThemeGenerator } from "@/components/ThemeGenerator";
+
 interface Product {
   id: string;
   title: string;
@@ -424,132 +424,183 @@ const Expose = () => {
   const renderStep = () => {
     switch (currentStep) {
       case 'products':
-        return <Card className="border-0 shadow-sm">
-            <CardHeader className="p-6 pb-2">
-            </CardHeader>
-            <StepProgress currentStep={currentStep} onStepClick={handleStepClick} />
-            <div className="px-6 pt-4">
+        return (
+          <Card className="bg-[--p-surface] shadow-[--p-shadow-card] border-[--p-border-subdued]">
+            <CardContent className="p-6 space-y-6">
               <div className="mt-4">
-                <h2 className="text-display-md text-polaris-text mb-1">Select Products</h2>
-                <p className="text-body-md text-polaris-secondary">
+                <h2 className="text-[1.75rem] leading-[2.4rem] font-medium text-[--p-text] mb-1">Select Products</h2>
+                <p className="text-[--p-text-subdued] text-base">
                   Choose up to three products to feature in your hero image
                 </p>
               </div>
-            </div>
-            <CardContent className="p-6">
-              <div className="space-y-6">
-                <ProductPicker onSelect={handleProductSelect} selectedProducts={selectedProducts} searchResults={searchResults} isLoading={isLoading} error={error ? 'Error loading products' : null} searchTerm={searchTerm} onSearch={handleSearchChange} />
 
-                {selectedProducts.length > 0 && <div className="mt-8">
-                    <h3 className="text-sm font-medium text-[#1A1F2C] mb-3">
-                      Selected Products ({selectedProducts.length}/3)
-                    </h3>
-                    <div className="space-y-3">
-                      {selectedProducts.map(product => <div key={product.id} className="flex items-center p-4 border rounded-lg border-[#E3E5E7] bg-white">
-                          <img src={product.image} alt={product.title} className="w-12 h-12 object-cover rounded" onError={e => {
-                      e.currentTarget.src = '/placeholder.svg';
-                    }} />
-                          <div className="ml-3 flex-1 min-w-0">
-                            <h4 className="text-sm font-medium text-[#1A1F2C] truncate">
-                              {product.title}
-                            </h4>
-                            <p className="text-xs text-[#6D7175]">SKU: {product.sku}</p>
-                          </div>
-                          <Button onClick={() => handleProductRemove(product.id)} variant="ghost" className="text-[#6D7175] hover:text-red-600 hover:bg-red-50">
-                            Remove
-                          </Button>
-                        </div>)}
-                    </div>
-                  </div>}
+              <ProductPicker 
+                onSelect={handleProductSelect} 
+                selectedProducts={selectedProducts}
+                searchResults={searchResults}
+                isLoading={isLoading}
+                error={error ? 'Error loading products' : null}
+                searchTerm={searchTerm}
+                onSearch={handleSearchChange}
+              />
 
-                <div className="flex justify-end pt-4">
-                  <Button onClick={handleContinue} disabled={selectedProducts.length === 0} className="bg-primary text-primary-foreground hover:bg-primary/90">
-                    {isGenerating ? <>
-                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                        Generating...
-                      </> : 'Continue'}
-                  </Button>
+              {selectedProducts.length > 0 && (
+                <div className="mt-8">
+                  <h3 className="text-base font-medium text-[--p-text] mb-3">
+                    Selected Products ({selectedProducts.length}/3)
+                  </h3>
+                  <div className="space-y-3">
+                    {selectedProducts.map(product => (
+                      <div 
+                        key={product.id} 
+                        className="flex items-center p-4 border rounded-lg border-[--p-border] bg-[--p-surface]"
+                      >
+                        <img 
+                          src={product.image} 
+                          alt={product.title} 
+                          className="w-12 h-12 object-cover rounded"
+                          onError={e => { e.currentTarget.src = '/placeholder.svg'; }}
+                        />
+                        <div className="ml-3 flex-1 min-w-0">
+                          <h4 className="text-sm font-medium text-[--p-text] truncate">
+                            {product.title}
+                          </h4>
+                          <p className="text-xs text-[--p-text-subdued]">SKU: {product.sku}</p>
+                        </div>
+                        <Button 
+                          onClick={() => handleProductRemove(product.id)}
+                          variant="ghost"
+                          className="text-[--p-text-subdued] hover:text-[--p-text] hover:bg-[--p-surface-hovered]"
+                        >
+                          Remove
+                        </Button>
+                      </div>
+                    ))}
+                  </div>
                 </div>
+              )}
+
+              <div className="flex justify-end pt-4">
+                <Button 
+                  onClick={handleContinue}
+                  disabled={selectedProducts.length === 0}
+                  className="bg-[--p-action-primary] text-white hover:bg-[--p-action-primary-hovered]"
+                >
+                  {isGenerating ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      Generating...
+                    </>
+                  ) : 'Continue'}
+                </Button>
               </div>
             </CardContent>
-          </Card>;
+          </Card>
+        );
+
       case 'theme':
-        return <Card className="border-0 shadow-sm">
-            <CardHeader className="p-6 pb-2">
+        return (
+          <Card className="bg-[--p-surface] shadow-[--p-shadow-card] border-[--p-border-subdued]">
+            <CardContent className="p-6 space-y-6">
               <div>
-                <h2 className="text-lg font-semibold text-[#1A1F2C] mb-1">Describe Your Theme</h2>
-                <p className="text-[#6D7175]">Tell us how you want your products to be presented</p>
+                <h2 className="text-[1.75rem] leading-[2.4rem] font-medium text-[--p-text] mb-1">Describe Your Theme</h2>
+                <p className="text-[--p-text-subdued] text-base">Tell us how you want your products to be presented</p>
               </div>
-            </CardHeader>
-            <StepProgress currentStep={currentStep} onStepClick={handleStepClick} />
-            <CardContent className="p-6">
-              <div className="space-y-6">
+
+              <div className="space-y-4">
                 <div className="space-y-2">
-                  <Label htmlFor="theme-description">Creative Brief</Label>
-                  <Textarea id="theme-description" value={themeDescription} onChange={e => setThemeDescription(e.target.value)} placeholder={themeExamples[currentPlaceholderIndex]} className="h-32" />
+                  <Label htmlFor="theme-description" className="text-[--p-text]">Creative Brief</Label>
+                  <Textarea 
+                    id="theme-description"
+                    value={themeDescription}
+                    onChange={e => setThemeDescription(e.target.value)}
+                    placeholder={themeExamples[currentPlaceholderIndex]}
+                    className="min-h-[8rem] border-[--p-border] focus:border-[--p-focused] bg-[--p-surface]"
+                  />
                 </div>
 
                 <ThemeGenerator onThemeSelect={setThemeDescription} selectedProducts={selectedProducts} />
+              </div>
 
-                <div className="flex justify-end pt-4">
-                  <Button onClick={handleContinue} disabled={!themeDescription.trim()} className="bg-primary text-primary-foreground hover:bg-primary/90">
-                    Continue to Content
-                  </Button>
-                </div>
+              <div className="flex justify-end pt-4">
+                <Button 
+                  onClick={handleContinue}
+                  disabled={!themeDescription.trim()}
+                  className="bg-[--p-action-primary] text-white hover:bg-[--p-action-primary-hovered]"
+                >
+                  Continue to Content
+                </Button>
               </div>
             </CardContent>
-          </Card>;
+          </Card>
+        );
+
       case 'content':
-        return <Card className="border-0 shadow-sm">
-            <CardHeader className="p-6 pb-2">
-            </CardHeader>
-            <StepProgress currentStep={currentStep} onStepClick={handleStepClick} />
-            <div className="px-6 pt-4">
+        return (
+          <Card className="bg-[--p-surface] shadow-[--p-shadow-card] border-[--p-border-subdued]">
+            <CardContent className="p-6 space-y-6">
               <div>
-                <h2 className="text-lg font-semibold text-[#1A1F2C] mb-1">Add Content</h2>
-                <p className="text-[#6D7175]">Manage the Expose headline and subtext</p>
+                <h2 className="text-[1.75rem] leading-[2.4rem] font-medium text-[--p-text] mb-1">Add Content</h2>
+                <p className="text-[--p-text-subdued] text-base">Manage the Expose headline and subtext</p>
               </div>
-            </div>
-            <CardContent className="p-6">
-              <div className="space-y-6">
+
+              <div className="space-y-4">
                 <div className="space-y-2">
                   <div className="flex justify-between items-center">
-                    <Label htmlFor="headline">Headline</Label>
+                    <Label htmlFor="headline" className="text-[--p-text]">Headline</Label>
                     <div className="flex items-center gap-2">
-                      
+                      {/* Additional controls can be added here */}
                     </div>
                   </div>
-                  <Textarea id="headline" value={headline} onChange={handleHeadlineChange} placeholder="Enter a compelling headline" className="text-lg min-h-[40px] resize-none overflow-hidden" rows={1} />
+                  <Textarea 
+                    id="headline" 
+                    value={headline} 
+                    onChange={handleHeadlineChange} 
+                    placeholder="Enter a compelling headline" 
+                    className="text-lg min-h-[40px] resize-none overflow-hidden" 
+                    rows={1} 
+                  />
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="body-copy">Body Copy (40 words max)</Label>
-                  <Textarea id="body-copy" value={bodyCopy} onChange={handleBodyCopyChange} placeholder="Enter the main content of your expose..." className="h-48" />
-                  <p className="text-sm text-[#6D7175]">
+                  <Label htmlFor="body-copy" className="text-[--p-text]">Body Copy (40 words max)</Label>
+                  <Textarea 
+                    id="body-copy" 
+                    value={bodyCopy} 
+                    onChange={handleBodyCopyChange} 
+                    placeholder="Enter the main content of your expose..." 
+                    className="h-48 border-[--p-border] focus:border-[--p-focused] bg-[--p-surface]"
+                  />
+                  <p className="text-sm text-[--p-text-subdued]">
                     {bodyCopy.split(' ').length}/40 words
                   </p>
                 </div>
 
                 <div className="flex justify-end gap-4">
                   <ToneChatbox isOpen={isToneChatOpen} onOpenChange={setIsToneChatOpen} currentHeadline={headline} currentBodyCopy={bodyCopy} onToneChange={handleToneChange} />
-                  <Button onClick={handleContinue} disabled={!headline.trim() || !bodyCopy.trim()} className="bg-primary text-primary-foreground hover:bg-primary/90">
+                  <Button 
+                    onClick={handleContinue} 
+                    disabled={!headline.trim() || !bodyCopy.trim()} 
+                    className="bg-[--p-action-primary] text-white hover:bg-[--p-action-primary-hovered]"
+                  >
                     Continue to Review
                   </Button>
                 </div>
               </div>
             </CardContent>
-          </Card>;
+          </Card>
+        );
+
       case 'review':
-        return <Card className="border-0 shadow-sm">
-            <CardHeader className="p-6 pb-2">
-              <StepProgress currentStep={currentStep} onStepClick={handleStepClick} />
-              <div className="mt-4">
-                <h2 className="text-lg font-semibold text-[#1A1F2C] mb-1">Review Your Expose</h2>
-                <p className="text-[#6D7175]">Review all details before generating</p>
+        return (
+          <Card className="bg-[--p-surface] shadow-[--p-shadow-card] border-[--p-border-subdued]">
+            <CardContent className="p-6 space-y-6">
+              <div>
+                <h2 className="text-[1.75rem] leading-[2.4rem] font-medium text-[--p-text] mb-1">Review Your Expose</h2>
+                <p className="text-[--p-text-subdued] text-base">Review all details before generating</p>
               </div>
-            </CardHeader>
-            <CardContent className="p-6">
-              <div className="space-y-6">
+
+              <div className="space-y-4">
                 {/* Products Section */}
                 <div className="bg-white rounded-lg border border-[#E3E5E7] p-6">
                   <div className="flex justify-between items-center mb-4">
@@ -560,15 +611,15 @@ const Expose = () => {
                     </Button>
                   </div>
                   <div className="flex flex-wrap gap-4">
-                    {selectedProducts.map(product => <div key={product.id} className="flex items-center space-x-3 bg-gray-50 rounded-lg p-3 flex-1 min-w-[250px]">
-                        <img src={product.image} alt={product.title} className="w-16 h-16 object-cover rounded-lg" onError={e => {
-                      e.currentTarget.src = '/placeholder.svg';
-                    }} />
+                    {selectedProducts.map(product => (
+                      <div key={product.id} className="flex items-center space-x-3 bg-gray-50 rounded-lg p-3 flex-1 min-w-[250px]">
+                        <img src={product.image} alt={product.title} className="w-16 h-16 object-cover rounded-lg" onError={e => { e.currentTarget.src = '/placeholder.svg'; }} />
                         <div>
                           <h4 className="font-medium text-sm text-[#1A1F2C]">{product.title}</h4>
                           <p className="text-xs text-[#6D7175]">SKU: {product.sku}</p>
                         </div>
-                      </div>)}
+                      </div>
+                    ))}
                   </div>
                 </div>
 
@@ -607,74 +658,68 @@ const Expose = () => {
                 </div>
 
                 <div className="flex justify-end pt-4">
-                  <Button onClick={handleGenerateHero} disabled={isGenerating} className="bg-primary text-primary-foreground hover:bg-primary/90">
-                    {isGenerating ? <>
+                  <Button onClick={handleGenerateHero} disabled={isGenerating} className="bg-[--p-action-primary] text-white hover:bg-[--p-action-primary-hovered]">
+                    {isGenerating ? (
+                      <>
                         <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                         Generating...
-                      </> : 'Generate Hero Image'}
+                      </>
+                    ) : 'Generate Hero Image'}
                   </Button>
                 </div>
               </div>
             </CardContent>
-          </Card>;
+          </Card>
+        );
+
       case 'results':
-        return <Card className="border-0 shadow-sm">
-            <CardHeader className="p-6 pb-2">
-            </CardHeader>
-            <StepProgress currentStep={currentStep} onStepClick={handleStepClick} />
-            <div className="px-6 pt-4">
-              <div className="flex justify-between items-center">
-                <div>
-                  <h2 className="text-lg font-semibold text-[#1A1F2C] mb-1">Results</h2>
-                  <p className="text-[#6D7175]">Your expose has been generated successfully</p>
-                </div>
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
-                      <MoreVertical className="h-4 w-4 text-[#6D7175]" />
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end" className="w-[180px]">
-                    <DropdownMenuItem onClick={handleAddToLibrary}>
-                      <Save className="mr-2 h-4 w-4" />
-                      <span>Add to Library</span>
-                    </DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
+        return (
+          <Card className="bg-[--p-surface] shadow-[--p-shadow-card] border-[--p-border-subdued]">
+            <CardContent className="p-6 space-y-6">
+              <div>
+                <h2 className="text-[1.75rem] leading-[2.4rem] font-medium text-[--p-text] mb-1">Results</h2>
+                <p className="text-[--p-text-subdued] text-base">Your expose has been generated successfully</p>
               </div>
-            </div>
-            <CardContent className="p-6">
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+                    <MoreVertical className="h-4 w-4 text-[#6D7175]" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-[180px]">
+                  <DropdownMenuItem onClick={handleAddToLibrary}>
+                    <Save className="mr-2 h-4 w-4" />
+                    <span>Add to Library</span>
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
               <div className="space-y-6">
-                {isLoadingExpose ? <div className="flex items-center justify-center py-12">
+                {isLoadingExpose ? (
+                  <div className="flex items-center justify-center py-12">
                     <Loader2 className="h-8 w-8 animate-spin text-[#008060]" />
-                  </div> : exposeData ? <ImageGrid variations={exposeData.image_variations as string[] || [exposeData.hero_image_url!]} selectedIndex={exposeData.selected_variation_index || 0} onSelect={handleVariationSelect} headline={headline} bodyCopy={bodyCopy} /> : <div className="text-center py-12 border rounded-lg bg-gray-50">
+                  </div>
+                ) : exposeData ? (
+                  <ImageGrid variations={exposeData.image_variations as string[] || [exposeData.hero_image_url!]} selectedIndex={exposeData.selected_variation_index || 0} onSelect={handleVariationSelect} headline={headline} bodyCopy={bodyCopy} />
+                ) : (
+                  <div className="text-center py-12 border rounded-lg bg-gray-50">
                     <p className="text-[#6D7175]">No generated image found. Please try generating again.</p>
-                  </div>}
+                  </div>
+                )}
               </div>
             </CardContent>
-          </Card>;
+          </Card>
+        );
     }
   };
-  return <div className="min-h-screen">
-      <div className="p-4 sm:p-6">
-        <div className="mb-6">
-          <Breadcrumbs className="mb-4" items={[{
-          label: 'Home',
-          href: '/'
-        }, {
-          label: 'Create Expose',
-          href: '/expose'
-        }]} />
-          <h1 className="text-display-lg text-polaris-text mt-4">Create an Expose</h1>
-          <p className="text-body-md text-polaris-secondary mt-1">
-            Generate AI-driven hero images with your products
-          </p>
-        </div>
-
+  return (
+    <div className="max-w-[99.8rem] mx-auto">
+      <ExposeHeader currentStep={currentStep} onStepClick={handleStepClick} />
+      <div className="p-5 bg-[--p-background] min-h-[calc(100vh-129px)]">
         <div className="max-w-3xl mx-auto">
           {renderStep()}
         </div>
       </div>
-    </div>;
+    </div>
+  );
 };
 export default Expose;
