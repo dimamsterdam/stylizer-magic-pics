@@ -1,95 +1,46 @@
-
 import React from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { CalendarClock, ThumbsUp, Lightbulb } from "lucide-react";
 import { DashboardHeader } from "@/components/dashboard/DashboardHeader";
 import { StatCard } from "@/components/dashboard/StatCard";
 import { ContentCard } from "@/components/dashboard/ContentCard";
-
 const Dashboard = () => {
-  return (
-    <div className="max-w-[99.8rem] mx-auto">
+  return <div className="max-w-[99.8rem] mx-auto">
       <DashboardHeader />
 
       <div className="p-5 space-y-5 bg-[--p-background] min-h-[calc(100vh-129px)]">
         {/* Stats Grid */}
         <div className="grid gap-5 md:grid-cols-3">
-          <StatCard
-            title="Pending Review"
-            value={12}
-            change="+2 from yesterday"
-            icon={CalendarClock}
-          />
-          <StatCard
-            title="Approved Today"
-            value={8}
-            change="+3 from yesterday"
-            icon={ThumbsUp}
-          />
-          <StatCard
-            title="AI Suggestions"
-            value={24}
-            change="Generated overnight"
-            icon={Lightbulb}
-          />
+          <StatCard title="Pending Review" value={12} change="+2 from yesterday" icon={CalendarClock} />
+          <StatCard title="Approved Today" value={8} change="+3 from yesterday" icon={ThumbsUp} />
+          <StatCard title="AI Suggestions" value={24} change="Generated overnight" icon={Lightbulb} />
         </div>
 
         {/* Content Tabs */}
         <div className="bg-[--p-surface] rounded-lg shadow-[--p-shadow-card]">
           <Tabs defaultValue="seasonality" className="w-full">
             <div className="border-b border-[--p-border]">
-              <TabsList className="px-5">
-                <TabsTrigger 
-                  value="seasonality"
-                  className="py-4 px-4 text-[0.875rem] leading-[1.25rem] font-medium data-[state=active]:border-b-2 data-[state=active]:border-[--p-action-primary] data-[state=active]:text-[--p-text]"
-                >
-                  Seasonality
-                </TabsTrigger>
-                <TabsTrigger 
-                  value="catalog"
-                  className="py-4 px-4 text-[0.875rem] leading-[1.25rem] font-medium data-[state=active]:border-b-2 data-[state=active]:border-[--p-action-primary] data-[state=active]:text-[--p-text]"
-                >
-                  Catalog Updates
-                </TabsTrigger>
-                <TabsTrigger 
-                  value="sales"
-                  className="py-4 px-4 text-[0.875rem] leading-[1.25rem] font-medium data-[state=active]:border-b-2 data-[state=active]:border-[--p-action-primary] data-[state=active]:text-[--p-text]"
-                >
-                  Sales Data
-                </TabsTrigger>
-              </TabsList>
+              
             </div>
 
             <div className="p-5">
               <TabsContent value="seasonality" className="mt-0">
                 <div className="grid gap-5 md:grid-cols-2 lg:grid-cols-3">
-                  <ContentCard
-                    title="Christmas Collection Launch"
-                    description="Holiday season campaign featuring new arrivals"
-                    badge={{
-                      label: "Seasonality",
-                      color: "#C05717",
-                      bgColor: "#FDF8F3"
-                    }}
-                  />
-                  <ContentCard
-                    title="Winter Essentials"
-                    description="Curated collection of seasonal must-haves"
-                    badge={{
-                      label: "Lookbook",
-                      color: "#1D6FD0",
-                      bgColor: "#EBF5FA"
-                    }}
-                  />
-                  <ContentCard
-                    title="Holiday Gift Guide"
-                    description="Interactive video showcase of gift ideas"
-                    badge={{
-                      label: "Video",
-                      color: "#5C248D",
-                      bgColor: "#F6F0FD"
-                    }}
-                  />
+                  <ContentCard title="Christmas Collection Launch" description="Holiday season campaign featuring new arrivals" badge={{
+                  label: "Seasonality",
+                  color: "#C05717",
+                  bgColor: "#FDF8F3"
+                }} />
+                  <ContentCard title="Winter Essentials" description="Curated collection of seasonal must-haves" badge={{
+                  label: "Lookbook",
+                  color: "#1D6FD0",
+                  bgColor: "#EBF5FA"
+                }} />
+                  <ContentCard title="Holiday Gift Guide" description="Interactive video showcase of gift ideas" badge={{
+                  label: "Video",
+                  color: "#5C248D",
+                  bgColor: "#F6F0FD"
+                }} />
                 </div>
               </TabsContent>
 
@@ -108,8 +59,6 @@ const Dashboard = () => {
           </Tabs>
         </div>
       </div>
-    </div>
-  );
+    </div>;
 };
-
 export default Dashboard;
