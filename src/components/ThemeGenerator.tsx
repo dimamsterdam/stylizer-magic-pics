@@ -40,37 +40,37 @@ const THEME_SUGGESTIONS: ThemePill[] = [
   {
     keyword: "Studio",
     color: "#D6BCFA",
-    template: "Professional studio setup with carefully positioned soft lighting and modern atmosphere",
+    template: "Professional studio setup with EFFECT lighting and MOOD atmosphere",
     icon: Sparkles
   },
   {
     keyword: "Natural",
     color: "#F2FCE2",
-    template: "Natural daylight setting with warm tones and organic elements",
+    template: "Natural daylight setting with MOOD tones and organic elements",
     icon: Sun
   },
   {
     keyword: "Dramatic",
     color: "#1A1F2C",
-    template: "High-contrast studio setup with dramatic shadows and moody atmosphere",
+    template: "High-contrast studio setup with dramatic shadows and MOOD atmosphere",
     icon: Moon
   },
   {
     keyword: "Urban",
     color: "#D3E4FD",
-    template: "Modern city environment with dynamic lighting and urban elements",
+    template: "Modern city environment with MOOD lighting and urban elements",
     icon: Building2
   },
   {
     keyword: "Luxury",
     color: "#FDE1D3",
-    template: "Elegant surfaces with gold accents and soft, diffused lighting",
+    template: "Elegant MATERIAL surfaces with gold accents and soft lighting",
     icon: Crown
   },
   {
     keyword: "Minimal",
     color: "#E5DEFF",
-    template: "Clean minimalist setting with neutral tones and simple backdrop",
+    template: "Clean minimalist setting with MOOD tones and simple backdrop",
     icon: Minimize2
   },
   {
@@ -98,24 +98,9 @@ export function ThemeGenerator({ onThemeSelect, selectedProducts }: ThemeGenerat
   const { toast } = useToast();
 
   const handleThemeClick = async (theme: ThemePill) => {
-    if (!selectedProducts.length) {
-      toast({
-        title: "No products selected",
-        description: "Please select at least one product before generating a theme.",
-        variant: "destructive"
-      });
-      return;
-    }
-
     setGeneratingTheme(theme.keyword);
     
     try {
-      console.log('Sending theme generation request:', {
-        keyword: theme.keyword,
-        template: theme.template,
-        products: selectedProducts
-      });
-
       const { data, error } = await supabase.functions.invoke('generate-theme-description', {
         body: {
           keyword: theme.keyword,
@@ -127,11 +112,7 @@ export function ThemeGenerator({ onThemeSelect, selectedProducts }: ThemeGenerat
         }
       });
 
-      console.log('Theme generation response:', { data, error });
-
-      if (error || !data?.themeDescription) {
-        throw new Error(error?.message || 'Failed to generate theme description');
-      }
+      if (error) throw error;
 
       onThemeSelect(data.themeDescription);
       toast({
