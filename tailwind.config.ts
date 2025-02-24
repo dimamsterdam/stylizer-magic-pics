@@ -1,4 +1,3 @@
-
 import type { Config } from "tailwindcss";
 
 const config = {
@@ -56,6 +55,16 @@ const config = {
           DEFAULT: "hsl(var(--card))",
           foreground: "hsl(var(--card-foreground))",
         },
+      },
+      fontSize: {
+        'display-xl': ['40px', { lineHeight: '44px', fontWeight: '600' }],
+        'display-lg': ['28px', { lineHeight: '32px', fontWeight: '600' }],
+        'display-md': ['26px', { lineHeight: '30px', fontWeight: '600' }],
+        'display-sm': ['24px', { lineHeight: '28px', fontWeight: '600' }],
+        'heading': ['16px', { lineHeight: '20px', fontWeight: '600' }],
+        'body': ['14px', { lineHeight: '20px', fontWeight: '400' }],
+        'body-tight': ['14px', { lineHeight: '16px', fontWeight: '400' }],
+        'caption': ['12px', { lineHeight: '16px', fontWeight: '400' }]
       },
       borderRadius: {
         lg: "var(--radius)",
