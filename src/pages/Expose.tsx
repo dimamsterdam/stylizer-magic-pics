@@ -428,7 +428,7 @@ const Expose = () => {
           <Card className="bg-[--p-surface] shadow-[--p-shadow-card] border-[--p-border-subdued]">
             <CardContent className="p-6 space-y-6">
               <div className="mt-4">
-                <h2 className="text-display-md text-[--p-text] mb-1">Select Products</h2>
+                <h2 className="text-display-sm text-[--p-text] mb-1">Select Products</h2>
                 <p className="text-body text-[--p-text-subdued]">
                   Choose up to three products to feature in your hero image
                 </p>
@@ -503,7 +503,7 @@ const Expose = () => {
           <Card className="bg-[--p-surface] shadow-[--p-shadow-card] border-[--p-border-subdued]">
             <CardContent className="p-6 space-y-6">
               <div>
-                <h2 className="text-display-md text-[--p-text] mb-1">Describe Your Theme</h2>
+                <h2 className="text-display-sm text-[--p-text] mb-1">Describe Your Theme</h2>
                 <p className="text-body text-[--p-text-subdued]">Tell us how you want your products to be presented</p>
               </div>
 
@@ -540,7 +540,7 @@ const Expose = () => {
           <Card className="bg-[--p-surface] shadow-[--p-shadow-card] border-[--p-border-subdued]">
             <CardContent className="p-6 space-y-6">
               <div>
-                <h2 className="text-display-md text-[--p-text] mb-1">Add Content</h2>
+                <h2 className="text-display-sm text-[--p-text] mb-1">Add Content</h2>
                 <p className="text-body text-[--p-text-subdued]">Manage the Expose headline and subtext</p>
               </div>
 
@@ -596,7 +596,7 @@ const Expose = () => {
           <Card className="bg-[--p-surface] shadow-[--p-shadow-card] border-[--p-border-subdued]">
             <CardContent className="p-6 space-y-6">
               <div>
-                <h2 className="text-display-md text-[--p-text] mb-1">Review Your Expose</h2>
+                <h2 className="text-display-sm text-[--p-text] mb-1">Review Your Expose</h2>
                 <p className="text-body text-[--p-text-subdued]">Review all details before generating</p>
               </div>
 
@@ -677,7 +677,7 @@ const Expose = () => {
           <Card className="bg-[--p-surface] shadow-[--p-shadow-card] border-[--p-border-subdued]">
             <CardContent className="p-6 space-y-6">
               <div>
-                <h2 className="text-display-md text-[--p-text] mb-1">Results</h2>
+                <h2 className="text-display-sm text-[--p-text] mb-1">Results</h2>
                 <p className="text-body text-[--p-text-subdued]">Your expose has been generated successfully</p>
               </div>
               <DropdownMenu>
