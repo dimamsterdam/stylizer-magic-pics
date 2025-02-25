@@ -3,7 +3,7 @@ import React from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { MoreVertical, MessageCircle, Star, ChevronRight } from "lucide-react";
+import { MoreVertical, MessageCircle, Star } from "lucide-react";
 
 interface ContentCardProps {
   title: string;
@@ -18,58 +18,56 @@ interface ContentCardProps {
 
 export const ContentCard = ({ title, description, imageUrl, badge }: ContentCardProps) => {
   return (
-    <Card className="group relative bg-[--p-surface] shadow-[--p-shadow-card] hover:shadow-[--p-shadow-card-hover] transition-all duration-300">
-      <div className="grid grid-cols-12 gap-4 p-6">
-        {/* Left Column - Text Content */}
-        <div className="col-span-7 flex flex-col justify-between">
-          <div className="space-y-4">
-            {/* Badge and Menu */}
-            <div className="flex items-start justify-between">
-              <Badge 
-                className="text-caption font-medium"
-                style={{ 
-                  backgroundColor: badge.bgColor,
-                  color: badge.color
-                }}
-              >
-                {badge.label}
-              </Badge>
-              <Button variant="ghost" size="icon" className="text-[--p-text-subdued] hover:text-[--p-text]">
-                <MoreVertical className="h-4 w-4" />
-              </Button>
-            </div>
-            
-            {/* Headline */}
-            <h3 className="font-playfair text-display-sm font-bold text-[--p-text] leading-tight">
-              {title}
-            </h3>
+    <Card className="group relative overflow-hidden bg-[--p-surface] shadow-[--p-shadow-card] hover:shadow-[--p-shadow-card-hover] transition-all duration-300 h-[360px]">
+      {/* Background Image */}
+      <div className="absolute inset-0 w-full h-full">
+        <img 
+          src={imageUrl} 
+          alt={title}
+          className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+        />
+        <div className="absolute inset-0 w-full h-full bg-gradient-to-b from-transparent via-black/30 to-black/60" />
+      </div>
 
-            {/* AI Editor's Note */}
-            <div className="border-l-2 border-[--p-border] pl-4">
-              <p className="text-body italic text-[--p-text-subdued]">
-                {"Editor's Note: This content has been featured due to its strong seasonal relevance and projected engagement metrics. Our AI analysis suggests this will resonate particularly well with our current market trends."}
-              </p>
-            </div>
+      {/* Content Overlay */}
+      <div className="relative h-full flex flex-col">
+        {/* Top Section with Badge and Menu */}
+        <div className="p-4 flex items-start justify-between">
+          <Badge 
+            className="text-caption font-medium backdrop-blur-sm"
+            style={{ 
+              backgroundColor: badge.bgColor,
+              color: badge.color
+            }}
+          >
+            {badge.label}
+          </Badge>
+          <Button variant="ghost" size="icon" className="text-white hover:bg-white/10">
+            <MoreVertical className="h-4 w-4" />
+          </Button>
+        </div>
 
-            {/* Description */}
-            <p className="text-body text-[--p-text] leading-relaxed">
-              {description}
-            </p>
-          </div>
-
-          {/* Actions */}
-          <div className="flex items-center justify-between pt-4 mt-4 border-t border-[--p-border]">
+        {/* Bottom Section with Text and Actions */}
+        <div className="mt-auto p-4 text-white">
+          <h3 className="text-display-sm font-medium mb-2">
+            {title}
+          </h3>
+          <p className="text-body text-white/80 mb-4">
+            {description}
+          </p>
+          
+          <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
               <Button 
                 size="sm"
-                className="bg-[--p-action-primary] hover:bg-[--p-action-primary-hovered] text-white"
+                className="bg-white/20 hover:bg-white/30 text-white border-0 backdrop-blur-sm h-8"
               >
                 Approve
               </Button>
               <Button 
                 size="sm" 
                 variant="outline"
-                className="border-[--p-border] text-[--p-text]"
+                className="bg-black/20 hover:bg-black/30 text-white border-white/20 h-8 backdrop-blur-sm"
               >
                 Adjust
               </Button>
@@ -78,37 +76,19 @@ export const ContentCard = ({ title, description, imageUrl, badge }: ContentCard
               <Button
                 variant="ghost"
                 size="icon"
-                className="h-8 w-8 text-[--p-text-subdued] hover:text-[--p-text]"
+                className="h-8 w-8 text-white hover:bg-white/10"
               >
                 <MessageCircle className="h-4 w-4" />
               </Button>
               <Button
                 variant="ghost"
                 size="icon"
-                className="h-8 w-8 text-[--p-text-subdued] hover:text-[--p-text]"
+                className="h-8 w-8 text-white hover:bg-white/10"
               >
                 <Star className="h-4 w-4" />
               </Button>
             </div>
           </div>
-        </div>
-
-        {/* Right Column - Image */}
-        <div className="col-span-5 relative">
-          <div className="aspect-[4/3] rounded-lg overflow-hidden">
-            <img 
-              src={imageUrl} 
-              alt={title}
-              className="w-full h-full object-cover"
-            />
-          </div>
-          <Button
-            variant="ghost"
-            size="sm"
-            className="absolute bottom-2 right-2 bg-white/80 backdrop-blur-sm hover:bg-white/90 text-[--p-text]"
-          >
-            View Details <ChevronRight className="h-4 w-4 ml-1" />
-          </Button>
         </div>
       </div>
     </Card>
