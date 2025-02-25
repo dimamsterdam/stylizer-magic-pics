@@ -1,3 +1,4 @@
+
 import type { Config } from "tailwindcss";
 
 const config = {
@@ -20,6 +21,9 @@ const config = {
     extend: {
       rotate: {
         '360': '360deg',
+      },
+      fontFamily: {
+        'playfair': ['Playfair Display', 'serif'],
       },
       colors: {
         border: "hsl(var(--border))",
