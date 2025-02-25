@@ -95,15 +95,24 @@ export const ContentCard = ({ title, description, imageUrl, badge }: ContentCard
         </div>
 
         {/* Action Buttons */}
-        <div className="flex items-center pt-4 mt-4 border-t border-gray-100">
+        <div className="flex items-center gap-4 pt-4 mt-4 border-t border-gray-100">
           <div className="flex items-center gap-2">
             <Button variant="ghost" size="icon" className="hover:bg-gray-100">
               <ThumbsUp className="h-5 w-5 text-gray-600" />
             </Button>
+            <Button variant="ghost" size="icon" className="hover:bg-gray-100">
+              <Copy className="h-5 w-5 text-gray-600" />
+            </Button>
+            <Button variant="ghost" size="icon" className="hover:bg-gray-100">
+              <PenLine className="h-5 w-5 text-gray-600" />
+            </Button>
           </div>
-          <div className="ml-auto">
-            <Button className="bg-blue-600 hover:bg-blue-700 text-white px-6">
-              Publish
+          <div className="flex items-center gap-2 ml-auto">
+            <Button variant="ghost" size="icon" className="hover:bg-gray-100">
+              <X className="h-5 w-5 text-gray-600" />
+            </Button>
+            <Button variant="ghost" size="icon" className="hover:bg-gray-100">
+              <Send className="h-5 w-5 text-gray-600" />
             </Button>
           </div>
         </div>
