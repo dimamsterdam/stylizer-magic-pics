@@ -1,54 +1,107 @@
 
-import { Toaster } from "@/components/ui/toaster";
-import { Toaster as Sonner } from "@/components/ui/sonner";
-import { TooltipProvider } from "@/components/ui/tooltip";
+import React from 'react';
+import {
+  createBrowserRouter,
+  RouterProvider,
+  Outlet,
+  Navigate
+} from "react-router-dom";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
-import NavBar from "./components/NavBar";
-import Breadcrumbs from "./components/Breadcrumbs";
 import Index from "./pages/Index";
-import Stylizer from "./pages/Stylizer";
 import NotFound from "./pages/NotFound";
-import GenerationResults from "./pages/GenerationResults";
+import Settings from "./pages/Settings";
+import Brand from "./pages/Brand";
+import Auth from "./pages/Auth";
 import Publish from "./pages/Publish";
 import Expose from "./pages/Expose";
-import Brand from "./pages/Brand";
-import Settings from "./pages/Settings";
+import Library from "./pages/Library";
+import Stylizer from "./pages/Stylizer";
+import Dashboard from "./pages/Dashboard";
+import NavBar from "./components/NavBar";
 import { GlobalSidebar } from "./components/GlobalSidebar";
 import { SidebarProvider } from "./components/ui/sidebar";
+import ProtectedRoute from "./components/ProtectedRoute";
 
+// Create a client
 const queryClient = new QueryClient();
 
-const App = () => (
-  <QueryClientProvider client={queryClient}>
-    <TooltipProvider>
-      <div className="min-h-screen bg-polaris-background">
-        <BrowserRouter>
-          <NavBar />
-          <SidebarProvider>
-            <div className="flex w-full pt-16">
-              <GlobalSidebar />
-              <main className="flex-1 transition-[margin] duration-300 ml-[260px] sidebar-collapsed:ml-[80px]">
-                <Breadcrumbs />
-                <Toaster />
-                <Sonner />
-                <Routes>
-                  <Route path="/" element={<Index />} />
-                  <Route path="/stylizer" element={<Stylizer />} />
-                  <Route path="/expose" element={<Expose />} />
-                  <Route path="/brand" element={<Brand />} />
-                  <Route path="/settings" element={<Settings />} />
-                  <Route path="/generation-results" element={<GenerationResults />} />
-                  <Route path="/publish" element={<Publish />} />
-                  <Route path="*" element={<NotFound />} />
-                </Routes>
-              </main>
-            </div>
-          </SidebarProvider>
-        </BrowserRouter>
+const Root = () => {
+  return (
+    <div className="min-h-screen flex w-full">
+      <GlobalSidebar />
+      <div className="flex-1">
+        <NavBar />
+        <div className="container py-6 mt-16">
+          <Outlet />
+        </div>
       </div>
-    </TooltipProvider>
-  </QueryClientProvider>
-);
+    </div>
+  );
+};
+
+const router = createBrowserRouter([
+  {
+    path: "/auth",
+    element: <Auth />,
+  },
+  {
+    path: "/",
+    element: <ProtectedRoute />,
+    errorElement: <NotFound />,
+    children: [
+      {
+        element: <Root />,
+        children: [
+          {
+            index: true,
+            element: <Navigate to="/dashboard" replace />,
+          },
+          {
+            path: "dashboard",
+            element: <Dashboard />,
+          },
+          {
+            path: "settings",
+            element: <Settings />,
+          },
+          {
+            path: "brand",
+            element: <Brand />,
+          },
+          {
+            path: "publish",
+            element: <Publish />,
+          },
+          {
+            path: "expose",
+            element: <Expose />,
+          },
+          {
+            path: "expose/:id",
+            element: <Expose />,
+          },
+          {
+            path: "library",
+            element: <Library />,
+          },
+          {
+            path: "stylizer",
+            element: <Stylizer />,
+          }
+        ],
+      },
+    ],
+  },
+]);
+
+function App() {
+  return (
+    <QueryClientProvider client={queryClient}>
+      <SidebarProvider>
+        <RouterProvider router={router} />
+      </SidebarProvider>
+    </QueryClientProvider>
+  );
+}
 
 export default App;

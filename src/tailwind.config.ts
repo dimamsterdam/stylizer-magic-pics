@@ -1,13 +1,14 @@
+
 import type { Config } from "tailwindcss";
 
-const config = {
+export default {
   darkMode: ["class"],
   content: [
-    './pages/**/*.{ts,tsx}',
-    './components/**/*.{ts,tsx}',
-    './app/**/*.{ts,tsx}',
-    './src/**/*.{ts,tsx}',
-	],
+    "./pages/**/*.{ts,tsx}",
+    "./components/**/*.{ts,tsx}",
+    "./app/**/*.{ts,tsx}",
+    "./src/**/*.{ts,tsx}",
+  ],
   prefix: "",
   theme: {
     container: {
@@ -18,10 +19,13 @@ const config = {
       },
     },
     extend: {
-      rotate: {
-        '360': '360deg',
-      },
       colors: {
+        polaris: {
+          background: "#F6F6F7",
+          border: "#E3E5E7",
+          text: "#1A1F2C",
+          secondary: "#6D7175",
+        },
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",
         ring: "hsl(var(--ring))",
@@ -57,14 +61,14 @@ const config = {
         },
       },
       fontSize: {
-        'display-xl': ['40px', { lineHeight: '44px', fontWeight: '600' }],
-        'display-lg': ['28px', { lineHeight: '32px', fontWeight: '600' }],
-        'display-md': ['26px', { lineHeight: '30px', fontWeight: '600' }],
-        'display-sm': ['24px', { lineHeight: '28px', fontWeight: '600' }],
-        'heading': ['16px', { lineHeight: '20px', fontWeight: '600' }],
-        'body': ['14px', { lineHeight: '20px', fontWeight: '400' }],
-        'body-tight': ['14px', { lineHeight: '16px', fontWeight: '400' }],
-        'caption': ['12px', { lineHeight: '16px', fontWeight: '400' }]
+        'display-xl': ['24px', { lineHeight: '30px', fontWeight: '600' }],
+        'display-lg': ['21px', { lineHeight: '24px', fontWeight: '600' }],
+        'display-md': ['18px', { lineHeight: '21px', fontWeight: '600' }],
+        'display-sm': ['15px', { lineHeight: '18px', fontWeight: '600' }],
+        'body-lg': ['18px', { lineHeight: '28px', fontWeight: '400' }],
+        'body-md': ['16px', { lineHeight: '24px', fontWeight: '400' }],
+        'body-sm': ['14px', { lineHeight: '20px', fontWeight: '400' }],
+        'body-xs': ['12px', { lineHeight: '16px', fontWeight: '400' }],
       },
       borderRadius: {
         lg: "var(--radius)",
@@ -80,14 +84,23 @@ const config = {
           from: { height: "var(--radix-accordion-content-height)" },
           to: { height: "0" },
         },
+        typing: {
+          from: { width: "0" },
+          to: { width: "100%" },
+        },
+        "cursor-blink": {
+          "0%, 100%": { opacity: "1" },
+          "50%": { opacity: "0" },
+        },
       },
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
         "accordion-up": "accordion-up 0.2s ease-out",
+        "typing": "typing 3s steps(50, end)",
+        "cursor-blink": "cursor-blink 0.7s step-end infinite",
+        "typing-cursor": "typing 3s steps(50, end)",
       },
     },
   },
   plugins: [require("tailwindcss-animate")],
-} satisfies Config
-
-export default config
+} satisfies Config;

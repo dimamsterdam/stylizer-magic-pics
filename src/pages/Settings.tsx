@@ -1,7 +1,7 @@
 
 import React from "react";
 import { Link } from "react-router-dom";
-import { Palette, ArrowRight } from "lucide-react";
+import { Palette, ArrowRight, Calendar } from "lucide-react";
 import { Card, CardHeader, CardContent } from "@/components/ui/card";
 
 const settingsApps = [
@@ -10,6 +10,12 @@ const settingsApps = [
     description: "Manage your brand's visual identity and guidelines",
     icon: Palette,
     url: "/brand"
+  },
+  {
+    title: "Brand Calendar",
+    description: "Share your brand's key retail events",
+    icon: Calendar,
+    url: "/calendar"
   }
 ];
 

@@ -9,6 +9,232 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      ai_provider_settings: {
+        Row: {
+          created_at: string | null
+          feature_name: string
+          feature_type: Database["public"]["Enums"]["ai_feature_type"]
+          id: string
+          provider: string
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          feature_name: string
+          feature_type: Database["public"]["Enums"]["ai_feature_type"]
+          id?: string
+          provider: string
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          feature_name?: string
+          feature_type?: Database["public"]["Enums"]["ai_feature_type"]
+          id?: string
+          provider?: string
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      brand_identity: {
+        Row: {
+          age_range_max: number | null
+          age_range_min: number | null
+          brand_name: string | null
+          characteristics: string[] | null
+          created_at: string
+          gender: Database["public"]["Enums"]["brand_audience_gender"] | null
+          id: string
+          income_level: Database["public"]["Enums"]["income_level"] | null
+          photography_lighting: string | null
+          photography_mood: string | null
+          updated_at: string
+          user_id: string
+          values: string[] | null
+        }
+        Insert: {
+          age_range_max?: number | null
+          age_range_min?: number | null
+          brand_name?: string | null
+          characteristics?: string[] | null
+          created_at?: string
+          gender?: Database["public"]["Enums"]["brand_audience_gender"] | null
+          id?: string
+          income_level?: Database["public"]["Enums"]["income_level"] | null
+          photography_lighting?: string | null
+          photography_mood?: string | null
+          updated_at?: string
+          user_id: string
+          values?: string[] | null
+        }
+        Update: {
+          age_range_max?: number | null
+          age_range_min?: number | null
+          brand_name?: string | null
+          characteristics?: string[] | null
+          created_at?: string
+          gender?: Database["public"]["Enums"]["brand_audience_gender"] | null
+          id?: string
+          income_level?: Database["public"]["Enums"]["income_level"] | null
+          photography_lighting?: string | null
+          photography_mood?: string | null
+          updated_at?: string
+          user_id?: string
+          values?: string[] | null
+        }
+        Relationships: []
+      }
+      expose_localizations: {
+        Row: {
+          created_at: string
+          expose_id: string | null
+          headline: string | null
+          id: string
+          is_auto_translated: boolean | null
+          locale: string
+          product_data: Json | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          expose_id?: string | null
+          headline?: string | null
+          id?: string
+          is_auto_translated?: boolean | null
+          locale: string
+          product_data?: Json | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          expose_id?: string | null
+          headline?: string | null
+          id?: string
+          is_auto_translated?: boolean | null
+          locale?: string
+          product_data?: Json | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "expose_localizations_expose_id_fkey"
+            columns: ["expose_id"]
+            isOneToOne: false
+            referencedRelation: "exposes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      expose_revisions: {
+        Row: {
+          brand_constraints: string | null
+          created_at: string
+          expose_id: string | null
+          headline: string | null
+          hero_image_url: string
+          id: string
+          occasion: string | null
+        }
+        Insert: {
+          brand_constraints?: string | null
+          created_at?: string
+          expose_id?: string | null
+          headline?: string | null
+          hero_image_url: string
+          id?: string
+          occasion?: string | null
+        }
+        Update: {
+          brand_constraints?: string | null
+          created_at?: string
+          expose_id?: string | null
+          headline?: string | null
+          hero_image_url?: string
+          id?: string
+          occasion?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "expose_revisions_expose_id_fkey"
+            columns: ["expose_id"]
+            isOneToOne: false
+            referencedRelation: "exposes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      exposes: {
+        Row: {
+          body_copy: string | null
+          brand_constraints: string | null
+          created_at: string
+          end_date: string | null
+          headline: string | null
+          hero_image_desktop_url: string | null
+          hero_image_generation_status: string | null
+          hero_image_mobile_url: string | null
+          hero_image_tablet_url: string | null
+          hero_image_url: string | null
+          id: string
+          image_variations: Json[] | null
+          occasion: string | null
+          selected_product_ids: string[]
+          selected_variation_index: number | null
+          start_date: string | null
+          status: Database["public"]["Enums"]["expose_status"]
+          theme: string | null
+          theme_description: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          body_copy?: string | null
+          brand_constraints?: string | null
+          created_at?: string
+          end_date?: string | null
+          headline?: string | null
+          hero_image_desktop_url?: string | null
+          hero_image_generation_status?: string | null
+          hero_image_mobile_url?: string | null
+          hero_image_tablet_url?: string | null
+          hero_image_url?: string | null
+          id?: string
+          image_variations?: Json[] | null
+          occasion?: string | null
+          selected_product_ids?: string[]
+          selected_variation_index?: number | null
+          start_date?: string | null
+          status?: Database["public"]["Enums"]["expose_status"]
+          theme?: string | null
+          theme_description?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          body_copy?: string | null
+          brand_constraints?: string | null
+          created_at?: string
+          end_date?: string | null
+          headline?: string | null
+          hero_image_desktop_url?: string | null
+          hero_image_generation_status?: string | null
+          hero_image_mobile_url?: string | null
+          hero_image_tablet_url?: string | null
+          hero_image_url?: string | null
+          id?: string
+          image_variations?: Json[] | null
+          occasion?: string | null
+          selected_product_ids?: string[]
+          selected_variation_index?: number | null
+          start_date?: string | null
+          status?: Database["public"]["Enums"]["expose_status"]
+          theme?: string | null
+          theme_description?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       feature_flags: {
         Row: {
           created_at: string
@@ -116,6 +342,10 @@ export type Database = {
       [_ in never]: never
     }
     Enums: {
+      ai_feature_type: "text_generation" | "image_generation"
+      brand_audience_gender: "all" | "male" | "female" | "non_binary"
+      expose_status: "draft" | "published" | "scheduled" | "archived"
+      income_level: "low" | "medium" | "high" | "luxury"
       task_priority: "low" | "medium" | "high"
     }
     CompositeTypes: {

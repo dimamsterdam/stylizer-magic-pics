@@ -273,222 +273,291 @@ const Stylizer = () => {
     searchProducts(term);
   };
 
-  return <div className="h-full w-full pt-4">
-    {isPickingProducts ? <div className="p-4 sm:p-6">
-      <Card className="border-0 shadow-sm overflow-hidden">
-        <CardHeader className="p-6 pb-0">
-          <div className="flex flex-col lg:flex-row gap-6 items-start">
-            <div className="flex-1 min-w-0">
-              <h1 className="text-2xl font-semibold text-[#1A1F2C] tracking-tight mb-1">
-                Improve Your Pack Shots
-              </h1>
-              <p className="text-[#6D7175] text-base">
-                Transform your product photos into professional lifestyle images using AI. 
-                Select up to 3 products to enhance their visual appeal together and publish directly to Shopify.
-              </p>
-            </div>
-            <div className="w-full lg:w-[320px] shrink-0">
-              <div className="grid grid-cols-4 gap-1">
-                {fashionImages.slice(0, 8).map((image, index) => <div key={index} className="relative group aspect-square overflow-hidden rounded">
-                  <img src={image.src} alt={image.alt} className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110" />
-                  <div className="absolute inset-0 bg-black/30 opacity-0 group-hover:opacity-100 transition-opacity" />
-                </div>)}
+  return (
+    <div className="h-full w-full pt-4">
+      {isPickingProducts ? (
+        <div className="p-4 sm:p-6">
+          <Card className="border-0 shadow-sm">
+            <CardHeader className="p-6 pb-0">
+              <div className="flex flex-col lg:flex-row gap-6 items-start">
+                <div className="flex-1 min-w-0">
+                  <h1 className="text-display-lg text-polaris-text tracking-tight mb-1">
+                    Improve Your Pack Shots
+                  </h1>
+                  <p className="text-polaris-secondary text-body-md">
+                    Transform your product photos into professional lifestyle images using AI. 
+                    Select up to 3 products to enhance their visual appeal together and publish directly to Shopify.
+                  </p>
+                </div>
+                <div className="w-full lg:w-[320px] shrink-0">
+                  <div className="grid grid-cols-4 gap-1">
+                    {fashionImages.slice(0, 8).map((image, index) => (
+                      <div key={index} className="relative group aspect-square overflow-hidden rounded">
+                        <img 
+                          src={image.src} 
+                          alt={image.alt} 
+                          className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110" 
+                        />
+                        <div className="absolute inset-0 bg-black/30 opacity-0 group-hover:opacity-100 transition-opacity" />
+                      </div>
+                    ))}
+                  </div>
+                </div>
               </div>
-            </div>
-          </div>
-        </CardHeader>
-        <CardContent className="p-6">
-          <div className="mt-4">
-            <ProductPicker onSelect={handleProductSelect} selectedProducts={selectedProducts} searchResults={results} isLoading={isLoading} error={searchError} searchTerm={searchTerm} onSearch={handleSearch} />
-          </div>
-        </CardContent>
-      </Card>
+            </CardHeader>
+            <CardContent className="p-6">
+              <div className="mt-4">
+                <ProductPicker 
+                  onSelect={handleProductSelect} 
+                  selectedProducts={selectedProducts} 
+                  searchResults={results} 
+                  isLoading={isLoading} 
+                  error={searchError} 
+                  searchTerm={searchTerm} 
+                  onSearch={handleSearch} 
+                />
+              </div>
+            </CardContent>
+          </Card>
 
-      {selectedProducts.length > 0 && <Card className="mt-4 border-0 shadow-sm">
-        <CardHeader className="p-6 pb-2">
-          <h2 className="text-xl font-semibold text-[#1A1F2C] mb-1">
-            Selected Products ({selectedProducts.length}/3)
-          </h2>
-        </CardHeader>
-        <CardContent className="p-6 pt-0">
+          {selectedProducts.length > 0 && (
+            <Card className="mt-4 border-0 shadow-sm">
+              <CardHeader className="p-6 pb-2">
+                <h2 className="text-display-md text-polaris-text mb-1">
+                  Selected Products ({selectedProducts.length}/3)
+                </h2>
+              </CardHeader>
+              <CardContent className="p-6 pt-0">
+                <div className="space-y-4">
+                  {selectedProducts.map(product => (
+                    <div key={product.id} 
+                      className="flex items-center p-4 border rounded-lg bg-white/50 transition-all duration-300 hover:bg-white/70">
+                      <img 
+                        src={product.image} 
+                        alt={product.title} 
+                        className="w-16 h-16 object-cover rounded-md"
+                        onError={e => { e.currentTarget.src = '/placeholder.svg'; }}
+                      />
+                      <div className="ml-4 flex-1 min-w-0">
+                        <h3 className="text-body-md font-medium text-polaris-text truncate">
+                          {product.title}
+                        </h3>
+                        <p className="text-body-sm text-polaris-secondary">
+                          SKU: {product.sku}
+                        </p>
+                      </div>
+                      <Button 
+                        onClick={() => handleProductRemove(product.id)}
+                        variant="ghost"
+                        className="text-polaris-secondary hover:text-red-600 hover:bg-red-50"
+                      >
+                        Remove
+                      </Button>
+                    </div>
+                  ))}
+                  <div className="flex justify-end">
+                    <Button 
+                      onClick={handleConfirmSelection} 
+                      disabled={selectedProducts.length === 0}
+                      className="bg-polaris-text hover:bg-black text-white"
+                    >
+                      Continue
+                    </Button>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          )}
+        </div>
+      ) : (
+        <div className="p-4 sm:p-6">
+          <div className="mb-6">
+            <h2 className="text-polaris-text text-2xl font-medium">Define your photo shoot</h2>
+            <p className="text-polaris-secondary mt-1">Configure all aspects of your AI-powered product photo shoot</p>
+          </div>
           <div className="space-y-4">
-            {selectedProducts.map(product => <div key={product.id} className="flex items-center p-4 border rounded-lg bg-white/50 transition-all duration-300 hover:bg-white/70">
-              <img src={product.image} alt={product.title} className="w-16 h-16 object-cover rounded-md" onError={e => {
-                e.currentTarget.src = '/placeholder.svg';
-              }} />
-              <div className="ml-4 flex-1 min-w-0">
-                <h3 className="font-medium text-[#1A1F2C] truncate">{product.title}</h3>
-                <p className="text-sm text-[#6D7175]">SKU: {product.sku}</p>
-              </div>
-              <button onClick={() => handleProductRemove(product.id)} className="ml-4 px-4 py-2 text-red-500 border border-red-500 rounded-lg hover:bg-red-50 transition-all duration-300">
-                Remove
-              </button>
-            </div>)}
-            <div className="flex justify-end">
-              <Button onClick={handleConfirmSelection} className="bg-[#9b87f5] hover:bg-[#7E69AB] text-white shadow-sm">
-                Confirm Selection
-              </Button>
-            </div>
-          </div>
-        </CardContent>
-      </Card>}
-    </div> : <div className="p-4 sm:p-6">
-      <div className="mb-6">
-        <h2 className="text-[#1A1F2C] text-2xl font-medium">Define your photo shoot</h2>
-        <p className="text-[#6D7175] mt-1">Configure all aspects of your AI-powered product photo shoot</p>
-      </div>
-      <div className="space-y-4">
-        <Card className="border-0 shadow-sm">
-          <CardHeader className="p-6 pb-2">
-            <div className="flex items-center justify-between">
-              <button onClick={() => setIsPickingProducts(true)} className="text-[#9b87f5] hover:text-[#7E69AB] font-medium">
-                Edit Selection
-              </button>
-            </div>
-            <Separator className="my-4" />
-            <h3 className="text-lg font-semibold text-[#1A1F2C] mb-1">Product Images</h3>
-            <p className="text-[#6D7175]">Select the product images to use for styling</p>
-          </CardHeader>
-          <CardContent className="p-6 pt-0">
-            <ImageGallery images={images} onSelect={handleImageSelect} onRemove={handleImageRemove} />
-          </CardContent>
-        </Card>
+            <Card className="border-0 shadow-sm">
+              <CardHeader className="p-6 pb-2">
+                <div className="flex items-center justify-between">
+                  <button onClick={() => setIsPickingProducts(true)} className="text-polaris-green hover:text-polaris-teal font-medium">
+                    Edit Selection
+                  </button>
+                </div>
+                <Separator className="my-4" />
+                <h3 className="text-lg font-semibold text-polaris-text mb-1">Product Images</h3>
+                <p className="text-polaris-secondary">Select the product images to use for styling</p>
+              </CardHeader>
+              <CardContent className="p-6 pt-0">
+                <ImageGallery images={images} onSelect={handleImageSelect} onRemove={handleImageRemove} />
+              </CardContent>
+            </Card>
 
-        <Card className="border-0 shadow-sm">
-          <CardHeader className="p-6 pb-2">
-            <h2 className="text-xl font-semibold text-[#1A1F2C] mb-1">Define the fashion model</h2>
-            <p className="text-[#6D7175]">Describe your ideal model by clicking on any attribute to customize it</p>
-          </CardHeader>
-          <CardContent className="p-6 pt-0">
-            <ModelPromptBuilder attributes={modelAttributes} onChange={(key, value) => setModelAttributes(prev => ({
-              ...prev,
-              [key]: value
-            }))} />
-          </CardContent>
-        </Card>
-
-        <Card className="border-0 shadow-sm">
-          <CardHeader className="p-6 pb-2">
-            <h2 className="text-xl font-semibold text-[#1A1F2C] mb-1">Selected Angles</h2>
-            <p className="text-[#6D7175]">Choose which angles to generate for your products</p>
-          </CardHeader>
-          <CardContent className="p-6 pt-0">
-            <div className="flex flex-wrap gap-2">
-              {Object.entries(selectedAngles).map(([angle, isSelected]) => <Toggle key={angle} pressed={isSelected} onPressedChange={() => handleAngleToggle(angle)} className={`transition-all duration-300 ${isSelected ? 'bg-white text-[#9b87f5] border-2 border-[#9b87f5] hover:bg-gray-50 pl-8 shadow-sm' : 'bg-gray-100 text-[#1A1F2C] hover:bg-gray-200 border-2 border-transparent'}`}>
-                {isSelected && <Check className="h-4 w-4 absolute left-2" />}
-                {angle}
-              </Toggle>)}
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card className="border-0 shadow-sm">
-          <CardHeader className="p-6 pb-2">
-            <h2 className="text-xl font-semibold text-[#1A1F2C] mb-1">Define Style</h2>
-            <p className="text-[#6D7175]">Choose your desired background setting or color</p>
-          </CardHeader>
-          <CardContent className="p-6 pt-0">
-            <div className="space-y-6">
-              <RadioGroup value={studioStyle.type} onValueChange={(value: 'studio' | 'custom') => {
-                setStudioStyle(prev => ({
+            <Card className="border-0 shadow-sm">
+              <CardHeader className="p-6 pb-2">
+                <h2 className="text-xl font-semibold text-polaris-text mb-1">Define the fashion model</h2>
+                <p className="text-polaris-secondary">Describe your ideal model by clicking on any attribute to customize it</p>
+              </CardHeader>
+              <CardContent className="p-6 pt-0">
+                <ModelPromptBuilder attributes={modelAttributes} onChange={(key, value) => setModelAttributes(prev => ({
                   ...prev,
-                  type: value
-                }));
-              }} className="flex flex-col space-y-4">
-                <div className="flex items-center justify-between p-4 border rounded-lg hover:border-[#9b87f5] transition-colors">
-                  <div className="flex items-center space-x-2">
-                    <RadioGroupItem value="studio" id="studio" />
-                    <Label htmlFor="studio">Studio Setting</Label>
-                    {studioStyle.type === 'studio' && <Popover>
-                        <PopoverTrigger asChild>
-                          <Button variant="outline" className="ml-4 relative pl-10">
-                            <div className="w-6 h-6 rounded-full absolute left-2 border-2 border-gray-300" style={{
-                            backgroundColor: studioStyle.backgroundColor
-                          }} />
-                            Choose Studio Background
-                          </Button>
-                        </PopoverTrigger>
-                        <PopoverContent className="w-80">
-                          <StudioColorPicker color={studioStyle.backgroundColor} onChange={color => setStudioStyle(prev => ({
-                          ...prev,
-                          backgroundColor: color
-                        }))} />
-                        </PopoverContent>
-                      </Popover>}
-                  </div>
-                </div>
+                  [key]: value
+                }))} />
+              </CardContent>
+            </Card>
 
-                <div className="flex items-center justify-between p-4 border rounded-lg hover:border-[#9b87f5] transition-colors">
-                  <div className="flex items-center space-x-2">
-                    <RadioGroupItem value="custom" id="custom" />
-                    <Label htmlFor="custom">Custom Prompt</Label>
-                  </div>
-                  {studioStyle.type === 'custom' && <Popover>
-                      <PopoverTrigger asChild>
-                        <Button variant="outline" className="ml-4">
-                          {studioStyle.customPrompt ? 'Edit Prompt' : 'Add Prompt'}
-                        </Button>
-                      </PopoverTrigger>
-                      <PopoverContent className="w-80">
-                        <div className="space-y-4">
-                          <div className="space-y-2">
-                            <Label>Custom Studio Prompt</Label>
-                            <div className="flex space-x-2">
-                              <Input value={studioStyle.customPrompt} onChange={e => setStudioStyle(prev => ({
-                              ...prev,
-                              customPrompt: e.target.value
-                            }))} placeholder="Describe your desired studio setting..." />
-                              <Button onClick={e => {
-                              const popoverElement = e.currentTarget.closest('[data-radix-popper-content-wrapper]');
-                              if (popoverElement instanceof HTMLElement) {
-                                popoverElement.style.display = 'none';
-                              }
-                            }}>
-                                Save
+            <Card className="border-0 shadow-sm">
+              <CardHeader className="p-6 pb-2">
+                <h2 className="text-xl font-semibold text-polaris-text mb-1">Selected Angles</h2>
+                <p className="text-polaris-secondary">Choose which angles to generate for your products</p>
+              </CardHeader>
+              <CardContent className="p-6 pt-0">
+                <div className="flex flex-wrap gap-2">
+                  {Object.entries(selectedAngles).map(([angle, isSelected]) => (
+                    <Toggle 
+                      key={angle} 
+                      pressed={isSelected} 
+                      onPressedChange={() => handleAngleToggle(angle)} 
+                      className={`transition-all duration-300 ${isSelected ? 'bg-white text-polaris-green border-2 border-polaris-green hover:bg-gray-50 pl-8 shadow-sm' : 'bg-gray-100 text-polaris-text hover:bg-gray-200 border-2 border-transparent'}`}
+                    >
+                      {isSelected && <Check className="h-4 w-4 absolute left-2" />}
+                      {angle}
+                    </Toggle>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card className="border-0 shadow-sm">
+              <CardHeader className="p-6 pb-2">
+                <h2 className="text-xl font-semibold text-polaris-text mb-1">Define Style</h2>
+                <p className="text-polaris-secondary">Choose your desired background setting or color</p>
+              </CardHeader>
+              <CardContent className="p-6 pt-0">
+                <div className="space-y-6">
+                  <RadioGroup 
+                    value={studioStyle.type} 
+                    onValueChange={(value: 'studio' | 'custom') => {
+                      setStudioStyle(prev => ({
+                        ...prev,
+                        type: value
+                      }));
+                    }} 
+                    className="flex flex-col space-y-4"
+                  >
+                    <div className="flex items-center justify-between p-4 border rounded-lg hover:border-polaris-green transition-colors">
+                      <div className="flex items-center space-x-2">
+                        <RadioGroupItem value="studio" id="studio" />
+                        <Label htmlFor="studio">Studio Setting</Label>
+                        {studioStyle.type === 'studio' && (
+                          <Popover>
+                            <PopoverTrigger asChild>
+                              <Button variant="outline" className="ml-4 relative pl-10">
+                                <div 
+                                  className="w-6 h-6 rounded-full absolute left-2 border-2 border-gray-300" 
+                                  style={{ backgroundColor: studioStyle.backgroundColor }} 
+                                />
+                                Choose Studio Background
                               </Button>
+                            </PopoverTrigger>
+                            <PopoverContent className="w-80">
+                              <StudioColorPicker 
+                                color={studioStyle.backgroundColor} 
+                                onChange={color => setStudioStyle(prev => ({
+                                  ...prev,
+                                  backgroundColor: color
+                                }))} 
+                              />
+                            </PopoverContent>
+                          </Popover>
+                        )}
+                      </div>
+                    </div>
+
+                    <div className="flex items-center justify-between p-4 border rounded-lg hover:border-polaris-green transition-colors">
+                      <div className="flex items-center space-x-2">
+                        <RadioGroupItem value="custom" id="custom" />
+                        <Label htmlFor="custom">Custom Prompt</Label>
+                      </div>
+                      {studioStyle.type === 'custom' && (
+                        <Popover>
+                          <PopoverTrigger asChild>
+                            <Button variant="outline" className="ml-4">
+                              {studioStyle.customPrompt ? 'Edit Prompt' : 'Add Prompt'}
+                            </Button>
+                          </PopoverTrigger>
+                          <PopoverContent className="w-80">
+                            <div className="space-y-4">
+                              <div className="space-y-2">
+                                <Label>Custom Studio Prompt</Label>
+                                <div className="flex space-x-2">
+                                  <Input 
+                                    value={studioStyle.customPrompt} 
+                                    onChange={e => setStudioStyle(prev => ({
+                                      ...prev,
+                                      customPrompt: e.target.value
+                                    }))} 
+                                    placeholder="Describe your desired studio setting..." 
+                                  />
+                                  <Button onClick={e => {
+                                    const popoverElement = e.currentTarget.closest('[data-radix-popper-content-wrapper]');
+                                    if (popoverElement instanceof HTMLElement) {
+                                      popoverElement.style.display = 'none';
+                                    }
+                                  }}>
+                                    Save
+                                  </Button>
+                                </div>
+                              </div>
                             </div>
-                          </div>
-                        </div>
-                      </PopoverContent>
-                    </Popover>}
+                          </PopoverContent>
+                        </Popover>
+                      )}
+                    </div>
+                  </RadioGroup>
+
+                  <div className="p-4 bg-gray-50 rounded-lg">
+                    <p className="text-sm font-medium text-polaris-secondary">Selected Style:</p>
+                    <p className="text-sm mt-1 text-polaris-text">
+                      {studioStyle.type === 'studio' ? `Studio setting with ${studioStyle.backgroundColor} background` : studioStyle.customPrompt || 'No custom prompt set'}
+                    </p>
+                  </div>
                 </div>
-              </RadioGroup>
+              </CardContent>
+            </Card>
 
-              <div className="p-4 bg-gray-50 rounded-lg">
-                <p className="text-sm font-medium text-[#6D7175]">Selected Style:</p>
-                <p className="text-sm mt-1 text-[#1A1F2C]">
-                  {studioStyle.type === 'studio' ? `Studio setting with ${studioStyle.backgroundColor} background` : studioStyle.customPrompt || 'No custom prompt set'}
-                </p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+            <Card className="border-0 shadow-sm">
+              <CardHeader className="p-6 pb-2">
+                <h2 className="text-xl font-semibold text-polaris-text mb-1">Final Prompt</h2>
+                <p className="text-polaris-secondary">Adjust by changing the values above</p>
+              </CardHeader>
+              <CardContent className="p-6 pt-0">
+                <div className="space-y-4">
+                  <div className="bg-[#FEF7CD] p-6 rounded-lg border-l-4 border-polaris-green">
+                    <p className="text-polaris-text">{getFinalPrompt()}</p>
+                  </div>
 
-        <Card className="border-0 shadow-sm">
-          <CardHeader className="p-6 pb-2">
-            <h2 className="text-xl font-semibold text-[#1A1F2C] mb-1">Final Prompt</h2>
-            <p className="text-[#6D7175]">Adjust by changing the values above</p>
-          </CardHeader>
-          <CardContent className="p-6 pt-0">
-            <div className="space-y-4">
-              <div className="bg-[#FEF7CD] p-6 rounded-lg border-l-4 border-[#9b87f5]">
-                <p className="text-[#1A1F2C]">{getFinalPrompt()}</p>
-              </div>
-
-              <div className="flex justify-end">
-                <Button className={`transition-all duration-300 ${canStartGeneration ? 'bg-[#9b87f5] hover:bg-[#7E69AB] text-white shadow-sm' : 'bg-gray-200 text-gray-500 cursor-not-allowed'}`} disabled={!canStartGeneration} onClick={handleStartGeneration}>
-                  Start Generation
-                </Button>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-    </div>}
-    {isLoading && <div className="flex items-center justify-center p-4">
-      <Loader2 className="h-6 w-6 text-[#6D7175] animate-spin" />
-    </div>}
-  </div>;
+                  <div className="flex justify-end">
+                    <Button 
+                      className={`transition-all duration-300 ${canStartGeneration ? 'bg-polaris-green hover:bg-polaris-teal text-white shadow-sm' : 'bg-gray-200 text-gray-500 cursor-not-allowed'}`} 
+                      disabled={!canStartGeneration} 
+                      onClick={handleStartGeneration}
+                    >
+                      Start Generation
+                    </Button>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        </div>
+      )}
+      {isLoading && (
+        <div className="flex items-center justify-center p-4">
+          <Loader2 className="h-6 w-6 text-polaris-secondary animate-spin" />
+        </div>
+      )}
+    </div>
+  );
 };
 
 export default Stylizer;

@@ -1,1 +1,14 @@
+
 project_id = "zjaswhqgqvlqpoosbfqn"
+
+[functions.sync-shopify-products]
+verify_jwt = false
+
+[functions.generate-content]
+verify_jwt = false
+
+[functions.generate-ai-image]
+verify_jwt = false
+
+[functions.generate-brand-identity]
+verify_jwt = false
