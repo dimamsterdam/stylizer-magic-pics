@@ -29,9 +29,9 @@ export const ContentCard = ({ title, description, imageUrl, badge }: ContentCard
   const [showInsights, setShowInsights] = useState(false);
 
   return (
-    <Card className="overflow-hidden bg-white border-0 rounded-xl shadow-lg hover:shadow-xl transition-shadow duration-300 flex flex-col">
+    <Card className="overflow-hidden bg-white border-0 rounded-xl shadow-lg hover:shadow-xl transition-shadow duration-300 flex flex-col h-full">
       {/* Image Section */}
-      <div className="relative h-[280px] bg-gray-100">
+      <div className="relative h-[280px] bg-gray-100 flex-shrink-0">
         <img 
           src={imageUrl} 
           alt={title}
@@ -54,8 +54,8 @@ export const ContentCard = ({ title, description, imageUrl, badge }: ContentCard
       </div>
 
       {/* Content Section */}
-      <div className="p-6 space-y-4 flex-1 flex flex-col">
-        <div className="flex items-start justify-between">
+      <div className="p-6 flex flex-col flex-1">
+        <div className="flex items-start justify-between mb-4">
           <h3 className="text-[24px] font-semibold text-gray-900 leading-tight">
             {title}
           </h3>
@@ -64,12 +64,12 @@ export const ContentCard = ({ title, description, imageUrl, badge }: ContentCard
           </Button>
         </div>
         
-        <p className="text-gray-600 text-base">
+        <p className="text-gray-600 text-base mb-4">
           {description}
         </p>
 
         {/* AI Insights Section */}
-        <div className="space-y-4">
+        <div className="space-y-4 mb-4">
           <Button
             variant="ghost"
             className="text-blue-600 hover:text-blue-700 hover:bg-blue-50 p-0 h-auto font-medium flex items-center gap-2"
@@ -93,7 +93,7 @@ export const ContentCard = ({ title, description, imageUrl, badge }: ContentCard
           )}
         </div>
 
-        {/* Action Buttons - Now at bottom and centered */}
+        {/* Action Buttons - Now at bottom and centered with proper spacing */}
         <div className="flex items-center justify-center gap-4 pt-4 mt-auto border-t border-gray-100">
           <Button variant="ghost" size="icon" className="hover:bg-gray-100">
             <ThumbsUp className="h-5 w-5 text-gray-600" />
@@ -102,10 +102,10 @@ export const ContentCard = ({ title, description, imageUrl, badge }: ContentCard
             <PenLine className="h-5 w-5 text-gray-600" />
           </Button>
           <Button variant="ghost" size="icon" className="hover:bg-gray-100">
-            <Trash className="h-5 w-5 text-gray-600" />
+            <Send className="h-5 w-5 text-gray-600" />
           </Button>
           <Button variant="ghost" size="icon" className="hover:bg-gray-100">
-            <Send className="h-5 w-5 text-gray-600" />
+            <Trash className="h-5 w-5 text-gray-600" />
           </Button>
         </div>
       </div>
