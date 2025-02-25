@@ -13,7 +13,7 @@ const settingsApps = [
   },
   {
     title: "Brand Calendar",
-    description: "Plan and schedule your brand content and campaigns",
+    description: "Share your brand's key retail events",
     icon: Calendar,
     url: "/calendar"
   }
