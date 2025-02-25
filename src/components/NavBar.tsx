@@ -10,7 +10,7 @@ const NavBar = () => {
           <div className="flex items-center">
             <Link to="/" className="flex items-center space-x-2">
               <span className="flex items-center">
-                <svg width="24" height="24" viewBox="0 0 297 267" fill="none" xmlns="http://www.w3.org/2000/svg" className="mr-2">
+                <svg width="31" height="31" viewBox="0 0 297 267" fill="none" xmlns="http://www.w3.org/2000/svg" className="mr-2">
                   <g clipPath="url(#clip0_47_26)">
                     <path d="M154.17 160.993C197.503 146.913 226.959 118.042 219.962 96.5061C212.965 74.9707 172.164 68.9268 128.83 83.0067C85.4969 97.0866 56.0406 125.959 63.0379 147.494C70.0351 169.029 110.836 175.073 154.17 160.993Z" stroke="#25B384" strokeWidth="2.076"/>
                     <path d="M150.474 176.217C211.904 171.921 259.75 140.525 257.342 106.091C254.935 71.6574 203.184 47.2256 141.754 51.5212C80.3245 55.8168 32.4778 87.2131 34.8857 121.647C37.2935 156.081 89.0441 180.512 150.474 176.217Z" stroke="#60B325" strokeWidth="2"/>
