@@ -1,10 +1,24 @@
-import { ChevronDown, ChevronRight, Image, Video, Palette, Settings, ChevronLeft, Library, LayoutDashboard } from "lucide-react";
+
+import { ChevronDown, ChevronRight, Home, Image, Video, Palette, Settings, ChevronLeft, Library } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
-import { Sidebar, SidebarContent, SidebarGroup, SidebarGroupContent, SidebarGroupLabel, SidebarMenu, SidebarMenuButton, SidebarMenuItem, SidebarTrigger } from "@/components/ui/sidebar";
+import {
+  Sidebar,
+  SidebarContent,
+  SidebarGroup,
+  SidebarGroupContent,
+  SidebarGroupLabel,
+  SidebarMenu,
+  SidebarMenuButton,
+  SidebarMenuItem,
+  SidebarTrigger,
+} from "@/components/ui/sidebar";
 import { useState, useEffect } from "react";
-import { OnboardingTasksNav } from "./onboarding/OnboardingTasksNav";
 
 const mainNavItems = [{
+  title: "Home",
+  icon: Home,
+  url: "/"
+}, {
   title: "Stylizer",
   icon: Palette,
   url: "/stylizer"
@@ -33,6 +47,7 @@ export function GlobalSidebar() {
   const [isLibraryExpanded, setIsLibraryExpanded] = useState(false);
   const isLibraryRoute = location.pathname.startsWith('/library');
 
+  // Auto-expand library section when on a library route
   useEffect(() => {
     if (isLibraryRoute && !isLibraryExpanded) {
       setIsLibraryExpanded(true);
@@ -40,31 +55,19 @@ export function GlobalSidebar() {
   }, [location.pathname]);
 
   return (
-    <div className="h-[calc(100vh-64px)] border-r border-polaris-border">
-      <Sidebar className="h-full">
-        <SidebarContent className="space-y-1 pt-20">
-          <OnboardingTasksNav />
-          
-          <SidebarGroup>
-            <SidebarMenuItem>
-              <SidebarMenuButton asChild className={location.pathname === "/dashboard" ? "bg-[#F6F6F7]" : "hover:bg-gray-50"}>
-                <Link to="/dashboard" className="flex items-center gap-2">
-                  <LayoutDashboard className={`h-5 w-5 ${location.pathname === "/dashboard" ? "text-black" : ""}`} />
-                  <span className={location.pathname === "/dashboard" ? "text-black font-medium" : ""}>Dashboard</span>
-                </Link>
-              </SidebarMenuButton>
-            </SidebarMenuItem>
-          </SidebarGroup>
-
-          <div className="h-px bg-polaris-border mx-4" />
-
+    <div className="fixed left-0 top-16 bottom-0 z-40">
+      <Sidebar className="h-[calc(100vh-4rem)] border-r border-polaris-border">
+        <SidebarContent className="space-y-1">
           <SidebarGroup>
             <SidebarGroupLabel>Applications</SidebarGroupLabel>
             <SidebarGroupContent>
               <SidebarMenu>
-                {mainNavItems.map(item => (
+                {mainNavItems.map((item) => (
                   <SidebarMenuItem key={item.title}>
-                    <SidebarMenuButton asChild className={location.pathname === item.url ? "bg-[#F6F6F7]" : "hover:bg-gray-50"}>
+                    <SidebarMenuButton
+                      asChild
+                      className={location.pathname === item.url ? "bg-[#F6F6F7]" : "hover:bg-gray-50"}
+                    >
                       <Link to={item.url} className="flex items-center gap-2">
                         <item.icon className={`h-5 w-5 ${location.pathname === item.url ? "text-black" : ""}`} />
                         <span className={location.pathname === item.url ? "text-black font-medium" : ""}>{item.title}</span>
@@ -79,23 +82,32 @@ export function GlobalSidebar() {
           <div className="h-px bg-polaris-border mx-4" />
 
           <SidebarGroup>
-            <button 
-              onClick={() => setIsLibraryExpanded(!isLibraryExpanded)} 
-              className={`flex items-center justify-between w-full px-3 py-2 text-sm font-medium ${isLibraryRoute ? "text-black font-medium" : "text-gray-600 hover:text-gray-900"}`}
+            <button
+              onClick={() => setIsLibraryExpanded(!isLibraryExpanded)}
+              className={`flex items-center justify-between w-full px-3 py-2 text-sm font-medium ${
+                isLibraryRoute ? "text-black font-medium" : "text-gray-600 hover:text-gray-900"
+              }`}
             >
               <span className="flex items-center gap-2">
                 <Library className={`h-5 w-5 ${isLibraryRoute ? "text-black" : ""}`} />
                 <span>Library</span>
               </span>
-              {isLibraryExpanded ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
+              {isLibraryExpanded ? (
+                <ChevronDown className="h-4 w-4" />
+              ) : (
+                <ChevronRight className="h-4 w-4" />
+              )}
             </button>
             {isLibraryExpanded && (
               <SidebarGroupContent>
                 <SidebarMenu>
-                  {libraryItems.map(item => (
+                  {libraryItems.map((item) => (
                     <SidebarMenuItem key={item.title}>
-                      <SidebarMenuButton asChild className={location.pathname === item.url ? "bg-[#F6F6F7]" : "hover:bg-gray-50"}>
-                        <Link to={item.url} className="flex items-center gap-2 px-[39px]">
+                      <SidebarMenuButton
+                        asChild
+                        className={location.pathname === item.url ? "bg-[#F6F6F7]" : "hover:bg-gray-50"}
+                      >
+                        <Link to={item.url} className="flex items-center gap-2">
                           <item.icon className={`h-5 w-5 ${location.pathname === item.url ? "text-black" : ""}`} />
                           <span className={location.pathname === item.url ? "text-black font-medium" : ""}>{item.title}</span>
                         </Link>
@@ -114,7 +126,10 @@ export function GlobalSidebar() {
               <SidebarGroupContent>
                 <SidebarMenu>
                   <SidebarMenuItem>
-                    <SidebarMenuButton asChild className={location.pathname === "/settings" ? "bg-[#F6F6F7]" : "hover:bg-gray-50"}>
+                    <SidebarMenuButton
+                      asChild
+                      className={location.pathname === "/settings" ? "bg-[#F6F6F7]" : "hover:bg-gray-50"}
+                    >
                       <Link to="/settings" className="flex items-center gap-2">
                         <Settings className={`h-5 w-5 ${location.pathname === "/settings" ? "text-black" : ""}`} />
                         <span className={location.pathname === "/settings" ? "text-black font-medium" : ""}>Settings</span>

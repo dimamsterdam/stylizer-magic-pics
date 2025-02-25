@@ -1,115 +1,216 @@
-
-import "https://deno.land/x/xhr@0.1.0/mod.ts";
-import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
-import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.39.3';
+import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.7.1'
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
-};
+}
+
+// Initialize Supabase client
+const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
+const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
+const supabase = createClient(supabaseUrl, supabaseKey);
+
+async function generateWithDeepseek(prompt: string) {
+  const deepseekKey = Deno.env.get('DEEPSEEK_API_KEY')!;
+  
+  const response = await fetch('https://api.deepseek.ai/v1/images/generations', {
+    method: 'POST',
+    headers: {
+      'Authorization': `Bearer ${deepseekKey}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      prompt,
+      n: 1,
+      size: "1024x1024",
+      response_format: "url"
+    })
+  });
+
+  if (!response.ok) {
+    throw new Error(`Deepseek API error: ${response.status}`);
+  }
+
+  const data = await response.json();
+  return data.data[0].url;
+}
+
+async function generateWithPerplexity(prompt: string) {
+  const perplexityKey = Deno.env.get('PERPLEXITY_API_KEY')!;
+
+  const response = await fetch('https://api.perplexity.ai/chat/completions', {
+    method: 'POST',
+    headers: {
+      'Authorization': `Bearer ${perplexityKey}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      model: 'llama-3.1-sonar-small-128k-online',
+      messages: [
+        {
+          role: 'system',
+          content: 'Generate an image based on the following prompt.'
+        },
+        {
+          role: 'user',
+          content: prompt
+        }
+      ]
+    })
+  });
+
+  if (!response.ok) {
+    throw new Error(`Perplexity API error: ${response.status}`);
+  }
+
+  const data = await response.json();
+  return data.choices[0].message.content;
+}
+
+async function generateWithFal(prompt: string) {
+  const falKey = Deno.env.get('FAL_KEY')!;
+  console.log('Generating image with FAL, prompt:', prompt);
+
+  try {
+    // Initial request to generate image using the REST API endpoint
+    const response = await fetch('https://fal.run/api/v1/art/models/1.6-turbo', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Key ${falKey}`,
+        'Content-Type': 'application/json',
+        'Accept': 'application/json'
+      },
+      body: JSON.stringify({
+        prompt,
+        image_size: "landscape_4_3",
+        num_images: 1,
+        output_format: "jpeg",
+        guidance_scale: 7.5,
+        num_inference_steps: 50
+      })
+    });
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error('FAL API error response:', errorText);
+      throw new Error(`FAL API error: ${response.status} - ${errorText}`);
+    }
+
+    const data = await response.json();
+    console.log('FAL API initial response:', data);
+
+    if (!data.id) {
+      throw new Error('No request ID in FAL API response');
+    }
+
+    // Wait for the image generation to complete
+    const imageResult = await waitForImageGeneration(data.id, falKey);
+    console.log('FAL API final image result:', imageResult);
+
+    if (!imageResult.image?.url) {
+      throw new Error('No image URL in FAL API response');
+    }
+
+    return imageResult.image.url;
+  } catch (error) {
+    console.error('Error in generateWithFal:', error);
+    throw error;
+  }
+}
+
+async function waitForImageGeneration(requestId: string, apiKey: string) {
+  const maxAttempts = 30;
+  const delayMs = 1000;
+
+  for (let attempt = 0; attempt < maxAttempts; attempt++) {
+    try {
+      const response = await fetch(`https://fal.run/api/v1/art/requests/${requestId}`, {
+        method: 'GET',
+        headers: {
+          'Authorization': `Key ${apiKey}`,
+          'Accept': 'application/json'
+        },
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error(`Status check attempt ${attempt + 1} failed:`, errorText);
+        throw new Error(`Status check failed: ${response.status}`);
+      }
+
+      const result = await response.json();
+      console.log(`Status check attempt ${attempt + 1} result:`, result);
+
+      if (result.status === 'completed') {
+        return result;
+      } else if (result.status === 'failed') {
+        throw new Error('Image generation failed: ' + (result.error || 'Unknown error'));
+      }
+
+      await new Promise(resolve => setTimeout(resolve, delayMs));
+    } catch (error) {
+      console.error(`Error in attempt ${attempt + 1}:`, error);
+      throw error;
+    }
+  }
+
+  throw new Error('Timeout waiting for image generation');
+}
 
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
-    return new Response(null, { headers: corsHeaders });
+    return new Response(null, { headers: corsHeaders })
   }
 
   try {
-    const requestBody = await req.json();
-    const { exposeId, products, theme, headline, bodyCopy } = requestBody;
+    const { prompt } = await req.json();
 
-    if (!exposeId) {
-      throw new Error('exposeId is required');
+    // Fetch current AI provider from feature flags
+    const { data: featureFlags, error: flagError } = await supabase
+      .from('feature_flags')
+      .select('value')
+      .eq('name', 'ai_provider')
+      .single();
+
+    if (flagError) {
+      throw new Error(`Error fetching AI provider: ${flagError.message}`);
     }
 
-    const openaiKey = Deno.env.get('OPENAI_API_KEY');
-    const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
-    const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
+    const provider = featureFlags.value;
+    console.log('Using AI provider:', provider);
 
-    if (!openaiKey) {
-      throw new Error('OpenAI API key is not configured');
+    let imageUrl;
+    switch (provider) {
+      case 'deepseek':
+        imageUrl = await generateWithDeepseek(prompt);
+        break;
+      case 'perplexity':
+        imageUrl = await generateWithPerplexity(prompt);
+        break;
+      case 'fal':
+        imageUrl = await generateWithFal(prompt);
+        break;
+      default:
+        throw new Error(`Unknown AI provider: ${provider}`);
     }
 
-    const supabase = createClient(supabaseUrl, supabaseServiceKey);
+    return new Response(
+      JSON.stringify({ imageUrl }),
+      { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+    );
 
-    console.log('Preparing DALL-E requests...');
-
-    const basePrompt = `High-quality professional product photography in ${theme} style featuring ${products.map(p => p.title).join(', ')}. ${headline}`;
-    
-    // Generate variations with slightly different prompts
-    const prompts = [
-      basePrompt + " Main hero shot.",
-      basePrompt + " Alternative angle.",
-      basePrompt + " Close-up detail view.",
-      basePrompt + " Lifestyle context shot."
-    ];
-
-    console.log('Generating multiple variations...');
-    
-    const imageUrls: string[] = [];
-    
-    // Generate images sequentially
-    for (const prompt of prompts) {
-      console.log('Generating variation with prompt:', prompt);
-      
-      const openaiResponse = await fetch('https://api.openai.com/v1/images/generations', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${openaiKey}`,
-        },
-        body: JSON.stringify({
-          model: "dall-e-3",
-          prompt: prompt,
-          n: 1,
-          size: "1024x1024",
-          quality: "hd",
-          style: "natural"
-        }),
-      });
-
-      if (!openaiResponse.ok) {
-        const errorText = await openaiResponse.text();
-        console.error('DALL-E API error response:', errorText);
-        throw new Error(`DALL-E API error: ${errorText}`);
-      }
-
-      const openaiData = await openaiResponse.json();
-      console.log('DALL-E API response:', JSON.stringify(openaiData, null, 2));
-
-      if (!openaiData.data?.[0]?.url) {
-        throw new Error('Invalid response format from DALL-E API');
-      }
-
-      imageUrls.push(openaiData.data[0].url);
-    }
-
-    console.log(`Generated ${imageUrls.length} image variations`);
-
-    const { error: updateError } = await supabase
-      .from('exposes')
-      .update({
-        hero_image_generation_status: 'completed',
-        hero_image_url: imageUrls[0],
-        hero_image_desktop_url: imageUrls[0],
-        hero_image_tablet_url: imageUrls[0],
-        hero_image_mobile_url: imageUrls[0],
-        image_variations: imageUrls,
-        selected_variation_index: 0
-      })
-      .eq('id', exposeId);
-
-    if (updateError) {
-      throw new Error(`Failed to update expose: ${updateError.message}`);
-    }
-
-    return new Response(JSON.stringify({ success: true }), {
-      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-    });
   } catch (error) {
-    console.error('Error in generate-ai-image function:', error);
-    return new Response(JSON.stringify({ error: error.message }), {
-      status: 500,
-      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-    });
+    console.error('Error:', error);
+    return new Response(
+      JSON.stringify({ 
+        error: error.message,
+        details: 'Failed to generate image'
+      }),
+      { 
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        status: 500
+      }
+    );
   }
 });

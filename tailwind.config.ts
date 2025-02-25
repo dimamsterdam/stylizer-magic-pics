@@ -1,13 +1,14 @@
+
 import type { Config } from "tailwindcss";
 
-const config = {
+export default {
   darkMode: ["class"],
   content: [
-    './pages/**/*.{ts,tsx}',
-    './components/**/*.{ts,tsx}',
-    './app/**/*.{ts,tsx}',
-    './src/**/*.{ts,tsx}',
-	],
+    "./pages/**/*.{ts,tsx}",
+    "./components/**/*.{ts,tsx}",
+    "./app/**/*.{ts,tsx}",
+    "./src/**/*.{ts,tsx}",
+  ],
   prefix: "",
   theme: {
     container: {
@@ -18,10 +19,15 @@ const config = {
       },
     },
     extend: {
-      rotate: {
-        '360': '360deg',
-      },
       colors: {
+        polaris: {
+          green: "#9b87f5",
+          teal: "#7E69AB",
+          background: "#F6F6F7",
+          border: "#E3E5E7",
+          text: "#1A1F2C",
+          secondary: "#6D7175",
+        },
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",
         ring: "hsl(var(--ring))",
@@ -56,38 +62,26 @@ const config = {
           foreground: "hsl(var(--card-foreground))",
         },
       },
+      fontFamily: {
+        sans: ["Inter", "sans-serif"],
+      },
       fontSize: {
-        'display-xl': ['40px', { lineHeight: '44px', fontWeight: '600' }],
-        'display-lg': ['28px', { lineHeight: '32px', fontWeight: '600' }],
-        'display-md': ['26px', { lineHeight: '30px', fontWeight: '600' }],
-        'display-sm': ['24px', { lineHeight: '28px', fontWeight: '600' }],
-        'heading': ['16px', { lineHeight: '20px', fontWeight: '600' }],
-        'body': ['14px', { lineHeight: '20px', fontWeight: '400' }],
-        'body-tight': ['14px', { lineHeight: '16px', fontWeight: '400' }],
-        'caption': ['12px', { lineHeight: '16px', fontWeight: '400' }]
+        // Reduced display sizes by 25% while maintaining proportions
+        'display-xl': ['24px', { lineHeight: '30px', fontWeight: '600' }], // Was 32px
+        'display-lg': ['21px', { lineHeight: '24px', fontWeight: '600' }], // Was 28px
+        'display-md': ['18px', { lineHeight: '21px', fontWeight: '600' }], // Was 24px
+        'display-sm': ['15px', { lineHeight: '18px', fontWeight: '600' }], // Was 20px
+        'body-lg': ['18px', { lineHeight: '28px', fontWeight: '400' }],
+        'body-md': ['16px', { lineHeight: '24px', fontWeight: '400' }],
+        'body-sm': ['14px', { lineHeight: '20px', fontWeight: '400' }],
+        'body-xs': ['12px', { lineHeight: '16px', fontWeight: '400' }],
       },
       borderRadius: {
         lg: "var(--radius)",
         md: "calc(var(--radius) - 2px)",
         sm: "calc(var(--radius) - 4px)",
       },
-      keyframes: {
-        "accordion-down": {
-          from: { height: "0" },
-          to: { height: "var(--radix-accordion-content-height)" },
-        },
-        "accordion-up": {
-          from: { height: "var(--radix-accordion-content-height)" },
-          to: { height: "0" },
-        },
-      },
-      animation: {
-        "accordion-down": "accordion-down 0.2s ease-out",
-        "accordion-up": "accordion-up 0.2s ease-out",
-      },
     },
   },
   plugins: [require("tailwindcss-animate")],
-} satisfies Config
-
-export default config
+} satisfies Config;
