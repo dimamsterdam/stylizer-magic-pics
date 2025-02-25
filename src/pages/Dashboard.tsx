@@ -29,7 +29,7 @@ const Dashboard = () => {
               badge={{
                 label: "Product Showcase",
                 color: "#2563EB",
-                bgColor: "#DBEAFE"
+                bgColor: "rgba(219, 234, 254, 0.9)"
               }} 
             />
             <ContentCard 
@@ -38,8 +38,8 @@ const Dashboard = () => {
               imageUrl="/lovable-uploads/047c9307-af3c-47c6-b2e6-ea9d51a0c8cc.png"
               badge={{
                 label: "Seasonal Guide",
-                color: "#2563EB",
-                bgColor: "#DBEAFE"
+                color: "#9333EA",
+                bgColor: "rgba(243, 232, 255, 0.9)"
               }} 
             />
             <ContentCard 
@@ -48,8 +48,8 @@ const Dashboard = () => {
               imageUrl="/lovable-uploads/61d9b435-6552-49b0-a269-25c905ba18c9.png"
               badge={{
                 label: "New Release",
-                color: "#2563EB",
-                bgColor: "#DBEAFE"
+                color: "#EA580C",
+                bgColor: "rgba(255, 237, 213, 0.9)"
               }} 
             />
           </div>
