@@ -5,9 +5,8 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { 
   ThumbsUp, 
-  Copy, 
   PenLine, 
-  X, 
+  Trash, 
   Send,
   Sparkles,
   MoreVertical,
@@ -30,7 +29,7 @@ export const ContentCard = ({ title, description, imageUrl, badge }: ContentCard
   const [showInsights, setShowInsights] = useState(false);
 
   return (
-    <Card className="overflow-hidden bg-white border-0 rounded-xl shadow-lg hover:shadow-xl transition-shadow duration-300">
+    <Card className="overflow-hidden bg-white border-0 rounded-xl shadow-lg hover:shadow-xl transition-shadow duration-300 flex flex-col">
       {/* Image Section */}
       <div className="relative h-[280px] bg-gray-100">
         <img 
@@ -39,7 +38,7 @@ export const ContentCard = ({ title, description, imageUrl, badge }: ContentCard
           className="w-full h-full object-cover"
         />
         
-        {/* Badge Overlay - Now at bottom */}
+        {/* Badge Overlay */}
         <div className="absolute bottom-4 left-4">
           <Badge 
             className="px-3 py-1.5 text-sm font-medium rounded-full"
@@ -55,7 +54,7 @@ export const ContentCard = ({ title, description, imageUrl, badge }: ContentCard
       </div>
 
       {/* Content Section */}
-      <div className="p-6 space-y-4">
+      <div className="p-6 space-y-4 flex-1 flex flex-col">
         <div className="flex items-start justify-between">
           <h3 className="text-[24px] font-semibold text-gray-900 leading-tight">
             {title}
@@ -94,27 +93,20 @@ export const ContentCard = ({ title, description, imageUrl, badge }: ContentCard
           )}
         </div>
 
-        {/* Action Buttons */}
-        <div className="flex items-center gap-4 pt-4 mt-4 border-t border-gray-100">
-          <div className="flex items-center gap-2">
-            <Button variant="ghost" size="icon" className="hover:bg-gray-100">
-              <ThumbsUp className="h-5 w-5 text-gray-600" />
-            </Button>
-            <Button variant="ghost" size="icon" className="hover:bg-gray-100">
-              <Copy className="h-5 w-5 text-gray-600" />
-            </Button>
-            <Button variant="ghost" size="icon" className="hover:bg-gray-100">
-              <PenLine className="h-5 w-5 text-gray-600" />
-            </Button>
-          </div>
-          <div className="flex items-center gap-2 ml-auto">
-            <Button variant="ghost" size="icon" className="hover:bg-gray-100">
-              <X className="h-5 w-5 text-gray-600" />
-            </Button>
-            <Button variant="ghost" size="icon" className="hover:bg-gray-100">
-              <Send className="h-5 w-5 text-gray-600" />
-            </Button>
-          </div>
+        {/* Action Buttons - Now at bottom and centered */}
+        <div className="flex items-center justify-center gap-4 pt-4 mt-auto border-t border-gray-100">
+          <Button variant="ghost" size="icon" className="hover:bg-gray-100">
+            <ThumbsUp className="h-5 w-5 text-gray-600" />
+          </Button>
+          <Button variant="ghost" size="icon" className="hover:bg-gray-100">
+            <PenLine className="h-5 w-5 text-gray-600" />
+          </Button>
+          <Button variant="ghost" size="icon" className="hover:bg-gray-100">
+            <Trash className="h-5 w-5 text-gray-600" />
+          </Button>
+          <Button variant="ghost" size="icon" className="hover:bg-gray-100">
+            <Send className="h-5 w-5 text-gray-600" />
+          </Button>
         </div>
       </div>
     </Card>
