@@ -43,8 +43,8 @@ export const ContentCard = ({ title, description, imageUrl, badge }: ContentCard
             className="w-full h-full object-cover"
           />
           
-          {/* Badge Overlay */}
-          <div className="absolute top-4 left-4">
+          {/* Badge Overlay - Now at bottom */}
+          <div className="absolute bottom-4 left-4">
             <Badge 
               className="px-3 py-1.5 text-sm font-medium rounded-full"
               style={{ 
