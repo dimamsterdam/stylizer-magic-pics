@@ -5,10 +5,19 @@ import { CalendarClock, ThumbsUp, Lightbulb } from "lucide-react";
 import { DashboardHeader } from "@/components/dashboard/DashboardHeader";
 import { StatCard } from "@/components/dashboard/StatCard";
 import { ContentCard } from "@/components/dashboard/ContentCard";
+import { OnboardingModal } from "@/components/onboarding/OnboardingModal";
+import { useOnboarding } from "@/hooks/useOnboarding";
 
 const Dashboard = () => {
+  const { showOnboarding, closeOnboarding, loading } = useOnboarding();
+
+  if (loading) {
+    return <div>Loading...</div>;
+  }
+
   return (
     <div className="max-w-[99.8rem] mx-auto">
+      <OnboardingModal isOpen={showOnboarding} onClose={closeOnboarding} />
       <DashboardHeader />
 
       <div className="p-5 space-y-8 bg-[--p-background] min-h-[calc(100vh-129px)]">

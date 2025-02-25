@@ -1,8 +1,8 @@
-
 import { ChevronDown, ChevronRight, Image, Video, Palette, Settings, ChevronLeft, Library, LayoutDashboard } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
 import { Sidebar, SidebarContent, SidebarGroup, SidebarGroupContent, SidebarGroupLabel, SidebarMenu, SidebarMenuButton, SidebarMenuItem, SidebarTrigger } from "@/components/ui/sidebar";
 import { useState, useEffect } from "react";
+import { OnboardingTasksNav } from "./onboarding/OnboardingTasksNav";
 
 const mainNavItems = [{
   title: "Stylizer",
@@ -43,6 +43,8 @@ export function GlobalSidebar() {
     <div className="h-[calc(100vh-64px)] border-r border-polaris-border">
       <Sidebar className="h-full">
         <SidebarContent className="space-y-1 pt-20">
+          <OnboardingTasksNav />
+          
           <SidebarGroup>
             <SidebarMenuItem>
               <SidebarMenuButton asChild className={location.pathname === "/dashboard" ? "bg-[#F6F6F7]" : "hover:bg-gray-50"}>
