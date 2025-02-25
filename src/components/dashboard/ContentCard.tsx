@@ -48,8 +48,8 @@ export const ContentCard = ({ title, description, imageUrl, badge }: ContentCard
             <Badge 
               className="px-3 py-1.5 text-sm font-medium rounded-full"
               style={{ 
-                backgroundColor: 'rgba(219, 234, 254, 0.9)', // Light blue with opacity
-                color: '#2563EB',
+                backgroundColor: badge.bgColor,
+                color: badge.color,
                 backdropFilter: 'blur(4px)'
               }}
             >
@@ -96,7 +96,7 @@ export const ContentCard = ({ title, description, imageUrl, badge }: ContentCard
                 <X className="h-5 w-5 text-gray-600" />
               </Button>
               <Button variant="ghost" size="icon">
-                <Send className="h-5 w-5 text-blue-600" />
+                <Send className="h-5 w-5" style={{ color: badge.color }} />
               </Button>
             </div>
           </div>
@@ -114,15 +114,15 @@ export const ContentCard = ({ title, description, imageUrl, badge }: ContentCard
               <h4 className="font-medium text-gray-900">Why this content was proposed:</h4>
               <ul className="space-y-2 text-gray-600">
                 <li className="flex items-start gap-2">
-                  <Sparkles className="h-5 w-5 text-blue-600 mt-0.5 shrink-0" />
+                  <Sparkles className="h-5 w-5 mt-0.5 shrink-0" style={{ color: badge.color }} />
                   <span>High seasonal relevance based on current winter trends and historical data</span>
                 </li>
                 <li className="flex items-start gap-2">
-                  <Sparkles className="h-5 w-5 text-blue-600 mt-0.5 shrink-0" />
+                  <Sparkles className="h-5 w-5 mt-0.5 shrink-0" style={{ color: badge.color }} />
                   <span>Similar content has shown strong engagement rates in your target demographic</span>
                 </li>
                 <li className="flex items-start gap-2">
-                  <Sparkles className="h-5 w-5 text-blue-600 mt-0.5 shrink-0" />
+                  <Sparkles className="h-5 w-5 mt-0.5 shrink-0" style={{ color: badge.color }} />
                   <span>Aligns with your brand's visual identity and color palette preferences</span>
                 </li>
               </ul>
