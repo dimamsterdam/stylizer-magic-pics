@@ -23,17 +23,22 @@ const ImageGrid = ({ variations, selectedIndex, onSelect, headline, bodyCopy }: 
     { label: 'Editorial', value: 'editorial' },
   ];
 
+  // Ensure variations is an array of strings
+  const safeVariations = Array.isArray(variations) ? 
+    variations.filter((url): url is string => typeof url === 'string') : 
+    [];
+
   return (
     <div className="space-y-4">
       {/* Control Bar */}
       <GalleryControlBar 
         currentIndex={selectedIndex}
-        totalCount={variations.length}
+        totalCount={safeVariations.length}
       />
       
       {/* Main Preview */}
       <GeneratedImagePreview
-        imageUrl={variations[selectedIndex]}
+        imageUrl={safeVariations[selectedIndex] || '/placeholder.svg'}
         headline={headline}
         bodyCopy={bodyCopy}
         isSelected={true}
@@ -42,7 +47,7 @@ const ImageGrid = ({ variations, selectedIndex, onSelect, headline, bodyCopy }: 
       
       {/* Thumbnails */}
       <div className="grid grid-cols-4 gap-4">
-        {variations.map((imageUrl, index) => (
+        {safeVariations.map((imageUrl, index) => (
           <Card 
             key={index}
             className={`cursor-pointer overflow-hidden ${

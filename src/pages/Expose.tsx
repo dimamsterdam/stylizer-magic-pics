@@ -656,13 +656,27 @@ const Expose = () => {
     }
   };
 
+  // Determine the image URL for the preview panel
   const getPreviewImageUrl = () => {
+    // If we have generated images, use the selected variation
     if (exposeData?.hero_image_url) {
-      if (exposeData.image_variations && Array.isArray(exposeData.image_variations) && exposeData.selected_variation_index !== undefined) {
-        return exposeData.image_variations[exposeData.selected_variation_index] || exposeData.hero_image_url;
+      if (exposeData.image_variations && 
+          Array.isArray(exposeData.image_variations) && 
+          exposeData.selected_variation_index !== undefined) {
+        
+        const selectedVariation = exposeData.image_variations[exposeData.selected_variation_index];
+        
+        // Check if the selected variation is a valid string
+        if (typeof selectedVariation === 'string') {
+          return selectedVariation;
+        }
+        
+        return exposeData.hero_image_url;
       }
       return exposeData.hero_image_url;
     }
+    
+    // Otherwise show a placeholder
     return PLACEHOLDER_IMAGE;
   };
 
