@@ -11,6 +11,7 @@ interface PreviewPanelProps {
   bodyCopy: string;
   isExpanded: boolean;
   onToggleExpand: () => void;
+  onPanelStateChange?: (state: 'minimized' | 'preview' | 'expanded') => void;
 }
 
 export const PreviewPanel = ({
@@ -18,7 +19,8 @@ export const PreviewPanel = ({
   headline,
   bodyCopy,
   isExpanded,
-  onToggleExpand
+  onToggleExpand,
+  onPanelStateChange
 }: PreviewPanelProps) => {
   const [currentLayout, setCurrentLayout] = useState<ExposeLayout>('default');
   const [sheetOpen, setSheetOpen] = useState(true);
@@ -31,6 +33,19 @@ export const PreviewPanel = ({
       setShouldShowPreview(true);
     }
   }, [headline, bodyCopy]);
+  
+  // Effect to notify parent of panel state changes
+  useEffect(() => {
+    if (onPanelStateChange) {
+      if (isExpanded) {
+        onPanelStateChange('expanded');
+      } else if (shouldShowPreview) {
+        onPanelStateChange('preview');
+      } else {
+        onPanelStateChange('minimized');
+      }
+    }
+  }, [isExpanded, shouldShowPreview, onPanelStateChange]);
 
   const layouts: { label: string; value: ExposeLayout }[] = [
     { label: 'Default', value: 'default' },

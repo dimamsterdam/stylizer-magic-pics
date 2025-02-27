@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
@@ -25,6 +26,8 @@ interface Product {
   image: string;
 }
 type Step = 'products' | 'theme-content' | 'results';
+type PanelState = 'minimized' | 'preview' | 'expanded';
+
 const themeExamples = ["Festive red theme with soft lighting and night club background", "Minimalist white studio setup with dramatic shadows", "Natural outdoor setting with morning sunlight and autumn colors", "Modern urban environment with neon lights and city backdrop", "Elegant marble surface with gold accents and soft diffused lighting"];
 
 const PLACEHOLDER_IMAGE = '/placeholder.svg';
@@ -42,6 +45,7 @@ const Expose = () => {
   const [currentPlaceholderIndex, setCurrentPlaceholderIndex] = useState(0);
   const [isGeneratingContent, setIsGeneratingContent] = useState(false);
   const [isPreviewExpanded, setIsPreviewExpanded] = useState(false);
+  const [panelState, setPanelState] = useState<PanelState>('minimized');
   const { toast } = useToast();
   const navigate = useNavigate();
 
@@ -421,6 +425,23 @@ const Expose = () => {
     setIsPreviewExpanded(!isPreviewExpanded);
   };
 
+  const handlePanelStateChange = (state: PanelState) => {
+    setPanelState(state);
+  };
+
+  // Get bottom padding based on panel state
+  const getContentPadding = () => {
+    switch (panelState) {
+      case 'expanded':
+        return 'pb-[70vh]';
+      case 'preview':
+        return 'pb-[25vh]';
+      case 'minimized':
+      default:
+        return 'pb-[32px]';
+    }
+  };
+
   const renderProductsStep = () => {
     return (
       <Card className="bg-[--p-surface] shadow-[--p-shadow-card] border-[--p-border-subdued]">
@@ -680,7 +701,7 @@ const Expose = () => {
   return (
     <div className="max-w-[99.8rem] mx-auto">
       <ExposeHeader currentStep={currentStep} onStepClick={handleStepClick} />
-      <div className="bg-[--p-background] min-h-[calc(100vh-129px)]">
+      <div className={`bg-[--p-background] min-h-[calc(100vh-129px)] transition-all duration-300 ${getContentPadding()}`}>
         <div className="p-5">
           {renderMainContent()}
         </div>
@@ -691,6 +712,7 @@ const Expose = () => {
           bodyCopy={bodyCopy}
           isExpanded={isPreviewExpanded}
           onToggleExpand={togglePreviewExpansion}
+          onPanelStateChange={handlePanelStateChange}
         />
       </div>
     </div>
