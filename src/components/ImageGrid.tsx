@@ -4,7 +4,7 @@ import { Card } from './ui/card';
 import GeneratedImagePreview, { ExposeLayout } from './GeneratedImagePreview';
 import { GalleryControlBar } from './expose/GalleryControlBar';
 import { Button } from './ui/button';
-import { LayoutTemplate } from 'lucide-react';
+import { LayoutTemplate, ChevronLeft, ChevronRight } from 'lucide-react';
 
 interface ImageGridProps {
   variations: string[];
@@ -28,6 +28,20 @@ const ImageGrid = ({ variations, selectedIndex, onSelect, headline, bodyCopy }: 
     variations.filter((url): url is string => typeof url === 'string') : 
     [];
 
+  const handlePrevious = () => {
+    const newIndex = selectedIndex === 0 ? safeVariations.length - 1 : selectedIndex - 1;
+    onSelect(newIndex);
+  };
+
+  const handleNext = () => {
+    const newIndex = selectedIndex === safeVariations.length - 1 ? 0 : selectedIndex + 1;
+    onSelect(newIndex);
+  };
+
+  if (safeVariations.length === 0) {
+    return null;
+  }
+
   return (
     <div className="space-y-4">
       {/* Control Bar */}
@@ -36,14 +50,37 @@ const ImageGrid = ({ variations, selectedIndex, onSelect, headline, bodyCopy }: 
         totalCount={safeVariations.length}
       />
       
-      {/* Main Preview */}
-      <GeneratedImagePreview
-        imageUrl={safeVariations[selectedIndex] || '/placeholder.svg'}
-        headline={headline}
-        bodyCopy={bodyCopy}
-        isSelected={true}
-        layout={currentLayout}
-      />
+      {/* Main Preview with Navigation */}
+      <div className="relative">
+        <GeneratedImagePreview
+          imageUrl={safeVariations[selectedIndex] || '/placeholder.svg'}
+          headline={headline}
+          bodyCopy={bodyCopy}
+          isSelected={true}
+          layout={currentLayout}
+        />
+        
+        {safeVariations.length > 1 && (
+          <>
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={handlePrevious}
+              className="absolute left-2 top-1/2 -translate-y-1/2 bg-white/80 hover:bg-white"
+            >
+              <ChevronLeft className="h-4 w-4" />
+            </Button>
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={handleNext}
+              className="absolute right-2 top-1/2 -translate-y-1/2 bg-white/80 hover:bg-white"
+            >
+              <ChevronRight className="h-4 w-4" />
+            </Button>
+          </>
+        )}
+      </div>
       
       {/* Thumbnails */}
       <div className="grid grid-cols-4 gap-4">
@@ -73,10 +110,9 @@ const ImageGrid = ({ variations, selectedIndex, onSelect, headline, bodyCopy }: 
         {layouts.map((layout) => (
           <Button
             key={layout.value}
-            variant={currentLayout === layout.value ? "default" : "ghost"}
+            variant={currentLayout === layout.value ? "primary" : "ghost"}
             size="sm"
             onClick={() => setCurrentLayout(layout.value)}
-            className={currentLayout === layout.value ? "bg-[--p-action-primary] text-white" : "text-[--p-text]"}
           >
             {layout.label}
           </Button>
