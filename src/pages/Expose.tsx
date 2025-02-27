@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
@@ -225,12 +224,13 @@ const Expose = () => {
       if (bodyResponse.error) throw bodyResponse.error;
       const { generatedText: bodyText } = bodyResponse.data;
       
-      // Process and set the headline
-      const headlineWords = headlineText.split(' ');
+      // Process and set the headline - ensure all quotes are removed
+      const cleanedHeadlineText = headlineText.replace(/['"]/g, '');
+      const headlineWords = cleanedHeadlineText.split(' ');
       if (headlineWords.length > 12) {
-        setHeadline(headlineWords.slice(0, 12).join(' ').replace(/["']/g, ''));
+        setHeadline(headlineWords.slice(0, 12).join(' '));
       } else {
-        setHeadline(headlineText.replace(/["']/g, ''));
+        setHeadline(cleanedHeadlineText);
       }
       
       // Process and set the body copy
