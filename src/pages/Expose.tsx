@@ -12,7 +12,8 @@ import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { ThemeSelector } from '@/components/ThemeSelector';
 
-type ExposeStep = 'product' | 'theme' | 'copy' | 'hero';
+// Adjust the ExposeStep type to match what ExposeHeader expects
+type ExposeStep = 'products' | 'theme-content';
 
 const Expose = () => {
   const { id: urlExposeId } = useParams<{ id: string }>();
@@ -22,7 +23,8 @@ const Expose = () => {
   
   // State management
   const [exposeId, setExposeId] = useState<string | null>(urlExposeId || null);
-  const [currentStep, setCurrentStep] = useState<ExposeStep>('product');
+  // Update initial step to match ExposeStep type
+  const [currentStep, setCurrentStep] = useState<ExposeStep>('products');
   const [selectedProducts, setSelectedProducts] = useState<any[]>([]);
   const [headline, setHeadline] = useState<string>('');
   const [bodyCopy, setBodyCopy] = useState<string>('');
@@ -179,19 +181,19 @@ const Expose = () => {
   };
   
   // Update theme
-  const handleThemeSelect = async (theme: string, description: string) => {
+  const handleThemeSelect = async (themeId: string, styleGuide: string) => {
     if (!exposeId) return;
     
     try {
       const { error } = await supabase
         .from('exposes')
-        .update({ theme, theme_description: description })
+        .update({ theme: themeId, theme_description: styleGuide })
         .eq('id', exposeId);
       
       if (error) throw error;
       
-      setSelectedTheme(theme);
-      setThemeDescription(description);
+      setSelectedTheme(themeId);
+      setThemeDescription(styleGuide);
       queryClient.invalidateQueries({ queryKey: ['expose', exposeId] });
       
       toast({
@@ -384,32 +386,35 @@ const Expose = () => {
     return { marginRight: '40px' };
   };
   
-  // Render main content based on current step
+  // Determine which step content to render based on current step
   const renderMainContent = () => {
-    switch (currentStep) {
-      case 'product':
-        return (
-          <div className="mt-5">
-            <h2 className="text-2xl font-semibold mb-5">Select Products</h2>
-            <ProductPicker 
-              selectedProducts={selectedProducts} 
-              onProductsSelect={handleProductSelect} 
-            />
-          </div>
-        );
-      case 'theme':
-        return (
-          <div className="mt-5">
+    if (currentStep === 'products') {
+      return (
+        <div className="mt-5">
+          <h2 className="text-2xl font-semibold mb-5">Select Products</h2>
+          <ProductPicker 
+            searchResults={[]}
+            selectedProducts={selectedProducts}
+            onSelect={handleProductSelect}
+            isLoading={false}
+            error={null}
+            searchTerm=""
+            onSearch={() => {}}
+          />
+        </div>
+      );
+    } else if (currentStep === 'theme-content') {
+      return (
+        <div className="mt-5">
+          <div className="mb-8">
             <h2 className="text-2xl font-semibold mb-5">Choose a Theme</h2>
             <ThemeSelector 
-              selectedTheme={selectedTheme} 
-              onThemeSelect={handleThemeSelect} 
+              value={selectedTheme} 
+              onChange={handleThemeSelect} 
             />
           </div>
-        );
-      case 'copy':
-        return (
-          <div className="mt-5">
+          
+          <div className="mt-8">
             <h2 className="text-2xl font-semibold mb-5">Create Copy</h2>
             <div className="max-w-2xl">
               <div className="mb-5">
@@ -433,16 +438,14 @@ const Expose = () => {
               </div>
               <Button 
                 onClick={handleSaveCopy}
-                variant="primary"
+                variant="default"
               >
                 Save Copy
               </Button>
             </div>
           </div>
-        );
-      case 'hero':
-        return (
-          <div className="mt-5">
+          
+          <div className="mt-8">
             <h2 className="text-2xl font-semibold mb-5">Generate Hero Image</h2>
             <div className="mb-5">
               <p className="text-gray-600 mb-3">
@@ -450,17 +453,18 @@ const Expose = () => {
               </p>
               <Button 
                 onClick={handleGenerateHero}
-                variant="primary"
+                variant="default"
                 disabled={isGenerating || selectedProducts.length === 0}
               >
                 {isGenerating ? 'Generating...' : 'Generate Hero Image'}
               </Button>
             </div>
           </div>
-        );
-      default:
-        return null;
+        </div>
+      );
     }
+    
+    return null;
   };
 
   const getPreviewImageUrl = () => {
