@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent } from "@/components/ui/card";
@@ -509,7 +508,7 @@ const Expose = () => {
             <Button 
               onClick={handleContinue}
               disabled={selectedProducts.length === 0}
-              className="bg-[--p-action-primary] text-white hover:bg-[--p-action-primary-hovered]"
+              variant="primary"
             >
               {isGenerating ? (
                 <>
@@ -611,7 +610,7 @@ const Expose = () => {
               type="button"
               onClick={handleContinue}
               disabled={isGenerating || !themeDescription.trim() || !headline.trim() || !bodyCopy.trim()}
-              className="bg-[--p-action-primary] text-white hover:bg-[--p-action-primary-hovered]"
+              variant="primary"
             >
               {isGenerating ? (
                 <>

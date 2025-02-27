@@ -19,6 +19,7 @@ const buttonVariants = cva(
           "bg-secondary text-secondary-foreground hover:bg-secondary/80",
         ghost: "hover:bg-accent hover:text-accent-foreground",
         link: "text-primary underline-offset-4 hover:underline",
+        primary: "bg-[#2C6ECB] text-white hover:bg-[#1F5199]", // Adding explicit Polaris primary button styling
       },
       size: {
         default: "h-10 px-4 py-2",
