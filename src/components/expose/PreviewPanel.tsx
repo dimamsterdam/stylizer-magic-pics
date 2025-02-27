@@ -42,10 +42,18 @@ export const PreviewPanel = ({
     <Sheet open={sheetOpen} modal={false}>
       <SheetContent 
         side="bottom" 
-        className={`p-0 border-t border-[--p-border] shadow-lg rounded-t-lg ${isExpanded ? 'h-[70vh]' : shouldShowPreview ? 'h-[25vh]' : 'h-[32px]'}`}
-        style={{ zIndex: 40 }}
-        // Remove the close button
+        className={`p-0 border-t border-[--p-border] shadow-xl rounded-t-2xl ${isExpanded ? 'h-[70vh]' : shouldShowPreview ? 'h-[25vh]' : 'h-[32px]'}`}
+        style={{ 
+          zIndex: 40,
+          boxShadow: '0px -4px 20px rgba(0, 0, 0, 0.15)'
+        }}
         hideCloseButton={true}
+        // Enable snap points for flexible dragging
+        snapPoints={[0.2, 0.5, 0.8]}
+        // Enable free dragging between snap points
+        snapPointsMode="percent"
+        // Make the sheet draggable
+        draggable={true}
       >
         <div className="flex flex-col h-full">
           {/* Smaller top bar with layout options on the right */}
