@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
@@ -15,7 +16,6 @@ import { ExposeHeader } from "@/components/expose/ExposeHeader";
 import GeneratedImagePreview from "@/components/GeneratedImagePreview";
 import { ToneSelector, type ToneStyle } from "@/components/ToneSelector";
 import ImageGrid from '@/components/ImageGrid';
-import { ToneChatbox } from "@/components/ToneChatbox";
 import { ThemeGenerator } from "@/components/ThemeGenerator";
 
 interface Product {
@@ -37,7 +37,6 @@ const Expose = () => {
   const [exposeId, setExposeId] = useState<string | null>(null);
   const [selectedTone, setSelectedTone] = useState<number>(2);
   const [currentPlaceholderIndex, setCurrentPlaceholderIndex] = useState(0);
-  const [isToneChatOpen, setIsToneChatOpen] = useState(false);
   const [isGeneratingContent, setIsGeneratingContent] = useState(false);
   const {
     toast
@@ -340,6 +339,64 @@ const Expose = () => {
     setThemeDescription(theme);
   };
 
+  const handleStepClick = (step: Step) => {
+    setCurrentStep(step);
+  };
+  const handleAddToLibrary = async () => {
+    if (!exposeId) return;
+    try {
+      toast({
+        title: "Success",
+        description: "Expose added to library successfully!"
+      });
+      navigate('/library');
+    } catch (error) {
+      console.error('Error navigating to library:', error);
+      toast({
+        title: "Error",
+        description: "Failed to navigate to library. Please try again.",
+        variant: "destructive"
+      });
+    }
+  };
+  const handleRegenerate = async () => {
+    setCurrentStep('theme-content');
+    toast({
+      title: "Ready to regenerate",
+      description: "You can now modify your settings and generate a new image."
+    });
+  };
+  const handleVariationSelect = async (index: number) => {
+    if (!exposeId) return;
+    try {
+      const selectedUrl = exposeData?.image_variations?.[index];
+      if (typeof selectedUrl !== 'string') {
+        throw new Error('Invalid image URL');
+      }
+      const {
+        error
+      } = await supabase.from('exposes').update({
+        selected_variation_index: index,
+        hero_image_url: selectedUrl,
+        hero_image_desktop_url: selectedUrl,
+        hero_image_tablet_url: selectedUrl,
+        hero_image_mobile_url: selectedUrl
+      }).eq('id', exposeId);
+      if (error) throw error;
+      toast({
+        title: "Success",
+        description: "Selected variation has been updated"
+      });
+    } catch (error) {
+      console.error('Error updating selected variation:', error);
+      toast({
+        title: "Error",
+        description: "Failed to update selected variation",
+        variant: "destructive"
+      });
+    }
+  };
+  
   const renderStep = () => {
     switch (currentStep) {
       case 'products':
@@ -493,8 +550,6 @@ const Expose = () => {
                           </>
                         )}
                       </Button>
-                      
-                      <div></div>
                     </div>
                   </div>
                 </div>
@@ -561,75 +616,6 @@ const Expose = () => {
         );
     }
   };
-
-  const handleStepClick = (step: Step) => {
-    setCurrentStep(step);
-  };
-  const handleAddToLibrary = async () => {
-    if (!exposeId) return;
-    try {
-      toast({
-        title: "Success",
-        description: "Expose added to library successfully!"
-      });
-      navigate('/library');
-    } catch (error) {
-      console.error('Error navigating to library:', error);
-      toast({
-        title: "Error",
-        description: "Failed to navigate to library. Please try again.",
-        variant: "destructive"
-      });
-    }
-  };
-  const handleRegenerate = async () => {
-    setCurrentStep('theme-content');
-    toast({
-      title: "Ready to regenerate",
-      description: "You can now modify your settings and generate a new image."
-    });
-  };
-  const handleVariationSelect = async (index: number) => {
-    if (!exposeId) return;
-    try {
-      const selectedUrl = exposeData?.image_variations?.[index];
-      if (typeof selectedUrl !== 'string') {
-        throw new Error('Invalid image URL');
-      }
-      const {
-        error
-      } = await supabase.from('exposes').update({
-        selected_variation_index: index,
-        hero_image_url: selectedUrl,
-        hero_image_desktop_url: selectedUrl,
-        hero_image_tablet_url: selectedUrl,
-        hero_image_mobile_url: selectedUrl
-      }).eq('id', exposeId);
-      if (error) throw error;
-      toast({
-        title: "Success",
-        description: "Selected variation has been updated"
-      });
-    } catch (error) {
-      console.error('Error updating selected variation:', error);
-      toast({
-        title: "Error",
-        description: "Failed to update selected variation",
-        variant: "destructive"
-      });
-    }
-  };
-  const handleToneChange = ({
-    headline: newHeadline,
-    bodyCopy: newBodyCopy
-  }: {
-    headline: string;
-    bodyCopy: string;
-  }) => {
-    setHeadline(newHeadline);
-    setBodyCopy(newBodyCopy);
-  };
-
   return (
     <div className="max-w-[99.8rem] mx-auto">
       <ExposeHeader currentStep={currentStep} onStepClick={handleStepClick} />
