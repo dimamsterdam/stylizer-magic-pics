@@ -450,7 +450,7 @@ const Expose = () => {
 
   const renderProductsStep = () => {
     return (
-      <Card className="bg-[--p-surface] shadow-[--p-shadow-card] border-[--p-border-subdued]">
+      <Card className="bg-[--p-surface] shadow-sm border border-[#E3E5E7] rounded-md">
         <CardContent className="p-6 space-y-6">
           <div className="mt-4">
             <h2 className="text-display-sm text-[--p-text] mb-1">Select Products</h2>
@@ -478,7 +478,7 @@ const Expose = () => {
                 {selectedProducts.map(product => (
                   <div 
                     key={product.id} 
-                    className="flex items-center p-4 border rounded-lg border-[--p-border] bg-[--p-surface]"
+                    className="flex items-center p-4 border rounded-lg border-[#E3E5E7] bg-[--p-surface]"
                   >
                     <img 
                       src={product.image} 
@@ -526,7 +526,7 @@ const Expose = () => {
 
   const renderThemeContentStep = () => {
     return (
-      <Card className="bg-[--p-surface] shadow-[--p-shadow-card] border-[--p-border-subdued]">
+      <Card className="bg-[--p-surface] shadow-sm border border-[#E3E5E7] rounded-md">
         <CardContent className="p-6 space-y-6">
           <div>
             <h2 className="text-display-sm text-[--p-text] mb-1">Theme & Content</h2>
@@ -541,7 +541,7 @@ const Expose = () => {
                 value={themeDescription}
                 onChange={e => setThemeDescription(e.target.value)}
                 placeholder={themeExamples[currentPlaceholderIndex]}
-                className="min-h-[8rem] border-[--p-border] focus:border-[--p-focused] bg-[--p-surface] text-body"
+                className="min-h-[8rem] border-[#E3E5E7] focus:border-[--p-focused] bg-[--p-surface] text-body"
               />
             </div>
 
@@ -551,7 +551,7 @@ const Expose = () => {
               onContentRegenerate={generateContent}
             />
 
-            <div className="border-t border-[--p-border-subdued] pt-4 mt-4">
+            <div className="border-t border-[#E3E5E7] pt-4 mt-4">
               <h3 className="text-heading text-[--p-text] mb-3">Content</h3>
               <div className="space-y-4">
                 <div className="space-y-2">
@@ -563,7 +563,7 @@ const Expose = () => {
                     value={headline} 
                     onChange={handleHeadlineChange} 
                     placeholder="Enter a compelling headline" 
-                    className="text-lg min-h-[40px] resize-none overflow-hidden" 
+                    className="text-lg min-h-[40px] resize-none overflow-hidden border-[#E3E5E7]" 
                     rows={1} 
                   />
                 </div>
@@ -575,7 +575,7 @@ const Expose = () => {
                     value={bodyCopy} 
                     onChange={handleBodyCopyChange} 
                     placeholder="Enter the main content of your expose..." 
-                    className="h-48 border-[--p-border] focus:border-[--p-focused] bg-[--p-surface]"
+                    className="h-48 border-[#E3E5E7] focus:border-[--p-focused] bg-[--p-surface]"
                   />
                   <p className="text-sm text-[--p-text-subdued]">
                     {bodyCopy.split(' ').length}/40 words
@@ -586,6 +586,7 @@ const Expose = () => {
                   <Button 
                     onClick={generateContent}
                     variant="outline"
+                    className="border-[#E3E5E7]"
                     disabled={isGeneratingContent || !themeDescription.trim()}
                   >
                     {isGeneratingContent ? (
