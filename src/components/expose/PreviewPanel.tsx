@@ -73,7 +73,7 @@ export const PreviewPanel = ({
       className="fixed right-0 top-[129px] bottom-0 bg-white border-l border-[--p-border] shadow-xl z-40 transition-all duration-300 ease-in-out"
       style={{ 
         width,
-        boxShadow: '-4px 0px 20px rgba(0, 0, 0, 0.15)',
+        boxShadow: '-4px 0px 20px rgba(0, 0, 0, 0.05)',
       }}
     >
       <div className="flex h-full">

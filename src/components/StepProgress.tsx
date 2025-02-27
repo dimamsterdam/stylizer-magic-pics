@@ -49,9 +49,9 @@ const StepProgress = ({ currentStep, onStepClick }: StepProgressProps) => {
                 <div 
                   className={`
                     flex items-center justify-center w-10 h-10 rounded-full border-2 mb-2
-                    ${status === 'active' ? 'border-black bg-black text-white' : ''}
-                    ${status === 'completed' ? 'border-[#333333] text-[#333333] hover:bg-[#F6F6F7]' : ''}
-                    ${status === 'upcoming' ? 'border-[#6D7175] text-[#6D7175]' : ''}
+                    ${status === 'active' ? 'border-[#2C6ECB] bg-[#2C6ECB] text-white' : ''}
+                    ${status === 'completed' ? 'border-[#8E9196] text-[#8E9196] hover:bg-[#F6F6F7]' : ''}
+                    ${status === 'upcoming' ? 'border-[#8E9196] text-[#8E9196]' : ''}
                     ${isClickable ? 'transition-colors' : ''}
                   `}
                 >
@@ -60,9 +60,9 @@ const StepProgress = ({ currentStep, onStepClick }: StepProgressProps) => {
                 <span 
                   className={`
                     text-sm font-medium
-                    ${status === 'active' ? 'text-black' : ''}
-                    ${status === 'completed' ? 'text-[#333333]' : ''}
-                    ${status === 'upcoming' ? 'text-[#6D7175]' : ''}
+                    ${status === 'active' ? 'text-[#2C6ECB]' : ''}
+                    ${status === 'completed' ? 'text-[#8E9196]' : ''}
+                    ${status === 'upcoming' ? 'text-[#8E9196]' : ''}
                   `}
                 >
                   {step.label}
@@ -72,7 +72,7 @@ const StepProgress = ({ currentStep, onStepClick }: StepProgressProps) => {
                 <div 
                   className={`
                     flex-1 h-[2px] mx-4 mt-[-20px]
-                    ${getStepStatus(steps[index + 1].id) === 'upcoming' ? 'bg-[#E3E5E7]' : 'bg-black'}
+                    ${getStepStatus(steps[index + 1].id) === 'upcoming' ? 'bg-[#E3E5E7]' : 'bg-[#2C6ECB]'}
                   `}
                 />
               )}

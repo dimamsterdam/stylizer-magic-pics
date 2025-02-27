@@ -81,18 +81,18 @@
   width: 270px;
   height: 540px;
   background-color: white;
-  border: 12px solid #333;
+  border: 12px solid #8E9196;
   border-radius: 24px;
   overflow: hidden;
   position: relative;
-  box-shadow: 0 0 20px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
 }
 
 .mobile-device-notch {
   position: absolute;
   width: 80px;
   height: 24px;
-  background-color: #333;
+  background-color: #8E9196;
   top: 0;
   left: 50%;
   transform: translateX(-50%);
