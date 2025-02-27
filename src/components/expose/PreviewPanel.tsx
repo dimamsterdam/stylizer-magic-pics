@@ -70,7 +70,7 @@ export const PreviewPanel = ({
   return (
     <div 
       ref={panelRef}
-      className="fixed right-0 top-[129px] bottom-0 bg-white border-l border-[--p-border] shadow-xl z-40 transition-all duration-300 ease-in-out"
+      className="fixed right-0 top-[129px] bottom-0 bg-white border-l border-[#E3E5E7] shadow-xl z-40 transition-all duration-300 ease-in-out"
       style={{ 
         width,
         boxShadow: '-4px 0px 20px rgba(0, 0, 0, 0.05)',
@@ -79,7 +79,7 @@ export const PreviewPanel = ({
       <div className="flex h-full">
         {/* Side tab for collapse/expand */}
         <div 
-          className="w-10 border-r border-[--p-border] bg-[--p-surface] flex flex-col items-center pt-4"
+          className="w-10 border-r border-[#E3E5E7] bg-[--p-surface] flex flex-col items-center pt-4"
         >
           <Button
             variant="ghost"
@@ -109,7 +109,7 @@ export const PreviewPanel = ({
           <div className="flex-1 flex flex-col overflow-hidden">
             {/* Top bar with controls */}
             <div 
-              className="flex items-center justify-between px-3 py-2 bg-[--p-surface] border-b border-[--p-border]"
+              className="flex items-center justify-between px-3 py-2 bg-[--p-surface] border-b border-[#E3E5E7]"
             >
               <h3 className="font-medium text-[--p-text] text-sm">Mobile Preview</h3>
               <div className="flex items-center gap-1">
