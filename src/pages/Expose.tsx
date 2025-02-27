@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
@@ -427,23 +426,22 @@ const Expose = () => {
 
   const handlePanelStateChange = (state: PanelState) => {
     setPanelState(state);
+    console.log("Panel state changed:", state);
   };
 
-  // Get bottom padding based on panel state
-  const getContentPadding = () => {
+  const getContentPaddingStyle = () => {
     if (typeof panelState === 'number') {
-      // Handle custom dragged height
-      return `pb-[${panelState}vh]`;
+      return { paddingBottom: `${panelState}vh` };
     }
     
     switch (panelState) {
       case 'expanded':
-        return 'pb-[70vh]';
+        return { paddingBottom: '70vh' };
       case 'preview':
-        return 'pb-[25vh]';
+        return { paddingBottom: '25vh' };
       case 'minimized':
       default:
-        return 'pb-[32px]';
+        return { paddingBottom: '32px' };
     }
   };
 
@@ -707,9 +705,10 @@ const Expose = () => {
     <div className="max-w-[99.8rem] mx-auto">
       <ExposeHeader currentStep={currentStep} onStepClick={handleStepClick} />
       <div 
-        className={`bg-[--p-background] min-h-[calc(100vh-129px)] transition-all ${typeof panelState === 'number' ? '' : 'duration-300'}`}
+        className="bg-[--p-background] min-h-[calc(100vh-129px)]"
         style={{ 
-          paddingBottom: typeof panelState === 'number' ? `${panelState}vh` : undefined
+          ...getContentPaddingStyle(),
+          transition: typeof panelState === 'number' ? 'none' : 'padding-bottom 0.2s ease'
         }}
       >
         <div className="p-5">

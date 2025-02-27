@@ -115,38 +115,34 @@ export const PreviewPanel = ({
     onToggleExpand();
   };
 
-  const getSheetHeight = () => {
-    if (panelHeight !== null) {
-      return `h-[${panelHeight}vh]`;
-    } else if (isExpanded) {
-      return 'h-[70vh]';
-    } else if (shouldShowPreview) {
-      return 'h-[25vh]';
-    } else {
-      return 'h-[32px]';
-    }
-  };
-
   const layouts: { label: string; value: ExposeLayout }[] = [
     { label: 'Default', value: 'default' },
     { label: 'Reversed', value: 'reversed' },
     { label: 'Editorial', value: 'editorial' },
   ];
   
+  // Calculate panel height styles for both class and inline style
+  let heightClass = '';
+  let heightStyle = {};
+  
+  if (panelHeight !== null) {
+    // When we have a custom dragged height, use inline style
+    heightStyle = { height: `${panelHeight}vh` };
+  } else if (isExpanded) {
+    heightClass = 'h-[70vh]';
+  } else if (shouldShowPreview) {
+    heightClass = 'h-[25vh]';
+  } else {
+    heightClass = 'h-[32px]';
+  }
+  
   return (
     <Sheet open={sheetOpen} modal={false}>
       <SheetContent 
         side="bottom" 
-        className={`p-0 border-t border-[--p-border] shadow-xl rounded-t-2xl ${
-          panelHeight !== null 
-            ? `h-[${panelHeight}vh]` 
-            : isExpanded 
-              ? 'h-[70vh]' 
-              : shouldShowPreview 
-                ? 'h-[25vh]' 
-                : 'h-[32px]'
-        }`}
+        className={`p-0 border-t border-[--p-border] shadow-xl rounded-t-2xl ${heightClass}`}
         style={{ 
+          ...heightStyle,
           zIndex: 40,
           boxShadow: '0px -4px 20px rgba(0, 0, 0, 0.15)',
           transition: isDragging ? 'none' : 'height 0.2s ease'
@@ -156,7 +152,7 @@ export const PreviewPanel = ({
         <div className="flex flex-col h-full" ref={panelRef}>
           {/* Smaller top bar with layout options on the right */}
           <div 
-            className={`flex items-center justify-between px-3 py-1 bg-[--p-surface] border-b border-[--p-border] cursor-grab ${isDragging ? 'cursor-grabbing' : 'cursor-grab'}`}
+            className={`flex items-center justify-between px-3 py-1 bg-[--p-surface] border-b border-[--p-border] ${isDragging ? 'cursor-grabbing' : 'cursor-grab'}`}
             onMouseDown={handleDragStart}
             onTouchStart={handleDragStart}
             // Make the handle more prominent to indicate draggability
