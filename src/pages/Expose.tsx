@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent } from "@/components/ui/card";
@@ -23,6 +24,8 @@ interface Product {
 }
 type Step = 'products' | 'theme-content' | 'results';
 type PanelState = 'minimized' | 'preview' | 'expanded' | number;
+// Define the missing ToneStyle type
+type ToneStyle = 'formal' | 'elegant' | 'informal' | 'playful' | 'edgy';
 
 const themeExamples = ["Festive red theme with soft lighting and night club background", "Minimalist white studio setup with dramatic shadows", "Natural outdoor setting with morning sunlight and autumn colors", "Modern urban environment with neon lights and city backdrop", "Elegant marble surface with gold accents and soft diffused lighting"];
 
