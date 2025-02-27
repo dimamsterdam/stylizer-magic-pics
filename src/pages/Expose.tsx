@@ -608,6 +608,7 @@ const Expose = () => {
 
           <div className="flex justify-end pt-4">
             <Button 
+              type="button"
               onClick={handleContinue}
               disabled={isGenerating || !themeDescription.trim() || !headline.trim() || !bodyCopy.trim()}
               className="bg-[--p-action-primary] text-white hover:bg-[--p-action-primary-hovered]"
