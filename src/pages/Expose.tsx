@@ -16,6 +16,8 @@ import GeneratedImagePreview from "@/components/GeneratedImagePreview";
 import { ToneSelector, type ToneStyle } from "@/components/ToneSelector";
 import ImageGrid from '@/components/ImageGrid';
 import { ThemeGenerator } from "@/components/ThemeGenerator";
+import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from "@/components/ui/resizable";
+import { PreviewPanel } from "@/components/expose/PreviewPanel";
 
 interface Product {
   id: string;
@@ -25,6 +27,9 @@ interface Product {
 }
 type Step = 'products' | 'theme-content' | 'results';
 const themeExamples = ["Festive red theme with soft lighting and night club background", "Minimalist white studio setup with dramatic shadows", "Natural outdoor setting with morning sunlight and autumn colors", "Modern urban environment with neon lights and city backdrop", "Elegant marble surface with gold accents and soft diffused lighting"];
+
+const PLACEHOLDER_IMAGE = '/placeholder.svg';
+
 const Expose = () => {
   const [currentStep, setCurrentStep] = useState<Step>('products');
   const [searchTerm, setSearchTerm] = useState("");
@@ -37,10 +42,10 @@ const Expose = () => {
   const [selectedTone, setSelectedTone] = useState<number>(2);
   const [currentPlaceholderIndex, setCurrentPlaceholderIndex] = useState(0);
   const [isGeneratingContent, setIsGeneratingContent] = useState(false);
-  const {
-    toast
-  } = useToast();
+  const [isPreviewExpanded, setIsPreviewExpanded] = useState(false);
+  const { toast } = useToast();
   const navigate = useNavigate();
+
   useEffect(() => {
     const checkAuth = async () => {
       const {
@@ -63,12 +68,14 @@ const Expose = () => {
     };
     checkAuth();
   }, [navigate]);
+
   useEffect(() => {
     const interval = setInterval(() => {
       setCurrentPlaceholderIndex(prev => (prev + 1) % themeExamples.length);
     }, 5000);
     return () => clearInterval(interval);
   }, []);
+
   const {
     data: exposeData,
     isLoading: isLoadingExpose
@@ -93,8 +100,9 @@ const Expose = () => {
       if (error) throw error;
       return data;
     },
-    enabled: !!exposeId && currentStep === 'results'
+    enabled: !!exposeId
   });
+
   const {
     data: searchResults = [],
     isLoading,
@@ -117,17 +125,21 @@ const Expose = () => {
     },
     enabled: searchTerm.length >= 2
   });
+
   const handleProductSelect = (product: Product) => {
     if (selectedProducts.length < 3) {
       setSelectedProducts(prev => [...prev, product]);
     }
   };
+
   const handleProductRemove = (productId: string) => {
     setSelectedProducts(prev => prev.filter(p => p.id !== productId));
   };
+
   const handleSearchChange = (term: string) => {
     setSearchTerm(term);
   };
+
   const handleContinue = async () => {
     if (currentStep === 'products' && selectedProducts.length === 0) return;
     if (currentStep === 'theme-content' && !themeDescription.trim()) return;
@@ -175,10 +187,12 @@ const Expose = () => {
       }
     }
   };
+
   const handleHeadlineChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-    const cleanedValue = e.target.value.replace(/["']/g, '');
+    const cleanedValue = e.target.value.replace(/['"]/g, '');
     setHeadline(cleanedValue);
   };
+
   const generateContent = async () => {
     try {
       setIsGeneratingContent(true);
@@ -267,6 +281,7 @@ const Expose = () => {
     };
     return descriptions[tone];
   };
+
   const handleBodyCopyChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     const words = e.target.value.split(' ');
     if (words.length > 40) {
@@ -279,6 +294,7 @@ const Expose = () => {
       setBodyCopy(e.target.value);
     }
   };
+
   const handleGenerateHero = async () => {
     if (!exposeId) return;
     setIsGenerating(true);
@@ -342,6 +358,7 @@ const Expose = () => {
   const handleStepClick = (step: Step) => {
     setCurrentStep(step);
   };
+
   const handleAddToLibrary = async () => {
     if (!exposeId) return;
     try {
@@ -359,6 +376,7 @@ const Expose = () => {
       });
     }
   };
+
   const handleRegenerate = async () => {
     setCurrentStep('theme-content');
     toast({
@@ -366,6 +384,7 @@ const Expose = () => {
       description: "You can now modify your settings and generate a new image."
     });
   };
+
   const handleVariationSelect = async (index: number) => {
     if (!exposeId) return;
     try {
@@ -396,233 +415,288 @@ const Expose = () => {
       });
     }
   };
-  
-  const renderStep = () => {
-    switch (currentStep) {
-      case 'products':
-        return (
-          <Card className="bg-[--p-surface] shadow-[--p-shadow-card] border-[--p-border-subdued]">
-            <CardContent className="p-6 space-y-6">
-              <div className="mt-4">
-                <h2 className="text-display-sm text-[--p-text] mb-1">Select Products</h2>
-                <p className="text-body text-[--p-text-subdued]">
-                  Choose up to three products to feature in your hero image
-                </p>
-              </div>
 
-              <ProductPicker 
-                onSelect={handleProductSelect} 
-                selectedProducts={selectedProducts}
-                searchResults={searchResults}
-                isLoading={isLoading}
-                error={error ? 'Error loading products' : null}
-                searchTerm={searchTerm}
-                onSearch={handleSearchChange}
-              />
+  const togglePreviewExpansion = () => {
+    setIsPreviewExpanded(!isPreviewExpanded);
+  };
 
-              {selectedProducts.length > 0 && (
-                <div className="mt-8">
-                  <h3 className="text-heading text-[--p-text] mb-3">
-                    Selected Products ({selectedProducts.length}/3)
-                  </h3>
-                  <div className="space-y-3">
-                    {selectedProducts.map(product => (
-                      <div 
-                        key={product.id} 
-                        className="flex items-center p-4 border rounded-lg border-[--p-border] bg-[--p-surface]"
-                      >
-                        <img 
-                          src={product.image} 
-                          alt={product.title} 
-                          className="w-12 h-12 object-cover rounded"
-                          onError={e => { e.currentTarget.src = '/placeholder.svg'; }}
-                        />
-                        <div className="ml-3 flex-1 min-w-0">
-                          <h4 className="text-heading text-[--p-text] truncate">
-                            {product.title}
-                          </h4>
-                          <p className="text-caption text-[--p-text-subdued]">SKU: {product.sku}</p>
-                        </div>
-                        <Button 
-                          onClick={() => handleProductRemove(product.id)}
-                          variant="ghost"
-                          className="text-[--p-text-subdued] hover:text-[--p-text] hover:bg-[--p-surface-hovered]"
-                        >
-                          Remove
-                        </Button>
-                      </div>
-                    ))}
+  const renderProductsStep = () => {
+    return (
+      <Card className="bg-[--p-surface] shadow-[--p-shadow-card] border-[--p-border-subdued]">
+        <CardContent className="p-6 space-y-6">
+          <div className="mt-4">
+            <h2 className="text-display-sm text-[--p-text] mb-1">Select Products</h2>
+            <p className="text-body text-[--p-text-subdued]">
+              Choose up to three products to feature in your hero image
+            </p>
+          </div>
+
+          <ProductPicker 
+            onSelect={handleProductSelect} 
+            selectedProducts={selectedProducts}
+            searchResults={searchResults}
+            isLoading={isLoading}
+            error={error ? 'Error loading products' : null}
+            searchTerm={searchTerm}
+            onSearch={handleSearchChange}
+          />
+
+          {selectedProducts.length > 0 && (
+            <div className="mt-8">
+              <h3 className="text-heading text-[--p-text] mb-3">
+                Selected Products ({selectedProducts.length}/3)
+              </h3>
+              <div className="space-y-3">
+                {selectedProducts.map(product => (
+                  <div 
+                    key={product.id} 
+                    className="flex items-center p-4 border rounded-lg border-[--p-border] bg-[--p-surface]"
+                  >
+                    <img 
+                      src={product.image} 
+                      alt={product.title} 
+                      className="w-12 h-12 object-cover rounded"
+                      onError={e => { e.currentTarget.src = '/placeholder.svg'; }}
+                    />
+                    <div className="ml-3 flex-1 min-w-0">
+                      <h4 className="text-heading text-[--p-text] truncate">
+                        {product.title}
+                      </h4>
+                      <p className="text-caption text-[--p-text-subdued]">SKU: {product.sku}</p>
+                    </div>
+                    <Button 
+                      onClick={() => handleProductRemove(product.id)}
+                      variant="ghost"
+                      className="text-[--p-text-subdued] hover:text-[--p-text] hover:bg-[--p-surface-hovered]"
+                    >
+                      Remove
+                    </Button>
                   </div>
-                </div>
-              )}
-
-              <div className="flex justify-end pt-4">
-                <Button 
-                  onClick={handleContinue}
-                  disabled={selectedProducts.length === 0}
-                  className="bg-[--p-action-primary] text-white hover:bg-[--p-action-primary-hovered]"
-                >
-                  {isGenerating ? (
-                    <>
-                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                      Generating...
-                    </>
-                  ) : 'Continue'}
-                </Button>
+                ))}
               </div>
-            </CardContent>
-          </Card>
-        );
+            </div>
+          )}
 
-      case 'theme-content':
-        return (
-          <Card className="bg-[--p-surface] shadow-[--p-shadow-card] border-[--p-border-subdued]">
-            <CardContent className="p-6 space-y-6">
-              <div>
-                <h2 className="text-display-sm text-[--p-text] mb-1">Theme & Content</h2>
-                <p className="text-body text-[--p-text-subdued]">Describe your theme and manage content</p>
-              </div>
+          <div className="flex justify-end pt-4">
+            <Button 
+              onClick={handleContinue}
+              disabled={selectedProducts.length === 0}
+              className="bg-[--p-action-primary] text-white hover:bg-[--p-action-primary-hovered]"
+            >
+              {isGenerating ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Generating...
+                </>
+              ) : 'Continue'}
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
+    );
+  };
 
-              <div className="space-y-5">
-                <div className="space-y-3">
-                  <Label htmlFor="theme-description" className="text-heading text-[--p-text]">Creative Brief</Label>
+  const renderThemeContentStep = () => {
+    return (
+      <Card className="bg-[--p-surface] shadow-[--p-shadow-card] border-[--p-border-subdued]">
+        <CardContent className="p-6 space-y-6">
+          <div>
+            <h2 className="text-display-sm text-[--p-text] mb-1">Theme & Content</h2>
+            <p className="text-body text-[--p-text-subdued]">Describe your theme and manage content</p>
+          </div>
+
+          <div className="space-y-5">
+            <div className="space-y-3">
+              <Label htmlFor="theme-description" className="text-heading text-[--p-text]">Creative Brief</Label>
+              <Textarea 
+                id="theme-description"
+                value={themeDescription}
+                onChange={e => setThemeDescription(e.target.value)}
+                placeholder={themeExamples[currentPlaceholderIndex]}
+                className="min-h-[8rem] border-[--p-border] focus:border-[--p-focused] bg-[--p-surface] text-body"
+              />
+            </div>
+
+            <ThemeGenerator 
+              onThemeSelect={handleThemeSelect} 
+              selectedProducts={selectedProducts} 
+              onContentRegenerate={generateContent}
+            />
+
+            <div className="border-t border-[--p-border-subdued] pt-4 mt-4">
+              <h3 className="text-heading text-[--p-text] mb-3">Content</h3>
+              <div className="space-y-4">
+                <div className="space-y-2">
+                  <div className="flex justify-between items-center">
+                    <Label htmlFor="headline" className="text-heading text-[--p-text]">Headline</Label>
+                  </div>
                   <Textarea 
-                    id="theme-description"
-                    value={themeDescription}
-                    onChange={e => setThemeDescription(e.target.value)}
-                    placeholder={themeExamples[currentPlaceholderIndex]}
-                    className="min-h-[8rem] border-[--p-border] focus:border-[--p-focused] bg-[--p-surface] text-body"
+                    id="headline" 
+                    value={headline} 
+                    onChange={handleHeadlineChange} 
+                    placeholder="Enter a compelling headline" 
+                    className="text-lg min-h-[40px] resize-none overflow-hidden" 
+                    rows={1} 
                   />
                 </div>
 
-                <ThemeGenerator 
-                  onThemeSelect={handleThemeSelect} 
-                  selectedProducts={selectedProducts} 
-                  onContentRegenerate={generateContent}
-                />
+                <div className="space-y-2">
+                  <Label htmlFor="body-copy" className="text-heading text-[--p-text]">Body Copy (40 words max)</Label>
+                  <Textarea 
+                    id="body-copy" 
+                    value={bodyCopy} 
+                    onChange={handleBodyCopyChange} 
+                    placeholder="Enter the main content of your expose..." 
+                    className="h-48 border-[--p-border] focus:border-[--p-focused] bg-[--p-surface]"
+                  />
+                  <p className="text-sm text-[--p-text-subdued]">
+                    {bodyCopy.split(' ').length}/40 words
+                  </p>
+                </div>
 
-                <div className="border-t border-[--p-border-subdued] pt-4 mt-4">
-                  <h3 className="text-heading text-[--p-text] mb-3">Content</h3>
-                  <div className="space-y-4">
-                    <div className="space-y-2">
-                      <div className="flex justify-between items-center">
-                        <Label htmlFor="headline" className="text-heading text-[--p-text]">Headline</Label>
-                      </div>
-                      <Textarea 
-                        id="headline" 
-                        value={headline} 
-                        onChange={handleHeadlineChange} 
-                        placeholder="Enter a compelling headline" 
-                        className="text-lg min-h-[40px] resize-none overflow-hidden" 
-                        rows={1} 
-                      />
-                    </div>
-
-                    <div className="space-y-2">
-                      <Label htmlFor="body-copy" className="text-heading text-[--p-text]">Body Copy (40 words max)</Label>
-                      <Textarea 
-                        id="body-copy" 
-                        value={bodyCopy} 
-                        onChange={handleBodyCopyChange} 
-                        placeholder="Enter the main content of your expose..." 
-                        className="h-48 border-[--p-border] focus:border-[--p-focused] bg-[--p-surface]"
-                      />
-                      <p className="text-sm text-[--p-text-subdued]">
-                        {bodyCopy.split(' ').length}/40 words
-                      </p>
-                    </div>
-
-                    <div className="flex justify-between items-center">
-                      <Button 
-                        onClick={generateContent}
-                        variant="outline"
-                        disabled={isGeneratingContent || !themeDescription.trim()}
-                      >
-                        {isGeneratingContent ? (
-                          <>
-                            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                            Generating...
-                          </>
-                        ) : (
-                          <>
-                            <WandSparkles className="mr-2 h-4 w-4" />
-                            Regenerate Content
-                          </>
-                        )}
-                      </Button>
-                    </div>
-                  </div>
+                <div className="flex justify-between items-center">
+                  <Button 
+                    onClick={generateContent}
+                    variant="outline"
+                    disabled={isGeneratingContent || !themeDescription.trim()}
+                  >
+                    {isGeneratingContent ? (
+                      <>
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        Generating...
+                      </>
+                    ) : (
+                      <>
+                        <WandSparkles className="mr-2 h-4 w-4" />
+                        Regenerate Content
+                      </>
+                    )}
+                  </Button>
                 </div>
               </div>
+            </div>
+          </div>
 
-              <div className="flex justify-end pt-4">
-                <Button 
-                  onClick={handleContinue}
-                  disabled={isGenerating || !themeDescription.trim() || !headline.trim() || !bodyCopy.trim()}
-                  className="bg-[--p-action-primary] text-white hover:bg-[--p-action-primary-hovered]"
-                >
-                  {isGenerating ? (
-                    <>
-                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                      Generating...
-                    </>
-                  ) : 'Generate Hero Image'}
+          <div className="flex justify-end pt-4">
+            <Button 
+              onClick={handleContinue}
+              disabled={isGenerating || !themeDescription.trim() || !headline.trim() || !bodyCopy.trim()}
+              className="bg-[--p-action-primary] text-white hover:bg-[--p-action-primary-hovered]"
+            >
+              {isGenerating ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Generating...
+                </>
+              ) : 'Generate Hero Image'}
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
+    );
+  };
+
+  const renderResultsStep = () => {
+    return (
+      <Card className="bg-[--p-surface] shadow-[--p-shadow-card] border-[--p-border-subdued]">
+        <CardContent className="p-6 space-y-6">
+          <div className="flex justify-between items-center">
+            <div>
+              <h2 className="text-display-sm text-[--p-text] mb-1">Results</h2>
+              <p className="text-body text-[--p-text-subdued]">Your expose has been generated successfully</p>
+            </div>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+                  <MoreVertical className="h-4 w-4 text-[#6D7175]" />
                 </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-[180px]">
+                <DropdownMenuItem onClick={handleAddToLibrary}>
+                  <Save className="mr-2 h-4 w-4" />
+                  <span>Add to Library</span>
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={handleRegenerate}>
+                  <RotateCw className="mr-2 h-4 w-4" />
+                  <span>Regenerate</span>
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
+          <div className="space-y-6">
+            {isLoadingExpose ? (
+              <div className="flex items-center justify-center py-12">
+                <Loader2 className="h-8 w-8 animate-spin text-[#008060]" />
               </div>
-            </CardContent>
-          </Card>
-        );
+            ) : exposeData ? (
+              <ImageGrid 
+                variations={exposeData.image_variations as string[] || [exposeData.hero_image_url!]} 
+                selectedIndex={exposeData.selected_variation_index || 0} 
+                onSelect={handleVariationSelect} 
+                headline={headline} 
+                bodyCopy={bodyCopy} 
+              />
+            ) : (
+              <div className="text-center py-12 border rounded-lg bg-gray-50">
+                <p className="text-[#6D7175]">No generated image found. Please try generating again.</p>
+              </div>
+            )}
+          </div>
+        </CardContent>
+      </Card>
+    );
+  };
 
-      case 'results':
-        return (
-          <Card className="bg-[--p-surface] shadow-[--p-shadow-card] border-[--p-border-subdued]">
-            <CardContent className="p-6 space-y-6">
-              <div>
-                <h2 className="text-display-sm text-[--p-text] mb-1">Results</h2>
-                <p className="text-body text-[--p-text-subdued]">Your expose has been generated successfully</p>
-              </div>
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
-                    <MoreVertical className="h-4 w-4 text-[#6D7175]" />
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="w-[180px]">
-                  <DropdownMenuItem onClick={handleAddToLibrary}>
-                    <Save className="mr-2 h-4 w-4" />
-                    <span>Add to Library</span>
-                  </DropdownMenuItem>
-                  <DropdownMenuItem onClick={handleRegenerate}>
-                    <RotateCw className="mr-2 h-4 w-4" />
-                    <span>Regenerate</span>
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
-              <div className="space-y-6">
-                {isLoadingExpose ? (
-                  <div className="flex items-center justify-center py-12">
-                    <Loader2 className="h-8 w-8 animate-spin text-[#008060]" />
-                  </div>
-                ) : exposeData ? (
-                  <ImageGrid variations={exposeData.image_variations as string[] || [exposeData.hero_image_url!]} selectedIndex={exposeData.selected_variation_index || 0} onSelect={handleVariationSelect} headline={headline} bodyCopy={bodyCopy} />
-                ) : (
-                  <div className="text-center py-12 border rounded-lg bg-gray-50">
-                    <p className="text-[#6D7175]">No generated image found. Please try generating again.</p>
-                  </div>
-                )}
-              </div>
-            </CardContent>
-          </Card>
-        );
+  const renderMainContent = () => {
+    switch (currentStep) {
+      case 'products': return renderProductsStep();
+      case 'theme-content': return renderThemeContentStep();
+      case 'results': return renderResultsStep();
+      default: return null;
     }
   };
+
+  const getPreviewImageUrl = () => {
+    if (exposeData?.hero_image_url) {
+      if (exposeData.image_variations && Array.isArray(exposeData.image_variations) && exposeData.selected_variation_index !== undefined) {
+        return exposeData.image_variations[exposeData.selected_variation_index] || exposeData.hero_image_url;
+      }
+      return exposeData.hero_image_url;
+    }
+    return PLACEHOLDER_IMAGE;
+  };
+
   return (
     <div className="max-w-[99.8rem] mx-auto">
       <ExposeHeader currentStep={currentStep} onStepClick={handleStepClick} />
-      <div className="p-5 bg-[--p-background] min-h-[calc(100vh-129px)]">
-        <div className="max-w-3xl mx-auto">
-          {renderStep()}
-        </div>
+      <div className="bg-[--p-background] min-h-[calc(100vh-129px)]">
+        <ResizablePanelGroup direction="horizontal">
+          <ResizablePanel 
+            defaultSize={isPreviewExpanded ? 30 : 70} 
+            minSize={30}
+            maxSize={isPreviewExpanded ? 30 : 70}
+          >
+            <div className="p-5 h-[calc(100vh-129px)] overflow-auto">
+              {renderMainContent()}
+            </div>
+          </ResizablePanel>
+          
+          <ResizableHandle withHandle />
+          
+          <ResizablePanel 
+            defaultSize={isPreviewExpanded ? 70 : 30} 
+            minSize={30}
+            maxSize={isPreviewExpanded ? 70 : 30}
+          >
+            <PreviewPanel
+              imageUrl={getPreviewImageUrl()}
+              headline={headline}
+              bodyCopy={bodyCopy}
+              isExpanded={isPreviewExpanded}
+              onToggleExpand={togglePreviewExpansion}
+            />
+          </ResizablePanel>
+        </ResizablePanelGroup>
       </div>
     </div>
   );
