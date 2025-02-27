@@ -1,11 +1,11 @@
+
 import React, { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { ProductPicker } from "@/components/ProductPicker";
 import { supabase } from "@/integrations/supabase/client";
-import { Loader2, WandSparkles, Save, RotateCw, MoreVertical } from "lucide-react";
+import { Loader2, WandSparkles } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
@@ -21,7 +21,7 @@ interface Product {
   sku: string;
   image: string;
 }
-type Step = 'products' | 'theme-content' | 'results';
+type Step = 'products' | 'theme-content';
 type PanelState = 'minimized' | 'preview' | 'expanded' | number;
 
 const themeExamples = ["Festive red theme with soft lighting and night club background", "Minimalist white studio setup with dramatic shadows", "Natural outdoor setting with morning sunlight and autumn colors", "Modern urban environment with neon lights and city backdrop", "Elegant marble surface with gold accents and soft diffused lighting"];
@@ -42,6 +42,7 @@ const Expose = () => {
   const [isGeneratingContent, setIsGeneratingContent] = useState(false);
   const [isPreviewExpanded, setIsPreviewExpanded] = useState(false);
   const [panelState, setPanelState] = useState<PanelState>('minimized');
+  const [imageGenerated, setImageGenerated] = useState(false);
   const { toast } = useToast();
   const navigate = useNavigate();
 
@@ -77,7 +78,8 @@ const Expose = () => {
 
   const {
     data: exposeData,
-    isLoading: isLoadingExpose
+    isLoading: isLoadingExpose,
+    refetch: refetchExpose
   } = useQuery({
     queryKey: ['expose', exposeId],
     queryFn: async () => {
@@ -315,19 +317,27 @@ const Expose = () => {
         }
       });
       if (error) throw error;
+      
+      // Start polling for image generation status
       const pollInterval = setInterval(async () => {
         const {
           data: exposeData
         } = await supabase.from('exposes').select('hero_image_generation_status, hero_image_desktop_url, hero_image_tablet_url, hero_image_mobile_url').eq('id', exposeId).single();
         console.log('Polling expose data:', exposeData);
+        
         if (exposeData?.hero_image_generation_status === 'completed') {
           clearInterval(pollInterval);
           setIsGenerating(false);
+          setImageGenerated(true);
+          refetchExpose();
+          
+          // Expand the preview panel to show the generated image
+          setIsPreviewExpanded(true);
+          
           toast({
             title: "Success",
             description: "Hero images generated successfully!"
           });
-          setCurrentStep('results');
         } else if (exposeData?.hero_image_generation_status === 'error') {
           clearInterval(pollInterval);
           setIsGenerating(false);
@@ -338,6 +348,7 @@ const Expose = () => {
           });
         }
       }, 2000);
+      
       return () => clearInterval(pollInterval);
     } catch (error) {
       console.error('Error generating hero:', error);
@@ -377,7 +388,7 @@ const Expose = () => {
   };
 
   const handleRegenerate = async () => {
-    setCurrentStep('theme-content');
+    setImageGenerated(false);
     toast({
       title: "Ready to regenerate",
       description: "You can now modify your settings and generate a new image."
@@ -403,6 +414,10 @@ const Expose = () => {
       }).eq('id', exposeId);
       
       if (error) throw error;
+      
+      // Refresh expose data
+      refetchExpose();
+      
       toast({
         title: "Success",
         description: "Selected variation has been updated"
@@ -618,64 +633,40 @@ const Expose = () => {
     );
   };
 
-  const renderResultsStep = () => {
-    return (
-      <Card className="bg-[--p-surface] shadow-[--p-shadow-card] border-[--p-border-subdued]">
-        <CardContent className="p-6 space-y-6">
-          <div className="flex justify-between items-center">
-            <div>
-              <h2 className="text-display-sm text-[--p-text] mb-1">Results</h2>
-              <p className="text-body text-[--p-text-subdued]">Your expose has been generated successfully</p>
-            </div>
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
-                  <MoreVertical className="h-4 w-4 text-[#6D7175]" />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-[180px]">
-                <DropdownMenuItem onClick={handleAddToLibrary}>
-                  <Save className="mr-2 h-4 w-4" />
-                  <span>Add to Library</span>
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={handleRegenerate}>
-                  <RotateCw className="mr-2 h-4 w-4" />
-                  <span>Regenerate</span>
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
-          </div>
-          <div className="space-y-6">
-            {isLoadingExpose ? (
-              <div className="flex items-center justify-center py-12">
-                <Loader2 className="h-8 w-8 animate-spin text-[#008060]" />
-              </div>
-            ) : exposeData ? (
-              <ImageGrid 
-                variations={exposeData.image_variations as string[] || [exposeData.hero_image_url!]} 
-                selectedIndex={exposeData.selected_variation_index || 0} 
-                onSelect={handleVariationSelect} 
-                headline={headline} 
-                bodyCopy={bodyCopy} 
-              />
-            ) : (
-              <div className="text-center py-12 border rounded-lg bg-gray-50">
-                <p className="text-[#6D7175]">No generated image found. Please try generating again.</p>
-              </div>
-            )}
-          </div>
-        </CardContent>
-      </Card>
-    );
-  };
-
   const renderMainContent = () => {
     switch (currentStep) {
       case 'products': return renderProductsStep();
       case 'theme-content': return renderThemeContentStep();
-      case 'results': return renderResultsStep();
       default: return null;
     }
+  };
+
+  // Display variations in the preview panel if they exist
+  const renderImageVariations = () => {
+    if (!exposeData?.image_variations || !Array.isArray(exposeData.image_variations) || exposeData.image_variations.length <= 1) {
+      return null;
+    }
+
+    return (
+      <div className="mt-4">
+        <h3 className="font-medium text-sm mb-2">Image Variations</h3>
+        <div className="grid grid-cols-4 gap-2">
+          {exposeData.image_variations.map((url, index) => (
+            <button
+              key={index}
+              className={`border rounded overflow-hidden ${exposeData.selected_variation_index === index ? 'border-[--p-action-primary] ring-2 ring-[--p-action-primary]' : 'border-[--p-border]'}`}
+              onClick={() => handleVariationSelect(index)}
+            >
+              <img
+                src={typeof url === 'string' ? url : '/placeholder.svg'}
+                alt={`Variation ${index + 1}`}
+                className="w-full h-12 object-cover"
+              />
+            </button>
+          ))}
+        </div>
+      </div>
+    );
   };
 
   const getPreviewImageUrl = () => {
@@ -719,6 +710,9 @@ const Expose = () => {
           isExpanded={isPreviewExpanded}
           onToggleExpand={togglePreviewExpansion}
           onPanelStateChange={handlePanelStateChange}
+          onAddToLibrary={handleAddToLibrary}
+          onRegenerate={handleRegenerate}
+          showActions={imageGenerated}
         />
       </div>
     </div>

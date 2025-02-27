@@ -1,7 +1,8 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import { Button } from '@/components/ui/button';
-import { ChevronUp, ChevronDown, LayoutGrid, GripHorizontal } from 'lucide-react';
+import { ChevronUp, ChevronDown, LayoutGrid, GripHorizontal, MoreVertical, Save, RotateCw } from 'lucide-react';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import GeneratedImagePreview, { ExposeLayout } from '@/components/GeneratedImagePreview';
 
 interface PreviewPanelProps {
@@ -11,6 +12,9 @@ interface PreviewPanelProps {
   isExpanded: boolean;
   onToggleExpand: () => void;
   onPanelStateChange?: (state: 'minimized' | 'preview' | 'expanded' | number) => void;
+  onAddToLibrary?: () => void;
+  onRegenerate?: () => void;
+  showActions?: boolean;
 }
 
 export const PreviewPanel = ({
@@ -19,7 +23,10 @@ export const PreviewPanel = ({
   bodyCopy,
   isExpanded,
   onToggleExpand,
-  onPanelStateChange
+  onPanelStateChange,
+  onAddToLibrary,
+  onRegenerate,
+  showActions = false
 }: PreviewPanelProps) => {
   const [currentLayout, setCurrentLayout] = useState<ExposeLayout>('default');
   const [shouldShowPreview, setShouldShowPreview] = useState(false);
@@ -193,6 +200,27 @@ export const PreviewPanel = ({
                 </Button>
               ))}
             </div>
+            
+            {/* Actions menu */}
+            {showActions && onAddToLibrary && onRegenerate && (
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="ghost" size="sm" className="h-6 w-6 p-0 mr-1">
+                    <MoreVertical className="h-3 w-3 text-[--p-text-subdued]" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-[180px]">
+                  <DropdownMenuItem onClick={onAddToLibrary}>
+                    <Save className="mr-2 h-4 w-4" />
+                    <span>Add to Library</span>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={onRegenerate}>
+                    <RotateCw className="mr-2 h-4 w-4" />
+                    <span>Regenerate</span>
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            )}
             
             <Button
               variant="ghost"
