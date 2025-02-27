@@ -1,9 +1,8 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import { Button } from '@/components/ui/button';
-import { ChevronUp, ChevronDown, LayoutGrid } from 'lucide-react';
+import { ChevronUp, ChevronDown, LayoutGrid, GripHorizontal } from 'lucide-react';
 import GeneratedImagePreview, { ExposeLayout } from '@/components/GeneratedImagePreview';
-import { Sheet, SheetContent } from '@/components/ui/sheet';
 
 interface PreviewPanelProps {
   imageUrl: string;
@@ -23,7 +22,6 @@ export const PreviewPanel = ({
   onPanelStateChange
 }: PreviewPanelProps) => {
   const [currentLayout, setCurrentLayout] = useState<ExposeLayout>('default');
-  const [sheetOpen, setSheetOpen] = useState(true);
   const [shouldShowPreview, setShouldShowPreview] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
   const [panelHeight, setPanelHeight] = useState<number | null>(null);
@@ -54,6 +52,23 @@ export const PreviewPanel = ({
       }
     }
   }, [isExpanded, shouldShowPreview, onPanelStateChange, panelHeight]);
+
+  // Determine if we should snap to a preset height
+  const snapToPresetHeight = (currentHeightVh: number) => {
+    // Snap points at 25vh and 70vh with tolerance of 10vh
+    if (Math.abs(currentHeightVh - 25) < 10) {
+      setPanelHeight(null);
+      if (!isExpanded) {
+        // We're near the default preview height
+        setShouldShowPreview(true);
+      }
+    } else if (Math.abs(currentHeightVh - 70) < 10) {
+      setPanelHeight(null);
+      if (!isExpanded) {
+        onToggleExpand();
+      }
+    }
+  };
 
   const handleDragStart = (e: React.MouseEvent | React.TouchEvent) => {
     e.preventDefault();
@@ -89,15 +104,20 @@ export const PreviewPanel = ({
     const newHeight = startHeight.current + deltaY;
     const windowHeight = window.innerHeight;
     
-    // Convert to vh and constrain between 25vh and 70vh
+    // Convert to vh and constrain between 20vh and 80vh
     const heightVh = (newHeight / windowHeight) * 100;
-    const constrainedHeightVh = Math.min(Math.max(heightVh, 25), 70);
+    const constrainedHeightVh = Math.min(Math.max(heightVh, 20), 80);
     
     // Update the panel height
     setPanelHeight(constrainedHeightVh);
   };
   
   const handleDragEnd = () => {
+    if (isDragging && panelHeight !== null) {
+      // Check if we should snap to a preset height
+      snapToPresetHeight(panelHeight);
+    }
+    
     setIsDragging(false);
     dragStartY.current = null;
     startHeight.current = null;
@@ -121,89 +141,82 @@ export const PreviewPanel = ({
     { label: 'Editorial', value: 'editorial' },
   ];
   
-  // Calculate panel height styles for both class and inline style
-  let heightClass = '';
-  let heightStyle = {};
-  
+  // Calculate panel height
+  let height: string;
   if (panelHeight !== null) {
-    // When we have a custom dragged height, use inline style
-    heightStyle = { height: `${panelHeight}vh` };
+    height = `${panelHeight}vh`;
   } else if (isExpanded) {
-    heightClass = 'h-[70vh]';
+    height = '70vh';
   } else if (shouldShowPreview) {
-    heightClass = 'h-[25vh]';
+    height = '25vh';
   } else {
-    heightClass = 'h-[32px]';
+    height = '32px';
   }
   
   return (
-    <Sheet open={sheetOpen} modal={false}>
-      <SheetContent 
-        side="bottom" 
-        className={`p-0 border-t border-[--p-border] shadow-xl rounded-t-2xl ${heightClass}`}
-        style={{ 
-          ...heightStyle,
-          zIndex: 40,
-          boxShadow: '0px -4px 20px rgba(0, 0, 0, 0.15)',
-          transition: isDragging ? 'none' : 'height 0.2s ease'
-        }}
-        hideCloseButton={true}
-      >
-        <div className="flex flex-col h-full" ref={panelRef}>
-          {/* Smaller top bar with layout options on the right */}
-          <div 
-            className={`flex items-center justify-between px-3 py-1 bg-[--p-surface] border-b border-[--p-border] ${isDragging ? 'cursor-grabbing' : 'cursor-grab'}`}
-            onMouseDown={handleDragStart}
-            onTouchStart={handleDragStart}
-            // Make the handle more prominent to indicate draggability
-            style={{ touchAction: 'none' }}
-          >
-            <div className="flex items-center gap-2">
-              <div className="h-1 w-10 bg-[--p-border-subdued] rounded-full" />
-              <h3 className="font-medium text-[--p-text] ml-2 text-sm">Preview</h3>
-            </div>
-            <div className="flex items-center gap-1">
-              {/* Layout options moved to the top bar */}
-              <div className="flex gap-1 items-center mr-2">
-                <LayoutGrid className="h-3 w-3 text-[--p-text-subdued]" />
-                {layouts.map((layout) => (
-                  <Button
-                    key={layout.value}
-                    variant={currentLayout === layout.value ? "default" : "ghost"}
-                    size="sm"
-                    onClick={() => setCurrentLayout(layout.value)}
-                    className={`text-xs py-0.5 px-2 h-6 ${currentLayout === layout.value ? "bg-[--p-action-primary] text-white" : "text-[--p-text]"}`}
-                  >
-                    {layout.label}
-                  </Button>
-                ))}
-              </div>
-              
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={handleToggleExpand}
-                title={isExpanded ? "Collapse preview" : "Expand preview"}
-                className="text-[--p-icon] h-6 w-6 p-0"
-              >
-                {isExpanded ? <ChevronDown className="h-3 w-3" /> : <ChevronUp className="h-3 w-3" />}
-              </Button>
-            </div>
+    <div 
+      ref={panelRef}
+      className="fixed bottom-0 left-0 right-0 bg-white border-t border-[--p-border] shadow-xl rounded-t-2xl z-40"
+      style={{ 
+        height,
+        boxShadow: '0px -4px 20px rgba(0, 0, 0, 0.15)',
+        transition: isDragging ? 'none' : 'height 0.2s ease-out',
+        willChange: 'height'
+      }}
+    >
+      <div className="flex flex-col h-full">
+        {/* Top bar with drag handle and controls */}
+        <div 
+          className={`flex items-center justify-between px-3 py-1 bg-[--p-surface] border-b border-[--p-border] ${isDragging ? 'cursor-grabbing' : 'cursor-grab'}`}
+          onMouseDown={handleDragStart}
+          onTouchStart={handleDragStart}
+          style={{ touchAction: 'none' }}
+        >
+          <div className="flex items-center gap-2">
+            <GripHorizontal className="h-4 w-4 text-[--p-text-subdued]" />
+            <h3 className="font-medium text-[--p-text] ml-2 text-sm">Preview</h3>
           </div>
-          
-          {/* Main content area - only shown when there's content or panel is expanded */}
-          {(shouldShowPreview || isExpanded) && (
-            <div className="flex-1 overflow-auto p-4 bg-[--p-background]">
-              <GeneratedImagePreview
-                imageUrl={imageUrl}
-                headline={headline || "Your headline will appear here"}
-                bodyCopy={bodyCopy || "Your body copy will appear here. As you type or generate content, you'll see it update in this preview."}
-                layout={currentLayout}
-              />
+          <div className="flex items-center gap-1">
+            {/* Layout options */}
+            <div className="flex gap-1 items-center mr-2">
+              <LayoutGrid className="h-3 w-3 text-[--p-text-subdued]" />
+              {layouts.map((layout) => (
+                <Button
+                  key={layout.value}
+                  variant={currentLayout === layout.value ? "default" : "ghost"}
+                  size="sm"
+                  onClick={() => setCurrentLayout(layout.value)}
+                  className={`text-xs py-0.5 px-2 h-6 ${currentLayout === layout.value ? "bg-[--p-action-primary] text-white" : "text-[--p-text]"}`}
+                >
+                  {layout.label}
+                </Button>
+              ))}
             </div>
-          )}
+            
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={handleToggleExpand}
+              title={isExpanded ? "Collapse preview" : "Expand preview"}
+              className="text-[--p-icon] h-6 w-6 p-0"
+            >
+              {isExpanded ? <ChevronDown className="h-3 w-3" /> : <ChevronUp className="h-3 w-3" />}
+            </Button>
+          </div>
         </div>
-      </SheetContent>
-    </Sheet>
+        
+        {/* Main content area - only shown when there's content or panel is expanded */}
+        {(shouldShowPreview || isExpanded) && (
+          <div className="flex-1 overflow-auto p-4 bg-[--p-background]">
+            <GeneratedImagePreview
+              imageUrl={imageUrl}
+              headline={headline || "Your headline will appear here"}
+              bodyCopy={bodyCopy || "Your body copy will appear here. As you type or generate content, you'll see it update in this preview."}
+              layout={currentLayout}
+            />
+          </div>
+        )}
+      </div>
+    </div>
   );
 };

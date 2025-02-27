@@ -1,19 +1,16 @@
 import React, { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { Card, CardContent, CardHeader } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { ProductPicker } from "@/components/ProductPicker";
 import { supabase } from "@/integrations/supabase/client";
-import { Loader2, WandSparkles, Plus, Equal, Pen, Save, RotateCw, MoreVertical } from "lucide-react";
+import { Loader2, WandSparkles, Save, RotateCw, MoreVertical } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
-import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { useNavigate } from "react-router-dom";
 import { ExposeHeader } from "@/components/expose/ExposeHeader";
-import GeneratedImagePreview from "@/components/GeneratedImagePreview";
-import { ToneSelector, type ToneStyle } from "@/components/ToneSelector";
 import ImageGrid from '@/components/ImageGrid';
 import { ThemeGenerator } from "@/components/ThemeGenerator";
 import { PreviewPanel } from "@/components/expose/PreviewPanel";
@@ -708,7 +705,7 @@ const Expose = () => {
         className="bg-[--p-background] min-h-[calc(100vh-129px)]"
         style={{ 
           ...getContentPaddingStyle(),
-          transition: typeof panelState === 'number' ? 'none' : 'padding-bottom 0.2s ease'
+          transition: typeof panelState === 'number' ? 'none' : 'padding-bottom 0.3s ease-out'
         }}
       >
         <div className="p-5">
