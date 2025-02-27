@@ -441,20 +441,11 @@ const Expose = () => {
     console.log("Panel state changed:", state);
   };
 
-  const getContentPaddingStyle = () => {
-    if (typeof panelState === 'number') {
-      return { paddingBottom: `${panelState}vh` };
-    }
-    
-    switch (panelState) {
-      case 'expanded':
-        return { paddingBottom: '70vh' };
-      case 'preview':
-        return { paddingBottom: '25vh' };
-      case 'minimized':
-      default:
-        return { paddingBottom: '32px' };
-    }
+  const getContentMarginStyle = () => {
+    return {
+      marginRight: isPreviewExpanded ? '320px' : '40px',
+      transition: 'margin-right 0.3s ease-in-out'
+    };
   };
 
   const renderProductsStep = () => {
@@ -641,36 +632,10 @@ const Expose = () => {
     }
   };
 
-  // Display variations in the preview panel if they exist
-  const renderImageVariations = () => {
-    if (!exposeData?.image_variations || !Array.isArray(exposeData.image_variations) || exposeData.image_variations.length <= 1) {
-      return null;
-    }
-
-    return (
-      <div className="mt-4">
-        <h3 className="font-medium text-sm mb-2">Image Variations</h3>
-        <div className="grid grid-cols-4 gap-2">
-          {exposeData.image_variations.map((url, index) => (
-            <button
-              key={index}
-              className={`border rounded overflow-hidden ${exposeData.selected_variation_index === index ? 'border-[--p-action-primary] ring-2 ring-[--p-action-primary]' : 'border-[--p-border]'}`}
-              onClick={() => handleVariationSelect(index)}
-            >
-              <img
-                src={typeof url === 'string' ? url : '/placeholder.svg'}
-                alt={`Variation ${index + 1}`}
-                className="w-full h-12 object-cover"
-              />
-            </button>
-          ))}
-        </div>
-      </div>
-    );
-  };
-
   const getPreviewImageUrl = () => {
-    if (exposeData?.hero_image_url) {
+    if (exposeData?.hero_image_mobile_url) {
+      return exposeData.hero_image_mobile_url;
+    } else if (exposeData?.hero_image_url) {
       if (exposeData.image_variations && 
           Array.isArray(exposeData.image_variations) && 
           exposeData.selected_variation_index !== undefined) {
@@ -694,27 +659,24 @@ const Expose = () => {
       <ExposeHeader currentStep={currentStep} onStepClick={handleStepClick} />
       <div 
         className="bg-[--p-background] min-h-[calc(100vh-129px)]"
-        style={{ 
-          ...getContentPaddingStyle(),
-          transition: typeof panelState === 'number' ? 'none' : 'padding-bottom 0.3s ease-out'
-        }}
+        style={getContentMarginStyle()}
       >
         <div className="p-5">
           {renderMainContent()}
         </div>
-        
-        <PreviewPanel
-          imageUrl={getPreviewImageUrl()}
-          headline={headline}
-          bodyCopy={bodyCopy}
-          isExpanded={isPreviewExpanded}
-          onToggleExpand={togglePreviewExpansion}
-          onPanelStateChange={handlePanelStateChange}
-          onAddToLibrary={handleAddToLibrary}
-          onRegenerate={handleRegenerate}
-          showActions={imageGenerated}
-        />
       </div>
+      
+      <PreviewPanel
+        imageUrl={getPreviewImageUrl()}
+        headline={headline}
+        bodyCopy={bodyCopy}
+        isExpanded={isPreviewExpanded}
+        onToggleExpand={togglePreviewExpansion}
+        onPanelStateChange={handlePanelStateChange}
+        onAddToLibrary={handleAddToLibrary}
+        onRegenerate={handleRegenerate}
+        showActions={imageGenerated}
+      />
     </div>
   );
 };

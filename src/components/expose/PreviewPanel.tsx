@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import { Button } from '@/components/ui/button';
-import { ChevronUp, ChevronDown, LayoutGrid, GripHorizontal, MoreVertical, Save, RotateCw } from 'lucide-react';
+import { ChevronRight, ChevronLeft, LayoutGrid, MoreVertical, Save, RotateCw, ExternalLink } from 'lucide-react';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import GeneratedImagePreview, { ExposeLayout } from '@/components/GeneratedImagePreview';
 
@@ -30,10 +30,6 @@ export const PreviewPanel = ({
 }: PreviewPanelProps) => {
   const [currentLayout, setCurrentLayout] = useState<ExposeLayout>('reversed');
   const [shouldShowPreview, setShouldShowPreview] = useState(false);
-  const [isDragging, setIsDragging] = useState(false);
-  const [panelHeight, setPanelHeight] = useState<number | null>(null);
-  const dragStartY = useRef<number | null>(null);
-  const startHeight = useRef<number | null>(null);
   const panelRef = useRef<HTMLDivElement>(null);
   
   // Effect to check if content is available and show preview
@@ -47,10 +43,7 @@ export const PreviewPanel = ({
   // Effect to notify parent of panel state changes
   useEffect(() => {
     if (onPanelStateChange) {
-      if (panelHeight !== null) {
-        // Send the actual height percentage when dragging
-        onPanelStateChange(panelHeight);
-      } else if (isExpanded) {
+      if (isExpanded) {
         onPanelStateChange('expanded');
       } else if (shouldShowPreview) {
         onPanelStateChange('preview');
@@ -58,88 +51,9 @@ export const PreviewPanel = ({
         onPanelStateChange('minimized');
       }
     }
-  }, [isExpanded, shouldShowPreview, onPanelStateChange, panelHeight]);
-
-  // Define event handlers outside useEffect to maintain references
-  const handleDragMove = (e: MouseEvent | TouchEvent) => {
-    if (!isDragging || dragStartY.current === null || startHeight.current === null) return;
-    
-    // Get current Y position
-    const currentY = 'touches' in e ? e.touches[0].clientY : e.clientY;
-    const deltaY = dragStartY.current - currentY;
-    
-    // Calculate new height
-    const newHeight = startHeight.current + deltaY;
-    const windowHeight = window.innerHeight;
-    
-    // Convert to vh and constrain between 20vh and 80vh
-    const heightVh = (newHeight / windowHeight) * 100;
-    const constrainedHeightVh = Math.min(Math.max(heightVh, 20), 80);
-    
-    // Update the panel height
-    setPanelHeight(constrainedHeightVh);
-  };
-  
-  const handleDragEnd = () => {
-    if (isDragging && panelHeight !== null) {
-      // Check if we should snap to a preset height
-      snapToPresetHeight(panelHeight);
-    }
-    
-    setIsDragging(false);
-    dragStartY.current = null;
-    startHeight.current = null;
-    
-    // Remove event listeners
-    document.removeEventListener('mousemove', handleDragMove);
-    document.removeEventListener('touchmove', handleDragMove);
-    document.removeEventListener('mouseup', handleDragEnd);
-    document.removeEventListener('touchend', handleDragEnd);
-  };
-
-  // Determine if we should snap to a preset height
-  const snapToPresetHeight = (currentHeightVh: number) => {
-    // Snap points at 25vh and 70vh with tolerance of 10vh
-    if (Math.abs(currentHeightVh - 25) < 10) {
-      setPanelHeight(null);
-      if (!isExpanded) {
-        // We're near the default preview height
-        setShouldShowPreview(true);
-      }
-    } else if (Math.abs(currentHeightVh - 70) < 10) {
-      setPanelHeight(null);
-      if (!isExpanded) {
-        onToggleExpand();
-      }
-    }
-  };
-
-  const handleDragStart = (e: React.MouseEvent | React.TouchEvent) => {
-    e.preventDefault();
-    setIsDragging(true);
-    
-    // Get starting positions
-    if ('touches' in e) {
-      dragStartY.current = e.touches[0].clientY;
-    } else {
-      dragStartY.current = e.clientY;
-    }
-    
-    // Store current panel height
-    if (panelRef.current) {
-      startHeight.current = panelRef.current.offsetHeight;
-    }
-    
-    // Add event listeners for dragging
-    document.addEventListener('mousemove', handleDragMove);
-    document.addEventListener('touchmove', handleDragMove);
-    document.addEventListener('mouseup', handleDragEnd);
-    document.addEventListener('touchend', handleDragEnd);
-  };
+  }, [isExpanded, shouldShowPreview, onPanelStateChange]);
 
   const handleToggleExpand = () => {
-    // Reset custom panel height when explicitly toggling
-    setPanelHeight(null);
     onToggleExpand();
   };
 
@@ -150,100 +64,108 @@ export const PreviewPanel = ({
     { label: 'Editorial', value: 'editorial' },
   ];
   
-  // Calculate panel height
-  let height: string;
-  if (panelHeight !== null) {
-    height = `${panelHeight}vh`;
-  } else if (isExpanded) {
-    height = '70vh';
-  } else if (shouldShowPreview) {
-    height = '25vh';
-  } else {
-    height = '32px';
-  }
+  // Set panel width based on expansion state
+  const width = isExpanded ? '320px' : '40px';
   
   return (
     <div 
       ref={panelRef}
-      className="fixed bottom-0 left-0 right-0 bg-white border-t border-[--p-border] shadow-xl rounded-t-2xl z-40"
+      className="fixed right-0 top-[129px] bottom-0 bg-white border-l border-[--p-border] shadow-xl z-40 transition-all duration-300 ease-in-out"
       style={{ 
-        height,
-        boxShadow: '0px -4px 20px rgba(0, 0, 0, 0.15)',
-        transition: isDragging ? 'none' : 'height 0.2s ease-out',
-        willChange: 'height'
+        width,
+        boxShadow: '-4px 0px 20px rgba(0, 0, 0, 0.15)',
       }}
     >
-      <div className="flex flex-col h-full">
-        {/* Top bar with drag handle and controls */}
+      <div className="flex h-full">
+        {/* Side tab for collapse/expand */}
         <div 
-          className={`flex items-center justify-between px-3 py-1 bg-[--p-surface] border-b border-[--p-border] ${isDragging ? 'cursor-grabbing' : 'cursor-grab'}`}
-          onMouseDown={handleDragStart}
-          onTouchStart={handleDragStart}
-          style={{ touchAction: 'none' }}
+          className="w-10 border-r border-[--p-border] bg-[--p-surface] flex flex-col items-center pt-4"
         >
-          <div className="flex items-center gap-2">
-            <GripHorizontal className="h-4 w-4 text-[--p-text-subdued]" />
-            <h3 className="font-medium text-[--p-text] ml-2 text-sm">Preview</h3>
-          </div>
-          <div className="flex items-center gap-1">
-            {/* Layout options */}
-            <div className="flex gap-1 items-center mr-2">
-              <LayoutGrid className="h-3 w-3 text-[--p-text-subdued]" />
-              {layouts.map((layout) => (
-                <Button
-                  key={layout.value}
-                  variant={currentLayout === layout.value ? "default" : "ghost"}
-                  size="sm"
-                  onClick={() => setCurrentLayout(layout.value)}
-                  className={`text-xs py-0.5 px-2 h-6 ${currentLayout === layout.value ? "bg-[--p-action-primary] text-white" : "text-[--p-text]"}`}
-                >
-                  {layout.label}
-                </Button>
-              ))}
-            </div>
-            
-            {/* Actions menu */}
-            {showActions && onAddToLibrary && onRegenerate && (
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" size="sm" className="h-6 w-6 p-0 mr-1">
-                    <MoreVertical className="h-3 w-3 text-[--p-text-subdued]" />
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="w-[180px]">
-                  <DropdownMenuItem onClick={onAddToLibrary}>
-                    <Save className="mr-2 h-4 w-4" />
-                    <span>Add to Library</span>
-                  </DropdownMenuItem>
-                  <DropdownMenuItem onClick={onRegenerate}>
-                    <RotateCw className="mr-2 h-4 w-4" />
-                    <span>Regenerate</span>
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
-            )}
-            
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={handleToggleExpand}
-              title={isExpanded ? "Collapse preview" : "Expand preview"}
-              className="text-[--p-icon] h-6 w-6 p-0"
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={handleToggleExpand}
+            title={isExpanded ? "Collapse preview" : "Expand preview"}
+            className="text-[--p-icon] h-8 w-8 p-0 mb-4"
+          >
+            {isExpanded ? <ChevronRight className="h-4 w-4" /> : <ChevronLeft className="h-4 w-4" />}
+          </Button>
+          
+          {isExpanded && (
+            <a 
+              href="#" 
+              target="_blank" 
+              rel="noopener noreferrer" 
+              title="View in desktop"
+              className="text-[--p-icon] h-8 w-8 p-0 flex items-center justify-center hover:bg-[--p-surface-hovered] rounded-md"
             >
-              {isExpanded ? <ChevronDown className="h-3 w-3" /> : <ChevronUp className="h-3 w-3" />}
-            </Button>
-          </div>
+              <ExternalLink className="h-4 w-4" />
+            </a>
+          )}
         </div>
         
-        {/* Main content area - only shown when there's content or panel is expanded */}
-        {(shouldShowPreview || isExpanded) && (
-          <div className="flex-1 overflow-auto p-4 bg-[--p-background]">
-            <GeneratedImagePreview
-              imageUrl={imageUrl}
-              headline={headline || "Your headline will appear here"}
-              bodyCopy={bodyCopy || "Your body copy will appear here. As you type or generate content, you'll see it update in this preview."}
-              layout={currentLayout}
-            />
+        {/* Main content area - only shown when expanded */}
+        {isExpanded && (
+          <div className="flex-1 flex flex-col overflow-hidden">
+            {/* Top bar with controls */}
+            <div 
+              className="flex items-center justify-between px-3 py-2 bg-[--p-surface] border-b border-[--p-border]"
+            >
+              <h3 className="font-medium text-[--p-text] text-sm">Mobile Preview</h3>
+              <div className="flex items-center gap-1">
+                {/* Layout options */}
+                <div className="flex gap-1 items-center mr-2">
+                  <LayoutGrid className="h-3 w-3 text-[--p-text-subdued]" />
+                  {layouts.map((layout) => (
+                    <Button
+                      key={layout.value}
+                      variant={currentLayout === layout.value ? "default" : "ghost"}
+                      size="sm"
+                      onClick={() => setCurrentLayout(layout.value)}
+                      className={`text-xs py-0.5 px-2 h-6 ${currentLayout === layout.value ? "bg-[--p-action-primary] text-white" : "text-[--p-text]"}`}
+                    >
+                      {layout.label}
+                    </Button>
+                  ))}
+                </div>
+                
+                {/* Actions menu */}
+                {showActions && onAddToLibrary && onRegenerate && (
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button variant="ghost" size="sm" className="h-6 w-6 p-0 mr-1">
+                        <MoreVertical className="h-3 w-3 text-[--p-text-subdued]" />
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end" className="w-[180px]">
+                      <DropdownMenuItem onClick={onAddToLibrary}>
+                        <Save className="mr-2 h-4 w-4" />
+                        <span>Add to Library</span>
+                      </DropdownMenuItem>
+                      <DropdownMenuItem onClick={onRegenerate}>
+                        <RotateCw className="mr-2 h-4 w-4" />
+                        <span>Regenerate</span>
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                )}
+              </div>
+            </div>
+            
+            {/* Mobile device frame with content */}
+            <div className="flex-1 overflow-auto p-4 bg-[--p-background] flex items-center justify-center">
+              <div className="mobile-device-frame">
+                <div className="mobile-device-notch"></div>
+                <div className="mobile-content overflow-auto">
+                  <GeneratedImagePreview
+                    imageUrl={imageUrl}
+                    headline={headline || "Your headline will appear here"}
+                    bodyCopy={bodyCopy || "Your body copy will appear here. As you type or generate content, you'll see it update in this preview."}
+                    layout={currentLayout}
+                  />
+                </div>
+              </div>
+            </div>
           </div>
         )}
       </div>
