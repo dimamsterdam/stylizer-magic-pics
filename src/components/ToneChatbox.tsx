@@ -137,17 +137,9 @@ export function ToneChatbox({
     }
   };
 
+  // We're removing the button completely, so we only render the chat interface when it's open
   if (!isOpen) {
-    return (
-      <Button 
-        variant="outline" 
-        className="gap-2" 
-        onClick={() => onOpenChange(true)}
-      >
-        <MessageSquare className="h-4 w-4" />
-        Adjust Tone
-      </Button>
-    );
+    return null;
   }
 
   return (

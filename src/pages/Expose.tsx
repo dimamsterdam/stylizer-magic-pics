@@ -494,13 +494,7 @@ const Expose = () => {
                         )}
                       </Button>
                       
-                      <ToneChatbox 
-                        isOpen={isToneChatOpen} 
-                        onOpenChange={setIsToneChatOpen} 
-                        currentHeadline={headline} 
-                        currentBodyCopy={bodyCopy} 
-                        onToneChange={handleToneChange} 
-                      />
+                      <div></div>
                     </div>
                   </div>
                 </div>
