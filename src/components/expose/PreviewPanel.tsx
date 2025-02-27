@@ -1,9 +1,9 @@
+
 import React, { useState, useEffect, useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { ChevronRight, ChevronLeft, LayoutGrid, MoreVertical, Save, RotateCw, ExternalLink } from 'lucide-react';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import GeneratedImagePreview, { ExposeLayout } from '@/components/GeneratedImagePreview';
-import ImageGrid from '@/components/ImageGrid';
 
 interface PreviewPanelProps {
   imageUrl: string;
@@ -30,26 +30,16 @@ export const PreviewPanel = ({
 }: PreviewPanelProps) => {
   const [currentLayout, setCurrentLayout] = useState<ExposeLayout>('reversed');
   const [shouldShowPreview, setShouldShowPreview] = useState(false);
-  const [currentVariationIndex, setCurrentVariationIndex] = useState(0);
   const panelRef = useRef<HTMLDivElement>(null);
   const prevHeadlineRef = useRef<string>('');
   
-  // Mock variations - replace with actual data from your API
-  const variations = [imageUrl];
-  
   // Effect to check if content is available and show preview
   useEffect(() => {
+    // Show preview when content is available
     if ((headline && headline.trim() !== '') || (bodyCopy && bodyCopy.trim() !== '')) {
       setShouldShowPreview(true);
     }
   }, [headline, bodyCopy]);
-  
-  // Effect to auto-expand panel when new images are generated
-  useEffect(() => {
-    if (imageUrl && imageUrl !== '/placeholder.svg' && !isExpanded) {
-      onToggleExpand();
-    }
-  }, [imageUrl, isExpanded, onToggleExpand]);
   
   // Effect to notify parent of panel state changes
   useEffect(() => {
@@ -182,12 +172,11 @@ export const PreviewPanel = ({
               <div className="mobile-device-frame">
                 <div className="mobile-device-notch"></div>
                 <div className="mobile-content overflow-auto">
-                  <ImageGrid
-                    variations={variations}
-                    selectedIndex={currentVariationIndex}
-                    onSelect={setCurrentVariationIndex}
+                  <GeneratedImagePreview
+                    imageUrl={imageUrl}
                     headline={headline || "Your headline will appear here"}
                     bodyCopy={bodyCopy || "Your body copy will appear here. As you type or generate content, you'll see it update in this preview."}
+                    layout={currentLayout}
                   />
                 </div>
               </div>
