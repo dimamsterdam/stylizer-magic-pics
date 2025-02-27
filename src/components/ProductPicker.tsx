@@ -76,16 +76,7 @@ export const ProductPicker = ({
       if (functionError) throw functionError;
 
       if (data?.products) {
-        // Transform the API response to match our Product interface
-        const transformedProducts = data.products.map((p: any) => ({
-          id: p.id,
-          title: p.title,
-          sku: p.sku || 'No SKU',
-          // Make sure we're using the correct image property from the response
-          image: p.image_url || p.image || '/placeholder.svg'
-        }));
-        
-        setSearchResults(transformedProducts);
+        setSearchResults(data.products);
         
         const { error } = await supabase
           .from('products')
@@ -171,7 +162,6 @@ export const ProductPicker = ({
                 alt={product.title}
                 className="w-16 h-16 object-cover rounded-md"
                 onError={(e) => {
-                  // If image fails to load, use placeholder
                   e.currentTarget.src = '/placeholder.svg';
                 }}
               />
@@ -180,19 +170,12 @@ export const ProductPicker = ({
                 <p className="text-sm text-[#6D7175]">SKU: {product.sku}</p>
               </div>
               <button
-                type="button"
                 className={`ml-4 px-4 py-2 rounded transition-colors ${
                   isSelected
                     ? 'text-[#333333] bg-[#F6F6F7]'
                     : 'text-white bg-black hover:bg-[#333333]'
                 }`}
                 disabled={isSelected}
-                onClick={(e) => {
-                  e.stopPropagation(); // Prevent the parent div's onClick from firing
-                  if (!isSelected) {
-                    handleProductSelect(product);
-                  }
-                }}
               >
                 {isSelected ? 'Selected' : 'Select'}
               </button>
