@@ -31,6 +31,7 @@ export const PreviewPanel = ({
   const [currentLayout, setCurrentLayout] = useState<ExposeLayout>('reversed');
   const [shouldShowPreview, setShouldShowPreview] = useState(false);
   const panelRef = useRef<HTMLDivElement>(null);
+  const prevHeadlineRef = useRef<string>('');
   
   // Effect to check if content is available and show preview
   useEffect(() => {
@@ -52,6 +53,20 @@ export const PreviewPanel = ({
       }
     }
   }, [isExpanded, shouldShowPreview, onPanelStateChange]);
+
+  // Effect to auto-expand panel when headline is newly generated
+  useEffect(() => {
+    // Only trigger if we have a headline and it's different from the previous one
+    if (headline && headline.trim() !== '' && headline !== prevHeadlineRef.current && !isExpanded) {
+      // Only auto-expand if there was no headline before or if the headline significantly changed
+      if (prevHeadlineRef.current === '' || headline.length > prevHeadlineRef.current.length + 5) {
+        onToggleExpand();
+      }
+    }
+    
+    // Update the ref with current headline for next comparison
+    prevHeadlineRef.current = headline || '';
+  }, [headline, isExpanded, onToggleExpand]);
 
   const handleToggleExpand = () => {
     onToggleExpand();
