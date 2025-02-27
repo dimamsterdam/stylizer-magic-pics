@@ -16,7 +16,6 @@ import GeneratedImagePreview from "@/components/GeneratedImagePreview";
 import { ToneSelector, type ToneStyle } from "@/components/ToneSelector";
 import ImageGrid from '@/components/ImageGrid';
 import { ThemeGenerator } from "@/components/ThemeGenerator";
-import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from "@/components/ui/resizable";
 import { PreviewPanel } from "@/components/expose/PreviewPanel";
 
 interface Product {
@@ -389,9 +388,10 @@ const Expose = () => {
     if (!exposeId) return;
     try {
       const selectedUrl = exposeData?.image_variations?.[index];
-      if (typeof selectedUrl !== 'string') {
+      if (!selectedUrl || typeof selectedUrl !== 'string') {
         throw new Error('Invalid image URL');
       }
+      
       const {
         error
       } = await supabase.from('exposes').update({
@@ -401,6 +401,7 @@ const Expose = () => {
         hero_image_tablet_url: selectedUrl,
         hero_image_mobile_url: selectedUrl
       }).eq('id', exposeId);
+      
       if (error) throw error;
       toast({
         title: "Success",
@@ -656,9 +657,7 @@ const Expose = () => {
     }
   };
 
-  // Determine the image URL for the preview panel
   const getPreviewImageUrl = () => {
-    // If we have generated images, use the selected variation
     if (exposeData?.hero_image_url) {
       if (exposeData.image_variations && 
           Array.isArray(exposeData.image_variations) && 
@@ -666,7 +665,6 @@ const Expose = () => {
         
         const selectedVariation = exposeData.image_variations[exposeData.selected_variation_index];
         
-        // Check if the selected variation is a valid string
         if (typeof selectedVariation === 'string') {
           return selectedVariation;
         }
@@ -676,7 +674,6 @@ const Expose = () => {
       return exposeData.hero_image_url;
     }
     
-    // Otherwise show a placeholder
     return PLACEHOLDER_IMAGE;
   };
 
@@ -684,33 +681,17 @@ const Expose = () => {
     <div className="max-w-[99.8rem] mx-auto">
       <ExposeHeader currentStep={currentStep} onStepClick={handleStepClick} />
       <div className="bg-[--p-background] min-h-[calc(100vh-129px)]">
-        <ResizablePanelGroup direction="horizontal">
-          <ResizablePanel 
-            defaultSize={isPreviewExpanded ? 30 : 70} 
-            minSize={30}
-            maxSize={isPreviewExpanded ? 30 : 70}
-          >
-            <div className="p-5 h-[calc(100vh-129px)] overflow-auto">
-              {renderMainContent()}
-            </div>
-          </ResizablePanel>
-          
-          <ResizableHandle withHandle />
-          
-          <ResizablePanel 
-            defaultSize={isPreviewExpanded ? 70 : 30} 
-            minSize={30}
-            maxSize={isPreviewExpanded ? 70 : 30}
-          >
-            <PreviewPanel
-              imageUrl={getPreviewImageUrl()}
-              headline={headline}
-              bodyCopy={bodyCopy}
-              isExpanded={isPreviewExpanded}
-              onToggleExpand={togglePreviewExpansion}
-            />
-          </ResizablePanel>
-        </ResizablePanelGroup>
+        <div className="p-5">
+          {renderMainContent()}
+        </div>
+        
+        <PreviewPanel
+          imageUrl={getPreviewImageUrl()}
+          headline={headline}
+          bodyCopy={bodyCopy}
+          isExpanded={isPreviewExpanded}
+          onToggleExpand={togglePreviewExpansion}
+        />
       </div>
     </div>
   );
