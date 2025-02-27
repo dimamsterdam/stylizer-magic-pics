@@ -15,11 +15,11 @@ interface ImageGridProps {
 }
 
 const ImageGrid = ({ variations, selectedIndex, onSelect, headline, bodyCopy }: ImageGridProps) => {
-  const [currentLayout, setCurrentLayout] = useState<ExposeLayout>('default');
+  const [currentLayout, setCurrentLayout] = useState<ExposeLayout>('reversed');
   
   const layouts: { label: string; value: ExposeLayout }[] = [
-    { label: 'Default', value: 'default' },
-    { label: 'Reversed', value: 'reversed' },
+    { label: 'Top', value: 'reversed' },
+    { label: 'Bottom', value: 'default' },
     { label: 'Editorial', value: 'editorial' },
   ];
 

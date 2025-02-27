@@ -28,7 +28,7 @@ export const PreviewPanel = ({
   onRegenerate,
   showActions = false
 }: PreviewPanelProps) => {
-  const [currentLayout, setCurrentLayout] = useState<ExposeLayout>('default');
+  const [currentLayout, setCurrentLayout] = useState<ExposeLayout>('reversed');
   const [shouldShowPreview, setShouldShowPreview] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
   const [panelHeight, setPanelHeight] = useState<number | null>(null);
@@ -143,9 +143,10 @@ export const PreviewPanel = ({
     onToggleExpand();
   };
 
+  // Updated layout options
   const layouts: { label: string; value: ExposeLayout }[] = [
-    { label: 'Default', value: 'default' },
-    { label: 'Reversed', value: 'reversed' },
+    { label: 'Top', value: 'reversed' },
+    { label: 'Bottom', value: 'default' },
     { label: 'Editorial', value: 'editorial' },
   ];
   
