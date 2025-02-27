@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
@@ -24,7 +25,7 @@ interface Product {
   sku: string;
   image: string;
 }
-type Step = 'products' | 'theme' | 'content' | 'review' | 'results';
+type Step = 'products' | 'theme-content' | 'results';
 const themeExamples = ["Festive red theme with soft lighting and night club background", "Minimalist white studio setup with dramatic shadows", "Natural outdoor setting with morning sunlight and autumn colors", "Modern urban environment with neon lights and city backdrop", "Elegant marble surface with gold accents and soft diffused lighting"];
 const Expose = () => {
   const [currentStep, setCurrentStep] = useState<Step>('products');
@@ -38,6 +39,7 @@ const Expose = () => {
   const [selectedTone, setSelectedTone] = useState<number>(2);
   const [currentPlaceholderIndex, setCurrentPlaceholderIndex] = useState(0);
   const [isToneChatOpen, setIsToneChatOpen] = useState(false);
+  const [isGeneratingContent, setIsGeneratingContent] = useState(false);
   const {
     toast
   } = useToast();
@@ -131,8 +133,8 @@ const Expose = () => {
   };
   const handleContinue = async () => {
     if (currentStep === 'products' && selectedProducts.length === 0) return;
-    if (currentStep === 'theme' && !themeDescription.trim()) return;
-    if (currentStep === 'content' && (!headline.trim() || !bodyCopy.trim())) return;
+    if (currentStep === 'theme-content' && !themeDescription.trim()) return;
+    
     if (currentStep === 'products') {
       try {
         const {
@@ -145,7 +147,7 @@ const Expose = () => {
         }).select().single();
         if (error) throw error;
         setExposeId(data.id);
-        setCurrentStep('theme');
+        setCurrentStep('theme-content');
       } catch (error) {
         console.error('Error creating expose:', error);
         toast({
@@ -154,40 +156,23 @@ const Expose = () => {
           variant: "destructive"
         });
       }
-    } else if (currentStep === 'theme') {
+    } else if (currentStep === 'theme-content') {
       try {
         if (!exposeId) throw new Error('No expose ID');
         const {
           error
         } = await supabase.from('exposes').update({
-          theme_description: themeDescription
-        }).eq('id', exposeId);
-        if (error) throw error;
-        setCurrentStep('content');
-      } catch (error) {
-        console.error('Error updating theme:', error);
-        toast({
-          title: "Error",
-          description: "Failed to save theme. Please try again.",
-          variant: "destructive"
-        });
-      }
-    } else if (currentStep === 'content') {
-      try {
-        if (!exposeId) throw new Error('No expose ID');
-        const {
-          error
-        } = await supabase.from('exposes').update({
+          theme_description: themeDescription,
           headline,
           body_copy: bodyCopy
         }).eq('id', exposeId);
         if (error) throw error;
-        setCurrentStep('review');
+        await handleGenerateHero();
       } catch (error) {
-        console.error('Error updating content:', error);
+        console.error('Error updating expose:', error);
         toast({
           title: "Error",
-          description: "Failed to save content. Please try again.",
+          description: "Failed to save expose. Please try again.",
           variant: "destructive"
         });
       }
@@ -197,61 +182,83 @@ const Expose = () => {
     const cleanedValue = e.target.value.replace(/["']/g, '');
     setHeadline(cleanedValue);
   };
-  const generateContent = async (type: 'headline' | 'body') => {
+  const generateContent = async () => {
     try {
+      setIsGeneratingContent(true);
+      toast({
+        title: "Generating content",
+        description: "Generating headline and body copy..."
+      });
+
       const toneStyles: ToneStyle[] = ['formal', 'elegant', 'informal', 'playful', 'edgy'];
       const currentTone = toneStyles[selectedTone];
-      const {
-        data,
-        error
-      } = await supabase.functions.invoke('generate-content', {
+      
+      // Generate headline
+      const headlineResponse = await supabase.functions.invoke('generate-content', {
         body: {
-          type,
+          type: 'headline',
           products: selectedProducts.map(product => ({
             title: product.title,
             sku: product.sku
           })),
           theme: themeDescription,
           tone: currentTone,
-          promptContext: `Create ${type === 'headline' ? 'a compelling headline of maximum 12 words' : 'a concise body copy of maximum 40 words'} for an expose featuring ${selectedProducts.map(p => p.title).join(', ')}. The theme/mood is: ${themeDescription}. Use a ${currentTone} tone that is ${getToneDescription(currentTone)}`
+          promptContext: `Create a compelling headline of maximum 12 words for an expose featuring ${selectedProducts.map(p => p.title).join(', ')}. The theme/mood is: ${themeDescription}. Use a ${currentTone} tone that is ${getToneDescription(currentTone)}`
         }
       });
-      if (error) throw error;
-      const {
-        generatedText
-      } = data;
-      if (type === 'headline') {
-        const words = generatedText.split(' ');
-        if (words.length > 12) {
-          setHeadline(words.slice(0, 12).join(' ').replace(/["']/g, ''));
-          toast({
-            title: "Headline trimmed",
-            description: "Headline has been trimmed to 12 words"
-          });
-        } else {
-          setHeadline(generatedText.replace(/["']/g, ''));
+      
+      if (headlineResponse.error) throw headlineResponse.error;
+      const { generatedText: headlineText } = headlineResponse.data;
+      
+      // Generate body copy
+      const bodyResponse = await supabase.functions.invoke('generate-content', {
+        body: {
+          type: 'body',
+          products: selectedProducts.map(product => ({
+            title: product.title,
+            sku: product.sku
+          })),
+          theme: themeDescription,
+          tone: currentTone,
+          promptContext: `Create a concise body copy of maximum 40 words for an expose featuring ${selectedProducts.map(p => p.title).join(', ')}. The theme/mood is: ${themeDescription}. Use a ${currentTone} tone that is ${getToneDescription(currentTone)}`
         }
+      });
+      
+      if (bodyResponse.error) throw bodyResponse.error;
+      const { generatedText: bodyText } = bodyResponse.data;
+      
+      // Process and set the headline
+      const headlineWords = headlineText.split(' ');
+      if (headlineWords.length > 12) {
+        setHeadline(headlineWords.slice(0, 12).join(' ').replace(/["']/g, ''));
       } else {
-        const words = generatedText.split(' ');
-        if (words.length > 40) {
-          setBodyCopy(words.slice(0, 40).join(' '));
-          toast({
-            title: "Content trimmed",
-            description: "Body copy has been trimmed to 40 words"
-          });
-        } else {
-          setBodyCopy(generatedText);
-        }
+        setHeadline(headlineText.replace(/["']/g, ''));
       }
+      
+      // Process and set the body copy
+      const bodyWords = bodyText.split(' ');
+      if (bodyWords.length > 40) {
+        setBodyCopy(bodyWords.slice(0, 40).join(' '));
+      } else {
+        setBodyCopy(bodyText);
+      }
+      
+      toast({
+        title: "Success",
+        description: "Content generated successfully!"
+      });
     } catch (error) {
       console.error('Error generating content:', error);
       toast({
         title: "Error",
-        description: `Failed to generate ${type}. Please try again.`,
+        description: "Failed to generate content. Please try again.",
         variant: "destructive"
       });
+    } finally {
+      setIsGeneratingContent(false);
     }
   };
+
   const getToneDescription = (tone: ToneStyle) => {
     const descriptions: Record<ToneStyle, string> = {
       formal: "polished, professional, and authoritative",
@@ -329,26 +336,14 @@ const Expose = () => {
       });
     }
   };
-  const handleGenerateAll = async () => {
-    toast({
-      title: "Generating content",
-      description: "Generating headline and body copy..."
-    });
-    try {
-      await Promise.all([generateContent('headline'), generateContent('body')]);
-      toast({
-        title: "Success",
-        description: "Content generated successfully!"
-      });
-    } catch (error) {
-      console.error('Error generating content:', error);
-      toast({
-        title: "Error",
-        description: "Failed to generate content. Please try again.",
-        variant: "destructive"
-      });
+
+  // Trigger content generation when theme is defined
+  useEffect(() => {
+    if (themeDescription && currentStep === 'theme-content' && !headline && !bodyCopy && !isGeneratingContent) {
+      generateContent();
     }
-  };
+  }, [themeDescription, currentStep]);
+
   const handleStepClick = (step: Step) => {
     setCurrentStep(step);
   };
@@ -370,7 +365,7 @@ const Expose = () => {
     }
   };
   const handleRegenerate = async () => {
-    setCurrentStep('review');
+    setCurrentStep('theme-content');
     toast({
       title: "Ready to regenerate",
       description: "You can now modify your settings and generate a new image."
@@ -406,11 +401,6 @@ const Expose = () => {
       });
     }
   };
-  useEffect(() => {
-    if (currentStep === 'content' && !headline && !bodyCopy) {
-      handleGenerateAll();
-    }
-  }, [currentStep]);
   const handleToneChange = ({
     headline: newHeadline,
     bodyCopy: newBodyCopy
@@ -420,6 +410,9 @@ const Expose = () => {
   }) => {
     setHeadline(newHeadline);
     setBodyCopy(newBodyCopy);
+  };
+  const handleThemeSelect = (theme: string) => {
+    setThemeDescription(theme);
   };
   const renderStep = () => {
     switch (currentStep) {
@@ -498,17 +491,17 @@ const Expose = () => {
           </Card>
         );
 
-      case 'theme':
+      case 'theme-content':
         return (
           <Card className="bg-[--p-surface] shadow-[--p-shadow-card] border-[--p-border-subdued]">
             <CardContent className="p-6 space-y-6">
               <div>
-                <h2 className="text-display-sm text-[--p-text] mb-1">Describe Your Theme</h2>
-                <p className="text-body text-[--p-text-subdued]">Tell us how you want your products to be presented</p>
+                <h2 className="text-display-sm text-[--p-text] mb-1">Theme & Content</h2>
+                <p className="text-body text-[--p-text-subdued]">Describe your theme and manage content</p>
               </div>
 
-              <div className="space-y-4">
-                <div className="space-y-2">
+              <div className="space-y-5">
+                <div className="space-y-3">
                   <Label htmlFor="theme-description" className="text-heading text-[--p-text]">Creative Brief</Label>
                   <Textarea 
                     id="theme-description"
@@ -519,154 +512,83 @@ const Expose = () => {
                   />
                 </div>
 
-                <ThemeGenerator onThemeSelect={setThemeDescription} selectedProducts={selectedProducts} />
+                <ThemeGenerator onThemeSelect={handleThemeSelect} selectedProducts={selectedProducts} />
+
+                <div className="border-t border-[--p-border-subdued] pt-4 mt-4">
+                  <h3 className="text-heading text-[--p-text] mb-3">Content</h3>
+                  <div className="space-y-4">
+                    <div className="space-y-2">
+                      <div className="flex justify-between items-center">
+                        <Label htmlFor="headline" className="text-heading text-[--p-text]">Headline</Label>
+                      </div>
+                      <Textarea 
+                        id="headline" 
+                        value={headline} 
+                        onChange={handleHeadlineChange} 
+                        placeholder="Enter a compelling headline" 
+                        className="text-lg min-h-[40px] resize-none overflow-hidden" 
+                        rows={1} 
+                      />
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label htmlFor="body-copy" className="text-heading text-[--p-text]">Body Copy (40 words max)</Label>
+                      <Textarea 
+                        id="body-copy" 
+                        value={bodyCopy} 
+                        onChange={handleBodyCopyChange} 
+                        placeholder="Enter the main content of your expose..." 
+                        className="h-48 border-[--p-border] focus:border-[--p-focused] bg-[--p-surface]"
+                      />
+                      <p className="text-sm text-[--p-text-subdued]">
+                        {bodyCopy.split(' ').length}/40 words
+                      </p>
+                    </div>
+
+                    <div className="flex justify-between items-center">
+                      <Button 
+                        onClick={generateContent}
+                        variant="outline"
+                        disabled={isGeneratingContent || !themeDescription.trim()}
+                      >
+                        {isGeneratingContent ? (
+                          <>
+                            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                            Generating...
+                          </>
+                        ) : (
+                          <>
+                            <WandSparkles className="mr-2 h-4 w-4" />
+                            Regenerate Content
+                          </>
+                        )}
+                      </Button>
+                      
+                      <ToneChatbox 
+                        isOpen={isToneChatOpen} 
+                        onOpenChange={setIsToneChatOpen} 
+                        currentHeadline={headline} 
+                        currentBodyCopy={bodyCopy} 
+                        onToneChange={handleToneChange} 
+                      />
+                    </div>
+                  </div>
+                </div>
               </div>
 
               <div className="flex justify-end pt-4">
                 <Button 
                   onClick={handleContinue}
-                  disabled={!themeDescription.trim()}
+                  disabled={isGenerating || !themeDescription.trim() || !headline.trim() || !bodyCopy.trim()}
                   className="bg-[--p-action-primary] text-white hover:bg-[--p-action-primary-hovered]"
                 >
-                  Continue to Content
+                  {isGenerating ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      Generating...
+                    </>
+                  ) : 'Generate Hero Image'}
                 </Button>
-              </div>
-            </CardContent>
-          </Card>
-        );
-
-      case 'content':
-        return (
-          <Card className="bg-[--p-surface] shadow-[--p-shadow-card] border-[--p-border-subdued]">
-            <CardContent className="p-6 space-y-6">
-              <div>
-                <h2 className="text-display-sm text-[--p-text] mb-1">Add Content</h2>
-                <p className="text-body text-[--p-text-subdued]">Manage the Expose headline and subtext</p>
-              </div>
-
-              <div className="space-y-4">
-                <div className="space-y-2">
-                  <div className="flex justify-between items-center">
-                    <Label htmlFor="headline" className="text-heading text-[--p-text]">Headline</Label>
-                    <div className="flex items-center gap-2">
-                      {/* Additional controls can be added here */}
-                    </div>
-                  </div>
-                  <Textarea 
-                    id="headline" 
-                    value={headline} 
-                    onChange={handleHeadlineChange} 
-                    placeholder="Enter a compelling headline" 
-                    className="text-lg min-h-[40px] resize-none overflow-hidden" 
-                    rows={1} 
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="body-copy" className="text-heading text-[--p-text]">Body Copy (40 words max)</Label>
-                  <Textarea 
-                    id="body-copy" 
-                    value={bodyCopy} 
-                    onChange={handleBodyCopyChange} 
-                    placeholder="Enter the main content of your expose..." 
-                    className="h-48 border-[--p-border] focus:border-[--p-focused] bg-[--p-surface]"
-                  />
-                  <p className="text-sm text-[--p-text-subdued]">
-                    {bodyCopy.split(' ').length}/40 words
-                  </p>
-                </div>
-
-                <div className="flex justify-end gap-4">
-                  <ToneChatbox isOpen={isToneChatOpen} onOpenChange={setIsToneChatOpen} currentHeadline={headline} currentBodyCopy={bodyCopy} onToneChange={handleToneChange} />
-                  <Button 
-                    onClick={handleContinue} 
-                    disabled={!headline.trim() || !bodyCopy.trim()} 
-                    className="bg-[--p-action-primary] text-white hover:bg-[--p-action-primary-hovered]"
-                  >
-                    Continue to Review
-                  </Button>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        );
-
-      case 'review':
-        return (
-          <Card className="bg-[--p-surface] shadow-[--p-shadow-card] border-[--p-border-subdued]">
-            <CardContent className="p-6 space-y-6">
-              <div>
-                <h2 className="text-display-sm text-[--p-text] mb-1">Review Your Expose</h2>
-                <p className="text-body text-[--p-text-subdued]">Review all details before generating</p>
-              </div>
-
-              <div className="space-y-4">
-                {/* Products Section */}
-                <div className="bg-white rounded-lg border border-[#E3E5E7] p-6">
-                  <div className="flex justify-between items-center mb-4">
-                    <h3 className="text-heading text-[#1A1F2C]">Selected Products</h3>
-                    <Button variant="ghost" size="sm" onClick={() => setCurrentStep('products')} className="text-[#333333] hover:text-[#1A1F2C] hover:bg-gray-100">
-                      <Pen className="h-4 w-4 mr-1" />
-                      Edit
-                    </Button>
-                  </div>
-                  <div className="flex flex-wrap gap-4">
-                    {selectedProducts.map(product => (
-                      <div key={product.id} className="flex items-center space-x-3 bg-gray-50 rounded-lg p-3 flex-1 min-w-[250px]">
-                        <img src={product.image} alt={product.title} className="w-16 h-16 object-cover rounded-lg" onError={e => { e.currentTarget.src = '/placeholder.svg'; }} />
-                        <div>
-                          <h4 className="text-heading text-[#1A1F2C]">{product.title}</h4>
-                          <p className="text-caption text-[#6D7175]">SKU: {product.sku}</p>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-
-                {/* Theme Section */}
-                <div className="bg-white rounded-lg border border-[#E3E5E7] p-6">
-                  <div className="flex justify-between items-center mb-4">
-                    <h3 className="text-heading text-[#1A1F2C]">Theme Description</h3>
-                    <Button variant="ghost" size="sm" onClick={() => setCurrentStep('theme')} className="text-[#333333] hover:text-[#1A1F2C] hover:bg-gray-100">
-                      <Pen className="h-4 w-4 mr-1" />
-                      Edit
-                    </Button>
-                  </div>
-                  <p className="text-body text-[#1A1F2C] bg-gray-50 rounded-lg p-4">{themeDescription}</p>
-                </div>
-
-                {/* Content Section */}
-                <div className="bg-white rounded-lg border border-[#E3E5E7] p-6">
-                  <div className="flex justify-between items-center mb-4">
-                    <h3 className="text-heading text-[#1A1F2C]">Content</h3>
-                    <Button variant="ghost" size="sm" onClick={() => setCurrentStep('content')} className="text-[#333333] hover:text-[#1A1F2C] hover:bg-gray-100">
-                      <Pen className="h-4 w-4 mr-1" />
-                      Edit
-                    </Button>
-                  </div>
-                  <div className="space-y-4">
-                    <div className="bg-gray-50 rounded-lg p-4">
-                      <h4 className="text-heading text-[#6D7175] mb-2">Headline</h4>
-                      <p className="text-body-lg text-[#1A1F2C]">{headline}</p>
-                    </div>
-                    <div className="bg-gray-50 rounded-lg p-4">
-                      <h4 className="text-heading text-[#6D7175] mb-2">Body Copy</h4>
-                      <p className="text-body text-[#1A1F2C]">{bodyCopy}</p>
-                      <p className="text-caption text-[#6D7175] mt-2">{bodyCopy.split(' ').length}/40 words</p>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="flex justify-end pt-4">
-                  <Button onClick={handleGenerateHero} disabled={isGenerating} className="bg-[--p-action-primary] text-white hover:bg-[--p-action-primary-hovered]">
-                    {isGenerating ? (
-                      <>
-                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                        Generating...
-                      </>
-                    ) : 'Generate Hero Image'}
-                  </Button>
-                </div>
               </div>
             </CardContent>
           </Card>
@@ -690,6 +612,10 @@ const Expose = () => {
                   <DropdownMenuItem onClick={handleAddToLibrary}>
                     <Save className="mr-2 h-4 w-4" />
                     <span>Add to Library</span>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={handleRegenerate}>
+                    <RotateCw className="mr-2 h-4 w-4" />
+                    <span>Regenerate</span>
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
@@ -722,4 +648,5 @@ const Expose = () => {
     </div>
   );
 };
+
 export default Expose;

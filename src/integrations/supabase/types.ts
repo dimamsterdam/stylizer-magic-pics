@@ -46,8 +46,10 @@ export type Database = {
           gender: Database["public"]["Enums"]["brand_audience_gender"] | null
           id: string
           income_level: Database["public"]["Enums"]["income_level"] | null
+          onboarding_completed: boolean | null
           photography_lighting: string | null
           photography_mood: string | null
+          tasks_completed: string[] | null
           updated_at: string
           user_id: string
           values: string[] | null
@@ -61,8 +63,10 @@ export type Database = {
           gender?: Database["public"]["Enums"]["brand_audience_gender"] | null
           id?: string
           income_level?: Database["public"]["Enums"]["income_level"] | null
+          onboarding_completed?: boolean | null
           photography_lighting?: string | null
           photography_mood?: string | null
+          tasks_completed?: string[] | null
           updated_at?: string
           user_id: string
           values?: string[] | null
@@ -76,8 +80,10 @@ export type Database = {
           gender?: Database["public"]["Enums"]["brand_audience_gender"] | null
           id?: string
           income_level?: Database["public"]["Enums"]["income_level"] | null
+          onboarding_completed?: boolean | null
           photography_lighting?: string | null
           photography_mood?: string | null
+          tasks_completed?: string[] | null
           updated_at?: string
           user_id?: string
           values?: string[] | null

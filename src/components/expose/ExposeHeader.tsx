@@ -5,8 +5,8 @@ import Breadcrumbs from "@/components/Breadcrumbs";
 import StepProgress from "@/components/StepProgress";
 
 interface ExposeHeaderProps {
-  currentStep: 'products' | 'theme' | 'content' | 'review' | 'results';
-  onStepClick?: (step: 'products' | 'theme' | 'content' | 'review' | 'results') => void;
+  currentStep: 'products' | 'theme-content' | 'results';
+  onStepClick?: (step: 'products' | 'theme-content' | 'results') => void;
 }
 
 export const ExposeHeader = ({ currentStep, onStepClick }: ExposeHeaderProps) => {

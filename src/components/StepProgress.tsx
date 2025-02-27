@@ -1,8 +1,8 @@
 
 import React from 'react';
-import { ShoppingCart, WandSparkles, Text, CheckCircle, Image } from 'lucide-react';
+import { ShoppingCart, WandSparkles, Image } from 'lucide-react';
 
-type Step = 'products' | 'theme' | 'content' | 'review' | 'results';
+type Step = 'products' | 'theme-content' | 'results';
 
 interface StepProgressProps {
   currentStep: Step;
@@ -12,9 +12,7 @@ interface StepProgressProps {
 const StepProgress = ({ currentStep, onStepClick }: StepProgressProps) => {
   const steps = [
     { id: 'products' as const, label: 'Products', icon: ShoppingCart },
-    { id: 'theme' as const, label: 'Theme', icon: WandSparkles },
-    { id: 'content' as const, label: 'Content', icon: Text },
-    { id: 'review' as const, label: 'Review', icon: CheckCircle },
+    { id: 'theme-content' as const, label: 'Theme & Content', icon: WandSparkles },
     { id: 'results' as const, label: 'Results', icon: Image },
   ];
 
