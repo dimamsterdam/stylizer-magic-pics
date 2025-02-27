@@ -1,10 +1,9 @@
 
-import React, { useState } from 'react';
-import { Card } from '@/components/ui/card';
+import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { ChevronUp, ChevronDown, LayoutGrid } from 'lucide-react';
 import GeneratedImagePreview, { ExposeLayout } from '@/components/GeneratedImagePreview';
-import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
+import { Sheet, SheetContent } from '@/components/ui/sheet';
 
 interface PreviewPanelProps {
   imageUrl: string;
@@ -23,6 +22,15 @@ export const PreviewPanel = ({
 }: PreviewPanelProps) => {
   const [currentLayout, setCurrentLayout] = useState<ExposeLayout>('default');
   const [sheetOpen, setSheetOpen] = useState(true);
+  const [shouldShowPreview, setShouldShowPreview] = useState(false);
+  
+  // Effect to check if content is available and show preview
+  useEffect(() => {
+    // Show preview when content is available
+    if ((headline && headline.trim() !== '') || (bodyCopy && bodyCopy.trim() !== '')) {
+      setShouldShowPreview(true);
+    }
+  }, [headline, bodyCopy]);
 
   const layouts: { label: string; value: ExposeLayout }[] = [
     { label: 'Default', value: 'default' },
@@ -31,57 +39,65 @@ export const PreviewPanel = ({
   ];
   
   return (
-    <Sheet open={sheetOpen} onOpenChange={setSheetOpen} modal={false}>
+    <Sheet open={sheetOpen} modal={false}>
       <SheetContent 
         side="bottom" 
-        className={`p-0 border-t border-[--p-border] shadow-lg rounded-t-lg ${isExpanded ? 'h-[70vh]' : 'h-[40vh]'}`}
+        className={`p-0 border-t border-[--p-border] shadow-lg rounded-t-lg ${isExpanded ? 'h-[70vh]' : shouldShowPreview ? 'h-[25vh]' : 'h-[32px]'}`}
         style={{ zIndex: 40 }}
+        // Remove the close button
+        hideCloseButton={true}
       >
         <div className="flex flex-col h-full">
-          <div className="flex items-center justify-between p-3 bg-[--p-surface] border-b border-[--p-border] cursor-grab">
+          {/* Smaller top bar with layout options on the right */}
+          <div 
+            className="flex items-center justify-between px-3 py-1 bg-[--p-surface] border-b border-[--p-border] cursor-grab"
+            // Make the handle more prominent to indicate draggability
+            style={{ touchAction: 'none' }}
+          >
             <div className="flex items-center gap-2">
-              <div className="h-1 w-10 bg-[--p-border-subdued] rounded-full mx-auto" />
-              <h3 className="font-medium text-[--p-text] ml-2">Preview</h3>
+              <div className="h-1 w-10 bg-[--p-border-subdued] rounded-full" />
+              <h3 className="font-medium text-[--p-text] ml-2 text-sm">Preview</h3>
             </div>
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-1">
+              {/* Layout options moved to the top bar */}
+              <div className="flex gap-1 items-center mr-2">
+                <LayoutGrid className="h-3 w-3 text-[--p-text-subdued]" />
+                {layouts.map((layout) => (
+                  <Button
+                    key={layout.value}
+                    variant={currentLayout === layout.value ? "default" : "ghost"}
+                    size="sm"
+                    onClick={() => setCurrentLayout(layout.value)}
+                    className={`text-xs py-0.5 px-2 h-6 ${currentLayout === layout.value ? "bg-[--p-action-primary] text-white" : "text-[--p-text]"}`}
+                  >
+                    {layout.label}
+                  </Button>
+                ))}
+              </div>
+              
               <Button
                 variant="ghost"
                 size="sm"
                 onClick={onToggleExpand}
                 title={isExpanded ? "Collapse preview" : "Expand preview"}
-                className="text-[--p-icon]"
+                className="text-[--p-icon] h-6 w-6 p-0"
               >
-                {isExpanded ? <ChevronDown className="h-4 w-4" /> : <ChevronUp className="h-4 w-4" />}
+                {isExpanded ? <ChevronDown className="h-3 w-3" /> : <ChevronUp className="h-3 w-3" />}
               </Button>
             </div>
           </div>
           
-          <div className="flex-1 overflow-auto p-4 bg-[--p-background]">
-            <GeneratedImagePreview
-              imageUrl={imageUrl}
-              headline={headline || "Your headline will appear here"}
-              bodyCopy={bodyCopy || "Your body copy will appear here. As you type or generate content, you'll see it update in this preview."}
-              layout={currentLayout}
-            />
-          </div>
-          
-          <div className="p-3 bg-[--p-surface] border-t border-[--p-border]">
-            <div className="flex flex-wrap gap-2 items-center">
-              <LayoutGrid className="h-4 w-4 text-[--p-text-subdued] mr-1" />
-              <span className="text-sm text-[--p-text-subdued] mr-2">Layout:</span>
-              {layouts.map((layout) => (
-                <Button
-                  key={layout.value}
-                  variant={currentLayout === layout.value ? "default" : "ghost"}
-                  size="sm"
-                  onClick={() => setCurrentLayout(layout.value)}
-                  className={currentLayout === layout.value ? "bg-[--p-action-primary] text-white" : "text-[--p-text]"}
-                >
-                  {layout.label}
-                </Button>
-              ))}
+          {/* Main content area - only shown when there's content or panel is expanded */}
+          {(shouldShowPreview || isExpanded) && (
+            <div className="flex-1 overflow-auto p-4 bg-[--p-background]">
+              <GeneratedImagePreview
+                imageUrl={imageUrl}
+                headline={headline || "Your headline will appear here"}
+                bodyCopy={bodyCopy || "Your body copy will appear here. As you type or generate content, you'll see it update in this preview."}
+                layout={currentLayout}
+              />
             </div>
-          </div>
+          )}
         </div>
       </SheetContent>
     </Sheet>
