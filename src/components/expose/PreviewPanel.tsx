@@ -53,6 +53,43 @@ export const PreviewPanel = ({
     }
   }, [isExpanded, shouldShowPreview, onPanelStateChange, panelHeight]);
 
+  // Define event handlers outside useEffect to maintain references
+  const handleDragMove = (e: MouseEvent | TouchEvent) => {
+    if (!isDragging || dragStartY.current === null || startHeight.current === null) return;
+    
+    // Get current Y position
+    const currentY = 'touches' in e ? e.touches[0].clientY : e.clientY;
+    const deltaY = dragStartY.current - currentY;
+    
+    // Calculate new height
+    const newHeight = startHeight.current + deltaY;
+    const windowHeight = window.innerHeight;
+    
+    // Convert to vh and constrain between 20vh and 80vh
+    const heightVh = (newHeight / windowHeight) * 100;
+    const constrainedHeightVh = Math.min(Math.max(heightVh, 20), 80);
+    
+    // Update the panel height
+    setPanelHeight(constrainedHeightVh);
+  };
+  
+  const handleDragEnd = () => {
+    if (isDragging && panelHeight !== null) {
+      // Check if we should snap to a preset height
+      snapToPresetHeight(panelHeight);
+    }
+    
+    setIsDragging(false);
+    dragStartY.current = null;
+    startHeight.current = null;
+    
+    // Remove event listeners
+    document.removeEventListener('mousemove', handleDragMove);
+    document.removeEventListener('touchmove', handleDragMove);
+    document.removeEventListener('mouseup', handleDragEnd);
+    document.removeEventListener('touchend', handleDragEnd);
+  };
+
   // Determine if we should snap to a preset height
   const snapToPresetHeight = (currentHeightVh: number) => {
     // Snap points at 25vh and 70vh with tolerance of 10vh
@@ -91,42 +128,6 @@ export const PreviewPanel = ({
     document.addEventListener('touchmove', handleDragMove);
     document.addEventListener('mouseup', handleDragEnd);
     document.addEventListener('touchend', handleDragEnd);
-  };
-  
-  const handleDragMove = (e: MouseEvent | TouchEvent) => {
-    if (!isDragging || dragStartY.current === null || startHeight.current === null) return;
-    
-    // Get current Y position
-    const currentY = 'touches' in e ? e.touches[0].clientY : e.clientY;
-    const deltaY = dragStartY.current - currentY;
-    
-    // Calculate new height
-    const newHeight = startHeight.current + deltaY;
-    const windowHeight = window.innerHeight;
-    
-    // Convert to vh and constrain between 20vh and 80vh
-    const heightVh = (newHeight / windowHeight) * 100;
-    const constrainedHeightVh = Math.min(Math.max(heightVh, 20), 80);
-    
-    // Update the panel height
-    setPanelHeight(constrainedHeightVh);
-  };
-  
-  const handleDragEnd = () => {
-    if (isDragging && panelHeight !== null) {
-      // Check if we should snap to a preset height
-      snapToPresetHeight(panelHeight);
-    }
-    
-    setIsDragging(false);
-    dragStartY.current = null;
-    startHeight.current = null;
-    
-    // Remove event listeners
-    document.removeEventListener('mousemove', handleDragMove);
-    document.removeEventListener('touchmove', handleDragMove);
-    document.removeEventListener('mouseup', handleDragEnd);
-    document.removeEventListener('touchend', handleDragEnd);
   };
 
   const handleToggleExpand = () => {
