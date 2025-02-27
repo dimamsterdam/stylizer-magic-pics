@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { ChevronUp, ChevronDown, LayoutGrid } from 'lucide-react';
 import GeneratedImagePreview, { ExposeLayout } from '@/components/GeneratedImagePreview';
@@ -11,7 +11,7 @@ interface PreviewPanelProps {
   bodyCopy: string;
   isExpanded: boolean;
   onToggleExpand: () => void;
-  onPanelStateChange?: (state: 'minimized' | 'preview' | 'expanded') => void;
+  onPanelStateChange?: (state: 'minimized' | 'preview' | 'expanded' | number) => void;
 }
 
 export const PreviewPanel = ({
@@ -25,6 +25,11 @@ export const PreviewPanel = ({
   const [currentLayout, setCurrentLayout] = useState<ExposeLayout>('default');
   const [sheetOpen, setSheetOpen] = useState(true);
   const [shouldShowPreview, setShouldShowPreview] = useState(false);
+  const [isDragging, setIsDragging] = useState(false);
+  const [panelHeight, setPanelHeight] = useState<number | null>(null);
+  const dragStartY = useRef<number | null>(null);
+  const startHeight = useRef<number | null>(null);
+  const panelRef = useRef<HTMLDivElement>(null);
   
   // Effect to check if content is available and show preview
   useEffect(() => {
@@ -37,7 +42,10 @@ export const PreviewPanel = ({
   // Effect to notify parent of panel state changes
   useEffect(() => {
     if (onPanelStateChange) {
-      if (isExpanded) {
+      if (panelHeight !== null) {
+        // Send the actual height percentage when dragging
+        onPanelStateChange(panelHeight);
+      } else if (isExpanded) {
         onPanelStateChange('expanded');
       } else if (shouldShowPreview) {
         onPanelStateChange('preview');
@@ -45,7 +53,79 @@ export const PreviewPanel = ({
         onPanelStateChange('minimized');
       }
     }
-  }, [isExpanded, shouldShowPreview, onPanelStateChange]);
+  }, [isExpanded, shouldShowPreview, onPanelStateChange, panelHeight]);
+
+  const handleDragStart = (e: React.MouseEvent | React.TouchEvent) => {
+    e.preventDefault();
+    setIsDragging(true);
+    
+    // Get starting positions
+    if ('touches' in e) {
+      dragStartY.current = e.touches[0].clientY;
+    } else {
+      dragStartY.current = e.clientY;
+    }
+    
+    // Store current panel height
+    if (panelRef.current) {
+      startHeight.current = panelRef.current.offsetHeight;
+    }
+    
+    // Add event listeners for dragging
+    document.addEventListener('mousemove', handleDragMove);
+    document.addEventListener('touchmove', handleDragMove);
+    document.addEventListener('mouseup', handleDragEnd);
+    document.addEventListener('touchend', handleDragEnd);
+  };
+  
+  const handleDragMove = (e: MouseEvent | TouchEvent) => {
+    if (!isDragging || dragStartY.current === null || startHeight.current === null) return;
+    
+    // Get current Y position
+    const currentY = 'touches' in e ? e.touches[0].clientY : e.clientY;
+    const deltaY = dragStartY.current - currentY;
+    
+    // Calculate new height
+    const newHeight = startHeight.current + deltaY;
+    const windowHeight = window.innerHeight;
+    
+    // Convert to vh and constrain between 25vh and 70vh
+    const heightVh = (newHeight / windowHeight) * 100;
+    const constrainedHeightVh = Math.min(Math.max(heightVh, 25), 70);
+    
+    // Update the panel height
+    setPanelHeight(constrainedHeightVh);
+  };
+  
+  const handleDragEnd = () => {
+    setIsDragging(false);
+    dragStartY.current = null;
+    startHeight.current = null;
+    
+    // Remove event listeners
+    document.removeEventListener('mousemove', handleDragMove);
+    document.removeEventListener('touchmove', handleDragMove);
+    document.removeEventListener('mouseup', handleDragEnd);
+    document.removeEventListener('touchend', handleDragEnd);
+  };
+
+  const handleToggleExpand = () => {
+    // Reset custom panel height when explicitly toggling
+    setPanelHeight(null);
+    onToggleExpand();
+  };
+
+  const getSheetHeight = () => {
+    if (panelHeight !== null) {
+      return `h-[${panelHeight}vh]`;
+    } else if (isExpanded) {
+      return 'h-[70vh]';
+    } else if (shouldShowPreview) {
+      return 'h-[25vh]';
+    } else {
+      return 'h-[32px]';
+    }
+  };
 
   const layouts: { label: string; value: ExposeLayout }[] = [
     { label: 'Default', value: 'default' },
@@ -57,17 +137,28 @@ export const PreviewPanel = ({
     <Sheet open={sheetOpen} modal={false}>
       <SheetContent 
         side="bottom" 
-        className={`p-0 border-t border-[--p-border] shadow-xl rounded-t-2xl ${isExpanded ? 'h-[70vh]' : shouldShowPreview ? 'h-[25vh]' : 'h-[32px]'}`}
+        className={`p-0 border-t border-[--p-border] shadow-xl rounded-t-2xl ${
+          panelHeight !== null 
+            ? `h-[${panelHeight}vh]` 
+            : isExpanded 
+              ? 'h-[70vh]' 
+              : shouldShowPreview 
+                ? 'h-[25vh]' 
+                : 'h-[32px]'
+        }`}
         style={{ 
           zIndex: 40,
-          boxShadow: '0px -4px 20px rgba(0, 0, 0, 0.15)'
+          boxShadow: '0px -4px 20px rgba(0, 0, 0, 0.15)',
+          transition: isDragging ? 'none' : 'height 0.2s ease'
         }}
         hideCloseButton={true}
       >
-        <div className="flex flex-col h-full">
+        <div className="flex flex-col h-full" ref={panelRef}>
           {/* Smaller top bar with layout options on the right */}
           <div 
-            className="flex items-center justify-between px-3 py-1 bg-[--p-surface] border-b border-[--p-border] cursor-grab"
+            className={`flex items-center justify-between px-3 py-1 bg-[--p-surface] border-b border-[--p-border] cursor-grab ${isDragging ? 'cursor-grabbing' : 'cursor-grab'}`}
+            onMouseDown={handleDragStart}
+            onTouchStart={handleDragStart}
             // Make the handle more prominent to indicate draggability
             style={{ touchAction: 'none' }}
           >
@@ -95,7 +186,7 @@ export const PreviewPanel = ({
               <Button
                 variant="ghost"
                 size="sm"
-                onClick={onToggleExpand}
+                onClick={handleToggleExpand}
                 title={isExpanded ? "Collapse preview" : "Expand preview"}
                 className="text-[--p-icon] h-6 w-6 p-0"
               >

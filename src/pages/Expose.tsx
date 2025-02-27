@@ -26,7 +26,7 @@ interface Product {
   image: string;
 }
 type Step = 'products' | 'theme-content' | 'results';
-type PanelState = 'minimized' | 'preview' | 'expanded';
+type PanelState = 'minimized' | 'preview' | 'expanded' | number;
 
 const themeExamples = ["Festive red theme with soft lighting and night club background", "Minimalist white studio setup with dramatic shadows", "Natural outdoor setting with morning sunlight and autumn colors", "Modern urban environment with neon lights and city backdrop", "Elegant marble surface with gold accents and soft diffused lighting"];
 
@@ -431,6 +431,11 @@ const Expose = () => {
 
   // Get bottom padding based on panel state
   const getContentPadding = () => {
+    if (typeof panelState === 'number') {
+      // Handle custom dragged height
+      return `pb-[${panelState}vh]`;
+    }
+    
     switch (panelState) {
       case 'expanded':
         return 'pb-[70vh]';
@@ -701,7 +706,12 @@ const Expose = () => {
   return (
     <div className="max-w-[99.8rem] mx-auto">
       <ExposeHeader currentStep={currentStep} onStepClick={handleStepClick} />
-      <div className={`bg-[--p-background] min-h-[calc(100vh-129px)] transition-all duration-300 ${getContentPadding()}`}>
+      <div 
+        className={`bg-[--p-background] min-h-[calc(100vh-129px)] transition-all ${typeof panelState === 'number' ? '' : 'duration-300'}`}
+        style={{ 
+          paddingBottom: typeof panelState === 'number' ? `${panelState}vh` : undefined
+        }}
+      >
         <div className="p-5">
           {renderMainContent()}
         </div>
