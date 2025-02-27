@@ -34,6 +34,7 @@ interface ThemePill {
 interface ThemeGeneratorProps {
   onThemeSelect: (theme: string) => void;
   selectedProducts: Product[];
+  onContentRegenerate?: () => void;
 }
 
 const THEME_SUGGESTIONS: ThemePill[] = [
@@ -93,7 +94,7 @@ const THEME_SUGGESTIONS: ThemePill[] = [
   }
 ];
 
-export function ThemeGenerator({ onThemeSelect, selectedProducts }: ThemeGeneratorProps) {
+export function ThemeGenerator({ onThemeSelect, selectedProducts, onContentRegenerate }: ThemeGeneratorProps) {
   const [generatingTheme, setGeneratingTheme] = React.useState<string | null>(null);
   const { toast } = useToast();
 
@@ -115,6 +116,12 @@ export function ThemeGenerator({ onThemeSelect, selectedProducts }: ThemeGenerat
       if (error) throw error;
 
       onThemeSelect(data.themeDescription);
+      
+      // Trigger content regeneration after theme selection
+      if (onContentRegenerate) {
+        onContentRegenerate();
+      }
+      
       toast({
         title: "Theme generated",
         description: "Your theme description has been updated.",
