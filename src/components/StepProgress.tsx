@@ -71,8 +71,8 @@ const StepProgress = ({ currentStep, onStepClick }: StepProgressProps) => {
               {index < steps.length - 1 && (
                 <div 
                   className={`
-                    flex-1 h-[2px] mx-4 mt-[-20px]
-                    ${getStepStatus(steps[index + 1].id) === 'upcoming' ? 'bg-[#E3E5E7]' : 'bg-[#2C6ECB]'}
+                    flex-1 h-[1px] mx-4 mt-[-20px]
+                    ${getStepStatus(steps[index + 1].id) === 'upcoming' ? 'bg-[#E3E5E7]' : 'bg-[#D7DBE0]'}
                   `}
                 />
               )}
