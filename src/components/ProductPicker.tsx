@@ -4,7 +4,6 @@ import { useToast } from "@/hooks/use-toast";
 import { Input } from "@/components/ui/input";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { supabase } from "@/integrations/supabase/client";
-import { useState } from "react";
 
 interface Product {
   id: string;
@@ -26,21 +25,15 @@ interface ProductPickerProps {
 export const ProductPicker = ({ 
   onSelect, 
   selectedProducts, 
-  searchResults: initialSearchResults, 
-  isLoading: initialIsLoading, 
-  error: initialError,
-  searchTerm: initialSearchTerm,
+  searchResults, 
+  isLoading, 
+  error,
+  searchTerm,
   onSearch
 }: ProductPickerProps) => {
   const { toast } = useToast();
-  
-  // Local state to manage input and search
-  const [searchTerm, setSearchTerm] = useState(initialSearchTerm);
-  const [searchResults, setSearchResults] = useState<Product[]>(initialSearchResults);
-  const [isLoading, setIsLoading] = useState(initialIsLoading);
-  const [error, setError] = useState(initialError);
-  const [open, setOpen] = useState(false);
-  
+  const isOpen = searchTerm.length >= 2;
+
   const isProductSelected = (productId: string) => {
     return selectedProducts.some(p => p.id === productId);
   };
@@ -48,25 +41,14 @@ export const ProductPicker = ({
   const handleProductSelect = (product: Product) => {
     if (!isProductSelected(product.id)) {
       onSelect(product);
-      setSearchTerm('');
-      setOpen(false);
+      onSearch('');
     }
   };
 
   const handleSearch = async (term: string) => {
-    setSearchTerm(term);
     onSearch(term);
     
-    // Only open the popover when there's at least 2 characters
-    setOpen(term.length >= 2);
-    
-    if (term.length < 2) {
-      setSearchResults([]);
-      return;
-    }
-
-    setIsLoading(true);
-    setError(null);
+    if (term.length < 2) return;
 
     try {
       const { data, error: functionError } = await supabase.functions.invoke('sync-shopify-products', {
@@ -76,8 +58,6 @@ export const ProductPicker = ({
       if (functionError) throw functionError;
 
       if (data?.products) {
-        setSearchResults(data.products);
-        
         const { error } = await supabase
           .from('products')
           .upsert(
@@ -96,12 +76,8 @@ export const ProductPicker = ({
           console.error('Error syncing products to Supabase:', error);
         }
       }
-      
-      setIsLoading(false);
     } catch (error) {
       console.error('Error fetching products:', error);
-      setError("Failed to fetch products. Please try again.");
-      setIsLoading(false);
       toast({
         title: "Error",
         description: "Failed to fetch products. Please try again.",
@@ -188,7 +164,7 @@ export const ProductPicker = ({
 
   return (
     <div className="relative w-full max-w-2xl mx-auto">
-      <Popover open={open} onOpenChange={setOpen}>
+      <Popover open={isOpen}>
         <PopoverTrigger asChild>
           <div className="relative">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-[#6D7175]" />
