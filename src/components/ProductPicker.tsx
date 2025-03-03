@@ -4,14 +4,7 @@ import { Input } from "@/components/ui/input";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { supabase } from "@/integrations/supabase/client";
 import { useEffect, useRef } from "react";
-
-interface Product {
-  id: string;
-  title: string;
-  sku: string;
-  image_url: string;
-  images?: string[];
-}
+import { Product } from "@/types/product";
 
 interface ProductPickerProps {
   onSelect: (product: Product) => void;

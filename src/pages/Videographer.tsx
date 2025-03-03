@@ -9,14 +9,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { ChevronRight, Image, Play, ArrowLeft } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { ImageGallery } from '@/components/ImageGallery';
-
-interface Product {
-  id: string;
-  title: string;
-  sku: string;
-  image_url: string;
-  images?: string[];
-}
+import { Product } from "@/types/product";
 
 interface VideoStyle {
   id: string;
