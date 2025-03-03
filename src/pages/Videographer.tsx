@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { ProductPicker } from '@/components/ProductPicker';
 import { Button } from '@/components/ui/button';
@@ -15,7 +14,7 @@ interface Product {
   id: string;
   title: string;
   sku: string;
-  image: string;
+  image_url: string;
   images?: string[];
 }
 
@@ -39,7 +38,6 @@ const Videographer = () => {
   const [selectedStyles, setSelectedStyles] = useState<Record<string, string>>({});
   const [isGenerating, setIsGenerating] = useState(false);
 
-  // Animation styles defined based on requirements
   const videoStyles: VideoStyle[] = [
     {
       id: 'horizontal-pan',
@@ -115,7 +113,6 @@ const Videographer = () => {
   const handleImageSelect = (imageUrl: string) => {
     if (selectedImages.includes(imageUrl)) {
       setSelectedImages(selectedImages.filter(img => img !== imageUrl));
-      // Remove style selection for this image if it exists
       const updatedStyles = { ...selectedStyles };
       delete updatedStyles[imageUrl];
       setSelectedStyles(updatedStyles);
@@ -148,7 +145,6 @@ const Videographer = () => {
   };
 
   const handleGenerateVideos = async () => {
-    // Check if all selected images have styles assigned
     const imagesWithoutStyles = selectedImages.filter(img => !selectedStyles[img]);
     
     if (imagesWithoutStyles.length > 0) {
@@ -163,14 +159,11 @@ const Videographer = () => {
     setIsGenerating(true);
     
     try {
-      // Here we would normally call the AI video generation endpoint
-      // This is a placeholder for future implementation
       toast({
         title: "Video generation started",
         description: "Your videos are being generated. This may take a few minutes."
       });
       
-      // Simulate API delay for demonstration purposes
       setTimeout(() => {
         setIsGenerating(false);
         setActiveTab('review-videos');
@@ -216,7 +209,7 @@ const Videographer = () => {
     if (!selectedProduct) return null;
     
     const productImages = selectedProduct.images || [
-      selectedProduct.image,
+      selectedProduct.image_url,
     ];
     
     const galleryImages = productImages.map((url, index) => ({

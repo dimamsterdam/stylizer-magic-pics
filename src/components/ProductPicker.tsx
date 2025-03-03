@@ -1,4 +1,3 @@
-
 import { Search, Loader2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { Input } from "@/components/ui/input";
@@ -10,7 +9,8 @@ interface Product {
   id: string;
   title: string;
   sku: string;
-  image: string;
+  image_url: string;
+  images?: string[];
 }
 
 interface ProductPickerProps {
@@ -36,10 +36,8 @@ export const ProductPicker = ({
   const isOpen = searchTerm.length >= 2;
   const inputRef = useRef<HTMLInputElement>(null);
 
-  // Maintain focus on input when popover opens
   useEffect(() => {
     if (isOpen && inputRef.current) {
-      // Small timeout to ensure the popover has opened
       setTimeout(() => {
         inputRef.current?.focus();
       }, 10);
@@ -146,7 +144,7 @@ export const ProductPicker = ({
               onClick={() => !isSelected && handleProductSelect(product)}
             >
               <img
-                src={product.image}
+                src={product.image_url}
                 alt={product.title}
                 className="w-16 h-16 object-cover rounded-md"
                 onError={(e) => {
@@ -196,7 +194,6 @@ export const ProductPicker = ({
           align="start"
           sideOffset={4}
           onOpenAutoFocus={(e) => {
-            // Prevent the popover from stealing focus
             e.preventDefault();
           }}
         >
