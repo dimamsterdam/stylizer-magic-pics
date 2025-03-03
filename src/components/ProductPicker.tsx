@@ -4,6 +4,7 @@ import { useToast } from "@/hooks/use-toast";
 import { Input } from "@/components/ui/input";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { supabase } from "@/integrations/supabase/client";
+import { useEffect, useRef } from "react";
 
 interface Product {
   id: string;
@@ -33,6 +34,17 @@ export const ProductPicker = ({
 }: ProductPickerProps) => {
   const { toast } = useToast();
   const isOpen = searchTerm.length >= 2;
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  // Maintain focus on input when popover opens
+  useEffect(() => {
+    if (isOpen && inputRef.current) {
+      // Small timeout to ensure the popover has opened
+      setTimeout(() => {
+        inputRef.current?.focus();
+      }, 10);
+    }
+  }, [isOpen]);
 
   const isProductSelected = (productId: string) => {
     return selectedProducts.some(p => p.id === productId);
@@ -175,6 +187,7 @@ export const ProductPicker = ({
               onChange={(e) => handleSearch(e.target.value)}
               className="pl-10 border-[#E3E5E7] bg-white/50 transition-all duration-300 focus:bg-white focus:border-black"
               disabled={isLoading || selectedProducts.length >= 3}
+              ref={inputRef}
             />
           </div>
         </PopoverTrigger>
@@ -182,6 +195,10 @@ export const ProductPicker = ({
           className="w-[var(--radix-popover-trigger-width)] p-4" 
           align="start"
           sideOffset={4}
+          onOpenAutoFocus={(e) => {
+            // Prevent the popover from stealing focus
+            e.preventDefault();
+          }}
         >
           <div className="max-h-[400px] overflow-y-auto">
             {renderSearchContent()}
