@@ -1,3 +1,4 @@
+
 import { ChevronDown, ChevronRight, Image, Video, Palette, Settings, ChevronLeft, Library, LayoutDashboard } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
 import { Sidebar, SidebarContent, SidebarGroup, SidebarGroupContent, SidebarGroupLabel, SidebarMenu, SidebarMenuButton, SidebarMenuItem, SidebarTrigger } from "@/components/ui/sidebar";
@@ -31,7 +32,7 @@ const libraryItems = [{
   url: "/library/expose"
 }];
 
-export function GlobalSidebar() {
+const GlobalSidebar = () => {
   const location = useLocation();
   const [isLibraryExpanded, setIsLibraryExpanded] = useState(false);
   const isLibraryRoute = location.pathname.startsWith('/library');
@@ -133,4 +134,6 @@ export function GlobalSidebar() {
       </Sidebar>
     </div>
   );
-}
+};
+
+export default GlobalSidebar;
