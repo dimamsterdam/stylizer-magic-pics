@@ -199,16 +199,22 @@ const Videographer = () => {
     }
   };
 
-  const handleVideoSelect = (imageUrl: string, videoType: 'video1' | 'video2' | 'both') => {
+  const handleVideoSelect = (imageUrl: string, videoType: 'video1' | 'video2') => {
     const updatedVideos = { ...generatedVideos };
-    updatedVideos[imageUrl].selected = videoType;
+    
+    if (updatedVideos[imageUrl].selected === videoType) {
+      updatedVideos[imageUrl].selected = undefined;
+    } else {
+      updatedVideos[imageUrl].selected = videoType;
+    }
+    
     setGeneratedVideos(updatedVideos);
     
     toast({
       title: "Video selected",
-      description: videoType === 'both' 
-        ? "Both videos have been selected" 
-        : `Video ${videoType === 'video1' ? '1' : '2'} has been selected`
+      description: updatedVideos[imageUrl].selected 
+        ? `Video ${videoType === 'video1' ? '1' : '2'} has been selected` 
+        : "Video selection removed"
     });
   };
 
@@ -485,12 +491,12 @@ const Videographer = () => {
                       </div>
                       <div className="flex items-center">
                         <Button
-                          variant={videoData.selected === 'video1' || videoData.selected === 'both' ? 'primary' : 'plain'}
+                          variant={videoData.selected === 'video1' ? 'primary' : 'plain'}
                           size="sm"
                           className="mr-2"
                           onClick={() => handleVideoSelect(imageUrl, 'video1')}
                         >
-                          {videoData.selected === 'video1' || videoData.selected === 'both' ? (
+                          {videoData.selected === 'video1' ? (
                             <CheckCircle className="h-4 w-4 mr-1" />
                           ) : null}
                           Select Option 1
@@ -522,12 +528,12 @@ const Videographer = () => {
                       </div>
                       <div className="flex items-center">
                         <Button
-                          variant={videoData.selected === 'video2' || videoData.selected === 'both' ? 'primary' : 'plain'}
+                          variant={videoData.selected === 'video2' ? 'primary' : 'plain'}
                           size="sm"
                           className="mr-2"
                           onClick={() => handleVideoSelect(imageUrl, 'video2')}
                         >
-                          {videoData.selected === 'video2' || videoData.selected === 'both' ? (
+                          {videoData.selected === 'video2' ? (
                             <CheckCircle className="h-4 w-4 mr-1" />
                           ) : null}
                           Select Option 2
@@ -537,19 +543,6 @@ const Videographer = () => {
                         </p>
                       </div>
                     </div>
-                  </div>
-                  
-                  <div className="p-4 bg-[#F9FAFB] border-t border-[#E3E5E7]">
-                    <Button
-                      variant={videoData.selected === 'both' ? 'primary' : 'plain'}
-                      onClick={() => handleVideoSelect(imageUrl, 'both')}
-                      className="mr-2"
-                    >
-                      {videoData.selected === 'both' ? (
-                        <CheckCircle className="h-4 w-4 mr-1" />
-                      ) : null}
-                      Select Both Videos
-                    </Button>
                   </div>
                 </div>
               ))}
