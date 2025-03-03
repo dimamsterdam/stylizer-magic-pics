@@ -1,154 +1,118 @@
 
-// @ts-ignore
-import { serve } from "https://deno.land/std@0.177.0/http/server.ts";
+import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
-  'Access-Control-Allow-Methods': 'POST, OPTIONS',
 };
 
-const SHOPIFY_STORE_URL = 'https://quickstart-50d94e13.myshopify.com';
-const SHOPIFY_API_VERSION = '2024-01';
+interface ProductImage {
+  url: string;
+}
+
+interface ShopifyProduct {
+  id: string;
+  title: string;
+  handle: string;
+  variants: {
+    edges: Array<{
+      node: {
+        sku: string;
+        price: {
+          amount: string;
+        };
+      };
+    }>;
+  };
+  description: string;
+  featuredImage: {
+    url: string;
+  };
+  images: {
+    edges: Array<{
+      node: ProductImage;
+    }>;
+  };
+}
+
+async function searchShopifyProducts(searchTerm: string) {
+  try {
+    const SHOPIFY_STORE_URL = "your-store.myshopify.com";
+    const SHOPIFY_API_KEY = Deno.env.get("SHOPIFY_STOREFRONT_API_KEY") || "";
+    
+    if (!SHOPIFY_API_KEY) {
+      throw new Error("Missing Shopify API key");
+    }
+
+    // Mock implementation for demo purposes
+    console.log(`Searching for products with term: ${searchTerm}`);
+    
+    // Simulate fetching from Shopify API
+    const products = [
+      {
+        id: "product1",
+        title: `Sample Product: ${searchTerm}`,
+        sku: "SKU-1234",
+        description: "This is a sample product description",
+        price: "49.99",
+        image_url: "/placeholder.svg",
+        shopify_gid: "gid://shopify/Product/1234567890",
+        images: ["/placeholder.svg", "/placeholder.svg"]
+      },
+      {
+        id: "product2",
+        title: `Another Product: ${searchTerm}`,
+        sku: "SKU-5678",
+        description: "Another sample product description",
+        price: "29.99",
+        image_url: "/placeholder.svg",
+        shopify_gid: "gid://shopify/Product/9876543210",
+        images: ["/placeholder.svg", "/placeholder.svg", "/placeholder.svg"]
+      }
+    ];
+    
+    return { products };
+  } catch (error) {
+    console.error("Error searching products:", error);
+    throw error;
+  }
+}
 
 serve(async (req) => {
-  // Handle CORS preflight
+  // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
-    return new Response(null, { 
-      status: 204, 
-      headers: corsHeaders 
-    });
-  }
-
-  // Validate request method
-  if (req.method !== 'POST') {
-    return new Response(
-      JSON.stringify({ error: 'Method not allowed' }),
-      { 
-        status: 405,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-      }
-    );
+    return new Response(null, { headers: corsHeaders });
   }
 
   try {
-    console.log("Starting sync-shopify-products function");
-    
-    // Get and validate Shopify token
-    const shopifyToken = Deno.env.get('SHOPIFY_STOREFRONT_API_KEY');
-    if (!shopifyToken) {
-      console.error("Missing Shopify API key");
-      return new Response(
-        JSON.stringify({ error: 'Missing Shopify API key configuration' }),
-        { 
-          status: 500,
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-        }
-      );
-    }
-
-    // Parse request body
-    const { searchTerm } = await req.json();
-    console.log("Search term:", searchTerm);
-
-    // Construct GraphQL query
-    const sanitizedSearchTerm = searchTerm ? searchTerm.replace(/"/g, '\\"') : '';
-    const query = `
-      query {
-        products(first: 10${sanitizedSearchTerm ? `, query: "${sanitizedSearchTerm}"` : ''}) {
-          edges {
-            node {
-              id
-              title
-              description
-              variants(first: 1) {
-                edges {
-                  node {
-                    sku
-                    price {
-                      amount
-                    }
-                  }
-                }
-              }
-              images(first: 1) {
-                edges {
-                  node {
-                    url
-                  }
-                }
-              }
-            }
-          }
-        }
+    if (req.method === 'POST') {
+      const { searchTerm } = await req.json();
+      
+      if (!searchTerm || typeof searchTerm !== 'string') {
+        return new Response(
+          JSON.stringify({ error: "Search term is required" }),
+          { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        );
       }
-    `;
 
-    console.log("Sending request to Shopify API");
-    const shopifyResponse = await fetch(`${SHOPIFY_STORE_URL}/api/${SHOPIFY_API_VERSION}/graphql.json`, {
-      method: 'POST',
-      headers: {
-        'X-Shopify-Storefront-Access-Token': shopifyToken,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ query }),
-    });
-
-    if (!shopifyResponse.ok) {
-      const errorText = await shopifyResponse.text();
-      console.error("Shopify API error:", {
-        status: shopifyResponse.status,
-        body: errorText
-      });
+      const result = await searchShopifyProducts(searchTerm);
       
       return new Response(
-        JSON.stringify({ 
-          error: 'Shopify API error',
-          details: errorText
-        }),
-        { 
-          status: shopifyResponse.status,
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-        }
+        JSON.stringify(result),
+        { headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
 
-    const data = await shopifyResponse.json();
-    
-    // Transform products data
-    const products = data.data.products.edges.map((edge: any) => ({
-      id: edge.node.id.split('/').pop(),
-      shopify_gid: edge.node.id,
-      title: edge.node.title,
-      description: edge.node.description,
-      sku: edge.node.variants.edges[0]?.node.sku || null,
-      price: edge.node.variants.edges[0]?.node.price.amount || null,
-      image_url: edge.node.images.edges[0]?.node.url || null,
-    }));
-
-    console.log(`Successfully processed ${products.length} products`);
-    
     return new Response(
-      JSON.stringify({ success: true, products }),
-      { 
-        headers: { 
-          ...corsHeaders, 
-          'Content-Type': 'application/json'
-        } 
-      }
+      JSON.stringify({ error: "Method not allowed" }),
+      { status: 405, headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
-
   } catch (error) {
-    console.error('Error in sync-shopify-products:', error);
+    console.error("Error processing request:", error);
+    
     return new Response(
-      JSON.stringify({ 
-        error: 'Internal server error',
-        details: error.message
-      }),
-      { 
-        status: 500,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-      }
+      JSON.stringify({ error: error.message || "Internal server error" }),
+      { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
   }
 });

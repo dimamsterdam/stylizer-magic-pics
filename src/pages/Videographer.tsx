@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { ProductPicker } from '@/components/ProductPicker';
 import { Button } from '@/components/ui/button';
@@ -275,9 +276,10 @@ const Videographer = () => {
   const renderImageGallery = () => {
     if (!selectedProduct) return null;
     
-    const productImages = selectedProduct.images || [
-      selectedProduct.image_url,
-    ];
+    // This is the key change: use the images array if available, otherwise fall back to image_url
+    const productImages = selectedProduct.images && selectedProduct.images.length > 0 
+      ? selectedProduct.images 
+      : [selectedProduct.image_url];
     
     const galleryImages = productImages.map((url, index) => ({
       id: `${selectedProduct.id}-image-${index}`,
