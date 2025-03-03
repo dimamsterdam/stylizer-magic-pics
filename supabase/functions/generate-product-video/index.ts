@@ -1,5 +1,6 @@
 
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2.7.1";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -13,57 +14,57 @@ serve(async (req) => {
   }
 
   try {
-    const { imageUrl, animationStyle } = await req.json();
+    const { imageUrl, styleId, productId, variantCount = 2 } = await req.json();
+    
+    if (!imageUrl || !styleId || !productId) {
+      return new Response(
+        JSON.stringify({ error: 'Missing required parameters' }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
 
-    // Log incoming request
-    console.log(`Processing video generation request: ${JSON.stringify({ imageUrl, animationStyle })}`);
+    console.log(`Generating video for product ${productId} with style ${styleId}`);
+    
+    // Here we would normally connect to an AI service to generate the videos
+    // For now, we'll simulate a response with placeholder video URLs
+    
+    // Create fake video URLs (in production these would be real generated videos)
+    const videoVariants = Array.from({ length: variantCount }, (_, i) => ({
+      id: `${productId}-${styleId}-variant-${i + 1}`,
+      videoUrl: `/placeholder.svg`, // This would be a real video URL in production
+      thumbnailUrl: `/placeholder.svg`,
+      styleId,
+      variantNumber: i + 1
+    }));
 
-    // Here we would normally connect to an AI service or video processing library
-    // For now, we'll return a mock response to simulate video generation
+    // In a real implementation, we would:
+    // 1. Send the image to an AI video generation service
+    // 2. Wait for the videos to be generated
+    // 3. Store the videos in Supabase Storage
+    // 4. Return the URLs to the videos
 
-    // Mock video generation process
-    const generateVideo = async () => {
-      // Simulate API processing time
-      await new Promise(resolve => setTimeout(resolve, 2000));
-
-      // Return mock video URLs (this would normally be URLs to generated videos)
-      return {
-        variant1: `https://example.com/videos/variant1_${Date.now()}.mp4`,
-        variant2: `https://example.com/videos/variant2_${Date.now()}.mp4`
-      };
-    };
-
-    const videoUrls = await generateVideo();
+    // Simulate processing delay
+    await new Promise(resolve => setTimeout(resolve, 1000));
 
     return new Response(
-      JSON.stringify({
-        success: true,
-        message: "Video generation completed",
-        videos: videoUrls
+      JSON.stringify({ 
+        success: true, 
+        message: 'Videos generated successfully',
+        videos: videoVariants
       }),
-      { 
-        headers: { 
-          ...corsHeaders, 
-          'Content-Type': 'application/json' 
-        } 
-      }
+      { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
-
   } catch (error) {
-    console.error("Error in generate-product-video function:", error);
+    console.error('Error generating product video:', error);
     
     return new Response(
-      JSON.stringify({
-        success: false,
-        message: "Failed to generate video",
-        error: error.message
+      JSON.stringify({ 
+        error: 'Failed to generate video', 
+        details: error.message 
       }),
       { 
-        headers: { 
-          ...corsHeaders, 
-          'Content-Type': 'application/json' 
-        },
-        status: 500
+        status: 500, 
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
       }
     );
   }
