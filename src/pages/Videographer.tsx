@@ -6,10 +6,11 @@ import { useToast } from '@/hooks/use-toast';
 import { PageHeader } from '@/components/ui/page-header';
 import { Breadcrumb, BreadcrumbItem, BreadcrumbLink } from '@/components/ui/breadcrumb';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { ArrowLeft, MoveHorizontal, ArrowDownFromLine, ArrowUpFromLine, Expand, Play } from 'lucide-react';
+import { ArrowLeft, MoveHorizontal, ArrowDownFromLine, ArrowUpFromLine, Expand, Play, ChevronRight, Download, CheckCircle, ExternalLink } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { ImageGallery } from '@/components/ImageGallery';
 import { Product } from "@/types/product";
+import { Skeleton } from "@/components/ui/skeleton";
 
 interface VideoStyle {
   id: string;
@@ -30,6 +31,14 @@ const Videographer = () => {
   const [activeTab, setActiveTab] = useState('select-product');
   const [selectedStyles, setSelectedStyles] = useState<Record<string, string>>({});
   const [isGenerating, setIsGenerating] = useState(false);
+  const [selectedVideos, setSelectedVideos] = useState<string[]>([]);
+  const [generatedVideos, setGeneratedVideos] = useState<Record<string, {
+    video1: string;
+    video2: string;
+    style: string;
+    thumbnail: string;
+    selected?: 'video1' | 'video2' | 'both';
+  }>>({});
 
   const videoStyles: VideoStyle[] = [
     {
@@ -157,8 +166,22 @@ const Videographer = () => {
         description: "Your videos are being generated. This may take a few minutes."
       });
       
+      const newGeneratedVideos: Record<string, any> = {};
+      
+      selectedImages.forEach((img, index) => {
+        const style = videoStyles.find(s => s.id === selectedStyles[img]);
+        newGeneratedVideos[img] = {
+          video1: `/placeholder.svg`,
+          video2: `/placeholder.svg`,
+          style: style?.name || 'Animation',
+          thumbnail: img,
+          selected: undefined
+        };
+      });
+      
       setTimeout(() => {
         setIsGenerating(false);
+        setGeneratedVideos(newGeneratedVideos);
         setActiveTab('review-videos');
         toast({
           title: "Videos generated",
@@ -174,6 +197,51 @@ const Videographer = () => {
         variant: "destructive"
       });
     }
+  };
+
+  const handleVideoSelect = (imageUrl: string, videoType: 'video1' | 'video2' | 'both') => {
+    const updatedVideos = { ...generatedVideos };
+    updatedVideos[imageUrl].selected = videoType;
+    setGeneratedVideos(updatedVideos);
+    
+    toast({
+      title: "Video selected",
+      description: videoType === 'both' 
+        ? "Both videos have been selected" 
+        : `Video ${videoType === 'video1' ? '1' : '2'} has been selected`
+    });
+  };
+
+  const handleDownloadVideo = (videoUrl: string) => {
+    toast({
+      title: "Download started",
+      description: "Your video is being downloaded."
+    });
+  };
+
+  const handleSendToShopify = () => {
+    const selectedCount = Object.values(generatedVideos).filter(v => v.selected).length;
+    
+    if (selectedCount === 0) {
+      toast({
+        title: "No videos selected",
+        description: "Please select at least one video to send to Shopify.",
+        variant: "destructive"
+      });
+      return;
+    }
+    
+    toast({
+      title: "Sending to Shopify",
+      description: `${selectedCount} video${selectedCount > 1 ? 's' : ''} being sent to your Shopify product.`
+    });
+    
+    setTimeout(() => {
+      toast({
+        title: "Success",
+        description: `${selectedCount} video${selectedCount > 1 ? 's' : ''} added to your Shopify product.`
+      });
+    }, 2000);
   };
 
   const renderProductSelection = () => (
@@ -378,9 +446,126 @@ const Videographer = () => {
           </div>
         </CardHeader>
         <CardContent className="p-6">
-          <p className="text-center text-polaris-text-subdued py-12">
-            Video preview coming soon...
-          </p>
+          {Object.keys(generatedVideos).length === 0 ? (
+            <p className="text-center text-polaris-text-subdued py-12">
+              No videos have been generated yet.
+            </p>
+          ) : (
+            <div className="space-y-8">
+              {Object.entries(generatedVideos).map(([imageUrl, videoData], index) => (
+                <div key={`video-preview-${index}`} className="border border-[#E3E5E7] rounded-md overflow-hidden">
+                  <div className="bg-[#F6F9FC] p-4 border-b border-[#E3E5E7]">
+                    <h3 className="text-headingSm font-medium text-polaris-text">
+                      {selectedProduct?.title} - Animation {index + 1}
+                    </h3>
+                    <p className="text-bodySm text-polaris-text-subdued">
+                      Style: {videoData.style}
+                    </p>
+                  </div>
+                  
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6 p-6">
+                    <div className="space-y-3">
+                      <div className="relative group">
+                        <div className="aspect-video bg-[#F6F6F7] rounded-md overflow-hidden flex items-center justify-center">
+                          <Skeleton className="w-full h-full" />
+                          <div className="absolute inset-0 flex items-center justify-center">
+                            <Play className="h-12 w-12 text-gray-400 opacity-50 group-hover:opacity-75 transition-opacity" />
+                          </div>
+                        </div>
+                        <div className="absolute top-2 right-2 rounded-full bg-white p-1 shadow-md">
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-8 w-8"
+                            onClick={() => handleDownloadVideo(videoData.video1)}
+                          >
+                            <Download className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      </div>
+                      <div className="flex items-center">
+                        <Button
+                          variant={videoData.selected === 'video1' || videoData.selected === 'both' ? 'primary' : 'plain'}
+                          size="sm"
+                          className="mr-2"
+                          onClick={() => handleVideoSelect(imageUrl, 'video1')}
+                        >
+                          {videoData.selected === 'video1' || videoData.selected === 'both' ? (
+                            <CheckCircle className="h-4 w-4 mr-1" />
+                          ) : null}
+                          Select Option 1
+                        </Button>
+                        <p className="text-xs text-polaris-text-subdued">
+                          1080×1080 • MP4
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="space-y-3">
+                      <div className="relative group">
+                        <div className="aspect-video bg-[#F6F6F7] rounded-md overflow-hidden flex items-center justify-center">
+                          <Skeleton className="w-full h-full" />
+                          <div className="absolute inset-0 flex items-center justify-center">
+                            <Play className="h-12 w-12 text-gray-400 opacity-50 group-hover:opacity-75 transition-opacity" />
+                          </div>
+                        </div>
+                        <div className="absolute top-2 right-2 rounded-full bg-white p-1 shadow-md">
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-8 w-8"
+                            onClick={() => handleDownloadVideo(videoData.video2)}
+                          >
+                            <Download className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      </div>
+                      <div className="flex items-center">
+                        <Button
+                          variant={videoData.selected === 'video2' || videoData.selected === 'both' ? 'primary' : 'plain'}
+                          size="sm"
+                          className="mr-2"
+                          onClick={() => handleVideoSelect(imageUrl, 'video2')}
+                        >
+                          {videoData.selected === 'video2' || videoData.selected === 'both' ? (
+                            <CheckCircle className="h-4 w-4 mr-1" />
+                          ) : null}
+                          Select Option 2
+                        </Button>
+                        <p className="text-xs text-polaris-text-subdued">
+                          1080×1080 • MP4
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <div className="p-4 bg-[#F9FAFB] border-t border-[#E3E5E7]">
+                    <Button
+                      variant={videoData.selected === 'both' ? 'primary' : 'plain'}
+                      onClick={() => handleVideoSelect(imageUrl, 'both')}
+                      className="mr-2"
+                    >
+                      {videoData.selected === 'both' ? (
+                        <CheckCircle className="h-4 w-4 mr-1" />
+                      ) : null}
+                      Select Both Videos
+                    </Button>
+                  </div>
+                </div>
+              ))}
+              
+              <div className="flex justify-end mt-6">
+                <Button 
+                  variant="primary"
+                  onClick={handleSendToShopify}
+                  className="min-w-32"
+                >
+                  <ExternalLink className="h-4 w-4 mr-1" />
+                  Send to Shopify
+                </Button>
+              </div>
+            </div>
+          )}
         </CardContent>
       </Card>
     );
