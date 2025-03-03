@@ -39,6 +39,10 @@ export const ImageGallery = ({ images, onSelect, onRemove }: ImageGalleryProps) 
               src={image.url}
               alt={image.title || "Product"}
               className="w-full h-48 md:h-64 object-cover rounded-lg"
+              onError={(e) => {
+                console.log("Image failed to load:", image.url);
+                e.currentTarget.src = '/placeholder.svg';
+              }}
             />
             <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-30 transition-opacity rounded-lg">
               <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
@@ -60,6 +64,9 @@ export const ImageGallery = ({ images, onSelect, onRemove }: ImageGalleryProps) 
                       src={image.url}
                       alt={image.title || "Product zoom"}
                       className="w-full h-96 object-cover rounded-md"
+                      onError={(e) => {
+                        e.currentTarget.src = '/placeholder.svg';
+                      }}
                     />
                   </HoverCardContent>
                 </HoverCard>
