@@ -16,6 +16,7 @@ import Publish from "./pages/Publish";
 import Expose from "./pages/Expose";
 import Library from "./pages/Library";
 import Stylizer from "./pages/Stylizer";
+import Videographer from "./pages/Videographer";
 import Dashboard from "./pages/Dashboard";
 import NavBar from "./components/NavBar";
 import { GlobalSidebar } from "./components/GlobalSidebar";
@@ -87,6 +88,10 @@ const router = createBrowserRouter([
           {
             path: "stylizer",
             element: <Stylizer />,
+          },
+          {
+            path: "videographer",
+            element: <Videographer />,
           }
         ],
       },
