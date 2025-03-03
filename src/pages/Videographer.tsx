@@ -113,14 +113,7 @@ const Videographer = () => {
   };
 
   const handleImageSelect = (imageUrl: string) => {
-    if (selectedImages.includes(imageUrl)) {
-      setSelectedImages(selectedImages.filter(img => img !== imageUrl));
-      const updatedStyles = { ...selectedStyles };
-      delete updatedStyles[imageUrl];
-      setSelectedStyles(updatedStyles);
-    } else {
-      setSelectedImages([...selectedImages, imageUrl]);
-    }
+    setSelectedImages([imageUrl]);
   };
 
   const handleStyleSelect = (imageUrl: string, styleId: string) => {
@@ -291,7 +284,7 @@ const Videographer = () => {
         <CardHeader className="p-6 pb-2">
           <h2 className="text-headingLg font-medium text-polaris-text">Select Images</h2>
           <p className="text-bodySm text-polaris-text-subdued">
-            Choose one or more images to create video animations
+            Choose an image to create video animation
           </p>
         </CardHeader>
         <CardContent className="p-6">

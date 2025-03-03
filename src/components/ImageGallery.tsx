@@ -40,6 +40,11 @@ export const ImageGallery = ({ images, onSelect, onRemove }: ImageGalleryProps) 
     setImagesLoaded(prev => ({ ...prev, [imageId]: true }));
   };
 
+  const handleImageClick = (id: string, e: React.MouseEvent) => {
+    e.stopPropagation();
+    onSelect(id);
+  };
+
   return (
     <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
       {images.length === 0 ? (
@@ -56,7 +61,7 @@ export const ImageGallery = ({ images, onSelect, onRemove }: ImageGalleryProps) 
               className={`relative cursor-pointer group ${
                 image.selected ? "ring-2 ring-polaris-teal rounded-lg" : ""
               }`}
-              onClick={() => onSelect(image.id)}
+              onClick={(e) => handleImageClick(image.id, e)}
             >
               <div className="w-full h-48 md:h-64 bg-gray-100 rounded-lg flex items-center justify-center">
                 <img
