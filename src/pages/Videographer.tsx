@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { ProductPicker } from '@/components/ProductPicker';
 import { Button } from '@/components/ui/button';
@@ -8,6 +7,7 @@ import { PageHeader } from '@/components/ui/page-header';
 import { Breadcrumb, BreadcrumbItem, BreadcrumbLink } from '@/components/ui/breadcrumb';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { ChevronRight, Image, Play } from 'lucide-react';
+import { supabase } from '@/integrations/supabase/client';
 
 interface Product {
   id: string;
@@ -48,7 +48,6 @@ const Videographer = () => {
       setIsLoading(true);
       setError(null);
       
-      // Fetch products from Shopify via Supabase edge function
       const { data, error: functionError } = await supabase.functions.invoke('sync-shopify-products', {
         body: { searchTerm: term }
       });
@@ -114,10 +113,8 @@ const Videographer = () => {
   const renderImageGallery = () => {
     if (!selectedProduct) return null;
     
-    // Mock product images for now
     const productImages = selectedProduct.images || [
       selectedProduct.image,
-      // Add more mock images if needed for testing
     ];
     
     return (
