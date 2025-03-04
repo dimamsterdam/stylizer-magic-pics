@@ -19,6 +19,26 @@ const Videographer = () => {
   const [videoTitle, setVideoTitle] = useState("");
   const [videoDescription, setVideoDescription] = useState("");
   const [generatedVideoUrl, setGeneratedVideoUrl] = useState<string | null>(null);
+  
+  // Mock data for ProductPicker
+  const [searchResults, setSearchResults] = useState<any[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [searchTerm, setSearchTerm] = useState("");
+
+  // Create a selectedProducts array from the single selectedProduct
+  const selectedProducts = selectedProduct ? [{ id: selectedProduct, title: "", sku: "", image: "" }] : [];
+  
+  // Handle product selection
+  const handleProductSelect = (product: any) => {
+    setSelectedProduct(product.id);
+  };
+  
+  // Handle search
+  const handleSearch = (term: string) => {
+    setSearchTerm(term);
+    // Add implementation for search if needed
+  };
 
   return (
     <div className="space-y-6">
@@ -106,8 +126,13 @@ const Videographer = () => {
               <div className="space-y-2">
                 <Label>Select Product</Label>
                 <ProductPicker 
-                  selectedProductId={selectedProduct}
-                  onProductSelect={setSelectedProduct}
+                  onSelect={handleProductSelect}
+                  selectedProducts={selectedProducts}
+                  searchResults={searchResults}
+                  isLoading={isLoading}
+                  error={error}
+                  searchTerm={searchTerm}
+                  onSearch={handleSearch}
                 />
               </div>
             </CardContent>
