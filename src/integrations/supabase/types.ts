@@ -175,6 +175,7 @@ export type Database = {
           brand_constraints: string | null
           created_at: string
           end_date: string | null
+          error_message: string | null
           headline: string | null
           hero_image_desktop_url: string | null
           hero_image_generation_status: string | null
@@ -198,6 +199,7 @@ export type Database = {
           brand_constraints?: string | null
           created_at?: string
           end_date?: string | null
+          error_message?: string | null
           headline?: string | null
           hero_image_desktop_url?: string | null
           hero_image_generation_status?: string | null
@@ -221,6 +223,7 @@ export type Database = {
           brand_constraints?: string | null
           created_at?: string
           end_date?: string | null
+          error_message?: string | null
           headline?: string | null
           hero_image_desktop_url?: string | null
           hero_image_generation_status?: string | null
