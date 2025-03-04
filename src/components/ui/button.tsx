@@ -19,13 +19,22 @@ const buttonVariants = cva(
           "bg-secondary text-secondary-foreground hover:bg-secondary/80",
         ghost: "hover:bg-accent hover:text-accent-foreground",
         link: "text-primary underline-offset-4 hover:underline",
-        primary: "bg-[#2C6ECB] text-white hover:bg-[#1F5199]", // Adding explicit Polaris primary button styling
+        primary: "bg-[#2C6ECB] text-white hover:bg-[#1F5199]",
+        monochrome: "bg-[#2A2C2E] text-white hover:bg-[#1A1C1E]",
+        'monochrome-plain': "bg-white border border-[#BABEC3] text-[#2A2C2E] hover:bg-[#F6F6F7]",
+        'plain': "bg-white border border-[#E3E5E7] text-[#2A2C2E] hover:bg-[#F6F6F7]",
+        success: "bg-[#007F5F] text-white hover:bg-[#005C44]",
+        critical: "bg-[#D72C0D] text-white hover:bg-[#BC2200]",
+        warning: "bg-[#FFC453] text-[#4D3B00] hover:bg-[#FFB21D]",
+        'success-plain': "bg-white border border-[#B3DFD3] text-[#007F5F] hover:bg-[#F1F8F5]",
+        'critical-plain': "bg-white border border-[#FADBD7] text-[#D72C0D] hover:bg-[#FDF4F4]",
       },
       size: {
         default: "h-10 px-4 py-2",
         sm: "h-9 rounded-md px-3",
         lg: "h-11 rounded-md px-8",
         icon: "h-10 w-10",
+        auto: "px-4 py-2"
       },
     },
     defaultVariants: {
