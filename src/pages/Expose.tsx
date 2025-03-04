@@ -302,7 +302,7 @@ const Expose = () => {
       const {
         data,
         error
-      } = await supabase.functions.invoke('generate-ai-image', {
+      } = await supabase.functions.invoke('generate-fal-images', {
         body: {
           exposeId,
           products: selectedProducts.map(product => ({
