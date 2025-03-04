@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { ProductPicker } from '@/components/ProductPicker';
 import { Button } from '@/components/ui/button';
@@ -8,6 +7,7 @@ import { PageHeader } from '@/components/ui/page-header';
 import { Breadcrumb, BreadcrumbItem, BreadcrumbLink } from '@/components/ui/breadcrumb';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { ChevronRight, Image, Play } from 'lucide-react';
+import { supabase } from '@/integrations/supabase/client';
 
 interface Product {
   id: string;
