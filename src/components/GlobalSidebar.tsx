@@ -12,10 +12,6 @@ const mainNavItems = [{
   title: "Expose",
   icon: Image,
   url: "/expose"
-}, {
-  title: "Videographer",
-  icon: Video,
-  url: "/videographer"
 }];
 
 const libraryItems = [{
