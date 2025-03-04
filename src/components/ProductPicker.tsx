@@ -4,7 +4,7 @@ import { useToast } from "@/hooks/use-toast";
 import { Input } from "@/components/ui/input";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { supabase } from "@/integrations/supabase/client";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 
 interface Product {
   id: string;
@@ -36,18 +36,10 @@ export const ProductPicker = ({
   
   // Local state to manage input and search
   const [searchTerm, setSearchTerm] = useState(initialSearchTerm);
-  const [searchResults, setSearchResults] = useState<Product[]>(initialSearchResults || []);
+  const [searchResults, setSearchResults] = useState<Product[]>(initialSearchResults);
   const [isLoading, setIsLoading] = useState(initialIsLoading);
   const [error, setError] = useState(initialError);
   const [open, setOpen] = useState(false);
-  
-  // Update local state when props change
-  useEffect(() => {
-    setSearchResults(initialSearchResults || []);
-    setIsLoading(initialIsLoading);
-    setError(initialError);
-    setSearchTerm(initialSearchTerm);
-  }, [initialSearchResults, initialIsLoading, initialError, initialSearchTerm]);
   
   const isProductSelected = (productId: string) => {
     return selectedProducts.some(p => p.id === productId);
@@ -67,6 +59,55 @@ export const ProductPicker = ({
     
     // Only open the popover when there's at least 2 characters
     setOpen(term.length >= 2);
+    
+    if (term.length < 2) {
+      setSearchResults([]);
+      return;
+    }
+
+    setIsLoading(true);
+    setError(null);
+
+    try {
+      const { data, error: functionError } = await supabase.functions.invoke('sync-shopify-products', {
+        body: { searchTerm: term }
+      });
+
+      if (functionError) throw functionError;
+
+      if (data?.products) {
+        setSearchResults(data.products);
+        
+        const { error } = await supabase
+          .from('products')
+          .upsert(
+            data.products.map((p: any) => ({
+              id: p.id,
+              title: p.title,
+              description: p.description,
+              sku: p.sku,
+              price: p.price,
+              image_url: p.image_url,
+              shopify_gid: p.shopify_gid,
+            }))
+          );
+
+        if (error) {
+          console.error('Error syncing products to Supabase:', error);
+        }
+      }
+      
+      setIsLoading(false);
+    } catch (error) {
+      console.error('Error fetching products:', error);
+      setError("Failed to fetch products. Please try again.");
+      setIsLoading(false);
+      toast({
+        title: "Error",
+        description: "Failed to fetch products. Please try again.",
+        variant: "destructive",
+      });
+    }
   };
 
   const renderSearchContent = () => {
@@ -121,7 +162,6 @@ export const ProductPicker = ({
                 alt={product.title}
                 className="w-16 h-16 object-cover rounded-md"
                 onError={(e) => {
-                  // If image fails to load, use placeholder
                   e.currentTarget.src = '/placeholder.svg';
                 }}
               />
@@ -130,19 +170,12 @@ export const ProductPicker = ({
                 <p className="text-sm text-[#6D7175]">SKU: {product.sku}</p>
               </div>
               <button
-                type="button"
                 className={`ml-4 px-4 py-2 rounded transition-colors ${
                   isSelected
                     ? 'text-[#333333] bg-[#F6F6F7]'
                     : 'text-white bg-black hover:bg-[#333333]'
                 }`}
                 disabled={isSelected}
-                onClick={(e) => {
-                  e.stopPropagation(); // Prevent the parent div's onClick from firing
-                  if (!isSelected) {
-                    handleProductSelect(product);
-                  }
-                }}
               >
                 {isSelected ? 'Selected' : 'Select'}
               </button>

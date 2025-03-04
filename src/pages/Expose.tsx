@@ -11,17 +11,9 @@ import { Textarea } from '@/components/ui/textarea';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { ThemeSelector } from '@/components/ThemeSelector';
-import { Breadcrumb, BreadcrumbItem, BreadcrumbLink } from "@/components/ui/breadcrumb";
 
 // Use the correct step type based on ExposeHeader
 type ExposeStep = 'products' | 'theme-content';
-
-interface Product {
-  id: string;
-  title: string;
-  sku: string;
-  image: string;
-}
 
 const Expose = () => {
   const { id: urlExposeId } = useParams<{ id: string }>();
@@ -32,7 +24,7 @@ const Expose = () => {
   // State management
   const [exposeId, setExposeId] = useState<string | null>(urlExposeId || null);
   const [currentStep, setCurrentStep] = useState<ExposeStep>('products');
-  const [selectedProducts, setSelectedProducts] = useState<Product[]>([]);
+  const [selectedProducts, setSelectedProducts] = useState<any[]>([]);
   const [headline, setHeadline] = useState<string>('');
   const [bodyCopy, setBodyCopy] = useState<string>('');
   const [themeDescription, setThemeDescription] = useState<string>('');
@@ -41,10 +33,6 @@ const Expose = () => {
   const [panelState, setPanelState] = useState<'minimized' | 'preview' | 'expanded'>('minimized');
   const [isGenerating, setIsGenerating] = useState<boolean>(false);
   const [imageGenerated, setImageGenerated] = useState<boolean>(false);
-  const [searchTerm, setSearchTerm] = useState<string>('');
-  const [isSearching, setIsSearching] = useState<boolean>(false);
-  const [searchResults, setSearchResults] = useState<Product[]>([]);
-  const [searchError, setSearchError] = useState<string | null>(null);
   
   // Fetch expose data
   const { 
@@ -143,15 +131,7 @@ const Expose = () => {
           data.find(product => product.id === id)
         ).filter(Boolean);
         
-        // Transform to match our Product interface
-        const formattedProducts = orderedProducts.map(product => ({
-          id: product.id,
-          title: product.title,
-          sku: product.sku || 'No SKU',
-          image: product.image_url || '/placeholder.svg'
-        }));
-        
-        setSelectedProducts(formattedProducts);
+        setSelectedProducts(orderedProducts);
       }
     } catch (error) {
       console.error('Error fetching products:', error);
@@ -168,57 +148,12 @@ const Expose = () => {
     setCurrentStep(step);
   };
   
-  // Handle product search
-  const handleProductSearch = async (term: string) => {
-    setSearchTerm(term);
-    
-    if (term.length < 2) {
-      setSearchResults([]);
-      return;
-    }
-    
-    setIsSearching(true);
-    setSearchError(null);
-    
-    try {
-      const { data, error } = await supabase.functions.invoke('sync-shopify-products', {
-        body: { searchTerm: term }
-      });
-      
-      if (error) throw error;
-      
-      if (data?.products) {
-        // Transform the API response to match our Product interface
-        const formattedProducts = data.products.map((p: any) => ({
-          id: p.id,
-          title: p.title,
-          sku: p.sku || 'No SKU',
-          image: p.image_url || '/placeholder.svg'
-        }));
-        
-        setSearchResults(formattedProducts);
-      }
-    } catch (error) {
-      console.error('Error searching products:', error);
-      setSearchError("Failed to search products. Please try again.");
-      toast({
-        title: "Error",
-        description: "Failed to search products. Please try again.",
-        variant: "destructive"
-      });
-    } finally {
-      setIsSearching(false);
-    }
-  };
-  
   // Update selected products
-  const handleProductSelect = async (product: Product) => {
+  const handleProductSelect = async (products: any[]) => {
+    if (!exposeId) return;
+    
     try {
-      if (!exposeId) return;
-      
-      // Create a new array with existing products plus the new one
-      const updatedProducts = [...selectedProducts, product];
-      const productIds = updatedProducts.map(p => p.id);
+      const productIds = products.map(product => product.id);
       
       const { error } = await supabase
         .from('exposes')
@@ -227,18 +162,18 @@ const Expose = () => {
       
       if (error) throw error;
       
-      setSelectedProducts(updatedProducts);
+      setSelectedProducts(products);
       queryClient.invalidateQueries({ queryKey: ['expose', exposeId] });
       
       toast({
         title: "Success",
-        description: "Product added successfully!"
+        description: "Products updated successfully!"
       });
     } catch (error) {
-      console.error('Error adding product:', error);
+      console.error('Error updating products:', error);
       toast({
         title: "Error",
-        description: "Failed to add product.",
+        description: "Failed to update products.",
         variant: "destructive"
       });
     }
@@ -457,38 +392,19 @@ const Expose = () => {
         <div className="mt-5">
           <h2 className="text-2xl font-semibold mb-5">Select Products</h2>
           <ProductPicker 
-            searchResults={searchResults}
+            searchResults={[]}
             selectedProducts={selectedProducts}
-            onSelect={handleProductSelect}
-            isLoading={isSearching}
-            error={searchError}
-            searchTerm={searchTerm}
-            onSearch={handleProductSearch}
+            onSelect={(product) => {
+              // Check if product is not already selected
+              if (!selectedProducts.some(p => p.id === product.id)) {
+                handleProductSelect([...selectedProducts, product]);
+              }
+            }}
+            isLoading={false}
+            error={null}
+            searchTerm=""
+            onSearch={() => {}}
           />
-          
-          {selectedProducts.length > 0 && (
-            <div className="mt-5">
-              <h3 className="text-lg font-medium mb-3">Selected Products</h3>
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                {selectedProducts.map((product) => (
-                  <div key={product.id} className="border rounded-md p-4 flex items-center">
-                    <img 
-                      src={product.image} 
-                      alt={product.title} 
-                      className="w-16 h-16 object-cover rounded-md mr-3"
-                      onError={(e) => {
-                        e.currentTarget.src = '/placeholder.svg';
-                      }}
-                    />
-                    <div>
-                      <p className="font-medium">{product.title}</p>
-                      <p className="text-sm text-gray-500">SKU: {product.sku}</p>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
         </div>
       );
     } else if (currentStep === 'theme-content') {
@@ -590,21 +506,6 @@ const Expose = () => {
 
   return (
     <div className="max-w-[99.8rem] mx-auto">
-      {/* Add Breadcrumbs */}
-      <Breadcrumb className="mb-4">
-        <BreadcrumbItem>
-          <BreadcrumbLink href="/dashboard">Dashboard</BreadcrumbLink>
-        </BreadcrumbItem>
-        <BreadcrumbItem>
-          <BreadcrumbLink href="/expose">Expose</BreadcrumbLink>
-        </BreadcrumbItem>
-        {exposeId && (
-          <BreadcrumbItem>
-            <BreadcrumbLink>#{exposeId.slice(0, 8)}</BreadcrumbLink>
-          </BreadcrumbItem>
-        )}
-      </Breadcrumb>
-      
       <ExposeHeader currentStep={currentStep} onStepClick={handleStepClick} />
       <div 
         className="bg-[--p-background] min-h-[calc(100vh-129px)]"
