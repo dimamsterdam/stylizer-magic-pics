@@ -310,7 +310,6 @@ export type Database = {
           description: string | null
           id: string
           image_url: string | null
-          images: string[] | null
           price: number | null
           shopify_gid: string
           sku: string | null
@@ -322,7 +321,6 @@ export type Database = {
           description?: string | null
           id: string
           image_url?: string | null
-          images?: string[] | null
           price?: number | null
           shopify_gid: string
           sku?: string | null
@@ -334,7 +332,6 @@ export type Database = {
           description?: string | null
           id?: string
           image_url?: string | null
-          images?: string[] | null
           price?: number | null
           shopify_gid?: string
           sku?: string | null
