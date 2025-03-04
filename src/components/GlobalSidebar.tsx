@@ -1,3 +1,4 @@
+
 import { ChevronDown, ChevronRight, Image, Video, Palette, Settings, ChevronLeft, Library, LayoutDashboard } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
 import { Sidebar, SidebarContent, SidebarGroup, SidebarGroupContent, SidebarGroupLabel, SidebarMenu, SidebarMenuButton, SidebarMenuItem, SidebarTrigger } from "@/components/ui/sidebar";
@@ -8,7 +9,7 @@ const mainNavItems = [{
   icon: Palette,
   url: "/stylizer"
 }, {
-  title: "Expose",
+  title: "Product Spotlight",
   icon: Image,
   url: "/expose"
 }, {
