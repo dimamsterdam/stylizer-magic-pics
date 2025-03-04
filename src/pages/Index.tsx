@@ -39,6 +39,19 @@ const Index = () => {
                 Create stunning product displays and layouts for your brand.
               </p>
             </Link>
+            
+            <Link 
+              to="/videographer" 
+              className="group p-4 border rounded-lg hover:border-black hover:shadow-sm transition-colors"
+            >
+              <div className="flex items-center justify-between mb-2">
+                <h3 className="font-semibold text-[#1A1F2C]">Product Video</h3>
+                <ArrowRight className="h-4 w-4 text-[#333333] opacity-0 group-hover:opacity-100 transition-opacity" />
+              </div>
+              <p className="text-sm text-[#6D7175]">
+                Transform product images into engaging video animations.
+              </p>
+            </Link>
           </div>
         </CardContent>
       </Card>

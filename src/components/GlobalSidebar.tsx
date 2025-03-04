@@ -1,4 +1,3 @@
-
 import { ChevronDown, ChevronRight, Image, Video, Palette, Settings, ChevronLeft, Library, LayoutDashboard } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
 import { Sidebar, SidebarContent, SidebarGroup, SidebarGroupContent, SidebarGroupLabel, SidebarMenu, SidebarMenuButton, SidebarMenuItem, SidebarTrigger } from "@/components/ui/sidebar";
@@ -12,6 +11,10 @@ const mainNavItems = [{
   title: "Expose",
   icon: Image,
   url: "/expose"
+}, {
+  title: "Product Video",
+  icon: Video,
+  url: "/videographer"
 }];
 
 const libraryItems = [{
