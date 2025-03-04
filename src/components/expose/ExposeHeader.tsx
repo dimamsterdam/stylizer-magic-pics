@@ -1,11 +1,14 @@
+
 import React from 'react';
 import { Button } from "@/components/ui/button";
 import Breadcrumbs from "@/components/Breadcrumbs";
 import StepProgress from "@/components/StepProgress";
+
 interface ExposeHeaderProps {
   currentStep: 'products' | 'theme-content';
   onStepClick?: (step: 'products' | 'theme-content') => void;
 }
+
 export const ExposeHeader = ({
   currentStep,
   onStepClick
@@ -16,7 +19,7 @@ export const ExposeHeader = ({
         label: 'Home',
         href: '/'
       }, {
-        label: 'Create Expose',
+        label: 'Product Spotlight',
         href: '/expose'
       }]} />
         <div className="flex items-center justify-between">
