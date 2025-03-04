@@ -6,7 +6,7 @@ import { useToast } from '@/hooks/use-toast';
 import { PageHeader } from '@/components/ui/page-header';
 import { Breadcrumb, BreadcrumbItem, BreadcrumbLink } from '@/components/ui/breadcrumb';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { ChevronRight, Image, Play, ArrowLeft } from 'lucide-react';
+import { ArrowLeft, MoveHorizontal, ArrowDownFromLine, ArrowUpFromLine, Expand, Play } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { ImageGallery } from '@/components/ImageGallery';
 import { Product } from "@/types/product";
@@ -36,28 +36,28 @@ const Videographer = () => {
       id: 'horizontal-pan',
       name: '180° Horizontal Pan',
       description: 'The image moves horizontally across the frame',
-      icon: <ChevronRight className="rotate-90" />,
+      icon: <MoveHorizontal className="h-5 w-5" />,
       preview: '/placeholder.svg'
     },
     {
       id: 'bottom-top-zoom',
       name: 'Bottom to Top Zoom',
       description: 'The image zooms in from the bottom to the top',
-      icon: <ChevronRight className="rotate-180" />,
+      icon: <ArrowUpFromLine className="h-5 w-5" />,
       preview: '/placeholder.svg'
     },
     {
       id: 'top-bottom-zoom',
       name: 'Top to Bottom Zoom',
       description: 'The image zooms in from the top to the bottom',
-      icon: <ChevronRight className="rotate-0" />,
+      icon: <ArrowDownFromLine className="h-5 w-5" />,
       preview: '/placeholder.svg'
     },
     {
       id: 'center-zoom',
       name: 'Center Zoom',
       description: 'The image zooms in from the center outward',
-      icon: <Play />,
+      icon: <Expand className="h-5 w-5" />,
       preview: '/placeholder.svg'
     }
   ];
