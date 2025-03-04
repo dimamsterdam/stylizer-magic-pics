@@ -8,6 +8,7 @@ interface GeneratedImagePreviewProps {
   headline: string;
   bodyCopy: string;
   onSelect?: () => void;
+  onImageLoadError?: () => void;
   isSelected?: boolean;
   layout?: ExposeLayout;
 }
@@ -16,6 +17,7 @@ const GeneratedImagePreview = ({
   imageUrl, 
   headline, 
   bodyCopy,
+  onImageLoadError,
   layout = 'default'
 }: GeneratedImagePreviewProps) => {
   const layouts = {
@@ -30,6 +32,14 @@ const GeneratedImagePreview = ({
     editorial: "absolute inset-0 flex flex-col justify-center p-8 lg:p-12 bg-black/40 text-white"
   };
 
+  const handleImageError = (e: React.SyntheticEvent<HTMLImageElement>) => {
+    console.error("Image failed to load:", imageUrl);
+    e.currentTarget.src = '/placeholder.svg';
+    if (onImageLoadError) {
+      onImageLoadError();
+    }
+  };
+
   if (layout === 'editorial') {
     return (
       <div className="bg-white rounded-lg overflow-hidden">
@@ -39,9 +49,7 @@ const GeneratedImagePreview = ({
               src={imageUrl} 
               alt="Generated hero"
               className="w-full h-full object-cover"
-              onError={(e) => {
-                e.currentTarget.src = '/placeholder.svg';
-              }}
+              onError={handleImageError}
             />
           </div>
           <div className={contentStyles[layout]}>
@@ -79,9 +87,7 @@ const GeneratedImagePreview = ({
             src={imageUrl} 
             alt="Generated hero"
             className="w-full h-full object-cover"
-            onError={(e) => {
-              e.currentTarget.src = '/placeholder.svg';
-            }}
+            onError={handleImageError}
           />
         </div>
         {layout === 'default' && (

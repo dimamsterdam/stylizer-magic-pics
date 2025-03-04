@@ -42,6 +42,7 @@ const Expose = () => {
   const [isPreviewExpanded, setIsPreviewExpanded] = useState(false);
   const [panelState, setPanelState] = useState<PanelState>('minimized');
   const [imageGenerated, setImageGenerated] = useState(false);
+  const [generationError, setGenerationError] = useState(false);
   const { toast } = useToast();
   const navigate = useNavigate();
 
@@ -298,7 +299,10 @@ const Expose = () => {
   const handleGenerateHero = async () => {
     if (!exposeId) return;
     setIsGenerating(true);
+    setGenerationError(false);
     try {
+      console.log('Starting image generation for exposeId:', exposeId);
+      
       const {
         data,
         error
@@ -315,43 +319,77 @@ const Expose = () => {
           bodyCopy
         }
       });
-      if (error) throw error;
+      
+      if (error) {
+        console.error('Function invocation error:', error);
+        throw error;
+      }
+      
+      console.log('Image generation response:', data);
       
       // Start polling for image generation status
       const pollInterval = setInterval(async () => {
-        const {
-          data: exposeData
-        } = await supabase.from('exposes').select('hero_image_generation_status, hero_image_desktop_url, hero_image_tablet_url, hero_image_mobile_url').eq('id', exposeId).single();
-        console.log('Polling expose data:', exposeData);
-        
-        if (exposeData?.hero_image_generation_status === 'completed') {
+        try {
+          console.log('Polling for image generation status...');
+          const {
+            data: exposeData,
+            error: pollError
+          } = await supabase.from('exposes').select('hero_image_generation_status, hero_image_desktop_url, hero_image_tablet_url, hero_image_mobile_url, error_message').eq('id', exposeId).single();
+          
+          if (pollError) {
+            console.error('Error polling for expose data:', pollError);
+            throw pollError;
+          }
+          
+          console.log('Polling expose data:', exposeData);
+          
+          if (exposeData?.hero_image_generation_status === 'completed') {
+            clearInterval(pollInterval);
+            setIsGenerating(false);
+            setImageGenerated(true);
+            setGenerationError(false);
+            refetchExpose();
+            
+            // Expand the preview panel to show the generated image
+            setIsPreviewExpanded(true);
+            
+            toast({
+              title: "Success",
+              description: "Hero images generated successfully!"
+            });
+          } else if (exposeData?.hero_image_generation_status === 'error') {
+            clearInterval(pollInterval);
+            setIsGenerating(false);
+            setGenerationError(true);
+            
+            toast({
+              title: "Error",
+              description: exposeData?.error_message || "Failed to generate hero images. Please try again.",
+              variant: "destructive"
+            });
+          }
+        } catch (pollError) {
+          console.error('Error in polling:', pollError);
           clearInterval(pollInterval);
           setIsGenerating(false);
-          setImageGenerated(true);
-          refetchExpose();
+          setGenerationError(true);
           
-          // Expand the preview panel to show the generated image
-          setIsPreviewExpanded(true);
-          
-          toast({
-            title: "Success",
-            description: "Hero images generated successfully!"
-          });
-        } else if (exposeData?.hero_image_generation_status === 'error') {
-          clearInterval(pollInterval);
-          setIsGenerating(false);
           toast({
             title: "Error",
-            description: "Failed to generate hero images. Please try again.",
+            description: "Failed to check image generation status. Please try again.",
             variant: "destructive"
           });
         }
-      }, 2000);
+      }, 3000); // Poll every 3 seconds
       
+      // Cleanup poll interval on component unmount
       return () => clearInterval(pollInterval);
+      
     } catch (error) {
       console.error('Error generating hero:', error);
       setIsGenerating(false);
+      setGenerationError(true);
+      
       toast({
         title: "Error",
         description: "Failed to generate hero images. Please try again.",
@@ -672,6 +710,8 @@ const Expose = () => {
         headline={headline}
         bodyCopy={bodyCopy}
         isExpanded={isPreviewExpanded}
+        isLoading={isGenerating}
+        hasError={generationError}
         onToggleExpand={togglePreviewExpansion}
         onPanelStateChange={handlePanelStateChange}
         onAddToLibrary={handleAddToLibrary}

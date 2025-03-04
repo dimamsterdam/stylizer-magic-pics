@@ -1,15 +1,18 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import { Button } from '@/components/ui/button';
-import { ChevronRight, ChevronLeft, LayoutGrid, MoreVertical, Save, RotateCw, ExternalLink } from 'lucide-react';
+import { ChevronRight, ChevronLeft, LayoutGrid, MoreVertical, Save, RotateCw, ExternalLink, AlertTriangle } from 'lucide-react';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import GeneratedImagePreview, { ExposeLayout } from '@/components/GeneratedImagePreview';
+import { Skeleton } from '@/components/ui/skeleton';
 
 interface PreviewPanelProps {
   imageUrl: string;
   headline: string;
   bodyCopy: string;
   isExpanded: boolean;
+  isLoading?: boolean;
+  hasError?: boolean;
   onToggleExpand: () => void;
   onPanelStateChange?: (state: 'minimized' | 'preview' | 'expanded' | number) => void;
   onAddToLibrary?: () => void;
@@ -22,6 +25,8 @@ export const PreviewPanel = ({
   headline,
   bodyCopy,
   isExpanded,
+  isLoading = false,
+  hasError = false,
   onToggleExpand,
   onPanelStateChange,
   onAddToLibrary,
@@ -30,8 +35,14 @@ export const PreviewPanel = ({
 }: PreviewPanelProps) => {
   const [currentLayout, setCurrentLayout] = useState<ExposeLayout>('reversed');
   const [shouldShowPreview, setShouldShowPreview] = useState(false);
+  const [imageLoadError, setImageLoadError] = useState(false);
   const panelRef = useRef<HTMLDivElement>(null);
   const prevHeadlineRef = useRef<string>('');
+  
+  // Reset image load error when imageUrl changes
+  useEffect(() => {
+    setImageLoadError(false);
+  }, [imageUrl]);
   
   // Effect to check if content is available and show preview
   useEffect(() => {
@@ -70,6 +81,11 @@ export const PreviewPanel = ({
 
   const handleToggleExpand = () => {
     onToggleExpand();
+  };
+
+  const handleImageError = () => {
+    console.log("Image failed to load:", imageUrl);
+    setImageLoadError(true);
   };
 
   // Updated layout options
@@ -172,12 +188,33 @@ export const PreviewPanel = ({
               <div className="mobile-device-frame">
                 <div className="mobile-device-notch"></div>
                 <div className="mobile-content overflow-auto">
-                  <GeneratedImagePreview
-                    imageUrl={imageUrl}
-                    headline={headline || "Your headline will appear here"}
-                    bodyCopy={bodyCopy || "Your body copy will appear here. As you type or generate content, you'll see it update in this preview."}
-                    layout={currentLayout}
-                  />
+                  {isLoading ? (
+                    <div className="bg-white rounded-lg overflow-hidden">
+                      <div className="grid grid-cols-1 min-h-[480px]">
+                        <Skeleton className="w-full h-full" />
+                      </div>
+                    </div>
+                  ) : hasError || imageLoadError ? (
+                    <div className="bg-white rounded-lg overflow-hidden p-6 text-center min-h-[480px] flex flex-col items-center justify-center">
+                      <AlertTriangle className="h-12 w-12 text-orange-500 mb-4" />
+                      <h3 className="text-lg font-semibold text-gray-800 mb-2">Image Generation Failed</h3>
+                      <p className="text-gray-600 mb-4">There was a problem generating the image. Please try again.</p>
+                      {onRegenerate && (
+                        <Button onClick={onRegenerate} variant="secondary">
+                          <RotateCw className="mr-2 h-4 w-4" />
+                          Try Again
+                        </Button>
+                      )}
+                    </div>
+                  ) : (
+                    <GeneratedImagePreview
+                      imageUrl={imageUrl}
+                      headline={headline || "Your headline will appear here"}
+                      bodyCopy={bodyCopy || "Your body copy will appear here. As you type or generate content, you'll see it update in this preview."}
+                      layout={currentLayout}
+                      onImageLoadError={handleImageError}
+                    />
+                  )}
                 </div>
               </div>
             </div>
