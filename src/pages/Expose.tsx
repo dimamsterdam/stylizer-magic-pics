@@ -13,6 +13,7 @@ import { ExposeHeader } from "@/components/expose/ExposeHeader";
 import ImageGrid from '@/components/ImageGrid';
 import { ThemeGenerator } from "@/components/ThemeGenerator";
 import { PreviewPanel } from "@/components/expose/PreviewPanel";
+import { AdvancedPromptBuilder } from "@/components/expose/AdvancedPromptBuilder";
 
 interface Product {
   id: string;
@@ -572,7 +573,13 @@ const Expose = () => {
 
           <div className="space-y-5">
             <div className="space-y-3">
-              <Label htmlFor="theme-description" className="text-heading text-[--p-text]">Creative Brief</Label>
+              <div className="flex justify-between items-center">
+                <Label htmlFor="theme-description" className="text-heading text-[--p-text]">Creative Brief</Label>
+                <AdvancedPromptBuilder 
+                  themeDescription={themeDescription} 
+                  onPromptChange={setThemeDescription} 
+                />
+              </div>
               <Textarea 
                 id="theme-description"
                 value={themeDescription}
