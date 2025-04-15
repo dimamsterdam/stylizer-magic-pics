@@ -17,6 +17,7 @@ import { AdvancedPromptBuilder } from "@/components/expose/AdvancedPromptBuilder
 import { SceneBuilder } from "@/components/expose/SceneBuilder";
 import { ModelPromptBuilder } from "@/components/ModelPromptBuilder";
 import { ModelAttributes } from "@/types/modelTypes";
+import { GeneratedPromptCard } from "@/components/expose/GeneratedPromptCard";
 
 interface Product {
   id: string;
