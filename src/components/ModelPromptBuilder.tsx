@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Check, ChevronsUpDown } from "lucide-react";
 import { cn } from "@/lib/utils";
+
 interface ModelAttributes {
   gender: "Male" | "Female";
   bodyType: "Slim" | "Athletic" | "Curvy" | "Plus Size";
@@ -13,14 +14,17 @@ interface ModelAttributes {
   hairColor: "Black" | "Brown" | "Blonde" | "Red" | "Gray" | "Other";
   style: "authentic" | "amateur" | "polished" | "rock star" | "vogue";
 }
+
 interface ModelPromptBuilderProps {
   attributes: ModelAttributes;
   onChange: (key: keyof ModelAttributes, value: string) => void;
 }
+
 interface AttributeOption {
   label: string;
   value: string;
 }
+
 const attributeOptions: Record<keyof ModelAttributes, AttributeOption[]> = {
   gender: [{
     label: "Female",
@@ -120,6 +124,7 @@ const attributeOptions: Record<keyof ModelAttributes, AttributeOption[]> = {
     value: "vogue"
   }]
 };
+
 const AttributeSelector = ({
   attribute,
   value,
@@ -162,11 +167,14 @@ const AttributeSelector = ({
       </PopoverContent>
     </Popover>;
 };
+
 export const ModelPromptBuilder: React.FC<ModelPromptBuilderProps> = ({
   attributes,
   onChange
 }) => {
-  return <div className="space-y-2.5 text-lg">
+  return (
+    <div className="space-y-2.5 text-lg">
+      <h3 className="text-heading text-[--p-text] mb-3">Describe the fashion model</h3>
       <p className="leading-relaxed whitespace-nowrap">
         I want to create a{" "}
         <AttributeSelector attribute="gender" value={attributes.gender} options={attributeOptions.gender} onChange={value => onChange("gender", value)} />{" "}
@@ -189,5 +197,6 @@ export const ModelPromptBuilder: React.FC<ModelPromptBuilderProps> = ({
         <AttributeSelector attribute="style" value={attributes.style} options={attributeOptions.style} onChange={value => onChange("style", value)} />{" "}
         look.
       </p>
-    </div>;
+    </div>
+  );
 };
