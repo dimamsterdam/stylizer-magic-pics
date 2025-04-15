@@ -1,9 +1,10 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Check, ChevronsUpDown } from "lucide-react";
+import { Check, ChevronsUpDown, Shuffle } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { Textarea } from "@/components/ui/textarea";
 
 interface ModelAttributes {
   gender: "Male" | "Female";
@@ -125,6 +126,10 @@ const attributeOptions: Record<keyof ModelAttributes, AttributeOption[]> = {
   }]
 };
 
+const getRandomFromArray = <T extends unknown>(arr: T[]): T => {
+  return arr[Math.floor(Math.random() * arr.length)];
+};
+
 const AttributeSelector = ({
   attribute,
   value,
@@ -172,31 +177,57 @@ export const ModelPromptBuilder: React.FC<ModelPromptBuilderProps> = ({
   attributes,
   onChange
 }) => {
+  const [finalPrompt, setFinalPrompt] = useState('');
+
+  const handleRandomize = () => {
+    onChange('gender', getRandomFromArray(attributeOptions.gender).value as ModelAttributes['gender']);
+    onChange('bodyType', getRandomFromArray(attributeOptions.bodyType).value as ModelAttributes['bodyType']);
+    onChange('age', getRandomFromArray(attributeOptions.age).value as ModelAttributes['age']);
+    onChange('ethnicity', getRandomFromArray(attributeOptions.ethnicity).value as ModelAttributes['ethnicity']);
+    onChange('hairLength', getRandomFromArray(attributeOptions.hairLength).value as ModelAttributes['hairLength']);
+    onChange('hairColor', getRandomFromArray(attributeOptions.hairColor).value as ModelAttributes['hairColor']);
+    onChange('style', getRandomFromArray(attributeOptions.style).value as ModelAttributes['style']);
+  };
+
   return (
-    <div className="space-y-2.5 text-lg">
-      <h3 className="text-heading text-[--p-text] mb-3">Describe the fashion model</h3>
-      <p className="leading-relaxed whitespace-nowrap">
-        I want to create a{" "}
-        <AttributeSelector attribute="gender" value={attributes.gender} options={attributeOptions.gender} onChange={value => onChange("gender", value)} />{" "}
-        fashion model with a{" "}
-        <AttributeSelector attribute="body type" value={attributes.bodyType} options={attributeOptions.bodyType} onChange={value => onChange("bodyType", value)} />{" "}
-        build, aged{" "}
-        <AttributeSelector attribute="age" value={attributes.age} options={attributeOptions.age} onChange={value => onChange("age", value)} />
-        .
-      </p>
-      <p className="leading-relaxed whitespace-nowrap">
-        The model should be of{" "}
-        <AttributeSelector attribute="ethnicity" value={attributes.ethnicity} options={attributeOptions.ethnicity} onChange={value => onChange("ethnicity", value)} />{" "}
-        ethnicity with{" "}
-        <AttributeSelector attribute="hair length" value={attributes.hairLength} options={attributeOptions.hairLength} onChange={value => onChange("hairLength", value)} />{" "}
-        <AttributeSelector attribute="hair color" value={attributes.hairColor} options={attributeOptions.hairColor} onChange={value => onChange("hairColor", value)} />{" "}
-        hair.
-      </p>
-      <p className="leading-relaxed whitespace-nowrap">
-        The model should have a{" "}
-        <AttributeSelector attribute="style" value={attributes.style} options={attributeOptions.style} onChange={value => onChange("style", value)} />{" "}
-        look.
-      </p>
+    <div className="space-y-4">
+      <div className="flex items-center justify-between">
+        <h3 className="text-heading text-[--p-text]">Describe the fashion model</h3>
+        <Button 
+          variant="outline" 
+          size="sm"
+          onClick={handleRandomize}
+          className="flex items-center gap-2"
+        >
+          <Shuffle className="h-4 w-4" />
+          Random
+        </Button>
+      </div>
+
+      <div className="space-y-2.5 text-lg">
+        <p className="leading-relaxed whitespace-nowrap">
+          I want to create a{" "}
+          <AttributeSelector attribute="gender" value={attributes.gender} options={attributeOptions.gender} onChange={value => onChange("gender", value)} />{" "}
+          fashion model with a{" "}
+          <AttributeSelector attribute="body type" value={attributes.bodyType} options={attributeOptions.bodyType} onChange={value => onChange("bodyType", value)} />{" "}
+          build, aged{" "}
+          <AttributeSelector attribute="age" value={attributes.age} options={attributeOptions.age} onChange={value => onChange("age", value)} />
+          .
+        </p>
+        <p className="leading-relaxed whitespace-nowrap">
+          The model should be of{" "}
+          <AttributeSelector attribute="ethnicity" value={attributes.ethnicity} options={attributeOptions.ethnicity} onChange={value => onChange("ethnicity", value)} />{" "}
+          ethnicity with{" "}
+          <AttributeSelector attribute="hair length" value={attributes.hairLength} options={attributeOptions.hairLength} onChange={value => onChange("hairLength", value)} />{" "}
+          <AttributeSelector attribute="hair color" value={attributes.hairColor} options={attributeOptions.hairColor} onChange={value => onChange("hairColor", value)} />{" "}
+          hair.
+        </p>
+        <p className="leading-relaxed whitespace-nowrap">
+          The model should have a{" "}
+          <AttributeSelector attribute="style" value={attributes.style} options={attributeOptions.style} onChange={value => onChange("style", value)} />{" "}
+          look.
+        </p>
+      </div>
     </div>
   );
 };

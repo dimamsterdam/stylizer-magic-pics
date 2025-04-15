@@ -30,6 +30,16 @@ const themeExamples = ["Festive red theme with soft lighting and night club back
 
 const PLACEHOLDER_IMAGE = '/placeholder.svg';
 
+interface ModelAttributes {
+  gender: string;
+  bodyType: string;
+  age: string;
+  ethnicity: string;
+  hairLength: string;
+  hairColor: string;
+  style: string;
+}
+
 const Expose = () => {
   const [currentStep, setCurrentStep] = useState<Step>('products');
   const [searchTerm, setSearchTerm] = useState("");
@@ -46,14 +56,14 @@ const Expose = () => {
   const [panelState, setPanelState] = useState<PanelState>('minimized');
   const [imageGenerated, setImageGenerated] = useState(false);
   const [generationError, setGenerationError] = useState(false);
-  const [modelAttributes, setModelAttributes] = useState({
-    gender: "",
-    bodyType: "",
-    age: "",
-    ethnicity: "",
-    hairLength: "",
-    hairColor: "",
-    style: ""
+  const [modelAttributes, setModelAttributes] = useState<ModelAttributes>({
+    gender: "Female",
+    bodyType: "Slim",
+    age: "25-35",
+    ethnicity: "Caucasian",
+    hairLength: "Long",
+    hairColor: "Brown",
+    style: "polished"
   });
   const [sceneDescription, setSceneDescription] = useState("");
   const { toast } = useToast();
