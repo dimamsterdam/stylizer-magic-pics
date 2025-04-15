@@ -1,16 +1,16 @@
 
-import React, { useState } from 'react';
+import React from 'react';
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Check, ChevronsUpDown, Shuffle } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { Textarea } from "@/components/ui/textarea";
-import { ModelAttributes, attributeOptions, getRandomFromArray } from "@/types/modelTypes";
+import { ModelAttributes, attributeOptions, getRandomFromArray } from '@/types/modelTypes';
 
 interface ModelPromptBuilderProps {
   attributes: ModelAttributes;
   onChange: (key: keyof ModelAttributes, value: string) => void;
+  onPromptUpdate: (prompt: string) => void;
 }
 
 interface AttributeOption {
@@ -63,9 +63,13 @@ const AttributeSelector = ({
 
 export const ModelPromptBuilder: React.FC<ModelPromptBuilderProps> = ({
   attributes,
-  onChange
+  onChange,
+  onPromptUpdate
 }) => {
-  const [finalPrompt, setFinalPrompt] = useState('');
+  React.useEffect(() => {
+    const prompt = `${attributes.gender} fashion model with ${attributes.bodyType} build, aged ${attributes.age}, ${attributes.ethnicity} ethnicity with ${attributes.hairLength} ${attributes.hairColor} hair, having a ${attributes.style} look.`;
+    onPromptUpdate(prompt);
+  }, [attributes, onPromptUpdate]);
 
   const handleRandomize = () => {
     onChange('gender', getRandomFromArray(attributeOptions.gender).value as ModelAttributes['gender']);
@@ -115,15 +119,6 @@ export const ModelPromptBuilder: React.FC<ModelPromptBuilderProps> = ({
           <AttributeSelector attribute="style" value={attributes.style} options={attributeOptions.style} onChange={value => onChange("style", value)} />{" "}
           look.
         </p>
-      </div>
-      
-      <div className="space-y-2">
-        <label className="text-sm font-medium text-[--p-text]">Generated Prompt</label>
-        <Textarea 
-          value={`${attributes.gender} fashion model with ${attributes.bodyType} build, aged ${attributes.age}, ${attributes.ethnicity} ethnicity with ${attributes.hairLength} ${attributes.hairColor} hair, having a ${attributes.style} look.`}
-          readOnly
-          className="h-20 bg-gray-50 resize-none"
-        />
       </div>
     </div>
   );
