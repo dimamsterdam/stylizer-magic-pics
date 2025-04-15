@@ -37,7 +37,7 @@ export const SceneBuilder: React.FC<SceneBuilderProps> = ({ onSceneChange }) => 
     <Card className="bg-[--p-surface] shadow-sm border border-[#E3E5E7]">
       <CardContent className="p-6 space-y-4">
         <div className="flex items-center gap-1">
-          <Label htmlFor="scene-description" className="text-[--p-text] font-medium">Location & Setting</Label>
+          <Label htmlFor="scene-description" className="text-[--p-text] font-medium">Describe the photoshoot scene</Label>
           <HoverCard>
             <HoverCardTrigger asChild>
               <Button variant="ghost" size="sm" className="p-0 h-auto">
