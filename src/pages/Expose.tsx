@@ -16,6 +16,7 @@ import { PreviewPanel } from "@/components/expose/PreviewPanel";
 import { AdvancedPromptBuilder } from "@/components/expose/AdvancedPromptBuilder";
 import { SceneBuilder } from "@/components/expose/SceneBuilder";
 import { ModelPromptBuilder } from "@/components/ModelPromptBuilder";
+import { ModelAttributes } from "@/types/modelTypes";
 
 interface Product {
   id: string;
@@ -29,16 +30,6 @@ type PanelState = 'minimized' | 'preview' | 'expanded' | number;
 const themeExamples = ["Festive red theme with soft lighting and night club background", "Minimalist white studio setup with dramatic shadows", "Natural outdoor setting with morning sunlight and autumn colors", "Modern urban environment with neon lights and city backdrop", "Elegant marble surface with gold accents and soft diffused lighting"];
 
 const PLACEHOLDER_IMAGE = '/placeholder.svg';
-
-interface ModelAttributes {
-  gender: string;
-  bodyType: string;
-  age: string;
-  ethnicity: string;
-  hairLength: string;
-  hairColor: string;
-  style: string;
-}
 
 const Expose = () => {
   const [currentStep, setCurrentStep] = useState<Step>('products');
@@ -508,10 +499,10 @@ const Expose = () => {
     };
   };
 
-  const handleModelAttributeChange = (key: keyof typeof modelAttributes, value: string) => {
+  const handleModelAttributeChange = (key: keyof ModelAttributes, value: string) => {
     setModelAttributes(prev => ({
       ...prev,
-      [key]: value
+      [key]: value as any
     }));
     updateFinalPrompt();
   };
