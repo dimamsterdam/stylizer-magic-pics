@@ -76,25 +76,6 @@ export const AdvancedPromptBuilder: React.FC<AdvancedPromptBuilderProps> = ({
     setOpen(false);
   };
 
-  const handleModelPromptUpdate = (prompt: string) => {
-    const modelDescription = prompt;
-    setFinalPrompt(prev => {
-      let updatedPrompt = '';
-      
-      if (sceneDescription) {
-        updatedPrompt += `Scene: ${sceneDescription}. `;
-      }
-      
-      updatedPrompt += `Model: ${modelDescription}. `;
-      
-      if (photographyStyle) {
-        updatedPrompt += `Photography style: ${photographyStyle}. `;
-      }
-      
-      return updatedPrompt;
-    });
-  };
-
   return (
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
@@ -121,11 +102,7 @@ export const AdvancedPromptBuilder: React.FC<AdvancedPromptBuilderProps> = ({
           
           <TabsContent value="model" className="mt-0">
             <div className="bg-[#FAFBFB] p-4 rounded-lg">
-              <ModelPromptBuilder 
-                attributes={modelAttributes} 
-                onChange={handleModelAttributeChange}
-                onPromptUpdate={handleModelPromptUpdate} 
-              />
+              <ModelPromptBuilder attributes={modelAttributes} onChange={handleModelAttributeChange} />
             </div>
           </TabsContent>
           
