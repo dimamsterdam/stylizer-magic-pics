@@ -14,9 +14,6 @@ import ImageGrid from '@/components/ImageGrid';
 import { ThemeGenerator } from "@/components/ThemeGenerator";
 import { PreviewPanel } from "@/components/expose/PreviewPanel";
 import { AdvancedPromptBuilder } from "@/components/expose/AdvancedPromptBuilder";
-import { SceneBuilder } from "@/components/expose/SceneBuilder";
-import { ModelPromptBuilder } from "@/components/ModelPromptBuilder";
-import { ModelAttributes } from "@/types/modelTypes";
 
 interface Product {
   id: string;
@@ -47,16 +44,6 @@ const Expose = () => {
   const [panelState, setPanelState] = useState<PanelState>('minimized');
   const [imageGenerated, setImageGenerated] = useState(false);
   const [generationError, setGenerationError] = useState(false);
-  const [modelAttributes, setModelAttributes] = useState<ModelAttributes>({
-    gender: "Female",
-    bodyType: "Slim",
-    age: "25-35",
-    ethnicity: "Caucasian",
-    hairLength: "Long",
-    hairColor: "Brown",
-    style: "polished"
-  });
-  const [sceneDescription, setSceneDescription] = useState("");
   const { toast } = useToast();
   const navigate = useNavigate();
 
@@ -499,34 +486,6 @@ const Expose = () => {
     };
   };
 
-  const handleModelAttributeChange = (key: keyof ModelAttributes, value: string) => {
-    setModelAttributes(prev => ({
-      ...prev,
-      [key]: value as any
-    }));
-    updateFinalPrompt();
-  };
-
-  const updateFinalPrompt = () => {
-    const modelDescription = `${modelAttributes.gender} fashion model with ${modelAttributes.bodyType} build, aged ${modelAttributes.age}, 
-    ${modelAttributes.ethnicity} ethnicity with ${modelAttributes.hairLength} ${modelAttributes.hairColor} hair, having a ${modelAttributes.style} look.`;
-    
-    let prompt = '';
-    
-    if (sceneDescription) {
-      prompt += `Scene: ${sceneDescription}. `;
-    }
-    
-    prompt += `Model: ${modelDescription}. `;
-    
-    setThemeDescription(prompt);
-  };
-
-  const handleSceneChange = (scene: string) => {
-    setSceneDescription(scene);
-    updateFinalPrompt();
-  };
-
   const renderProductsStep = () => {
     return (
       <Card className="bg-[--p-surface] shadow-sm border border-[#E3E5E7] rounded-md">
@@ -613,17 +572,28 @@ const Expose = () => {
           </div>
 
           <div className="space-y-5">
-            <div className="space-y-4">
-              <SceneBuilder onSceneChange={handleSceneChange} />
-              
-              <div className="bg-[#FAFBFB] rounded-lg">
-                <Card className="bg-[--p-surface] shadow-sm border border-[#E3E5E7]">
-                  <CardContent className="p-6">
-                    <ModelPromptBuilder attributes={modelAttributes} onChange={handleModelAttributeChange} />
-                  </CardContent>
-                </Card>
+            <div className="space-y-3">
+              <div className="flex justify-between items-center">
+                <Label htmlFor="theme-description" className="text-heading text-[--p-text]">Creative Brief</Label>
+                <AdvancedPromptBuilder 
+                  themeDescription={themeDescription} 
+                  onPromptChange={setThemeDescription} 
+                />
               </div>
+              <Textarea 
+                id="theme-description"
+                value={themeDescription}
+                onChange={e => setThemeDescription(e.target.value)}
+                placeholder={themeExamples[currentPlaceholderIndex]}
+                className="min-h-[8rem] border-[#E3E5E7] focus:border-[--p-focused] bg-[--p-surface] text-body"
+              />
             </div>
+
+            <ThemeGenerator 
+              onThemeSelect={handleThemeSelect} 
+              selectedProducts={selectedProducts} 
+              onContentRegenerate={generateContent}
+            />
 
             <div className="border-t border-[#E3E5E7] pt-4 mt-4">
               <h3 className="text-heading text-[--p-text] mb-3">Content</h3>
