@@ -14,6 +14,10 @@ import ImageGrid from '@/components/ImageGrid';
 import { ThemeGenerator } from "@/components/ThemeGenerator";
 import { PreviewPanel } from "@/components/expose/PreviewPanel";
 import { AdvancedPromptBuilder } from "@/components/expose/AdvancedPromptBuilder";
+import { SceneBuilder } from "@/components/expose/SceneBuilder";
+import { ModelPromptBuilder } from "@/components/ModelPromptBuilder";
+import { ModelAttributes } from "@/types/modelTypes";
+import { GeneratedPromptCard } from "@/components/expose/GeneratedPromptCard";
 
 interface Product {
   id: string;
@@ -44,6 +48,18 @@ const Expose = () => {
   const [panelState, setPanelState] = useState<PanelState>('minimized');
   const [imageGenerated, setImageGenerated] = useState(false);
   const [generationError, setGenerationError] = useState(false);
+  const [modelAttributes, setModelAttributes] = useState<ModelAttributes>({
+    gender: "Female",
+    bodyType: "Slim",
+    age: "25-35",
+    ethnicity: "Caucasian",
+    hairLength: "Long",
+    hairColor: "Brown",
+    style: "polished"
+  });
+  const [sceneDescription, setSceneDescription] = useState("");
+  const [modelPrompt, setModelPrompt] = useState('');
+  const [finalPrompt, setFinalPrompt] = useState('');
   const { toast } = useToast();
   const navigate = useNavigate();
 
@@ -486,6 +502,86 @@ const Expose = () => {
     };
   };
 
+  const handleModelAttributeChange = (key: keyof ModelAttributes, value: string) => {
+    setModelAttributes(prev => ({
+      ...prev,
+      [key]: value as any
+    }));
+  };
+
+  const handleModelPromptUpdate = (prompt: string) => {
+    setModelPrompt(prompt);
+  };
+
+  const handleSceneChange = (scene: string) => {
+    setSceneDescription(scene);
+  };
+
+  const handleFinalPromptChange = (prompt: string) => {
+    setFinalPrompt(prompt);
+  };
+
+  const handleFinalPromptFinalize = async (prompt: string) => {
+    try {
+      setIsGeneratingContent(true);
+      
+      // Generate content using the finalized prompt
+      const toneStyles = ['formal', 'elegant', 'informal', 'playful', 'edgy'];
+      const currentTone = toneStyles[selectedTone];
+      
+      // Generate headline
+      const headlineResponse = await supabase.functions.invoke('generate-content', {
+        body: {
+          type: 'headline',
+          products: selectedProducts.map(product => ({
+            title: product.title,
+            sku: product.sku
+          })),
+          theme: prompt,
+          tone: currentTone,
+          promptContext: `Create a compelling headline of maximum 12 words for an expose featuring ${selectedProducts.map(p => p.title).join(', ')}. The theme/mood is: ${prompt}. Use a ${currentTone} tone that is ${getToneDescription(currentTone)}`
+        }
+      });
+      
+      if (headlineResponse.error) throw headlineResponse.error;
+      const { generatedText: headlineText } = headlineResponse.data;
+      
+      // Generate body copy
+      const bodyResponse = await supabase.functions.invoke('generate-content', {
+        body: {
+          type: 'body',
+          products: selectedProducts.map(product => ({
+            title: product.title,
+            sku: product.sku
+          })),
+          theme: prompt,
+          tone: currentTone,
+          promptContext: `Create a concise body copy of maximum 40 words for an expose featuring ${selectedProducts.map(p => p.title).join(', ')}. The theme/mood is: ${prompt}. Use a ${currentTone} tone that is ${getToneDescription(currentTone)}`
+        }
+      });
+      
+      if (bodyResponse.error) throw bodyResponse.error;
+      const { generatedText: bodyText } = bodyResponse.data;
+      
+      setHeadline(headlineText.replace(/['"]/g, ''));
+      setBodyCopy(bodyText);
+      
+      toast({
+        title: "Success",
+        description: "Content generated successfully!"
+      });
+    } catch (error) {
+      console.error('Error generating content:', error);
+      toast({
+        title: "Error",
+        description: "Failed to generate content. Please try again.",
+        variant: "destructive"
+      });
+    } finally {
+      setIsGeneratingContent(false);
+    }
+  };
+
   const renderProductsStep = () => {
     return (
       <Card className="bg-[--p-surface] shadow-sm border border-[#E3E5E7] rounded-md">
@@ -568,93 +664,39 @@ const Expose = () => {
         <CardContent className="p-6 space-y-6">
           <div>
             <h2 className="text-display-sm text-[--p-text] mb-1">Theme & Content</h2>
-            <p className="text-body text-[--p-text-subdued]">Describe your theme and manage content</p>
+            <p className="text-body text-[--p-text-subdued]">Design your theme and model attributes</p>
           </div>
 
           <div className="space-y-5">
-            <div className="space-y-3">
-              <div className="flex justify-between items-center">
-                <Label htmlFor="theme-description" className="text-heading text-[--p-text]">Creative Brief</Label>
-                <AdvancedPromptBuilder 
-                  themeDescription={themeDescription} 
-                  onPromptChange={setThemeDescription} 
-                />
+            <div className="space-y-4">
+              <SceneBuilder onSceneChange={handleSceneChange} />
+              
+              <div className="bg-[#FAFBFB] rounded-lg">
+                <Card className="bg-[--p-surface] shadow-sm border border-[#E3E5E7]">
+                  <CardContent className="p-6">
+                    <ModelPromptBuilder 
+                      attributes={modelAttributes} 
+                      onChange={handleModelAttributeChange}
+                      onPromptUpdate={handleModelPromptUpdate}
+                    />
+                  </CardContent>
+                </Card>
               </div>
-              <Textarea 
-                id="theme-description"
-                value={themeDescription}
-                onChange={e => setThemeDescription(e.target.value)}
-                placeholder={themeExamples[currentPlaceholderIndex]}
-                className="min-h-[8rem] border-[#E3E5E7] focus:border-[--p-focused] bg-[--p-surface] text-body"
+
+              <GeneratedPromptCard
+                sceneDescription={sceneDescription}
+                modelPrompt={modelPrompt}
+                onChange={handleFinalPromptChange}
+                onFinalize={handleFinalPromptFinalize}
               />
-            </div>
-
-            <ThemeGenerator 
-              onThemeSelect={handleThemeSelect} 
-              selectedProducts={selectedProducts} 
-              onContentRegenerate={generateContent}
-            />
-
-            <div className="border-t border-[#E3E5E7] pt-4 mt-4">
-              <h3 className="text-heading text-[--p-text] mb-3">Content</h3>
-              <div className="space-y-4">
-                <div className="space-y-2">
-                  <div className="flex justify-between items-center">
-                    <Label htmlFor="headline" className="text-heading text-[--p-text]">Headline</Label>
-                  </div>
-                  <Textarea 
-                    id="headline" 
-                    value={headline} 
-                    onChange={handleHeadlineChange} 
-                    placeholder="Enter a compelling headline" 
-                    className="text-lg min-h-[40px] resize-none overflow-hidden border-[#E3E5E7]" 
-                    rows={1} 
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="body-copy" className="text-heading text-[--p-text]">Body Copy (40 words max)</Label>
-                  <Textarea 
-                    id="body-copy" 
-                    value={bodyCopy} 
-                    onChange={handleBodyCopyChange} 
-                    placeholder="Enter the main content of your expose..." 
-                    className="h-48 border-[#E3E5E7] focus:border-[--p-focused] bg-[--p-surface]"
-                  />
-                  <p className="text-sm text-[--p-text-subdued]">
-                    {bodyCopy.split(' ').length}/40 words
-                  </p>
-                </div>
-
-                <div className="flex justify-between items-center">
-                  <Button 
-                    onClick={generateContent}
-                    variant="outline"
-                    className="border-[#E3E5E7]"
-                    disabled={isGeneratingContent || !themeDescription.trim()}
-                  >
-                    {isGeneratingContent ? (
-                      <>
-                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                        Generating...
-                      </>
-                    ) : (
-                      <>
-                        <WandSparkles className="mr-2 h-4 w-4" />
-                        Regenerate Content
-                      </>
-                    )}
-                  </Button>
-                </div>
-              </div>
             </div>
           </div>
 
           <div className="flex justify-end pt-4">
             <Button 
               type="button"
-              onClick={handleContinue}
-              disabled={isGenerating || !themeDescription.trim() || !headline.trim() || !bodyCopy.trim()}
+              onClick={handleGenerateHero}
+              disabled={isGenerating || !finalPrompt.trim()}
               variant="primary"
             >
               {isGenerating ? (

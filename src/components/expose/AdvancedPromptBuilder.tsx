@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Settings } from 'lucide-react';
 import { Button } from "@/components/ui/button";
@@ -10,6 +9,7 @@ import { PhotographyStyleBuilder } from '@/components/expose/PhotographyStyleBui
 import { Card } from '@/components/ui/card';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
+import { ModelAttributes } from '@/types/modelTypes';
 
 interface AdvancedPromptBuilderProps {
   themeDescription: string;
@@ -22,14 +22,14 @@ export const AdvancedPromptBuilder: React.FC<AdvancedPromptBuilderProps> = ({
 }) => {
   const [sceneDescription, setSceneDescription] = useState('');
   const [photographyStyle, setPhotographyStyle] = useState('');
-  const [modelAttributes, setModelAttributes] = useState({
-    gender: "Female" as "Male" | "Female",
-    bodyType: "Slim" as "Slim" | "Athletic" | "Curvy" | "Plus Size",
-    age: "25-35" as "18-25" | "25-35" | "35-45" | "45+",
-    ethnicity: "Caucasian" as "Asian" | "Black" | "Caucasian" | "Hispanic" | "Middle Eastern" | "Mixed",
-    hairLength: "Long" as "Short" | "Medium" | "Long",
-    hairColor: "Brown" as "Black" | "Brown" | "Blonde" | "Red" | "Gray" | "Other",
-    style: "polished" as "authentic" | "amateur" | "polished" | "rock star" | "vogue"
+  const [modelAttributes, setModelAttributes] = useState<ModelAttributes>({
+    gender: "Female",
+    bodyType: "Slim",
+    age: "25-35",
+    ethnicity: "Caucasian",
+    hairLength: "Long",
+    hairColor: "Brown",
+    style: "polished"
   });
   const [finalPrompt, setFinalPrompt] = useState(themeDescription);
   const [open, setOpen] = useState(false);
@@ -43,7 +43,6 @@ export const AdvancedPromptBuilder: React.FC<AdvancedPromptBuilderProps> = ({
   };
 
   const updateFinalPrompt = () => {
-    // Combine all prompt parts into a final prompt
     const modelDescription = `${modelAttributes.gender} fashion model with ${modelAttributes.bodyType} build, aged ${modelAttributes.age}, 
     ${modelAttributes.ethnicity} ethnicity with ${modelAttributes.hairLength} ${modelAttributes.hairColor} hair, having a ${modelAttributes.style} look.`;
     
@@ -77,6 +76,25 @@ export const AdvancedPromptBuilder: React.FC<AdvancedPromptBuilderProps> = ({
     setOpen(false);
   };
 
+  const handleModelPromptUpdate = (prompt: string) => {
+    const modelDescription = prompt;
+    setFinalPrompt(prev => {
+      let updatedPrompt = '';
+      
+      if (sceneDescription) {
+        updatedPrompt += `Scene: ${sceneDescription}. `;
+      }
+      
+      updatedPrompt += `Model: ${modelDescription}. `;
+      
+      if (photographyStyle) {
+        updatedPrompt += `Photography style: ${photographyStyle}. `;
+      }
+      
+      return updatedPrompt;
+    });
+  };
+
   return (
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
@@ -103,7 +121,11 @@ export const AdvancedPromptBuilder: React.FC<AdvancedPromptBuilderProps> = ({
           
           <TabsContent value="model" className="mt-0">
             <div className="bg-[#FAFBFB] p-4 rounded-lg">
-              <ModelPromptBuilder attributes={modelAttributes} onChange={handleModelAttributeChange} />
+              <ModelPromptBuilder 
+                attributes={modelAttributes} 
+                onChange={handleModelAttributeChange}
+                onPromptUpdate={handleModelPromptUpdate} 
+              />
             </div>
           </TabsContent>
           

@@ -398,10 +398,16 @@ const Stylizer = () => {
                 <p className="text-polaris-secondary">Describe your ideal model by clicking on any attribute to customize it</p>
               </CardHeader>
               <CardContent className="p-6 pt-0">
-                <ModelPromptBuilder attributes={modelAttributes} onChange={(key, value) => setModelAttributes(prev => ({
-                  ...prev,
-                  [key]: value
-                }))} />
+                <ModelPromptBuilder 
+                  attributes={modelAttributes} 
+                  onChange={(key, value) => setModelAttributes(prev => ({
+                    ...prev,
+                    [key]: value
+                  }))}
+                  onPromptUpdate={(prompt) => {
+                    console.log("Model prompt updated:", prompt);
+                  }}
+                />
               </CardContent>
             </Card>
 
