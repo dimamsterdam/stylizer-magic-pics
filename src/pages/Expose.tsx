@@ -501,7 +501,7 @@ const Expose = () => {
     return <Card className="bg-[--p-surface] shadow-sm border border-[#E3E5E7] rounded-md">
         <CardContent className="p-6 space-y-6">
           <div>
-            <h2 className="text-display-sm text-[--p-text] mb-1">Theme & Content</h2>
+            <h2 className="text-display-sm text-[--p-text] mb-1">Design brief</h2>
             <p className="text-body text-[--p-text-subdued]">Be the art director of your  product spotlight</p>
           </div>
 
