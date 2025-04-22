@@ -230,6 +230,13 @@ const Stylizer = () => {
     }
   };
 
+  const handleModelAttributeChange = (key: keyof ModelAttributes, value: string) => {
+    setModelAttributes(prev => ({
+      ...prev,
+      [key]: value as any
+    }));
+  };
+
   const searchProducts = async (term: string) => {
     if (term.length < 2) {
       setResults([]);

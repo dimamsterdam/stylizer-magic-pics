@@ -145,7 +145,7 @@ const Expose = () => {
 
   const handleContinue = async () => {
     if (currentStep === 'products' && selectedProducts.length === 0) return;
-    if (currentStep === 'theme-content' && !themeDescription.trim()) return;
+    if (currentStep === 'theme-content' && !finalPrompt.trim()) return;
     
     if (currentStep === 'products') {
       try {
@@ -174,7 +174,7 @@ const Expose = () => {
         const {
           error
         } = await supabase.from('exposes').update({
-          theme_description: themeDescription,
+          theme_description: finalPrompt,
           headline,
           body_copy: bodyCopy
         }).eq('id', exposeId);
