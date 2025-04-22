@@ -13,11 +13,8 @@ import { ExposeHeader } from "@/components/expose/ExposeHeader";
 import ImageGrid from '@/components/ImageGrid';
 import { ThemeGenerator } from "@/components/ThemeGenerator";
 import { PreviewPanel } from "@/components/expose/PreviewPanel";
-import { AdvancedPromptBuilder } from "@/components/expose/AdvancedPromptBuilder";
-import { SceneBuilder } from "@/components/expose/SceneBuilder";
-import { ModelPromptBuilder } from "@/components/ModelPromptBuilder";
+import { PromptBuilder } from "@/components/expose/PromptBuilder";
 import { ModelAttributes } from "@/types/modelTypes";
-import { GeneratedPromptCard } from "@/components/expose/GeneratedPromptCard";
 
 interface Product {
   id: string;
@@ -36,7 +33,6 @@ const Expose = () => {
   const [currentStep, setCurrentStep] = useState<Step>('products');
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedProducts, setSelectedProducts] = useState<Product[]>([]);
-  const [themeDescription, setThemeDescription] = useState("");
   const [headline, setHeadline] = useState("");
   const [bodyCopy, setBodyCopy] = useState("");
   const [isGenerating, setIsGenerating] = useState(false);
@@ -48,17 +44,6 @@ const Expose = () => {
   const [panelState, setPanelState] = useState<PanelState>('minimized');
   const [imageGenerated, setImageGenerated] = useState(false);
   const [generationError, setGenerationError] = useState(false);
-  const [modelAttributes, setModelAttributes] = useState<ModelAttributes>({
-    gender: "Female",
-    bodyType: "Slim",
-    age: "25-35",
-    ethnicity: "Caucasian",
-    hairLength: "Long",
-    hairColor: "Brown",
-    style: "polished"
-  });
-  const [sceneDescription, setSceneDescription] = useState("");
-  const [modelPrompt, setModelPrompt] = useState('');
   const [finalPrompt, setFinalPrompt] = useState('');
   const { toast } = useToast();
   const navigate = useNavigate();
@@ -230,9 +215,9 @@ const Expose = () => {
             title: product.title,
             sku: product.sku
           })),
-          theme: themeDescription,
+          theme: finalPrompt,
           tone: currentTone,
-          promptContext: `Create a compelling headline of maximum 12 words for an expose featuring ${selectedProducts.map(p => p.title).join(', ')}. The theme/mood is: ${themeDescription}. Use a ${currentTone} tone that is ${getToneDescription(currentTone)}`
+          promptContext: `Create a compelling headline of maximum 12 words for an expose featuring ${selectedProducts.map(p => p.title).join(', ')}. The theme/mood is: ${finalPrompt}. Use a ${currentTone} tone that is ${getToneDescription(currentTone)}`
         }
       });
       
@@ -247,9 +232,9 @@ const Expose = () => {
             title: product.title,
             sku: product.sku
           })),
-          theme: themeDescription,
+          theme: finalPrompt,
           tone: currentTone,
-          promptContext: `Create a concise body copy of maximum 40 words for an expose featuring ${selectedProducts.map(p => p.title).join(', ')}. The theme/mood is: ${themeDescription}. Use a ${currentTone} tone that is ${getToneDescription(currentTone)}`
+          promptContext: `Create a concise body copy of maximum 40 words for an expose featuring ${selectedProducts.map(p => p.title).join(', ')}. The theme/mood is: ${finalPrompt}. Use a ${currentTone} tone that is ${getToneDescription(currentTone)}`
         }
       });
       
@@ -331,7 +316,7 @@ const Expose = () => {
             sku: product.sku,
             image: product.image
           })),
-          theme: themeDescription,
+          theme: finalPrompt,
           headline,
           bodyCopy
         }
@@ -415,8 +400,13 @@ const Expose = () => {
     }
   };
 
-  const handleThemeSelect = (theme: string) => {
-    setThemeDescription(theme);
+  const handlePromptChange = (prompt: string) => {
+    setFinalPrompt(prompt);
+  };
+
+  const handlePromptFinalize = (prompt: string) => {
+    setFinalPrompt(prompt);
+    generateContent();
   };
 
   const handleStepClick = (step: Step) => {
@@ -502,86 +492,6 @@ const Expose = () => {
     };
   };
 
-  const handleModelAttributeChange = (key: keyof ModelAttributes, value: string) => {
-    setModelAttributes(prev => ({
-      ...prev,
-      [key]: value as any
-    }));
-  };
-
-  const handleModelPromptUpdate = (prompt: string) => {
-    setModelPrompt(prompt);
-  };
-
-  const handleSceneChange = (scene: string) => {
-    setSceneDescription(scene);
-  };
-
-  const handleFinalPromptChange = (prompt: string) => {
-    setFinalPrompt(prompt);
-  };
-
-  const handleFinalPromptFinalize = async (prompt: string) => {
-    try {
-      setIsGeneratingContent(true);
-      
-      // Generate content using the finalized prompt
-      const toneStyles = ['formal', 'elegant', 'informal', 'playful', 'edgy'];
-      const currentTone = toneStyles[selectedTone];
-      
-      // Generate headline
-      const headlineResponse = await supabase.functions.invoke('generate-content', {
-        body: {
-          type: 'headline',
-          products: selectedProducts.map(product => ({
-            title: product.title,
-            sku: product.sku
-          })),
-          theme: prompt,
-          tone: currentTone,
-          promptContext: `Create a compelling headline of maximum 12 words for an expose featuring ${selectedProducts.map(p => p.title).join(', ')}. The theme/mood is: ${prompt}. Use a ${currentTone} tone that is ${getToneDescription(currentTone)}`
-        }
-      });
-      
-      if (headlineResponse.error) throw headlineResponse.error;
-      const { generatedText: headlineText } = headlineResponse.data;
-      
-      // Generate body copy
-      const bodyResponse = await supabase.functions.invoke('generate-content', {
-        body: {
-          type: 'body',
-          products: selectedProducts.map(product => ({
-            title: product.title,
-            sku: product.sku
-          })),
-          theme: prompt,
-          tone: currentTone,
-          promptContext: `Create a concise body copy of maximum 40 words for an expose featuring ${selectedProducts.map(p => p.title).join(', ')}. The theme/mood is: ${prompt}. Use a ${currentTone} tone that is ${getToneDescription(currentTone)}`
-        }
-      });
-      
-      if (bodyResponse.error) throw bodyResponse.error;
-      const { generatedText: bodyText } = bodyResponse.data;
-      
-      setHeadline(headlineText.replace(/['"]/g, ''));
-      setBodyCopy(bodyText);
-      
-      toast({
-        title: "Success",
-        description: "Content generated successfully!"
-      });
-    } catch (error) {
-      console.error('Error generating content:', error);
-      toast({
-        title: "Error",
-        description: "Failed to generate content. Please try again.",
-        variant: "destructive"
-      });
-    } finally {
-      setIsGeneratingContent(false);
-    }
-  };
-
   const renderProductsStep = () => {
     return (
       <Card className="bg-[--p-surface] shadow-sm border border-[#E3E5E7] rounded-md">
@@ -664,31 +574,38 @@ const Expose = () => {
         <CardContent className="p-6 space-y-6">
           <div>
             <h2 className="text-display-sm text-[--p-text] mb-1">Theme & Content</h2>
-            <p className="text-body text-[--p-text-subdued]">Design your theme and model attributes</p>
+            <p className="text-body text-[--p-text-subdued]">Design your creative brief for AI image generation</p>
           </div>
 
           <div className="space-y-5">
-            <div className="space-y-4">
-              <SceneBuilder onSceneChange={handleSceneChange} />
-              
-              <div className="bg-[#FAFBFB] rounded-lg">
-                <Card className="bg-[--p-surface] shadow-sm border border-[#E3E5E7]">
-                  <CardContent className="p-6">
-                    <ModelPromptBuilder 
-                      attributes={modelAttributes} 
-                      onChange={handleModelAttributeChange}
-                      onPromptUpdate={handleModelPromptUpdate}
-                    />
-                  </CardContent>
-                </Card>
+            <PromptBuilder
+              value={finalPrompt}
+              onChange={handlePromptChange}
+              onFinalize={handlePromptFinalize}
+            />
+            
+            <div className="space-y-4 mt-6">
+              <div>
+                <Label htmlFor="headline" className="text-[--p-text] font-medium">Headline</Label>
+                <Textarea 
+                  id="headline"
+                  value={headline}
+                  onChange={handleHeadlineChange}
+                  className="min-h-[80px] mt-2 border-[#E3E5E7]"
+                  placeholder="Your headline will appear here after generating content..."
+                />
               </div>
-
-              <GeneratedPromptCard
-                sceneDescription={sceneDescription}
-                modelPrompt={modelPrompt}
-                onChange={handleFinalPromptChange}
-                onFinalize={handleFinalPromptFinalize}
-              />
+              
+              <div>
+                <Label htmlFor="bodyCopy" className="text-[--p-text] font-medium">Body Copy</Label>
+                <Textarea 
+                  id="bodyCopy"
+                  value={bodyCopy}
+                  onChange={handleBodyCopyChange}
+                  className="min-h-[100px] mt-2 border-[#E3E5E7]"
+                  placeholder="Your body copy will appear here after generating content..."
+                />
+              </div>
             </div>
           </div>
 

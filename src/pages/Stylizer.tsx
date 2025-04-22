@@ -400,13 +400,10 @@ const Stylizer = () => {
               <CardContent className="p-6 pt-0">
                 <ModelPromptBuilder 
                   attributes={modelAttributes} 
-                  onChange={(key, value) => setModelAttributes(prev => ({
-                    ...prev,
-                    [key]: value
-                  }))}
+                  onChange={handleModelAttributeChange}
                   onPromptUpdate={(prompt) => {
                     console.log("Model prompt updated:", prompt);
-                  }}
+                  }} 
                 />
               </CardContent>
             </Card>

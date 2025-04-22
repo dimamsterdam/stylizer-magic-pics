@@ -67,7 +67,7 @@ export const ModelPromptBuilder: React.FC<ModelPromptBuilderProps> = ({
   onPromptUpdate
 }) => {
   React.useEffect(() => {
-    const prompt = `${attributes.gender} fashion model with ${attributes.bodyType} build, aged ${attributes.age}, ${attributes.ethnicity} ethnicity with ${attributes.hairLength} ${attributes.hairColor} hair, having a ${attributes.style} look.`;
+    const prompt = `${attributes.gender} fashion model with ${attributes.bodyType} build, aged ${attributes.age}, ${attributes.ethnicity} ethnicity with ${attributes.hairLength} ${attributes.hairColor} hair, having a ${attributes.style} look`;
     onPromptUpdate(prompt);
   }, [attributes, onPromptUpdate]);
 
@@ -84,7 +84,7 @@ export const ModelPromptBuilder: React.FC<ModelPromptBuilderProps> = ({
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
-        <h3 className="text-heading text-[--p-text]">Describe the fashion model</h3>
+        <h3 className="text-heading text-[--p-text]">Fashion Model Attributes</h3>
         <Button 
           variant="outline" 
           size="sm"
