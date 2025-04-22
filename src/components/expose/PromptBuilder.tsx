@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
@@ -8,26 +7,16 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { ModelPromptBuilder } from "@/components/ModelPromptBuilder";
 import { ModelAttributes, attributeOptions, getRandomFromArray } from '@/types/modelTypes';
 import { ChevronDown, User, MapPin } from 'lucide-react';
-
 interface PromptBuilderProps {
   value: string;
   onChange: (prompt: string) => void;
   onFinalize: (prompt: string) => void;
 }
-
-const sceneExamples = [
-  "Studio setting with white backdrop and soft lighting",
-  "Urban street corner with city lights in the background",
-  "Natural outdoor setting with autumn foliage",
-  "Beach scene with sunset and gentle waves",
-  "Elegant luxury shop interior with marble floors",
-  "Minimalist interior with neutral tones and large windows"
-];
-
+const sceneExamples = ["Studio setting with white backdrop and soft lighting", "Urban street corner with city lights in the background", "Natural outdoor setting with autumn foliage", "Beach scene with sunset and gentle waves", "Elegant luxury shop interior with marble floors", "Minimalist interior with neutral tones and large windows"];
 export const PromptBuilder: React.FC<PromptBuilderProps> = ({
   value,
   onChange,
-  onFinalize,
+  onFinalize
 }) => {
   const [inputValue, setInputValue] = useState(value);
   const [modelAttributes, setModelAttributes] = useState<ModelAttributes>({
@@ -39,75 +28,57 @@ export const PromptBuilder: React.FC<PromptBuilderProps> = ({
     hairColor: "Brown",
     style: "polished"
   });
-
   useEffect(() => {
     // Update the local state when prop value changes
     setInputValue(value);
   }, [value]);
-
   const handleInputChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     const newValue = e.target.value;
     setInputValue(newValue);
     onChange(newValue);
   };
-
   const handleBlur = () => {
     onFinalize(inputValue);
   };
-
   const handleModelAttributeChange = (key: keyof ModelAttributes, value: string) => {
     setModelAttributes(prev => ({
       ...prev,
       [key]: value as any
     }));
   };
-
   const handleModelPromptUpdate = (modelPrompt: string) => {
     // Update the prompt with model info, but try to preserve any scene descriptions
     const sceneMatch = inputValue.match(/Scene:(.*?)(?=Model:|$)/i);
     const sceneDescription = sceneMatch ? sceneMatch[0] : '';
-    
     let newPrompt = '';
     if (sceneDescription) {
       newPrompt = `${sceneDescription} Model: ${modelPrompt}`;
     } else {
       newPrompt = `Model: ${modelPrompt}`;
     }
-    
     setInputValue(newPrompt);
     onChange(newPrompt);
   };
-
   const handleSceneSelect = (scene: string) => {
     // Update prompt with scene info, but try to preserve any model descriptions
     const modelMatch = inputValue.match(/Model:(.*?)(?=$)/i);
     const modelDescription = modelMatch ? modelMatch[0] : '';
-    
     let newPrompt = '';
     if (modelDescription) {
       newPrompt = `Scene: ${scene}. ${modelDescription}`;
     } else {
       newPrompt = `Scene: ${scene}.`;
     }
-    
     setInputValue(newPrompt);
     onChange(newPrompt);
   };
-
-  return (
-    <Card className="bg-[#FEF7CD] shadow-sm border border-[#E3E5E7] mt-4">
+  return <Card className="bg-[#FEF7CD] shadow-sm border border-[#E3E5E7] mt-4">
       <CardContent className="p-6 space-y-4">
         <div className="flex items-center justify-between">
-          <Label className="text-heading text-[--p-text] font-medium">Creative Brief</Label>
+          <Label className="text-heading text-[--p-text] font-medium">Write your prompt</Label>
         </div>
         
-        <Textarea 
-          value={inputValue}
-          onChange={handleInputChange}
-          onBlur={handleBlur}
-          className="min-h-[100px] bg-white border-[#E3E5E7]"
-          placeholder="Describe the creative elements for your product image..."
-        />
+        <Textarea value={inputValue} onChange={handleInputChange} onBlur={handleBlur} className="min-h-[100px] bg-white border-[#E3E5E7]" placeholder="Describe the creative elements for your product image..." />
         
         <div className="flex flex-wrap gap-3 mt-2">
           {/* Fashion Model Popover */}
@@ -120,11 +91,7 @@ export const PromptBuilder: React.FC<PromptBuilderProps> = ({
               </Button>
             </PopoverTrigger>
             <PopoverContent className="w-[550px] p-4" align="start">
-              <ModelPromptBuilder 
-                attributes={modelAttributes} 
-                onChange={handleModelAttributeChange}
-                onPromptUpdate={handleModelPromptUpdate}
-              />
+              <ModelPromptBuilder attributes={modelAttributes} onChange={handleModelAttributeChange} onPromptUpdate={handleModelPromptUpdate} />
             </PopoverContent>
           </Popover>
           
@@ -143,22 +110,14 @@ export const PromptBuilder: React.FC<PromptBuilderProps> = ({
                   Select a scene to add to your prompt
                 </Label>
                 <div className="space-y-1">
-                  {sceneExamples.map((scene, index) => (
-                    <Button 
-                      key={index}
-                      variant="ghost"
-                      className="w-full justify-start text-left"
-                      onClick={() => handleSceneSelect(scene)}
-                    >
+                  {sceneExamples.map((scene, index) => <Button key={index} variant="ghost" className="w-full justify-start text-left" onClick={() => handleSceneSelect(scene)}>
                       {scene}
-                    </Button>
-                  ))}
+                    </Button>)}
                 </div>
               </div>
             </PopoverContent>
           </Popover>
         </div>
       </CardContent>
-    </Card>
-  );
+    </Card>;
 };
