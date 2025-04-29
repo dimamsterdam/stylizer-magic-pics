@@ -1,20 +1,16 @@
 
 import React from 'react';
-import { ShoppingCart, WandSparkles } from 'lucide-react';
+import { CheckCircle, ShoppingCart, WandSparkles } from 'lucide-react';
 
-type Step = 'products' | 'theme-content';
+type Step = 'products' | 'theme-content' | 'review';
 
 interface StepProgressProps {
+  steps: Array<{ id: Step, label: string }>;
   currentStep: Step;
   onStepClick?: (step: Step) => void;
 }
 
-const StepProgress = ({ currentStep, onStepClick }: StepProgressProps) => {
-  const steps = [
-    { id: 'products' as const, label: 'Products', icon: ShoppingCart },
-    { id: 'theme-content' as const, label: 'Theme & Content', icon: WandSparkles },
-  ];
-
+const StepProgress = ({ steps, currentStep, onStepClick }: StepProgressProps) => {
   const getStepStatus = (stepId: Step) => {
     if (stepId === currentStep) return 'active';
     
@@ -27,8 +23,21 @@ const StepProgress = ({ currentStep, onStepClick }: StepProgressProps) => {
 
   const handleStepClick = (stepId: Step) => {
     const status = getStepStatus(stepId);
-    if (status === 'completed' && onStepClick) {
+    if ((status === 'completed' || status === 'active') && onStepClick) {
       onStepClick(stepId);
+    }
+  };
+
+  const getStepIcon = (stepId: Step) => {
+    switch(stepId) {
+      case 'products':
+        return ShoppingCart;
+      case 'theme-content':
+        return WandSparkles;
+      case 'review':
+        return CheckCircle;
+      default:
+        return ShoppingCart;
     }
   };
 
@@ -37,7 +46,7 @@ const StepProgress = ({ currentStep, onStepClick }: StepProgressProps) => {
       <div className="flex items-center justify-between max-w-2xl mx-auto">
         {steps.map((step, index) => {
           const status = getStepStatus(step.id);
-          const Icon = step.icon;
+          const Icon = getStepIcon(step.id);
           const isClickable = status === 'completed';
           
           return (
