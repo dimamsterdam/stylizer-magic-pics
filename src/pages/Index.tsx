@@ -1,62 +1,96 @@
 
-import { ArrowRight } from "lucide-react";
-import { Link } from "react-router-dom";
-import { Card, CardHeader, CardContent } from "@/components/ui/card";
+import { useEffect } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Image, Tv, Workflow } from "lucide-react";
 
-const Index = () => {
+export default function Index() {
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    // Auto-redirect to dashboard if needed
+    // navigate('/dashboard');
+  }, [navigate]);
+
   return (
-    <div className="p-4 sm:p-6">
-      <Card className="border-0 shadow-sm">
-        <CardHeader className="p-6">
-          <p className="text-[#6D7175] mt-2">
-            Transform your product visuals and enhance your brand presence with our suite of AI-powered tools.
-          </p>
-        </CardHeader>
-        <CardContent className="p-6 pt-0">
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            <Link 
-              to="/stylizer" 
-              className="group p-4 border rounded-lg hover:border-black hover:shadow-sm transition-colors"
-            >
-              <div className="flex items-center justify-between mb-2">
-                <h3 className="font-semibold text-[#1A1F2C]">Stylizer</h3>
-                <ArrowRight className="h-4 w-4 text-[#333333] opacity-0 group-hover:opacity-100 transition-opacity" />
-              </div>
-              <p className="text-sm text-[#6D7175]">
-                Transform product photos into professional lifestyle images using AI.
-              </p>
-            </Link>
-            
-            <Link 
-              to="/expose" 
-              className="group p-4 border rounded-lg hover:border-black hover:shadow-sm transition-colors"
-            >
-              <div className="flex items-center justify-between mb-2">
-                <h3 className="font-semibold text-[#1A1F2C]">Product Spotlight</h3>
-                <ArrowRight className="h-4 w-4 text-[#333333] opacity-0 group-hover:opacity-100 transition-opacity" />
-              </div>
-              <p className="text-sm text-[#6D7175]">
-                Create stunning product displays and layouts for your brand.
-              </p>
-            </Link>
-            
-            <Link 
-              to="/videographer" 
-              className="group p-4 border rounded-lg hover:border-black hover:shadow-sm transition-colors"
-            >
-              <div className="flex items-center justify-between mb-2">
-                <h3 className="font-semibold text-[#1A1F2C]">Product Video</h3>
-                <ArrowRight className="h-4 w-4 text-[#333333] opacity-0 group-hover:opacity-100 transition-opacity" />
-              </div>
-              <p className="text-sm text-[#6D7175]">
-                Transform product images into engaging video animations.
-              </p>
-            </Link>
-          </div>
-        </CardContent>
-      </Card>
+    <div className="container mx-auto py-8 px-4">
+      <h1 className="text-3xl font-bold mb-6">Welcome to ProductAI</h1>
+      <p className="text-lg mb-8">Choose what you want to create today:</p>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center">
+              <Image className="mr-2 h-5 w-5" />
+              Product Spotlight
+            </CardTitle>
+            <CardDescription>Create beautiful hero images for your product pages</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <p>Generate AI-driven hero images featuring your products with customizable themes and settings.</p>
+          </CardContent>
+          <CardFooter>
+            <Button asChild variant="primary">
+              <Link to="/expose">Create Spotlight</Link>
+            </Button>
+          </CardFooter>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center">
+              <Image className="mr-2 h-5 w-5" />
+              Product Photo Shoot
+            </CardTitle>
+            <CardDescription>Generate professional product photos for your store</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <p>Create multiple product views with variants and easily select the best ones for your Shopify store.</p>
+          </CardContent>
+          <CardFooter>
+            <Button asChild variant="primary">
+              <Link to="/product-photo-shoot">Start Photo Shoot</Link>
+            </Button>
+          </CardFooter>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center">
+              <Tv className="mr-2 h-5 w-5" />
+              Video Creator
+            </CardTitle>
+            <CardDescription>Create promotional videos for your products</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <p>Generate product videos with customizable themes, transitions, and music.</p>
+          </CardContent>
+          <CardFooter>
+            <Button asChild variant="primary">
+              <Link to="/videographer">Create Video</Link>
+            </Button>
+          </CardFooter>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center">
+              <Workflow className="mr-2 h-5 w-5" />
+              Image Editor
+            </CardTitle>
+            <CardDescription>Edit and enhance product images</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <p>Use AI-powered tools to edit backgrounds, adjust lighting, and enhance product photos.</p>
+          </CardContent>
+          <CardFooter>
+            <Button asChild variant="primary">
+              <Link to="/stylizer">Edit Images</Link>
+            </Button>
+          </CardFooter>
+        </Card>
+      </div>
     </div>
   );
-};
-
-export default Index;
+}
