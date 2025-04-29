@@ -93,8 +93,8 @@ export const ContentCard = ({ title, description, imageUrl, badge }: ContentCard
           )}
         </div>
 
-        {/* Action Buttons - Now at bottom and centered with proper spacing */}
-        <div className="flex items-center justify-center gap-4 pt-4 mt-auto border-t border-gray-100">
+        {/* Action Buttons - Changed from center to space-between */}
+        <div className="flex items-center justify-between gap-4 pt-4 mt-auto border-t border-gray-100">
           <Button variant="ghost" size="icon" className="hover:bg-gray-100">
             <ThumbsUp className="h-5 w-5 text-gray-600" />
           </Button>
