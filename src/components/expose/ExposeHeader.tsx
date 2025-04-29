@@ -31,6 +31,13 @@ export const ExposeHeader = ({
           </div>
         </div>
       </div>
-      <StepProgress currentStep={currentStep} onStepClick={onStepClick} />
+      <StepProgress 
+        steps={[
+          { id: 'products', label: 'Product Selection' },
+          { id: 'theme-content', label: 'Design Brief' },
+        ]}
+        currentStep={currentStep} 
+        onStepClick={onStepClick} 
+      />
     </div>;
 };
