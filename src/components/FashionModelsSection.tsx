@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -5,7 +6,7 @@ import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Check, X, Loader, Plus } from "lucide-react";
+import { Check, X, Loader, Plus, AlertCircle } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ModelDescription, BrandIdentity } from "@/types/brandTypes";
 import { Json } from "@/integrations/supabase/types";
@@ -80,6 +81,12 @@ const FashionModelsSection: React.FC<FashionModelsSectionProps> = ({ brandIdenti
         .filter(model => !model.approved)
         .map(model => model.id);
 
+      console.log("Calling generate-fashion-models with:", { 
+        brandIdentity, 
+        regenerateIds, 
+        count: 10 - approvedModels.length 
+      });
+
       const { data, error } = await supabase.functions.invoke('generate-fashion-models', {
         body: { 
           brandIdentity,
@@ -89,6 +96,7 @@ const FashionModelsSection: React.FC<FashionModelsSectionProps> = ({ brandIdenti
       });
 
       if (error) throw error;
+      console.log("Generated models data:", data);
       
       // Ensure generated models have the correct type
       const typedModels = data.map((model: any) => model as ModelDescription);
@@ -130,6 +138,16 @@ const FashionModelsSection: React.FC<FashionModelsSectionProps> = ({ brandIdenti
     const updatedApprovedModels = approvedModels.filter(m => m.id !== model.id);
     setApprovedModels(updatedApprovedModels);
     saveMutation.mutate(updatedApprovedModels);
+  };
+
+  // Handle image errors by using a placeholder
+  const handleImageError = (event: React.SyntheticEvent<HTMLImageElement>) => {
+    event.currentTarget.src = '/placeholder.svg';
+  };
+
+  // Function to determine if a model needs image regeneration
+  const needsImageRegeneration = (model: ModelDescription) => {
+    return !model.imageUrl || model.imageUrl === 'null' || model.imageUrl === '';
   };
 
   return (
@@ -177,19 +195,23 @@ const FashionModelsSection: React.FC<FashionModelsSectionProps> = ({ brandIdenti
                 .filter(model => !model.approved)
                 .map((model) => (
                   <Card key={model.id} className="overflow-hidden flex flex-col">
-                    {model.imageUrl ? (
-                      <div className="relative aspect-square">
+                    <div className="relative aspect-square">
+                      {model.imageUrl ? (
                         <img 
                           src={model.imageUrl} 
                           alt={model.description}
                           className="w-full h-full object-cover" 
+                          onError={handleImageError}
                         />
-                      </div>
-                    ) : (
-                      <div className="bg-gray-200 w-full aspect-square flex items-center justify-center">
-                        <p className="text-sm text-gray-500">Image not available</p>
-                      </div>
-                    )}
+                      ) : (
+                        <div className="bg-gray-200 w-full h-full flex items-center justify-center">
+                          <div className="text-center p-4">
+                            <AlertCircle className="mx-auto h-8 w-8 text-amber-500 mb-2" />
+                            <p className="text-sm text-gray-500">Image not available</p>
+                          </div>
+                        </div>
+                      )}
+                    </div>
                     <div className="p-3">
                       <p className="text-sm line-clamp-3 text-polaris-text">{model.description}</p>
                       <div className="flex justify-between mt-3">
@@ -231,19 +253,23 @@ const FashionModelsSection: React.FC<FashionModelsSectionProps> = ({ brandIdenti
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
             {approvedModels.map((model) => (
               <Card key={model.id} className="overflow-hidden flex flex-col">
-                {model.imageUrl ? (
-                  <div className="relative aspect-square">
+                <div className="relative aspect-square">
+                  {model.imageUrl ? (
                     <img 
                       src={model.imageUrl} 
                       alt={model.description}
                       className="w-full h-full object-cover" 
+                      onError={handleImageError}
                     />
-                  </div>
-                ) : (
-                  <div className="bg-gray-200 w-full aspect-square flex items-center justify-center">
-                    <p className="text-sm text-gray-500">Image not available</p>
-                  </div>
-                )}
+                  ) : (
+                    <div className="bg-gray-200 w-full h-full flex items-center justify-center">
+                      <div className="text-center p-4">
+                        <AlertCircle className="mx-auto h-8 w-8 text-amber-500 mb-2" />
+                        <p className="text-sm text-gray-500">Image not available</p>
+                      </div>
+                    </div>
+                  )}
+                </div>
                 <div className="p-3">
                   <p className="text-sm line-clamp-3 text-polaris-text">{model.description}</p>
                   <div className="flex justify-end mt-3">

@@ -60,6 +60,7 @@ serve(async (req) => {
 
       try {
         const imageUrl = await generateModelImage(desc);
+        console.log(`Generated image for model ${index}:`, imageUrl ? "SUCCESS" : "FAILED");
         
         return {
           id: modelId,
@@ -77,6 +78,9 @@ serve(async (req) => {
         } as ModelDescription;
       }
     }));
+
+    // Log the results for debugging
+    console.log('Generated models:', JSON.stringify(models));
 
     return new Response(JSON.stringify(models), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
@@ -148,6 +152,12 @@ async function generateModelDescriptions(prompt: string, count: number): Promise
 
 async function generateModelImage(description: string): Promise<string | null> {
   try {
+    const prompt = `Generate a high-quality, professional headshot photo of a fashion model with these characteristics: ${description}. 
+    The image should be a close-up portrait showing only the face and hair, with a clean, neutral background. 
+    The lighting should be soft and flattering, typical of professional fashion photography. Ensure the image looks realistic and professional.`;
+
+    console.log("Generating image with prompt:", prompt);
+
     const response = await fetch('https://api.openai.com/v1/images/generations', {
       method: 'POST',
       headers: {
@@ -155,18 +165,21 @@ async function generateModelImage(description: string): Promise<string | null> {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: "gpt-4o",
-        prompt: `Generate a high-quality, professional headshot photo of a fashion model with these characteristics: ${description}. 
-        The image should be a close-up portrait showing only the face and hair, with a clean, neutral background. 
-        The lighting should be soft and flattering, typical of professional fashion photography. Ensure the image looks realistic and professional.`,
+        model: "dall-e-3",
+        prompt: prompt,
         n: 1,
         size: "1024x1024",
-        quality: "hd"
+        quality: "standard"
       }),
     });
 
     const data = await response.json();
     console.log('Image generation response:', data);
+
+    if (data.error) {
+      console.error('OpenAI API error:', data.error);
+      return null;
+    }
 
     if (data.data && data.data[0] && data.data[0].url) {
       return data.data[0].url;
