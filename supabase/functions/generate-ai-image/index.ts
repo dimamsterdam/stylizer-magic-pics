@@ -1,7 +1,8 @@
 
 import "https://deno.land/x/xhr@0.1.0/mod.ts";
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
-import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.39.3';
+
+const openAIApiKey = Deno.env.get('OPENAI_API_KEY');
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -14,95 +15,48 @@ serve(async (req) => {
   }
 
   try {
-    const requestBody = await req.json();
-    const { exposeId, products, theme, headline, bodyCopy } = requestBody;
-
-    if (!exposeId) {
-      throw new Error('exposeId is required');
+    const { prompt, size = "1024x1024", model = "dall-e-3", n = 1, quality = "standard" } = await req.json();
+    
+    if (!prompt) {
+      throw new Error('Prompt is required');
     }
 
-    const openaiKey = Deno.env.get('OPENAI_API_KEY');
-    const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
-    const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
-
-    if (!openaiKey) {
+    if (!openAIApiKey) {
       throw new Error('OpenAI API key is not configured');
     }
 
-    const supabase = createClient(supabaseUrl, supabaseServiceKey);
+    console.log(`Generating image with prompt: ${prompt}`);
 
-    console.log('Preparing DALL-E requests...');
+    const response = await fetch('https://api.openai.com/v1/images/generations', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${openAIApiKey}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        model: model,
+        prompt: prompt,
+        n: n,
+        size: size,
+        quality: quality
+      }),
+    });
 
-    const basePrompt = `High-quality professional product photography in ${theme} style featuring ${products.map(p => p.title).join(', ')}. ${headline}`;
+    const data = await response.json();
     
-    // Generate variations with slightly different prompts
-    const prompts = [
-      basePrompt + " Main hero shot.",
-      basePrompt + " Alternative angle.",
-      basePrompt + " Close-up detail view.",
-      basePrompt + " Lifestyle context shot."
-    ];
-
-    console.log('Generating multiple variations...');
-    
-    const imageUrls: string[] = [];
-    
-    // Generate images sequentially
-    for (const prompt of prompts) {
-      console.log('Generating variation with prompt:', prompt);
-      
-      const openaiResponse = await fetch('https://api.openai.com/v1/images/generations', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${openaiKey}`,
-        },
-        body: JSON.stringify({
-          model: "dall-e-3",
-          prompt: prompt,
-          n: 1,
-          size: "1024x1024",
-          quality: "hd",
-          style: "natural"
-        }),
-      });
-
-      if (!openaiResponse.ok) {
-        const errorText = await openaiResponse.text();
-        console.error('DALL-E API error response:', errorText);
-        throw new Error(`DALL-E API error: ${errorText}`);
-      }
-
-      const openaiData = await openaiResponse.json();
-      console.log('DALL-E API response:', JSON.stringify(openaiData, null, 2));
-
-      if (!openaiData.data?.[0]?.url) {
-        throw new Error('Invalid response format from DALL-E API');
-      }
-
-      imageUrls.push(openaiData.data[0].url);
+    if (data.error) {
+      console.error('OpenAI API error:', data.error);
+      throw new Error(`OpenAI API error: ${data.error.message || 'Unknown error'}`);
     }
 
-    console.log(`Generated ${imageUrls.length} image variations`);
-
-    const { error: updateError } = await supabase
-      .from('exposes')
-      .update({
-        hero_image_generation_status: 'completed',
-        hero_image_url: imageUrls[0],
-        hero_image_desktop_url: imageUrls[0],
-        hero_image_tablet_url: imageUrls[0],
-        hero_image_mobile_url: imageUrls[0],
-        image_variations: imageUrls,
-        selected_variation_index: 0
-      })
-      .eq('id', exposeId);
-
-    if (updateError) {
-      throw new Error(`Failed to update expose: ${updateError.message}`);
+    let url = null;
+    if (data.data && data.data[0] && data.data[0].url) {
+      url = data.data[0].url;
     }
 
-    return new Response(JSON.stringify({ success: true }), {
+    console.log(`Image generated successfully: ${url ? 'Success' : 'Failed'}`);
+
+    return new Response(JSON.stringify({ url }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
   } catch (error) {

@@ -46,7 +46,13 @@ serve(async (req) => {
     console.log('Using prompt:', prompt);
 
     // Generate model descriptions using GPT-4o
-    const modelDescriptions = await generateModelDescriptions(prompt, count);
+    let modelDescriptions = await generateModelDescriptions(prompt, count);
+    
+    if (!modelDescriptions || modelDescriptions.length === 0) {
+      console.log('Failed to generate descriptions, using fallback descriptions');
+      modelDescriptions = generateFallbackDescriptions(count, brandIdentity);
+    }
+    
     console.log('Generated descriptions:', modelDescriptions);
 
     // Generate images for each model description
@@ -111,6 +117,35 @@ Do not include any clothing descriptions or body type descriptions.
 Focus only on facial characteristics, expression, and hair style that would appeal to the specified target audience.`;
 }
 
+function generateFallbackDescriptions(count: number, brandIdentity: BrandIdentity): string[] {
+  // Generate fallback descriptions based on brand identity
+  const descriptions = [];
+  const genders = brandIdentity.gender === 'all' 
+    ? ['male', 'female'] 
+    : [brandIdentity.gender];
+  
+  const hairStyles = ['short', 'medium-length', 'long', 'wavy', 'straight', 'curly'];
+  const hairColors = ['black', 'brown', 'blonde', 'red', 'dark'];
+  const eyeColors = ['blue', 'green', 'brown', 'hazel'];
+  const expressions = ['confident', 'thoughtful', 'friendly', 'mysterious', 'approachable'];
+  const features = ['angular', 'defined', 'soft', 'distinctive', 'striking'];
+  
+  for (let i = 0; i < count; i++) {
+    const gender = genders[i % genders.length];
+    const hairStyle = hairStyles[Math.floor(Math.random() * hairStyles.length)];
+    const hairColor = hairColors[Math.floor(Math.random() * hairColors.length)];
+    const eyeColor = eyeColors[Math.floor(Math.random() * eyeColors.length)];
+    const expression = expressions[Math.floor(Math.random() * expressions.length)];
+    const feature = features[Math.floor(Math.random() * features.length)];
+    
+    descriptions.push(
+      `A ${gender} model with ${hairStyle} ${hairColor} hair and ${eyeColor} eyes. Their ${feature} features and ${expression} expression embody the brand values.`
+    );
+  }
+  
+  return descriptions;
+}
+
 async function generateModelDescriptions(prompt: string, count: number): Promise<string[]> {
   try {
     const response = await fetch('https://api.openai.com/v1/chat/completions', {
@@ -142,11 +177,40 @@ async function generateModelDescriptions(prompt: string, count: number): Promise
     const data = await response.json();
     console.log('OpenAI response for descriptions:', data);
 
-    const parsedContent = JSON.parse(data.choices[0].message.content);
-    return Array.isArray(parsedContent) ? parsedContent : parsedContent.descriptions || [];
+    if (data.error) {
+      console.error('OpenAI API error:', data.error);
+      return [];
+    }
+
+    if (!data.choices || !data.choices[0] || !data.choices[0].message) {
+      console.error('Unexpected API response format:', data);
+      return [];
+    }
+
+    try {
+      const content = data.choices[0].message.content;
+      const parsed = JSON.parse(content);
+      
+      if (Array.isArray(parsed)) {
+        return parsed;
+      } else if (parsed.descriptions && Array.isArray(parsed.descriptions)) {
+        return parsed.descriptions;
+      } else {
+        // Try to find any array in the parsed object
+        for (const key in parsed) {
+          if (Array.isArray(parsed[key])) {
+            return parsed[key];
+          }
+        }
+      }
+    } catch (parseError) {
+      console.error('Error parsing OpenAI response:', parseError);
+    }
+    
+    return [];
   } catch (error) {
     console.error('Error generating model descriptions:', error);
-    return Array(count).fill('Error generating description');
+    return [];
   }
 }
 

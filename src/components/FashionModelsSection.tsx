@@ -6,7 +6,7 @@ import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Check, X, Loader, Plus, AlertCircle } from "lucide-react";
+import { Check, X, Loader, Plus, AlertCircle, RefreshCw } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ModelDescription, BrandIdentity } from "@/types/brandTypes";
 import { Json } from "@/integrations/supabase/types";
@@ -18,10 +18,13 @@ interface FashionModelsSectionProps {
 
 const FashionModelsSection: React.FC<FashionModelsSectionProps> = ({ brandIdentity, onModelsUpdated }) => {
   const [isGenerating, setIsGenerating] = useState(false);
-  const [generatedModels, setGeneratedModels] = useState<ModelDescription[]>([]);
-  const [approvedModels, setApprovedModels] = useState<ModelDescription[]>(
+  const [generatedModels, setGeneratedModels] = useState<ModelDescription[]>(
     Array.isArray(brandIdentity.brand_models) ? brandIdentity.brand_models : []
   );
+  const [approvedModels, setApprovedModels] = useState<ModelDescription[]>(
+    Array.isArray(brandIdentity.brand_models) ? brandIdentity.brand_models.filter(model => model.approved) : []
+  );
+  const [isRegeneratingImage, setIsRegeneratingImage] = useState<string | null>(null);
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -116,6 +119,66 @@ const FashionModelsSection: React.FC<FashionModelsSectionProps> = ({ brandIdenti
     }
   };
 
+  const regenerateModelImage = async (model: ModelDescription) => {
+    if (!model.description) {
+      toast({
+        title: "Error",
+        description: "Model description is required to regenerate image",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    setIsRegeneratingImage(model.id);
+    try {
+      const { data, error } = await supabase.functions.invoke('generate-ai-image', {
+        body: { 
+          prompt: `Professional headshot photo of a fashion model. ${model.description}. Clean neutral background, soft flattering lighting, professional fashion photography style.`,
+          size: "1024x1024",
+          model: "dall-e-3"
+        }
+      });
+
+      if (error) throw error;
+      
+      if (data && data.url) {
+        // Update the model with new image URL
+        const updatedModel = { ...model, imageUrl: data.url };
+        
+        // Update in generatedModels
+        const updatedGeneratedModels = generatedModels.map(m => 
+          m.id === model.id ? updatedModel : m
+        );
+        setGeneratedModels(updatedGeneratedModels);
+        
+        // Update in approvedModels if applicable
+        if (model.approved) {
+          const updatedApprovedModels = approvedModels.map(m => 
+            m.id === model.id ? updatedModel : m
+          );
+          setApprovedModels(updatedApprovedModels);
+          saveMutation.mutate(updatedApprovedModels);
+        }
+        
+        toast({
+          title: "Success",
+          description: "Model image regenerated successfully"
+        });
+      } else {
+        throw new Error("No image URL returned");
+      }
+    } catch (error) {
+      console.error('Error regenerating model image:', error);
+      toast({
+        title: "Error",
+        description: "Failed to regenerate model image",
+        variant: "destructive"
+      });
+    } finally {
+      setIsRegeneratingImage(null);
+    }
+  };
+
   const handleApproveModel = (model: ModelDescription) => {
     const updatedModels = generatedModels.map(m => 
       m.id === model.id ? { ...m, approved: true } : m
@@ -148,6 +211,18 @@ const FashionModelsSection: React.FC<FashionModelsSectionProps> = ({ brandIdenti
   // Function to determine if a model needs image regeneration
   const needsImageRegeneration = (model: ModelDescription) => {
     return !model.imageUrl || model.imageUrl === 'null' || model.imageUrl === '';
+  };
+
+  // Function to render model description
+  const renderModelDescription = (description: string) => {
+    if (!description || description === "Error generating description") {
+      return (
+        <p className="text-sm text-polaris-secondary italic">No description available</p>
+      );
+    }
+    return (
+      <p className="text-sm line-clamp-3 text-polaris-text">{description}</p>
+    );
   };
 
   return (
@@ -197,23 +272,55 @@ const FashionModelsSection: React.FC<FashionModelsSectionProps> = ({ brandIdenti
                   <Card key={model.id} className="overflow-hidden flex flex-col">
                     <div className="relative aspect-square">
                       {model.imageUrl ? (
-                        <img 
-                          src={model.imageUrl} 
-                          alt={model.description}
-                          className="w-full h-full object-cover" 
-                          onError={handleImageError}
-                        />
+                        <>
+                          <img 
+                            src={model.imageUrl} 
+                            alt={model.description}
+                            className="w-full h-full object-cover" 
+                            onError={handleImageError}
+                          />
+                          {isRegeneratingImage === model.id && (
+                            <div className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center">
+                              <Loader className="animate-spin text-white w-8 h-8" />
+                            </div>
+                          )}
+                        </>
                       ) : (
                         <div className="bg-gray-200 w-full h-full flex items-center justify-center">
                           <div className="text-center p-4">
                             <AlertCircle className="mx-auto h-8 w-8 text-amber-500 mb-2" />
                             <p className="text-sm text-gray-500">Image not available</p>
+                            <Button 
+                              onClick={() => regenerateModelImage(model)}
+                              size="sm"
+                              variant="outline"
+                              className="mt-2"
+                              disabled={isRegeneratingImage === model.id}
+                            >
+                              {isRegeneratingImage === model.id ? (
+                                <Loader className="h-4 w-4 animate-spin" />
+                              ) : (
+                                <RefreshCw className="h-4 w-4 mr-1" />
+                              )}
+                              Regenerate
+                            </Button>
                           </div>
                         </div>
                       )}
+                      {model.imageUrl && needsImageRegeneration(model) && !isRegeneratingImage && (
+                        <Button
+                          size="icon"
+                          variant="outline"
+                          className="absolute top-2 right-2 h-8 w-8 rounded-full bg-white"
+                          onClick={() => regenerateModelImage(model)}
+                          disabled={isRegeneratingImage === model.id}
+                        >
+                          <RefreshCw className="h-4 w-4" />
+                        </Button>
+                      )}
                     </div>
                     <div className="p-3">
-                      <p className="text-sm line-clamp-3 text-polaris-text">{model.description}</p>
+                      {renderModelDescription(model.description)}
                       <div className="flex justify-between mt-3">
                         <Button 
                           size="icon" 
@@ -255,23 +362,55 @@ const FashionModelsSection: React.FC<FashionModelsSectionProps> = ({ brandIdenti
               <Card key={model.id} className="overflow-hidden flex flex-col">
                 <div className="relative aspect-square">
                   {model.imageUrl ? (
-                    <img 
-                      src={model.imageUrl} 
-                      alt={model.description}
-                      className="w-full h-full object-cover" 
-                      onError={handleImageError}
-                    />
+                    <>
+                      <img 
+                        src={model.imageUrl} 
+                        alt={model.description}
+                        className="w-full h-full object-cover" 
+                        onError={handleImageError}
+                      />
+                      {isRegeneratingImage === model.id && (
+                        <div className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center">
+                          <Loader className="animate-spin text-white w-8 h-8" />
+                        </div>
+                      )}
+                    </>
                   ) : (
                     <div className="bg-gray-200 w-full h-full flex items-center justify-center">
                       <div className="text-center p-4">
                         <AlertCircle className="mx-auto h-8 w-8 text-amber-500 mb-2" />
                         <p className="text-sm text-gray-500">Image not available</p>
+                        <Button 
+                          onClick={() => regenerateModelImage(model)}
+                          size="sm"
+                          variant="outline"
+                          className="mt-2"
+                          disabled={isRegeneratingImage === model.id}
+                        >
+                          {isRegeneratingImage === model.id ? (
+                            <Loader className="h-4 w-4 animate-spin" />
+                          ) : (
+                            <RefreshCw className="h-4 w-4 mr-1" />
+                          )}
+                          Regenerate
+                        </Button>
                       </div>
                     </div>
                   )}
+                  {model.imageUrl && (
+                    <Button
+                      size="icon"
+                      variant="outline"
+                      className="absolute top-2 right-2 h-8 w-8 rounded-full bg-white opacity-0 hover:opacity-100 transition-opacity"
+                      onClick={() => regenerateModelImage(model)}
+                      disabled={isRegeneratingImage === model.id}
+                    >
+                      <RefreshCw className="h-4 w-4" />
+                    </Button>
+                  )}
                 </div>
                 <div className="p-3">
-                  <p className="text-sm line-clamp-3 text-polaris-text">{model.description}</p>
+                  {renderModelDescription(model.description)}
                   <div className="flex justify-end mt-3">
                     <Button 
                       size="icon" 
