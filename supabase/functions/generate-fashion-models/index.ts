@@ -60,7 +60,7 @@ serve(async (req) => {
       const modelId = crypto.randomUUID();
 
       // Skip regenerating already approved models
-      if (regenerate.includes(modelId)) {
+      if (regenerate.length > 0 && regenerate.some(model => model.id === modelId)) {
         return regenerate.find(model => model.id === modelId);
       }
 
@@ -148,6 +148,11 @@ function generateFallbackDescriptions(count: number, brandIdentity: BrandIdentit
 
 async function generateModelDescriptions(prompt: string, count: number): Promise<string[]> {
   try {
+    if (!openAIApiKey) {
+      console.error('OpenAI API key not found');
+      return [];
+    }
+    
     const response = await fetch('https://api.openai.com/v1/chat/completions', {
       method: 'POST',
       headers: {
@@ -191,10 +196,13 @@ async function generateModelDescriptions(prompt: string, count: number): Promise
       const content = data.choices[0].message.content;
       const parsed = JSON.parse(content);
       
+      // Parse the response based on different possible formats
       if (Array.isArray(parsed)) {
         return parsed;
       } else if (parsed.descriptions && Array.isArray(parsed.descriptions)) {
         return parsed.descriptions;
+      } else if (parsed.model_descriptions && Array.isArray(parsed.model_descriptions)) {
+        return parsed.model_descriptions;
       } else {
         // Try to find any array in the parsed object
         for (const key in parsed) {
@@ -203,6 +211,9 @@ async function generateModelDescriptions(prompt: string, count: number): Promise
           }
         }
       }
+      
+      // If we still have no descriptions, return empty array
+      return [];
     } catch (parseError) {
       console.error('Error parsing OpenAI response:', parseError);
     }
@@ -216,6 +227,11 @@ async function generateModelDescriptions(prompt: string, count: number): Promise
 
 async function generateModelImage(description: string): Promise<string | null> {
   try {
+    if (!openAIApiKey) {
+      console.error('OpenAI API key not found');
+      return null;
+    }
+    
     const prompt = `Generate a high-quality, professional headshot photo of a fashion model with these characteristics: ${description}. 
     The image should be a close-up portrait showing only the face and hair, with a clean, neutral background. 
     The lighting should be soft and flattering, typical of professional fashion photography. Ensure the image looks realistic and professional.`;

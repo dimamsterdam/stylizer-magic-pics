@@ -1,5 +1,4 @@
 
-import "https://deno.land/x/xhr@0.1.0/mod.ts";
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 
 const openAIApiKey = Deno.env.get('OPENAI_API_KEY');
@@ -15,17 +14,23 @@ serve(async (req) => {
   }
 
   try {
-    const { prompt, size = "1024x1024", model = "dall-e-3", n = 1, quality = "standard" } = await req.json();
+    const { prompt, size = "1024x1024", model = "dall-e-3" } = await req.json();
     
     if (!prompt) {
-      throw new Error('Prompt is required');
+      return new Response(JSON.stringify({ error: "Prompt is required" }), {
+        status: 400,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
     }
 
     if (!openAIApiKey) {
-      throw new Error('OpenAI API key is not configured');
+      return new Response(JSON.stringify({ error: "OpenAI API key is not configured" }), {
+        status: 500,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
     }
 
-    console.log(`Generating image with prompt: ${prompt}`);
+    console.log("Generating image with prompt:", prompt);
 
     const response = await fetch('https://api.openai.com/v1/images/generations', {
       method: 'POST',
@@ -36,9 +41,9 @@ serve(async (req) => {
       body: JSON.stringify({
         model: model,
         prompt: prompt,
-        n: n,
+        n: 1,
         size: size,
-        quality: quality
+        quality: "standard"
       }),
     });
 
@@ -46,21 +51,24 @@ serve(async (req) => {
     
     if (data.error) {
       console.error('OpenAI API error:', data.error);
-      throw new Error(`OpenAI API error: ${data.error.message || 'Unknown error'}`);
+      return new Response(JSON.stringify({ error: data.error.message || "OpenAI API error" }), {
+        status: 500,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
     }
 
-    let url = null;
     if (data.data && data.data[0] && data.data[0].url) {
-      url = data.data[0].url;
+      return new Response(JSON.stringify({ url: data.data[0].url, revised_prompt: data.data[0].revised_prompt }), {
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    } else {
+      return new Response(JSON.stringify({ error: "No image URL returned" }), {
+        status: 500,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
     }
-
-    console.log(`Image generated successfully: ${url ? 'Success' : 'Failed'}`);
-
-    return new Response(JSON.stringify({ url }), {
-      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-    });
   } catch (error) {
-    console.error('Error in generate-ai-image function:', error);
+    console.error('Error generating image:', error);
     return new Response(JSON.stringify({ error: error.message }), {
       status: 500,
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },

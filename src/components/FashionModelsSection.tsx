@@ -8,9 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import { Check, X, Loader, Plus, AlertCircle, RefreshCw } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ModelDescription, BrandIdentity } from "@/types/brandTypes";
-import { Json } from "@/integrations/supabase/types";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { AspectRatio } from "@/components/ui/aspect-ratio";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 
 interface FashionModelsSectionProps {
@@ -82,6 +80,8 @@ const FashionModelsSection: React.FC<FashionModelsSectionProps> = ({ brandIdenti
     }
 
     setIsGenerating(true);
+    setShowGeneratedModelsDialog(true);
+    
     try {
       const regenerateIds = generatedModels
         .filter(model => !model.approved)
@@ -104,17 +104,31 @@ const FashionModelsSection: React.FC<FashionModelsSectionProps> = ({ brandIdenti
       if (error) throw error;
       console.log("Generated models data:", data);
       
+      if (!Array.isArray(data) || data.length === 0) {
+        throw new Error("No models were generated");
+      }
+      
       // Ensure generated models have the correct type
-      const typedModels = data.map((model: any) => model as ModelDescription);
+      const typedModels = data.map((model: any): ModelDescription => ({
+        id: model.id || crypto.randomUUID(),
+        description: model.description || "Error generating description",
+        imageUrl: model.imageUrl || null,
+        approved: model.approved || false
+      }));
       
       // Keep approved models and add new ones
       const currentApproved = generatedModels.filter(model => model.approved);
       setGeneratedModels([...currentApproved, ...typedModels]);
+      
+      toast({
+        title: "Success",
+        description: `Generated ${typedModels.length} models successfully`
+      });
     } catch (error) {
       console.error('Error generating fashion models:', error);
       toast({
         title: "Error",
-        description: "Failed to generate fashion models",
+        description: typeof error === 'string' ? error : 'Failed to generate fashion models',
         variant: "destructive"
       });
     } finally {
@@ -237,7 +251,7 @@ const FashionModelsSection: React.FC<FashionModelsSectionProps> = ({ brandIdenti
         </div>
         <Button 
           onClick={generateModels} 
-          disabled={isGenerating || (generatedModels.length - approvedModels.length) >= 10}
+          disabled={isGenerating || (approvedModels.length >= 10)}
         >
           {isGenerating ? <Loader className="mr-2 h-4 w-4 animate-spin" /> : <Plus className="mr-2 h-4 w-4" />}
           Generate Models
@@ -367,7 +381,7 @@ const FashionModelsSection: React.FC<FashionModelsSectionProps> = ({ brandIdenti
         </DialogContent>
       </Dialog>
 
-      {/* Approved Models */}
+      {/* Approved Models Grid */}
       {approvedModels.length > 0 && (
         <div className="space-y-4">
           <div className="flex items-center gap-2">
@@ -377,9 +391,10 @@ const FashionModelsSection: React.FC<FashionModelsSectionProps> = ({ brandIdenti
             </Badge>
           </div>
           
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-0">
             {approvedModels.map((model) => (
-              <Card key={model.id} className="overflow-hidden flex flex-col">
+              <div key={model.id} className="relative group">
+                {/* Edge-to-edge square image */}
                 <div className="relative aspect-square">
                   {model.imageUrl ? (
                     <>
@@ -417,32 +432,41 @@ const FashionModelsSection: React.FC<FashionModelsSectionProps> = ({ brandIdenti
                       </div>
                     </div>
                   )}
-                  {model.imageUrl && (
-                    <Button
-                      size="icon"
-                      variant="outline"
-                      className="absolute top-2 right-2 h-8 w-8 rounded-full bg-white opacity-0 hover:opacity-100 transition-opacity"
-                      onClick={() => regenerateModelImage(model)}
-                      disabled={isRegeneratingImage === model.id}
-                    >
-                      <RefreshCw className="h-4 w-4" />
-                    </Button>
-                  )}
-                </div>
-                <div className="p-3">
-                  {renderModelDescription(model.description)}
-                  <div className="flex justify-end mt-3">
-                    <Button 
-                      size="icon" 
-                      variant="outline"
-                      className="h-8 w-8 rounded-full bg-red-50 hover:bg-red-100 border-red-200"
-                      onClick={() => handleRemoveApprovedModel(model)}
-                    >
-                      <X className="h-4 w-4 text-red-600" />
-                    </Button>
+                  
+                  {/* Hover overlay with description */}
+                  <div className="absolute inset-0 bg-black bg-opacity-70 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col justify-between p-3 text-white">
+                    <div className="flex-grow flex items-center justify-center">
+                      <p className="text-sm text-center">{model.description}</p>
+                    </div>
+                    <div className="flex justify-end">
+                      {/* Action buttons on hover */}
+                      <div className="flex gap-2">
+                        <Button 
+                          size="icon" 
+                          variant="outline"
+                          className="h-8 w-8 rounded-full border-white/30 bg-transparent hover:bg-white/20"
+                          onClick={() => regenerateModelImage(model)}
+                          disabled={isRegeneratingImage === model.id}
+                        >
+                          {isRegeneratingImage === model.id ? (
+                            <Loader className="h-4 w-4 text-white animate-spin" />
+                          ) : (
+                            <RefreshCw className="h-4 w-4 text-white" />
+                          )}
+                        </Button>
+                        <Button 
+                          size="icon" 
+                          variant="outline"
+                          className="h-8 w-8 rounded-full border-white/30 bg-transparent hover:bg-white/20"
+                          onClick={() => handleRemoveApprovedModel(model)}
+                        >
+                          <X className="h-4 w-4 text-white" />
+                        </Button>
+                      </div>
+                    </div>
                   </div>
                 </div>
-              </Card>
+              </div>
             ))}
           </div>
         </div>
