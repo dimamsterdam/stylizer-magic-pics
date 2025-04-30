@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -10,6 +9,9 @@ import { Check, X, Loader, Plus, AlertCircle, RefreshCw } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ModelDescription, BrandIdentity } from "@/types/brandTypes";
 import { Json } from "@/integrations/supabase/types";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { AspectRatio } from "@/components/ui/aspect-ratio";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 
 interface FashionModelsSectionProps {
   brandIdentity: BrandIdentity;
@@ -25,6 +27,7 @@ const FashionModelsSection: React.FC<FashionModelsSectionProps> = ({ brandIdenti
     Array.isArray(brandIdentity.brand_models) ? brandIdentity.brand_models.filter(model => model.approved) : []
   );
   const [isRegeneratingImage, setIsRegeneratingImage] = useState<string | null>(null);
+  const [showGeneratedModelsDialog, setShowGeneratedModelsDialog] = useState(false);
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -241,111 +244,128 @@ const FashionModelsSection: React.FC<FashionModelsSectionProps> = ({ brandIdenti
         </Button>
       </div>
 
-      {/* Generated Models */}
-      {(generatedModels.length > 0 || isGenerating) && (
-        <div className="space-y-4">
-          <h3 className="font-medium text-lg text-polaris-text">Generated Models</h3>
-          
-          {isGenerating && (
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
-              {Array.from({ length: 5 }).map((_, i) => (
-                <Card key={`skeleton-${i}`} className="overflow-hidden flex flex-col">
-                  <Skeleton className="w-full aspect-square" />
-                  <div className="p-3">
-                    <Skeleton className="h-4 w-full mb-2" />
-                    <Skeleton className="h-4 w-3/4" />
-                    <div className="flex justify-between mt-4">
-                      <Skeleton className="h-8 w-8 rounded-full" />
-                      <Skeleton className="h-8 w-8 rounded-full" />
-                    </div>
-                  </div>
-                </Card>
-              ))}
-            </div>
-          )}
-
-          {!isGenerating && generatedModels.filter(m => !m.approved).length > 0 && (
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
-              {generatedModels
-                .filter(model => !model.approved)
-                .map((model) => (
-                  <Card key={model.id} className="overflow-hidden flex flex-col">
-                    <div className="relative aspect-square">
-                      {model.imageUrl ? (
-                        <>
-                          <img 
-                            src={model.imageUrl} 
-                            alt={model.description}
-                            className="w-full h-full object-cover" 
-                            onError={handleImageError}
-                          />
-                          {isRegeneratingImage === model.id && (
-                            <div className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center">
-                              <Loader className="animate-spin text-white w-8 h-8" />
-                            </div>
-                          )}
-                        </>
-                      ) : (
-                        <div className="bg-gray-200 w-full h-full flex items-center justify-center">
-                          <div className="text-center p-4">
-                            <AlertCircle className="mx-auto h-8 w-8 text-amber-500 mb-2" />
-                            <p className="text-sm text-gray-500">Image not available</p>
-                            <Button 
-                              onClick={() => regenerateModelImage(model)}
-                              size="sm"
-                              variant="outline"
-                              className="mt-2"
-                              disabled={isRegeneratingImage === model.id}
-                            >
-                              {isRegeneratingImage === model.id ? (
-                                <Loader className="h-4 w-4 animate-spin" />
-                              ) : (
-                                <RefreshCw className="h-4 w-4 mr-1" />
-                              )}
-                              Regenerate
-                            </Button>
+      {/* Full Screen Dialog for Generated Models */}
+      <Dialog open={showGeneratedModelsDialog} onOpenChange={setShowGeneratedModelsDialog}>
+        <DialogContent className="max-w-6xl w-[90vw] h-[80vh] max-h-[80vh] overflow-y-auto p-0">
+          <DialogHeader className="p-6 border-b">
+            <DialogTitle>Generated Fashion Models</DialogTitle>
+          </DialogHeader>
+          <div className="p-6">
+            {/* Generated Models */}
+            {(generatedModels.length > 0 || isGenerating) && (
+              <div className="space-y-4">
+                <h3 className="font-medium text-lg text-polaris-text">Generated Models</h3>
+                
+                {isGenerating && (
+                  <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
+                    {Array.from({ length: 5 }).map((_, i) => (
+                      <Card key={`skeleton-${i}`} className="overflow-hidden flex flex-col">
+                        <Skeleton className="w-full aspect-square" />
+                        <div className="p-3">
+                          <Skeleton className="h-4 w-full mb-2" />
+                          <Skeleton className="h-4 w-3/4" />
+                          <div className="flex justify-between mt-4">
+                            <Skeleton className="h-8 w-8 rounded-full" />
+                            <Skeleton className="h-8 w-8 rounded-full" />
                           </div>
                         </div>
-                      )}
-                      {model.imageUrl && needsImageRegeneration(model) && !isRegeneratingImage && (
-                        <Button
-                          size="icon"
-                          variant="outline"
-                          className="absolute top-2 right-2 h-8 w-8 rounded-full bg-white"
-                          onClick={() => regenerateModelImage(model)}
-                          disabled={isRegeneratingImage === model.id}
-                        >
-                          <RefreshCw className="h-4 w-4" />
-                        </Button>
-                      )}
-                    </div>
-                    <div className="p-3">
-                      {renderModelDescription(model.description)}
-                      <div className="flex justify-between mt-3">
-                        <Button 
-                          size="icon" 
-                          variant="outline" 
-                          className="h-8 w-8 rounded-full bg-green-50 hover:bg-green-100 border-green-200"
-                          onClick={() => handleApproveModel(model)}
-                        >
-                          <Check className="h-4 w-4 text-green-600" />
-                        </Button>
-                        <Button 
-                          size="icon" 
-                          variant="outline"
-                          className="h-8 w-8 rounded-full bg-red-50 hover:bg-red-100 border-red-200"
-                          onClick={() => handleRejectModel(model)}
-                        >
-                          <X className="h-4 w-4 text-red-600" />
-                        </Button>
-                      </div>
-                    </div>
-                  </Card>
-                ))}
-            </div>
-          )}
-        </div>
-      )}
+                      </Card>
+                    ))}
+                  </div>
+                )}
+                
+                {!isGenerating && generatedModels.filter(m => !m.approved).length > 0 && (
+                  <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
+                    {generatedModels
+                      .filter(model => !model.approved)
+                      .map((model) => (
+                        <Card key={model.id} className="overflow-hidden flex flex-col">
+                          <div className="relative aspect-square">
+                            {model.imageUrl ? (
+                              <>
+                                <img 
+                                  src={model.imageUrl} 
+                                  alt={model.description}
+                                  className="w-full h-full object-cover" 
+                                  onError={handleImageError}
+                                />
+                                {isRegeneratingImage === model.id && (
+                                  <div className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center">
+                                    <Loader className="animate-spin text-white w-8 h-8" />
+                                  </div>
+                                )}
+                              </>
+                            ) : (
+                              <div className="bg-gray-200 w-full h-full flex items-center justify-center">
+                                <div className="text-center p-4">
+                                  <AlertCircle className="mx-auto h-8 w-8 text-amber-500 mb-2" />
+                                  <p className="text-sm text-gray-500">Image not available</p>
+                                  <Button 
+                                    onClick={() => regenerateModelImage(model)}
+                                    size="sm"
+                                    variant="outline"
+                                    className="mt-2"
+                                    disabled={isRegeneratingImage === model.id}
+                                  >
+                                    {isRegeneratingImage === model.id ? (
+                                      <Loader className="h-4 w-4 animate-spin" />
+                                    ) : (
+                                      <RefreshCw className="h-4 w-4 mr-1" />
+                                    )}
+                                    Regenerate
+                                  </Button>
+                                </div>
+                              </div>
+                            )}
+                            {model.imageUrl && needsImageRegeneration(model) && !isRegeneratingImage && (
+                              <Button
+                                size="icon"
+                                variant="outline"
+                                className="absolute top-2 right-2 h-8 w-8 rounded-full bg-white"
+                                onClick={() => regenerateModelImage(model)}
+                                disabled={isRegeneratingImage === model.id}
+                              >
+                                <RefreshCw className="h-4 w-4" />
+                              </Button>
+                            )}
+                          </div>
+                          <div className="p-3">
+                            {renderModelDescription(model.description)}
+                            <div className="flex justify-between mt-3">
+                              <Button 
+                                size="icon" 
+                                variant="outline" 
+                                className="h-8 w-8 rounded-full bg-green-50 hover:bg-green-100 border-green-200"
+                                onClick={() => handleApproveModel(model)}
+                              >
+                                <Check className="h-4 w-4 text-green-600" />
+                              </Button>
+                              <Button 
+                                size="icon" 
+                                variant="outline"
+                                className="h-8 w-8 rounded-full bg-red-50 hover:bg-red-100 border-red-200"
+                                onClick={() => handleRejectModel(model)}
+                              >
+                                <X className="h-4 w-4 text-red-600" />
+                              </Button>
+                            </div>
+                          </div>
+                        </Card>
+                      ))}
+                  </div>
+                )}
+                
+                {!isGenerating && generatedModels.filter(m => !m.approved).length === 0 && (
+                  <div className="text-center py-8">
+                    <p className="text-polaris-secondary mb-4">No models waiting for approval</p>
+                    <Button onClick={() => setShowGeneratedModelsDialog(false)}>Close</Button>
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+        </DialogContent>
+      </Dialog>
 
       {/* Approved Models */}
       {approvedModels.length > 0 && (
