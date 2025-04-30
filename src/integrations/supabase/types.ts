@@ -40,6 +40,7 @@ export type Database = {
         Row: {
           age_range_max: number | null
           age_range_min: number | null
+          brand_models: Json[] | null
           brand_name: string | null
           characteristics: string[] | null
           created_at: string
@@ -57,6 +58,7 @@ export type Database = {
         Insert: {
           age_range_max?: number | null
           age_range_min?: number | null
+          brand_models?: Json[] | null
           brand_name?: string | null
           characteristics?: string[] | null
           created_at?: string
@@ -74,6 +76,7 @@ export type Database = {
         Update: {
           age_range_max?: number | null
           age_range_min?: number | null
+          brand_models?: Json[] | null
           brand_name?: string | null
           characteristics?: string[] | null
           created_at?: string

@@ -7,10 +7,12 @@ import { GlobalSidebar } from './components/GlobalSidebar';
 const Layout: React.FC = () => {
   return (
     <SidebarProvider>
-      <div className="flex w-full">
+      <div className="flex w-full min-h-screen bg-gray-50">
         <GlobalSidebar />
-        <main className="flex-1">
-          <Outlet />
+        <main className="flex-1 p-4">
+          <div className="max-w-7xl mx-auto bg-white rounded-lg shadow-sm">
+            <Outlet />
+          </div>
         </main>
       </div>
     </SidebarProvider>

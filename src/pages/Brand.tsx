@@ -9,9 +9,11 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
 import { Palette, Users, Camera, Wand2 } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
+import FashionModelsSection from "@/components/FashionModelsSection";
 
 interface BrandIdentity {
   id: string;
@@ -110,6 +112,8 @@ const Brand = () => {
   const [brandName, setBrandName] = React.useState("");
   const [isGenerating, setIsGenerating] = React.useState(false);
   const [ageRange, setAgeRange] = React.useState("");
+  const [showModelsDialog, setShowModelsDialog] = React.useState(false);
+  const [hasPromptedForModels, setHasPromptedForModels] = React.useState(false);
 
   const { data: brandIdentity, isLoading } = useQuery({
     queryKey: ['brandIdentity'],
@@ -333,6 +337,20 @@ const Brand = () => {
     return `${brandIdentity.age_range_min}-${brandIdentity.age_range_max}`;
   };
 
+  React.useEffect(() => {
+    if (brandIdentity && 
+        brandIdentity.brand_name && 
+        brandIdentity.values?.length > 0 && 
+        brandIdentity.characteristics?.length > 0 &&
+        !hasPromptedForModels && 
+        (!brandIdentity.brand_models || brandIdentity.brand_models.length === 0)) {
+      setTimeout(() => {
+        setShowModelsDialog(true);
+        setHasPromptedForModels(true);
+      }, 1000);
+    }
+  }, [brandIdentity, hasPromptedForModels]);
+
   const breadcrumbItems = [{
     label: "Home",
     href: "/"
@@ -511,6 +529,17 @@ const Brand = () => {
             </div>
           </div>
         </section>
+
+        {/* Fashion Models Section */}
+        {brandIdentity?.id && (
+          <section className="space-y-4">
+            <div className="flex items-center gap-2 text-xl font-semibold text-polaris-text">
+              <Users className="h-6 w-6" />
+              <h2>Fashion Models</h2>
+            </div>
+            <FashionModelsSection brandIdentity={brandIdentity} />
+          </section>
+        )}
       </div>
 
       {/* Preview Panel */}
@@ -563,6 +592,42 @@ const Brand = () => {
         </Sheet>
       </div>
     </div>
+
+    {/* Models Generation Dialog */}
+    <Dialog open={showModelsDialog} onOpenChange={setShowModelsDialog}>
+      <DialogContent className="sm:max-w-md">
+        <DialogHeader>
+          <DialogTitle>Generate Fashion Models</DialogTitle>
+          <DialogDescription>
+            Based on your brand identity, we can generate fashion models that represent your brand. These models can be used for your product photography and marketing materials.
+          </DialogDescription>
+        </DialogHeader>
+        <div className="flex flex-col gap-4 py-4">
+          <p>
+            Would you like to generate fashion models that match your brand's target audience?
+          </p>
+          <div className="flex justify-end gap-3">
+            <Button variant="outline" onClick={() => setShowModelsDialog(false)}>
+              Not Now
+            </Button>
+            <Button 
+              onClick={() => {
+                setShowModelsDialog(false);
+                // Scroll to fashion models section
+                setTimeout(() => {
+                  const section = document.getElementById('fashion-models-section');
+                  if (section) {
+                    section.scrollIntoView({ behavior: 'smooth' });
+                  }
+                }, 100);
+              }}
+            >
+              Generate Models
+            </Button>
+          </div>
+        </div>
+      </DialogContent>
+    </Dialog>
   </div>;
 };
 
