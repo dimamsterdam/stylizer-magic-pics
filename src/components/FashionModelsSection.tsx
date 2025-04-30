@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -208,6 +209,7 @@ const FashionModelsSection: React.FC<FashionModelsSectionProps> = ({ brandIdenti
 
     // After animation completes, update model approval status
     setTimeout(() => {
+      // Create a new array with the updated model (approved = true)
       const updatedModels = generatedModels.map(m => 
         m.id === model.id ? { ...m, approved: true } : m
       );
@@ -297,113 +299,111 @@ const FashionModelsSection: React.FC<FashionModelsSectionProps> = ({ brandIdenti
                 
                 {!isGenerating && (
                   <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-0">
-                    {generatedModels
-                      .filter(model => !model.approved)
-                      .map((model) => (
-                        <div key={model.id} className="relative group">
-                          <div className={`flip-container relative aspect-square ${flippedModels[model.id] ? 'flipped' : ''}`}>
-                            <div className="flipper">
-                              {/* Front face */}
-                              <div className="flip-front">
-                                {model.imageUrl ? (
-                                  <>
-                                    <img 
-                                      src={model.imageUrl} 
-                                      alt={model.description}
-                                      className="w-full h-full object-cover" 
-                                      onError={handleImageError}
-                                    />
-                                    {isRegeneratingImage === model.id && (
-                                      <div className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center">
-                                        <Loader className="animate-spin text-white w-8 h-8" />
-                                      </div>
-                                    )}
-                                  </>
-                                ) : (
-                                  <div className="bg-gray-200 w-full h-full flex items-center justify-center">
-                                    <div className="text-center p-4">
-                                      <AlertCircle className="mx-auto h-8 w-8 text-amber-500 mb-2" />
-                                      <p className="text-sm text-gray-500">Image not available</p>
-                                      <Button 
-                                        onClick={() => regenerateModelImage(model)}
-                                        size="sm"
-                                        variant="outline"
-                                        className="mt-2"
-                                        disabled={isRegeneratingImage === model.id}
-                                      >
-                                        {isRegeneratingImage === model.id ? (
-                                          <Loader className="h-4 w-4 animate-spin" />
-                                        ) : (
-                                          <RefreshCw className="h-4 w-4 mr-1" />
-                                        )}
-                                        Regenerate
-                                      </Button>
+                    {generatedModels.map((model) => (
+                      <div key={model.id} className="relative group">
+                        <div className={`flip-container relative aspect-square ${flippedModels[model.id] ? 'flipped' : ''}`}>
+                          <div className="flipper">
+                            {/* Front face */}
+                            <div className="flip-front">
+                              {model.imageUrl ? (
+                                <>
+                                  <img 
+                                    src={model.imageUrl} 
+                                    alt={model.description}
+                                    className="w-full h-full object-cover" 
+                                    onError={handleImageError}
+                                  />
+                                  {isRegeneratingImage === model.id && (
+                                    <div className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center">
+                                      <Loader className="animate-spin text-white w-8 h-8" />
                                     </div>
+                                  )}
+                                </>
+                              ) : (
+                                <div className="bg-gray-200 w-full h-full flex items-center justify-center">
+                                  <div className="text-center p-4">
+                                    <AlertCircle className="mx-auto h-8 w-8 text-amber-500 mb-2" />
+                                    <p className="text-sm text-gray-500">Image not available</p>
+                                    <Button 
+                                      onClick={() => regenerateModelImage(model)}
+                                      size="sm"
+                                      variant="outline"
+                                      className="mt-2"
+                                      disabled={isRegeneratingImage === model.id}
+                                    >
+                                      {isRegeneratingImage === model.id ? (
+                                        <Loader className="h-4 w-4 animate-spin" />
+                                      ) : (
+                                        <RefreshCw className="h-4 w-4 mr-1" />
+                                      )}
+                                      Regenerate
+                                    </Button>
                                   </div>
-                                )}
-                              </div>
+                                </div>
+                              )}
+                            </div>
 
-                              {/* Back face - shows after approval */}
-                              <div className="flip-back">
-                                {model.imageUrl ? (
-                                  <div className="relative w-full h-full">
-                                    <img 
-                                      src={model.imageUrl} 
-                                      alt={model.description}
-                                      className="w-full h-full object-cover" 
-                                      onError={handleImageError}
-                                    />
-                                    <div className="absolute inset-0 flex items-center justify-center">
-                                      <div className="bg-green-100 bg-opacity-80 rounded-full p-6 shadow-lg border-2 border-green-500 transform rotate-[-20deg]">
-                                        <p className="text-green-700 font-bold text-xs md:text-sm">APPROVED</p>
-                                        <p className="text-green-700 font-bold text-xs md:text-sm">BRAND FACE</p>
-                                      </div>
+                            {/* Back face - shows after approval */}
+                            <div className="flip-back">
+                              {model.imageUrl ? (
+                                <div className="relative w-full h-full">
+                                  <img 
+                                    src={model.imageUrl} 
+                                    alt={model.description}
+                                    className="w-full h-full object-cover" 
+                                    onError={handleImageError}
+                                  />
+                                  <div className="absolute inset-0 flex items-center justify-center">
+                                    <div className="bg-green-100 bg-opacity-80 rounded-full p-6 shadow-lg border-2 border-green-500 transform rotate-[-20deg]">
+                                      <p className="text-green-700 font-bold text-xs md:text-sm">APPROVED</p>
+                                      <p className="text-green-700 font-bold text-xs md:text-sm">BRAND FACE</p>
                                     </div>
                                   </div>
-                                ) : (
-                                  <div className="bg-gray-200 w-full h-full flex items-center justify-center">
-                                    <div className="text-center p-4">
-                                      <AlertCircle className="mx-auto h-8 w-8 text-amber-500 mb-2" />
-                                      <p className="text-sm text-gray-500">Image not available</p>
-                                    </div>
+                                </div>
+                              ) : (
+                                <div className="bg-gray-200 w-full h-full flex items-center justify-center">
+                                  <div className="text-center p-4">
+                                    <AlertCircle className="mx-auto h-8 w-8 text-amber-500 mb-2" />
+                                    <p className="text-sm text-gray-500">Image not available</p>
                                   </div>
-                                )}
-                              </div>
+                                </div>
+                              )}
                             </div>
                           </div>
-
-                          {/* Hover overlay with description - only show if not flipped */}
-                          {!flippedModels[model.id] && (
-                            <div className="absolute inset-0 bg-black bg-opacity-70 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col justify-between p-3 text-white">
-                              <div className="flex-grow flex items-center justify-center">
-                                <p className="text-sm text-center">{model.description}</p>
-                              </div>
-                              <div className="flex justify-center gap-4 mt-2">
-                                <Button 
-                                  size="icon" 
-                                  variant="outline" 
-                                  className="h-8 w-8 rounded-full bg-green-50 hover:bg-green-100 border-green-200"
-                                  onClick={() => handleApproveModel(model)}
-                                >
-                                  <Check className="h-4 w-4 text-green-600" />
-                                </Button>
-                                <Button 
-                                  size="icon" 
-                                  variant="outline"
-                                  className="h-8 w-8 rounded-full bg-red-50 hover:bg-red-100 border-red-200"
-                                  onClick={() => handleRejectModel(model)}
-                                >
-                                  <X className="h-4 w-4 text-red-600" />
-                                </Button>
-                              </div>
-                            </div>
-                          )}
                         </div>
-                      ))}
+
+                        {/* Hover overlay with description - only show if not flipped */}
+                        {!flippedModels[model.id] && !model.approved && (
+                          <div className="absolute inset-0 bg-black bg-opacity-70 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col justify-between p-3 text-white">
+                            <div className="flex-grow flex items-center justify-center">
+                              <p className="text-sm text-center">{model.description}</p>
+                            </div>
+                            <div className="flex justify-center gap-4 mt-2">
+                              <Button 
+                                size="icon" 
+                                variant="outline" 
+                                className="h-8 w-8 rounded-full bg-green-50 hover:bg-green-100 border-green-200"
+                                onClick={() => handleApproveModel(model)}
+                              >
+                                <Check className="h-4 w-4 text-green-600" />
+                              </Button>
+                              <Button 
+                                size="icon" 
+                                variant="outline"
+                                className="h-8 w-8 rounded-full bg-red-50 hover:bg-red-100 border-red-200"
+                                onClick={() => handleRejectModel(model)}
+                              >
+                                <X className="h-4 w-4 text-red-600" />
+                              </Button>
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    ))}
                   </div>
                 )}
                 
-                {!isGenerating && generatedModels.filter(m => !m.approved).length === 0 && (
+                {!isGenerating && generatedModels.filter(m => !m.approved).length === 0 && generatedModels.length > 0 && (
                   <div className="text-center py-8">
                     <p className="text-polaris-secondary mb-4">All models have been reviewed</p>
                     <Button onClick={() => setShowGeneratedModelsDialog(false)}>Close</Button>
