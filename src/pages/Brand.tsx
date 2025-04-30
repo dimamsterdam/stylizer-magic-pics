@@ -14,19 +14,7 @@ import { useToast } from "@/hooks/use-toast";
 import { Palette, Users, Camera, Wand2 } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import FashionModelsSection from "@/components/FashionModelsSection";
-
-interface BrandIdentity {
-  id: string;
-  brand_name?: string;
-  values: string[];
-  age_range_min: number;
-  age_range_max: number;
-  gender: 'all' | 'male' | 'female' | 'non_binary';
-  income_level: 'low' | 'medium' | 'high' | 'luxury';
-  characteristics: string[];
-  photography_mood: string;
-  photography_lighting: string;
-}
+import { BrandIdentity } from "@/types/brandTypes";
 
 const AGE_RANGES = [{
   label: "18-24",

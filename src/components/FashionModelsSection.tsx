@@ -7,16 +7,10 @@ import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Check, X, Loader, Plus } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
-
-interface ModelDescription {
-  id: string;
-  description: string;
-  imageUrl: string | null;
-  approved: boolean;
-}
+import { ModelDescription, BrandIdentity } from "@/types/brandTypes";
 
 interface FashionModelsSectionProps {
-  brandIdentity: any;
+  brandIdentity: BrandIdentity;
   onModelsUpdated?: () => void;
 }
 

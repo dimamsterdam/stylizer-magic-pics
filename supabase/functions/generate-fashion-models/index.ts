@@ -8,6 +8,14 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
+interface ModelDescription {
+  id: string;
+  description: string;
+  imageUrl: string | null;
+  approved: boolean;
+  [key: string]: string | boolean | null;
+}
+
 interface BrandIdentity {
   brand_name?: string;
   values: string[];
@@ -16,13 +24,6 @@ interface BrandIdentity {
   gender: 'all' | 'male' | 'female' | 'non_binary';
   income_level: 'low' | 'medium' | 'high' | 'luxury';
   characteristics: string[];
-}
-
-interface ModelDescription {
-  id: string;
-  description: string;
-  imageUrl: string | null;
-  approved: boolean;
 }
 
 serve(async (req) => {
