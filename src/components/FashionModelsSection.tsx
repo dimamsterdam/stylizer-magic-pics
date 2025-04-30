@@ -5,7 +5,7 @@ import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Check, X, Loader, Plus, AlertCircle, RefreshCw } from "lucide-react";
+import { Check, X, Loader, Plus, AlertCircle, RefreshCw, Trash2 } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ModelDescription, BrandIdentity } from "@/types/brandTypes";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
@@ -271,29 +271,21 @@ const FashionModelsSection: React.FC<FashionModelsSectionProps> = ({ brandIdenti
                 <h3 className="font-medium text-lg text-polaris-text">Generated Models</h3>
                 
                 {isGenerating && (
-                  <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
+                  <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-0">
                     {Array.from({ length: 5 }).map((_, i) => (
-                      <Card key={`skeleton-${i}`} className="overflow-hidden flex flex-col">
-                        <Skeleton className="w-full aspect-square" />
-                        <div className="p-3">
-                          <Skeleton className="h-4 w-full mb-2" />
-                          <Skeleton className="h-4 w-3/4" />
-                          <div className="flex justify-between mt-4">
-                            <Skeleton className="h-8 w-8 rounded-full" />
-                            <Skeleton className="h-8 w-8 rounded-full" />
-                          </div>
-                        </div>
-                      </Card>
+                      <div key={`skeleton-${i}`} className="relative aspect-square">
+                        <Skeleton className="w-full h-full" />
+                      </div>
                     ))}
                   </div>
                 )}
                 
                 {!isGenerating && generatedModels.filter(m => !m.approved).length > 0 && (
-                  <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
+                  <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-0">
                     {generatedModels
                       .filter(model => !model.approved)
                       .map((model) => (
-                        <Card key={model.id} className="overflow-hidden flex flex-col">
+                        <div key={model.id} className="relative group">
                           <div className="relative aspect-square">
                             {model.imageUrl ? (
                               <>
@@ -343,9 +335,13 @@ const FashionModelsSection: React.FC<FashionModelsSectionProps> = ({ brandIdenti
                               </Button>
                             )}
                           </div>
-                          <div className="p-3">
-                            {renderModelDescription(model.description)}
-                            <div className="flex justify-between mt-3">
+
+                          {/* Hover overlay with description */}
+                          <div className="absolute inset-0 bg-black bg-opacity-70 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col justify-between p-3 text-white">
+                            <div className="flex-grow flex items-center justify-center">
+                              <p className="text-sm text-center">{model.description}</p>
+                            </div>
+                            <div className="flex justify-center gap-4 mt-2">
                               <Button 
                                 size="icon" 
                                 variant="outline" 
@@ -364,7 +360,7 @@ const FashionModelsSection: React.FC<FashionModelsSectionProps> = ({ brandIdenti
                               </Button>
                             </div>
                           </div>
-                        </Card>
+                        </div>
                       ))}
                   </div>
                 )}
@@ -381,7 +377,7 @@ const FashionModelsSection: React.FC<FashionModelsSectionProps> = ({ brandIdenti
         </DialogContent>
       </Dialog>
 
-      {/* Approved Models Grid */}
+      {/* Approved Models in Card View */}
       {approvedModels.length > 0 && (
         <div className="space-y-4">
           <div className="flex items-center gap-2">
@@ -391,10 +387,9 @@ const FashionModelsSection: React.FC<FashionModelsSectionProps> = ({ brandIdenti
             </Badge>
           </div>
           
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-0">
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
             {approvedModels.map((model) => (
-              <div key={model.id} className="relative group">
-                {/* Edge-to-edge square image */}
+              <Card key={model.id} className="overflow-hidden flex flex-col">
                 <div className="relative aspect-square">
                   {model.imageUrl ? (
                     <>
@@ -432,41 +427,34 @@ const FashionModelsSection: React.FC<FashionModelsSectionProps> = ({ brandIdenti
                       </div>
                     </div>
                   )}
-                  
-                  {/* Hover overlay with description */}
-                  <div className="absolute inset-0 bg-black bg-opacity-70 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col justify-between p-3 text-white">
-                    <div className="flex-grow flex items-center justify-center">
-                      <p className="text-sm text-center">{model.description}</p>
-                    </div>
-                    <div className="flex justify-end">
-                      {/* Action buttons on hover */}
-                      <div className="flex gap-2">
-                        <Button 
-                          size="icon" 
-                          variant="outline"
-                          className="h-8 w-8 rounded-full border-white/30 bg-transparent hover:bg-white/20"
-                          onClick={() => regenerateModelImage(model)}
-                          disabled={isRegeneratingImage === model.id}
-                        >
-                          {isRegeneratingImage === model.id ? (
-                            <Loader className="h-4 w-4 text-white animate-spin" />
-                          ) : (
-                            <RefreshCw className="h-4 w-4 text-white" />
-                          )}
-                        </Button>
-                        <Button 
-                          size="icon" 
-                          variant="outline"
-                          className="h-8 w-8 rounded-full border-white/30 bg-transparent hover:bg-white/20"
-                          onClick={() => handleRemoveApprovedModel(model)}
-                        >
-                          <X className="h-4 w-4 text-white" />
-                        </Button>
-                      </div>
-                    </div>
+                </div>
+                <div className="p-3">
+                  {renderModelDescription(model.description)}
+                  <div className="flex justify-between mt-3">
+                    <Button 
+                      size="icon" 
+                      variant="outline" 
+                      className="h-8 w-8 rounded-full bg-neutral-50 hover:bg-neutral-100 border-neutral-200"
+                      onClick={() => regenerateModelImage(model)}
+                      disabled={isRegeneratingImage === model.id}
+                    >
+                      {isRegeneratingImage === model.id ? (
+                        <Loader className="h-4 w-4 animate-spin" />
+                      ) : (
+                        <RefreshCw className="h-4 w-4" />
+                      )}
+                    </Button>
+                    <Button 
+                      size="icon" 
+                      variant="outline"
+                      className="h-8 w-8 rounded-full bg-red-50 hover:bg-red-100 border-red-200"
+                      onClick={() => handleRemoveApprovedModel(model)}
+                    >
+                      <Trash2 className="h-4 w-4 text-red-600" />
+                    </Button>
                   </div>
                 </div>
-              </div>
+              </Card>
             ))}
           </div>
         </div>
