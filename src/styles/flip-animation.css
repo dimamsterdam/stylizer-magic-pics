@@ -1,0 +1,19 @@
+
+/* 3D Flip Animation Styles */
+.backface-hidden {
+  -webkit-backface-visibility: hidden;
+  backface-visibility: hidden;
+}
+
+.rotate-y-180 {
+  transform: rotateY(180deg);
+}
+
+/* Utility classes for transitions */
+.transition-all {
+  transition-property: all;
+}
+
+.duration-700 {
+  transition-duration: 700ms;
+}
