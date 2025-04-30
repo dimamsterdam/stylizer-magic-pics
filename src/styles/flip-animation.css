@@ -1,15 +1,35 @@
 
 /* 3D Flip Animation Styles */
-.backface-hidden {
-  -webkit-backface-visibility: hidden;
-  backface-visibility: hidden;
+.flip-container {
+  perspective: 1000px;
+  transform-style: preserve-3d;
 }
 
-.rotate-y-180 {
+.flipper {
+  transition: transform 0.8s;
+  transform-style: preserve-3d;
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+
+.flip-front, .flip-back {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+}
+
+.flip-back {
   transform: rotateY(180deg);
 }
 
-/* Utility classes for transitions */
+.flipped .flipper {
+  transform: rotateY(180deg);
+}
+
+/* Keep existing animation utility classes */
 .transition-all {
   transition-property: all;
 }
