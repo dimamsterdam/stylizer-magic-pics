@@ -8,6 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import { Check, X, Loader, Plus } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ModelDescription, BrandIdentity } from "@/types/brandTypes";
+import { Json } from "@/integrations/supabase/types";
 
 interface FashionModelsSectionProps {
   brandIdentity: BrandIdentity;
@@ -29,9 +30,17 @@ const FashionModelsSection: React.FC<FashionModelsSectionProps> = ({ brandIdenti
         throw new Error("Brand identity ID is required");
       }
 
+      // When saving to Supabase, we need to ensure the models are properly serializable
+      const serializedModels = models.map(model => ({
+        id: model.id,
+        description: model.description,
+        imageUrl: model.imageUrl,
+        approved: model.approved
+      }));
+
       const { error } = await supabase
         .from('brand_identity')
-        .update({ brand_models: models })
+        .update({ brand_models: serializedModels })
         .eq('id', brandIdentity.id);
 
       if (error) throw error;
@@ -81,9 +90,12 @@ const FashionModelsSection: React.FC<FashionModelsSectionProps> = ({ brandIdenti
 
       if (error) throw error;
       
+      // Ensure generated models have the correct type
+      const typedModels = data.map((model: any) => model as ModelDescription);
+      
       // Keep approved models and add new ones
       const currentApproved = generatedModels.filter(model => model.approved);
-      setGeneratedModels([...currentApproved, ...data]);
+      setGeneratedModels([...currentApproved, ...typedModels]);
     } catch (error) {
       console.error('Error generating fashion models:', error);
       toast({

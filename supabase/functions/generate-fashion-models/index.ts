@@ -24,6 +24,8 @@ interface BrandIdentity {
   gender: 'all' | 'male' | 'female' | 'non_binary';
   income_level: 'low' | 'medium' | 'high' | 'luxury';
   characteristics: string[];
+  photography_mood?: string;
+  photography_lighting?: string;
 }
 
 serve(async (req) => {
@@ -64,7 +66,7 @@ serve(async (req) => {
           description: desc,
           imageUrl,
           approved: false
-        };
+        } as ModelDescription;
       } catch (error) {
         console.error(`Error generating image for model ${index}:`, error);
         return {
@@ -72,7 +74,7 @@ serve(async (req) => {
           description: desc,
           imageUrl: null,
           approved: false
-        };
+        } as ModelDescription;
       }
     }));
 

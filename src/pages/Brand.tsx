@@ -14,7 +14,8 @@ import { useToast } from "@/hooks/use-toast";
 import { Palette, Users, Camera, Wand2 } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import FashionModelsSection from "@/components/FashionModelsSection";
-import { BrandIdentity } from "@/types/brandTypes";
+import { BrandIdentity, ModelDescription } from "@/types/brandTypes";
+import { Json } from "@/integrations/supabase/types";
 
 const AGE_RANGES = [{
   label: "18-24",
@@ -134,7 +135,14 @@ const Brand = () => {
           .single();
         
         if (insertError) throw insertError;
-        return newData as BrandIdentity;
+        
+        // Cast JSON data to our type
+        const typedData = {
+          ...newData,
+          brand_models: newData.brand_models ? newData.brand_models.map((model: Json) => model as unknown as ModelDescription) : []
+        } as BrandIdentity;
+        
+        return typedData;
       }
       
       if (data?.brand_name) {
@@ -145,7 +153,13 @@ const Brand = () => {
         setAgeRange(`${data.age_range_min}-${data.age_range_max}`);
       }
       
-      return data as BrandIdentity;
+      // Cast JSON data to our type
+      const typedData = {
+        ...data,
+        brand_models: data.brand_models ? data.brand_models.map((model: Json) => model as unknown as ModelDescription) : []
+      } as BrandIdentity;
+      
+      return typedData;
     },
     meta: {
       onError: (error: Error) => {
