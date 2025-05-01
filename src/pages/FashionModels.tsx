@@ -7,6 +7,8 @@ import Breadcrumbs from "@/components/Breadcrumbs";
 import { useToast } from "@/hooks/use-toast";
 import FashionModelsSection from "@/components/FashionModelsSection";
 import { BrandIdentity } from "@/types/brandTypes";
+import { PageHeader } from "@/components/ui/page-header";
+import { Users } from "lucide-react";
 
 const FashionModels = () => {
   const navigate = useNavigate();
@@ -73,7 +75,7 @@ const FashionModels = () => {
 
   if (isLoading) {
     return (
-      <div className="container py-6">
+      <div className="w-full p-6">
         <Breadcrumbs items={breadcrumbItems} className="mb-6" />
         <div className="flex justify-center items-center py-12">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-polaris-border-highlight"></div>
@@ -87,18 +89,18 @@ const FashionModels = () => {
   }
 
   return (
-    <div className="container py-6">
-      <Breadcrumbs items={breadcrumbItems} className="mb-6" />
+    <div className="w-full">
+      <PageHeader
+        title="Fashion Models"
+        description="Manage the fashion models that represent your brand"
+        icon={<Users className="h-5 w-5" />}
+        breadcrumbs={breadcrumbItems}
+        className="mb-6"
+      />
       
-      <div className="flex items-center justify-between mb-8">
-        <h1 className="text-2xl font-semibold text-polaris-text">Fashion Models</h1>
-      </div>
-      
-      <div className="space-y-8">
+      <div className="p-6">
         {brandIdentity && (
-          <section className="space-y-4">
-            <FashionModelsSection brandIdentity={brandIdentity} standalone={true} />
-          </section>
+          <FashionModelsSection brandIdentity={brandIdentity} standalone={true} />
         )}
       </div>
     </div>
