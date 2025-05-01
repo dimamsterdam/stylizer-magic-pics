@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -7,7 +6,7 @@ import { useToast } from "@/hooks/use-toast";
 import FashionModelsSection from "@/components/FashionModelsSection";
 import { BrandIdentity } from "@/types/brandTypes";
 import { PageHeader } from "@/components/ui/page-header";
-import { Users, Plus, Male, Female, Globe } from "lucide-react";
+import { Users, Plus, UserCircle2, Globe } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
@@ -82,13 +81,16 @@ const FashionModels = () => {
     }
   });
 
-  const breadcrumbItems = [{
-    label: "Home",
-    href: "/"
-  }, {
-    label: "Fashion Models",
-    href: "/fashion-models"
-  }];
+  const breadcrumbItems = [
+    {
+      label: "Home",
+      href: "/"
+    },
+    {
+      label: "Fashion Models",
+      href: "/fashion-models"
+    }
+  ];
 
   const handleGenerateClick = () => {
     setIsGenerating(true);
@@ -131,7 +133,7 @@ const FashionModels = () => {
               <div className="space-y-4 flex-grow">
                 <div>
                   <div className="flex items-center gap-2 mb-2">
-                    <Male className="h-5 w-5 text-polaris-text-subdued" />
+                    <UserCircle2 className="h-5 w-5 text-polaris-text-subdued" />
                     <h3 className="text-polaris-text font-medium">Gender</h3>
                   </div>
                   <RadioGroup
