@@ -7,7 +7,7 @@ import { useToast } from "@/hooks/use-toast";
 import FashionModelsSection from "@/components/FashionModelsSection";
 import { BrandIdentity } from "@/types/brandTypes";
 import { PageHeader } from "@/components/ui/page-header";
-import { Users, Plus, GenderMale, GenderFemale, Globe } from "lucide-react";
+import { Users, Plus, Male, Female, Globe } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
@@ -131,7 +131,7 @@ const FashionModels = () => {
               <div className="space-y-4 flex-grow">
                 <div>
                   <div className="flex items-center gap-2 mb-2">
-                    <GenderMale className="h-5 w-5 text-polaris-text-subdued" />
+                    <Male className="h-5 w-5 text-polaris-text-subdued" />
                     <h3 className="text-polaris-text font-medium">Gender</h3>
                   </div>
                   <RadioGroup
