@@ -1,48 +1,40 @@
-
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { Users, Plus, Check, X, Trash2, Wand } from "lucide-react";
+import { Users, Check, X, Trash2, Wand } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { BrandIdentity, ModelDescription } from "@/types/brandTypes";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Card, CardContent } from "@/components/ui/card";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { Label } from "@/components/ui/label";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 interface FashionModelsSectionProps {
   brandIdentity: BrandIdentity;
   standalone?: boolean;
+  initialGenderFilter?: string;
+  initialRaceFilter?: string;
+  isGenerateTriggered?: boolean;
+  onGenerateComplete?: () => void;
 }
 
-const raceOptions = [
-  { label: "Any", value: "any" },
-  { label: "Asian", value: "Asian" },
-  { label: "Black", value: "Black" },
-  { label: "Caucasian", value: "Caucasian" },
-  { label: "Hispanic", value: "Hispanic" },
-  { label: "Middle Eastern", value: "Middle Eastern" },
-  { label: "Mixed", value: "Mixed" },
-];
-
-const ModelCard = ({ 
-  model, 
-  onApprove, 
-  onReject,
-  onDelete, 
-  onCustomize,
-  showActions = true 
-}: { 
-  model: ModelDescription; 
-  onApprove?: () => void; 
+interface ModelCardProps {
+  model: ModelDescription;
+  onApprove?: () => void;
   onReject?: () => void;
   onDelete?: () => void;
   onCustomize?: () => void;
   showActions?: boolean;
+}
+
+const ModelCard: React.FC<ModelCardProps> = ({
+  model,
+  onApprove,
+  onReject,
+  onDelete,
+  onCustomize,
+  showActions = true
 }) => {
   return (
     <Card className="overflow-hidden">
@@ -57,9 +49,9 @@ const ModelCard = ({
                     <TooltipProvider>
                       <Tooltip>
                         <TooltipTrigger asChild>
-                          <Button 
-                            variant="default" 
-                            size="icon" 
+                          <Button
+                            variant="default"
+                            size="icon"
                             className="w-8 h-8 rounded-full bg-white/80 text-gray-700 hover:bg-white hover:text-red-500"
                             onClick={(e) => {
                               e.stopPropagation();
@@ -81,9 +73,9 @@ const ModelCard = ({
                         <TooltipTrigger asChild>
                           <Popover>
                             <PopoverTrigger asChild>
-                              <Button 
-                                variant="default" 
-                                size="icon" 
+                              <Button
+                                variant="default"
+                                size="icon"
                                 className="w-8 h-8 rounded-full bg-white/80 text-gray-700 hover:bg-white hover:text-blue-500"
                               >
                                 <Wand className="h-4 w-4" />
@@ -93,7 +85,7 @@ const ModelCard = ({
                             <PopoverContent className="w-80">
                               <div className="space-y-4">
                                 <h4 className="font-medium text-sm">Customize model prompt</h4>
-                                <textarea 
+                                <textarea
                                   className="w-full min-h-[100px] p-2 border border-gray-300 rounded-md"
                                   placeholder="Add specific details to customize this model..."
                                   defaultValue={model.description}
@@ -153,9 +145,9 @@ const ModelCard = ({
                   <TooltipProvider>
                     <Tooltip>
                       <TooltipTrigger asChild>
-                        <Button 
-                          variant="default" 
-                          size="icon" 
+                        <Button
+                          variant="default"
+                          size="icon"
                           className="w-8 h-8 rounded-full bg-white/80 text-gray-700 hover:bg-white hover:text-red-500"
                           onClick={(e) => {
                             e.stopPropagation();
@@ -177,9 +169,9 @@ const ModelCard = ({
                       <TooltipTrigger asChild>
                         <Popover>
                           <PopoverTrigger asChild>
-                            <Button 
-                              variant="default" 
-                              size="icon" 
+                            <Button
+                              variant="default"
+                              size="icon"
                               className="w-8 h-8 rounded-full bg-white/80 text-gray-700 hover:bg-white hover:text-blue-500"
                             >
                               <Wand className="h-4 w-4" />
@@ -189,7 +181,7 @@ const ModelCard = ({
                           <PopoverContent className="w-80">
                             <div className="space-y-4">
                               <h4 className="font-medium text-sm">Customize model prompt</h4>
-                              <textarea 
+                              <textarea
                                 className="w-full min-h-[100px] p-2 border border-gray-300 rounded-md"
                                 placeholder="Add specific details to customize this model..."
                                 defaultValue={model.description}
@@ -234,12 +226,32 @@ const ModelCard = ({
   );
 };
 
-const FashionModelsSection = ({ brandIdentity, standalone = false }: FashionModelsSectionProps) => {
+const FashionModelsSection = ({
+  brandIdentity,
+  standalone = false,
+  initialGenderFilter = "Female",
+  initialRaceFilter = "any",
+  isGenerateTriggered = false,
+  onGenerateComplete
+}: FashionModelsSectionProps) => {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [genderFilter, setGenderFilter] = useState<string>("Female");
-  const [raceFilter, setRaceFilter] = useState<string>("any");
+  const [genderFilter, setGenderFilter] = useState<string>(initialGenderFilter);
+  const [raceFilter, setRaceFilter] = useState<string>(initialRaceFilter);
   const { toast } = useToast();
   const queryClient = useQueryClient();
+
+  // Update local filters when props change
+  useEffect(() => {
+    setGenderFilter(initialGenderFilter);
+    setRaceFilter(initialRaceFilter);
+  }, [initialGenderFilter, initialRaceFilter]);
+
+  // Trigger generation when the parent signals
+  useEffect(() => {
+    if (isGenerateTriggered) {
+      generateMutation.mutate();
+    }
+  }, [isGenerateTriggered]);
 
   const generateMutation = useMutation({
     mutationFn: async () => {
@@ -249,7 +261,7 @@ const FashionModelsSection = ({ brandIdentity, standalone = false }: FashionMode
       }
 
       const { data, error } = await supabase.functions.invoke('generate-fashion-models', {
-        body: { 
+        body: {
           brandName: brandIdentity.brand_name,
           values: brandIdentity.values,
           characteristics: brandIdentity.characteristics,
@@ -287,6 +299,7 @@ const FashionModelsSection = ({ brandIdentity, standalone = false }: FashionMode
         description: "Fashion models have been generated"
       });
       setIsDialogOpen(true);
+      if (onGenerateComplete) onGenerateComplete();
     },
     onError: (error) => {
       console.error('Error generating fashion models:', error);
@@ -295,6 +308,7 @@ const FashionModelsSection = ({ brandIdentity, standalone = false }: FashionMode
         description: "Failed to generate fashion models",
         variant: "destructive"
       });
+      if (onGenerateComplete) onGenerateComplete();
     }
   });
 
@@ -302,7 +316,7 @@ const FashionModelsSection = ({ brandIdentity, standalone = false }: FashionMode
     mutationFn: async (modelId: string) => {
       // Get the current models
       const currentModels = [...(brandIdentity.brand_models || [])];
-      
+
       // Find the model to approve
       const modelIndex = currentModels.findIndex(model => model.id === modelId);
       if (modelIndex >= 0) {
@@ -337,7 +351,7 @@ const FashionModelsSection = ({ brandIdentity, standalone = false }: FashionMode
     mutationFn: async (modelId: string) => {
       // Get the current models
       const currentModels = [...(brandIdentity.brand_models || [])];
-      
+
       // Filter out the deleted model
       const updatedModels = currentModels.filter(model => model.id !== modelId);
 
@@ -373,7 +387,7 @@ const FashionModelsSection = ({ brandIdentity, standalone = false }: FashionMode
     mutationFn: async (modelId: string) => {
       // Get the current models
       const currentModels = [...(brandIdentity.brand_models || [])];
-      
+
       // Filter out the rejected model
       const updatedModels = currentModels.filter(model => model.id !== modelId);
 
@@ -401,90 +415,21 @@ const FashionModelsSection = ({ brandIdentity, standalone = false }: FashionMode
     }
   });
 
-  const handleGenerateModels = () => {
-    generateMutation.mutate();
-  };
-
   const approvedModels = brandIdentity.brand_models?.filter(model => model.approved) || [];
   const unapprovedModels = brandIdentity.brand_models?.filter(model => !model.approved) || [];
 
   return (
     <div id="fashion-models-section">
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-4 gap-4">
-        {!standalone && (
-          <div className="flex items-center gap-2 text-xl font-semibold text-polaris-text">
-            <Users className="h-6 w-6" />
-            <h2>Fashion Models</h2>
-          </div>
-        )}
-
-        <div className="flex flex-wrap items-center gap-3">
-          <div className="flex items-center gap-2">
-            <div className="flex-shrink-0 text-polaris-text-subdued text-sm">Gender:</div>
-            <RadioGroup
-              defaultValue="Female"
-              value={genderFilter}
-              onValueChange={setGenderFilter}
-              className="flex items-center space-x-4"
-            >
-              <div className="flex items-center space-x-2">
-                <RadioGroupItem value="Female" id="female" />
-                <Label htmlFor="female">Female</Label>
-              </div>
-              <div className="flex items-center space-x-2">
-                <RadioGroupItem value="Male" id="male" />
-                <Label htmlFor="male">Male</Label>
-              </div>
-            </RadioGroup>
-          </div>
-
-          <div className="flex items-center gap-2">
-            <div className="flex-shrink-0 text-polaris-text-subdued text-sm">Race:</div>
-            <Select value={raceFilter} onValueChange={setRaceFilter}>
-              <SelectTrigger className="w-[140px]">
-                <SelectValue placeholder="Any race" />
-              </SelectTrigger>
-              <SelectContent>
-                {raceOptions.map(option => (
-                  <SelectItem key={option.value} value={option.value}>
-                    {option.label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-
-          <Button
-            variant="primary"
-            onClick={handleGenerateModels}
-            disabled={generateMutation.isPending}
-            className="ml-auto"
-          >
-            {generateMutation.isPending ? (
-              <>
-                <div className="animate-spin mr-2 h-4 w-4 border-2 border-white border-t-transparent rounded-full" />
-                Generating...
-              </>
-            ) : (
-              <>
-                <Plus className="mr-2 h-4 w-4" />
-                Generate Models
-              </>
-            )}
-          </Button>
-        </div>
-      </div>
-
       {approvedModels.length > 0 && (
         <div className="mb-8">
           <h3 className="text-lg font-medium mb-3 text-polaris-text">Faces of the brand</h3>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
             {approvedModels.map(model => (
-              <ModelCard 
-                key={model.id} 
+              <ModelCard
+                key={model.id}
                 model={model}
                 onDelete={() => deleteModelMutation.mutate(model.id)}
-                onCustomize={() => {}}
+                onCustomize={() => { }}
                 showActions={true}
               />
             ))}
@@ -497,9 +442,9 @@ const FashionModelsSection = ({ brandIdentity, standalone = false }: FashionMode
           <h3 className="text-lg font-medium mb-3 text-polaris-text">Pending Models</h3>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 mb-6">
             {unapprovedModels.map(model => (
-              <ModelCard 
-                key={model.id} 
-                model={model} 
+              <ModelCard
+                key={model.id}
+                model={model}
                 onApprove={() => approveModelMutation.mutate(model.id)}
                 onReject={() => rejectModelMutation.mutate(model.id)}
                 showActions={true}
@@ -531,8 +476,8 @@ const FashionModelsSection = ({ brandIdentity, standalone = false }: FashionMode
             <div className="max-h-[60vh] overflow-y-auto space-y-4">
               {brandIdentity.brand_models?.filter(model => !model.approved).map(model => (
                 <div key={model.id} className="border rounded-md p-4">
-                  <ModelCard 
-                    model={model} 
+                  <ModelCard
+                    model={model}
                     onApprove={() => approveModelMutation.mutate(model.id)}
                     onReject={() => rejectModelMutation.mutate(model.id)}
                   />
