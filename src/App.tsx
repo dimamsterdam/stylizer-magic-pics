@@ -20,6 +20,7 @@ const Expose = lazy(() => import("./pages/Expose"));
 const Publish = lazy(() => import("./pages/Publish"));
 const Videographer = lazy(() => import("./pages/Videographer"));
 const ProductPhotoShoot = lazy(() => import("./pages/ProductPhotoShoot"));
+const FashionModels = lazy(() => import("./pages/FashionModels"));
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -49,6 +50,7 @@ function App() {
               <Route path="/publish" element={<Publish />} />
               <Route path="/videographer" element={<Videographer />} />
               <Route path="/product-photo-shoot" element={<ProductPhotoShoot />} />
+              <Route path="/fashion-models" element={<FashionModels />} />
               <Route path="*" element={<NotFound />} />
             </Route>
           </Routes>

@@ -1,3 +1,4 @@
+
 import React from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -9,12 +10,10 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
 import { Palette, Users, Camera, Wand2 } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
-import FashionModelsSection from "@/components/FashionModelsSection";
-import { BrandIdentity, ModelDescription } from "@/types/brandTypes";
+import { BrandIdentity } from "@/types/brandTypes";
 import { Json } from "@/integrations/supabase/types";
 
 const AGE_RANGES = [{
@@ -101,8 +100,6 @@ const Brand = () => {
   const [brandName, setBrandName] = React.useState("");
   const [isGenerating, setIsGenerating] = React.useState(false);
   const [ageRange, setAgeRange] = React.useState("");
-  const [showModelsDialog, setShowModelsDialog] = React.useState(false);
-  const [hasPromptedForModels, setHasPromptedForModels] = React.useState(false);
 
   const { data: brandIdentity, isLoading } = useQuery({
     queryKey: ['brandIdentity'],
@@ -139,7 +136,7 @@ const Brand = () => {
         // Cast JSON data to our type
         const typedData = {
           ...newData,
-          brand_models: newData.brand_models ? newData.brand_models.map((model: Json) => model as unknown as ModelDescription) : []
+          brand_models: newData.brand_models ? newData.brand_models.map((model: Json) => model as unknown as any) : []
         } as BrandIdentity;
         
         return typedData;
@@ -156,7 +153,7 @@ const Brand = () => {
       // Cast JSON data to our type
       const typedData = {
         ...data,
-        brand_models: data.brand_models ? data.brand_models.map((model: Json) => model as unknown as ModelDescription) : []
+        brand_models: data.brand_models ? data.brand_models.map((model: Json) => model as unknown as any) : []
       } as BrandIdentity;
       
       return typedData;
@@ -334,25 +331,6 @@ const Brand = () => {
     });
   };
 
-  const getCurrentAgeRangeValue = () => {
-    if (!brandIdentity?.age_range_min || !brandIdentity?.age_range_max) return "";
-    return `${brandIdentity.age_range_min}-${brandIdentity.age_range_max}`;
-  };
-
-  React.useEffect(() => {
-    if (brandIdentity && 
-        brandIdentity.brand_name && 
-        brandIdentity.values?.length > 0 && 
-        brandIdentity.characteristics?.length > 0 &&
-        !hasPromptedForModels && 
-        (!brandIdentity.brand_models || brandIdentity.brand_models.length === 0)) {
-      setTimeout(() => {
-        setShowModelsDialog(true);
-        setHasPromptedForModels(true);
-      }, 1000);
-    }
-  }, [brandIdentity, hasPromptedForModels]);
-
   const breadcrumbItems = [{
     label: "Home",
     href: "/"
@@ -360,6 +338,12 @@ const Brand = () => {
     label: "Brand Identity",
     href: "/brand"
   }];
+
+  // Check if brand identity is set up and then show a note to direct to Fashion Models page
+  const showFashionModelsNote = brandIdentity && 
+      brandIdentity.brand_name && 
+      brandIdentity.values?.length > 0 && 
+      brandIdentity.characteristics?.length > 0;
 
   if (isLoading) {
     return <div className="container py-6">
@@ -532,14 +516,19 @@ const Brand = () => {
           </div>
         </section>
 
-        {/* Fashion Models Section */}
-        {brandIdentity?.id && (
-          <section className="space-y-4">
-            <div className="flex items-center gap-2 text-xl font-semibold text-polaris-text">
-              <Users className="h-6 w-6" />
-              <h2>Fashion Models</h2>
+        {/* Note about Fashion Models */}
+        {showFashionModelsNote && (
+          <section className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+            <div className="flex items-center gap-2 mb-2">
+              <Users className="h-5 w-5 text-blue-500" />
+              <h3 className="font-medium">Fashion Models</h3>
             </div>
-            <FashionModelsSection brandIdentity={brandIdentity} />
+            <p className="text-sm mb-3">
+              Based on your brand identity, you can now generate fashion models to represent your brand in product photos.
+            </p>
+            <Button variant="outline" onClick={() => navigate("/fashion-models")}>
+              Go to Fashion Models
+            </Button>
           </section>
         )}
       </div>
@@ -594,42 +583,6 @@ const Brand = () => {
         </Sheet>
       </div>
     </div>
-
-    {/* Models Generation Dialog */}
-    <Dialog open={showModelsDialog} onOpenChange={setShowModelsDialog}>
-      <DialogContent className="sm:max-w-md">
-        <DialogHeader>
-          <DialogTitle>Generate Fashion Models</DialogTitle>
-          <DialogDescription>
-            Based on your brand identity, we can generate fashion models that represent your brand. These models can be used for your product photography and marketing materials.
-          </DialogDescription>
-        </DialogHeader>
-        <div className="flex flex-col gap-4 py-4">
-          <p>
-            Would you like to generate fashion models that match your brand's target audience?
-          </p>
-          <div className="flex justify-end gap-3">
-            <Button variant="outline" onClick={() => setShowModelsDialog(false)}>
-              Not Now
-            </Button>
-            <Button 
-              onClick={() => {
-                setShowModelsDialog(false);
-                // Scroll to fashion models section
-                setTimeout(() => {
-                  const section = document.getElementById('fashion-models-section');
-                  if (section) {
-                    section.scrollIntoView({ behavior: 'smooth' });
-                  }
-                }, 100);
-              }}
-            >
-              Generate Models
-            </Button>
-          </div>
-        </div>
-      </DialogContent>
-    </Dialog>
   </div>;
 };
 

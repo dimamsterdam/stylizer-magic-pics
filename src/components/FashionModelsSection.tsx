@@ -1,509 +1,323 @@
 
 import React, { useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
-import { useToast } from "@/hooks/use-toast";
-import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Check, X, Loader, Plus, AlertCircle, RefreshCw, Trash2 } from "lucide-react";
-import { Skeleton } from "@/components/ui/skeleton";
-import { ModelDescription, BrandIdentity } from "@/types/brandTypes";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import "../styles/flip-animation.css";
+import { Button } from "@/components/ui/button";
+import { Users, Plus, Check, X } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
+import { BrandIdentity, ModelDescription } from "@/types/brandTypes";
 
 interface FashionModelsSectionProps {
   brandIdentity: BrandIdentity;
-  onModelsUpdated?: () => void;
+  standalone?: boolean;
 }
 
-const FashionModelsSection: React.FC<FashionModelsSectionProps> = ({ brandIdentity, onModelsUpdated }) => {
-  const [isGenerating, setIsGenerating] = useState(false);
-  const [generatedModels, setGeneratedModels] = useState<ModelDescription[]>(
-    Array.isArray(brandIdentity.brand_models) ? brandIdentity.brand_models : []
+const ModelCard = ({ model, onApprove, onReject, showActions = true }: { 
+  model: ModelDescription; 
+  onApprove?: () => void; 
+  onReject?: () => void;
+  showActions?: boolean;
+}) => {
+  return (
+    <div className={`relative rounded-md overflow-hidden shadow-md ${model.approved ? 'flip-container flipped' : 'flip-container'}`}>
+      <div className="flipper">
+        <div className="flip-front bg-white">
+          {model.imageUrl ? (
+            <img src={model.imageUrl} alt="Model" className="w-full h-48 object-cover" />
+          ) : (
+            <div className="w-full h-48 bg-gray-200 flex items-center justify-center">
+              <Users className="h-12 w-12 text-gray-400" />
+              <span className="sr-only">No image available</span>
+            </div>
+          )}
+          <div className="p-4">
+            <p className="text-sm text-polaris-text">{model.description}</p>
+            {showActions && !model.approved && (
+              <div className="flex justify-end mt-3 space-x-2">
+                <Button variant="outline" size="sm" className="text-red-500" onClick={onReject}>
+                  <X className="h-4 w-4 mr-1" />
+                  Reject
+                </Button>
+                <Button variant="outline" size="sm" className="text-green-500" onClick={onApprove}>
+                  <Check className="h-4 w-4 mr-1" />
+                  Approve
+                </Button>
+              </div>
+            )}
+            {showActions && model.approved && (
+              <div className="mt-3">
+                <div className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                  <Check className="h-3 w-3 mr-1" />
+                  Approved
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+        <div className="flip-back bg-white">
+          {model.imageUrl ? (
+            <div className="relative">
+              <img src={model.imageUrl} alt="Model" className="w-full h-48 object-cover opacity-90" />
+              <div className="absolute inset-0 flex items-center justify-center">
+                <div className="transform rotate-45 bg-green-500 text-white font-bold py-2 px-8 text-lg opacity-90">
+                  APPROVED
+                </div>
+              </div>
+              <div className="absolute inset-x-0 bottom-0 bg-green-500 text-white text-center py-1 text-sm font-bold opacity-90">
+                BRAND FACE
+              </div>
+            </div>
+          ) : (
+            <div className="w-full h-48 bg-gray-200 flex items-center justify-center">
+              <Users className="h-12 w-12 text-gray-400" />
+              <span className="sr-only">No image available</span>
+            </div>
+          )}
+          <div className="p-4">
+            <p className="text-sm text-polaris-text">{model.description}</p>
+            {showActions && (
+              <div className="mt-3">
+                <div className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                  <Check className="h-3 w-3 mr-1" />
+                  Approved Brand Face
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+    </div>
   );
-  const [approvedModels, setApprovedModels] = useState<ModelDescription[]>(
-    Array.isArray(brandIdentity.brand_models) ? brandIdentity.brand_models.filter(model => model.approved) : []
-  );
-  const [isRegeneratingImage, setIsRegeneratingImage] = useState<string | null>(null);
-  const [showGeneratedModelsDialog, setShowGeneratedModelsDialog] = useState(false);
+};
+
+const FashionModelsSection = ({ brandIdentity, standalone = false }: FashionModelsSectionProps) => {
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
   const { toast } = useToast();
   const queryClient = useQueryClient();
-  
-  // Track flipped state for animations
-  const [flippedModels, setFlippedModels] = useState<Record<string, boolean>>({});
 
-  const saveMutation = useMutation({
-    mutationFn: async (models: ModelDescription[]) => {
-      if (!brandIdentity.id) {
-        throw new Error("Brand identity ID is required");
+  const generateMutation = useMutation({
+    mutationFn: async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session?.user?.id) {
+        throw new Error("No authenticated user");
       }
 
-      // When saving to Supabase, we need to ensure the models are properly serializable
-      const serializedModels = models.map(model => ({
-        id: model.id,
-        description: model.description,
-        imageUrl: model.imageUrl,
-        approved: model.approved
-      }));
-
-      const { error } = await supabase
-        .from('brand_identity')
-        .update({ brand_models: serializedModels })
-        .eq('id', brandIdentity.id);
+      const { data, error } = await supabase.functions.invoke('generate-fashion-models', {
+        body: { 
+          brandName: brandIdentity.brand_name,
+          values: brandIdentity.values,
+          characteristics: brandIdentity.characteristics,
+          age_range_min: brandIdentity.age_range_min,
+          age_range_max: brandIdentity.age_range_max,
+          gender: brandIdentity.gender,
+          income_level: brandIdentity.income_level
+        }
+      });
 
       if (error) throw error;
-      return models;
+      console.log("Models generated:", data);
+
+      // Update the brand_identity record with the generated models
+      const { error: updateError } = await supabase
+        .from('brand_identity')
+        .update({
+          brand_models: data
+        })
+        .eq('id', brandIdentity.id);
+
+      if (updateError) throw updateError;
+      return data;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['brandIdentity'] });
       toast({
         title: "Success",
-        description: "Fashion models updated successfully"
+        description: "Fashion models have been generated"
       });
-      if (onModelsUpdated) onModelsUpdated();
+      setIsDialogOpen(true);
     },
     onError: (error) => {
-      console.error('Error saving models:', error);
+      console.error('Error generating fashion models:', error);
       toast({
         title: "Error",
-        description: "Failed to save fashion models",
+        description: "Failed to generate fashion models",
         variant: "destructive"
       });
     }
   });
 
-  const generateModels = async () => {
-    if (!brandIdentity) {
-      toast({
-        title: "Error",
-        description: "Brand identity data is required",
-        variant: "destructive"
-      });
-      return;
-    }
+  const approveModelMutation = useMutation({
+    mutationFn: async (modelId: string) => {
+      // Get the current models
+      const currentModels = [...(brandIdentity.brand_models || [])];
+      
+      // Find the model to approve
+      const modelIndex = currentModels.findIndex(model => model.id === modelId);
+      if (modelIndex >= 0) {
+        currentModels[modelIndex].approved = true;
+      }
 
-    setIsGenerating(true);
-    setShowGeneratedModelsDialog(true);
-    
-    try {
-      const regenerateIds = generatedModels
-        .filter(model => !model.approved)
-        .map(model => model.id);
-
-      console.log("Calling generate-fashion-models with:", { 
-        brandIdentity, 
-        regenerateIds, 
-        count: 10 - approvedModels.length 
-      });
-
-      const { data, error } = await supabase.functions.invoke('generate-fashion-models', {
-        body: { 
-          brandIdentity,
-          regenerate: regenerateIds,
-          count: 10 - approvedModels.length
-        }
-      });
+      // Update the database
+      const { error } = await supabase
+        .from('brand_identity')
+        .update({
+          brand_models: currentModels
+        })
+        .eq('id', brandIdentity.id);
 
       if (error) throw error;
-      console.log("Generated models data:", data);
-      
-      if (!Array.isArray(data) || data.length === 0) {
-        throw new Error("No models were generated");
-      }
-      
-      // Ensure generated models have the correct type
-      const typedModels = data.map((model: any): ModelDescription => ({
-        id: model.id || crypto.randomUUID(),
-        description: model.description || "Error generating description",
-        imageUrl: model.imageUrl || null,
-        approved: model.approved || false
-      }));
-      
-      // Keep approved models and add new ones
-      const currentApproved = generatedModels.filter(model => model.approved);
-      setGeneratedModels([...currentApproved, ...typedModels]);
-      
-      toast({
-        title: "Success",
-        description: `Generated ${typedModels.length} models successfully`
-      });
-    } catch (error) {
-      console.error('Error generating fashion models:', error);
+      return currentModels;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['brandIdentity'] });
+    },
+    onError: (error) => {
+      console.error('Error approving model:', error);
       toast({
         title: "Error",
-        description: typeof error === 'string' ? error : 'Failed to generate fashion models',
+        description: "Failed to approve model",
         variant: "destructive"
       });
-    } finally {
-      setIsGenerating(false);
     }
-  };
+  });
 
-  const regenerateModelImage = async (model: ModelDescription) => {
-    if (!model.description) {
-      toast({
-        title: "Error",
-        description: "Model description is required to regenerate image",
-        variant: "destructive"
-      });
-      return;
-    }
+  const rejectModelMutation = useMutation({
+    mutationFn: async (modelId: string) => {
+      // Get the current models
+      const currentModels = [...(brandIdentity.brand_models || [])];
+      
+      // Filter out the rejected model
+      const updatedModels = currentModels.filter(model => model.id !== modelId);
 
-    setIsRegeneratingImage(model.id);
-    try {
-      const { data, error } = await supabase.functions.invoke('generate-ai-image', {
-        body: { 
-          prompt: `Professional headshot photo of a fashion model. ${model.description}. Clean neutral background, soft flattering lighting, professional fashion photography style.`,
-          size: "1024x1024",
-          model: "dall-e-3"
-        }
-      });
+      // Update the database
+      const { error } = await supabase
+        .from('brand_identity')
+        .update({
+          brand_models: updatedModels
+        })
+        .eq('id', brandIdentity.id);
 
       if (error) throw error;
-      
-      if (data && data.url) {
-        // Update the model with new image URL
-        const updatedModel = { ...model, imageUrl: data.url };
-        
-        // Update in generatedModels
-        const updatedGeneratedModels = generatedModels.map(m => 
-          m.id === model.id ? updatedModel : m
-        );
-        setGeneratedModels(updatedGeneratedModels);
-        
-        // Update in approvedModels if applicable
-        if (model.approved) {
-          const updatedApprovedModels = approvedModels.map(m => 
-            m.id === model.id ? updatedModel : m
-          );
-          setApprovedModels(updatedApprovedModels);
-          saveMutation.mutate(updatedApprovedModels);
-        }
-        
-        toast({
-          title: "Success",
-          description: "Model image regenerated successfully"
-        });
-      } else {
-        throw new Error("No image URL returned");
-      }
-    } catch (error) {
-      console.error('Error regenerating model image:', error);
+      return updatedModels;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['brandIdentity'] });
+    },
+    onError: (error) => {
+      console.error('Error rejecting model:', error);
       toast({
         title: "Error",
-        description: "Failed to regenerate model image",
+        description: "Failed to reject model",
         variant: "destructive"
       });
-    } finally {
-      setIsRegeneratingImage(null);
     }
+  });
+
+  const handleGenerateModels = () => {
+    generateMutation.mutate();
   };
 
-  const handleApproveModel = (model: ModelDescription) => {
-    // Mark model as flipped in the UI
-    setFlippedModels(prev => ({
-      ...prev,
-      [model.id]: true
-    }));
-
-    // After animation completes, update model approval status
-    setTimeout(() => {
-      // Create a new array with the updated model (approved = true)
-      const updatedModels = generatedModels.map(m => 
-        m.id === model.id ? { ...m, approved: true } : m
-      );
-      
-      setGeneratedModels(updatedModels);
-      
-      const newApprovedModels = [...approvedModels, { ...model, approved: true }];
-      setApprovedModels(newApprovedModels);
-      
-      saveMutation.mutate(newApprovedModels);
-    }, 900); // Slightly longer than animation duration to ensure it completes
-  };
-
-  const handleRejectModel = (model: ModelDescription) => {
-    const updatedModels = generatedModels.filter(m => m.id !== model.id);
-    setGeneratedModels(updatedModels);
-  };
-
-  const handleRemoveApprovedModel = (model: ModelDescription) => {
-    const updatedApprovedModels = approvedModels.filter(m => m.id !== model.id);
-    setApprovedModels(updatedApprovedModels);
-    saveMutation.mutate(updatedApprovedModels);
-  };
-
-  // Handle image errors by using a placeholder
-  const handleImageError = (event: React.SyntheticEvent<HTMLImageElement>) => {
-    event.currentTarget.src = '/placeholder.svg';
-  };
-
-  // Function to determine if a model needs image regeneration
-  const needsImageRegeneration = (model: ModelDescription) => {
-    return !model.imageUrl || model.imageUrl === 'null' || model.imageUrl === '';
-  };
-
-  // Function to render model description
-  const renderModelDescription = (description: string) => {
-    if (!description || description === "Error generating description") {
-      return (
-        <p className="text-sm text-polaris-secondary italic">No description available</p>
-      );
-    }
-    return (
-      <p className="text-sm line-clamp-3 text-polaris-text">{description}</p>
-    );
-  };
+  const approvedModels = brandIdentity.brand_models?.filter(model => model.approved) || [];
+  const unapprovedModels = brandIdentity.brand_models?.filter(model => !model.approved) || [];
 
   return (
-    <div className="space-y-8">
-      <div className="flex items-center justify-between">
-        <div>
-          <h2 className="text-xl font-semibold text-polaris-text">Fashion Models</h2>
-          <p className="text-polaris-secondary mt-1">Create and manage models that represent your brand identity</p>
-        </div>
-        <Button 
-          onClick={generateModels} 
-          disabled={isGenerating || (approvedModels.length >= 10)}
+    <div id="fashion-models-section">
+      <div className="flex items-center justify-between mb-4">
+        {!standalone && (
+          <div className="flex items-center gap-2 text-xl font-semibold text-polaris-text">
+            <Users className="h-6 w-6" />
+            <h2>Fashion Models</h2>
+          </div>
+        )}
+        <Button
+          variant="default"
+          onClick={handleGenerateModels}
+          disabled={generateMutation.isPending}
         >
-          {isGenerating ? <Loader className="mr-2 h-4 w-4 animate-spin" /> : <Plus className="mr-2 h-4 w-4" />}
-          Generate Models
+          {generateMutation.isPending ? (
+            <>
+              <div className="animate-spin mr-2 h-4 w-4 border-2 border-white border-t-transparent rounded-full" />
+              Generating...
+            </>
+          ) : (
+            <>
+              <Plus className="mr-2 h-4 w-4" />
+              {brandIdentity.brand_models?.length ? "Regenerate Models" : "Generate Models"}
+            </>
+          )}
         </Button>
       </div>
 
-      {/* Full Screen Dialog for Generated Models */}
-      <Dialog open={showGeneratedModelsDialog} onOpenChange={setShowGeneratedModelsDialog}>
-        <DialogContent className="max-w-6xl w-[90vw] h-[80vh] max-h-[80vh] overflow-y-auto p-0">
-          <DialogHeader className="p-6 border-b">
-            <DialogTitle>Generated Fashion Models</DialogTitle>
-          </DialogHeader>
-          <div className="p-0">
-            {/* Generated Models */}
-            {(generatedModels.length > 0 || isGenerating) && (
-              <div className="space-y-4">
-                <div className="p-4 border-b">
-                  <h3 className="font-medium text-lg text-polaris-text">Generated Models</h3>
-                  <p className="text-sm text-polaris-secondary">Approve or reject fashion models for your brand identity</p>
-                </div>
-                
-                {isGenerating && (
-                  <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-0">
-                    {Array.from({ length: 5 }).map((_, i) => (
-                      <div key={`skeleton-${i}`} className="relative aspect-square">
-                        <Skeleton className="w-full h-full" />
-                      </div>
-                    ))}
-                  </div>
-                )}
-                
-                {!isGenerating && (
-                  <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-0">
-                    {generatedModels.map((model) => (
-                      <div key={model.id} className="relative group">
-                        <div className={`flip-container relative aspect-square ${flippedModels[model.id] ? 'flipped' : ''}`}>
-                          <div className="flipper">
-                            {/* Front face */}
-                            <div className="flip-front">
-                              {model.imageUrl ? (
-                                <>
-                                  <img 
-                                    src={model.imageUrl} 
-                                    alt={model.description}
-                                    className="w-full h-full object-cover" 
-                                    onError={handleImageError}
-                                  />
-                                  {isRegeneratingImage === model.id && (
-                                    <div className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center">
-                                      <Loader className="animate-spin text-white w-8 h-8" />
-                                    </div>
-                                  )}
-                                </>
-                              ) : (
-                                <div className="bg-gray-200 w-full h-full flex items-center justify-center">
-                                  <div className="text-center p-4">
-                                    <AlertCircle className="mx-auto h-8 w-8 text-amber-500 mb-2" />
-                                    <p className="text-sm text-gray-500">Image not available</p>
-                                    <Button 
-                                      onClick={() => regenerateModelImage(model)}
-                                      size="sm"
-                                      variant="outline"
-                                      className="mt-2"
-                                      disabled={isRegeneratingImage === model.id}
-                                    >
-                                      {isRegeneratingImage === model.id ? (
-                                        <Loader className="h-4 w-4 animate-spin" />
-                                      ) : (
-                                        <RefreshCw className="h-4 w-4 mr-1" />
-                                      )}
-                                      Regenerate
-                                    </Button>
-                                  </div>
-                                </div>
-                              )}
-                            </div>
-
-                            {/* Back face - shows after approval */}
-                            <div className="flip-back">
-                              {model.imageUrl ? (
-                                <div className="relative w-full h-full">
-                                  <img 
-                                    src={model.imageUrl} 
-                                    alt={model.description}
-                                    className="w-full h-full object-cover" 
-                                    onError={handleImageError}
-                                  />
-                                  <div className="absolute inset-0 flex items-center justify-center">
-                                    <div className="bg-green-100 bg-opacity-80 rounded-full p-6 shadow-lg border-2 border-green-500 transform rotate-[-20deg]">
-                                      <p className="text-green-700 font-bold text-xs md:text-sm">APPROVED</p>
-                                      <p className="text-green-700 font-bold text-xs md:text-sm">BRAND FACE</p>
-                                    </div>
-                                  </div>
-                                </div>
-                              ) : (
-                                <div className="bg-gray-200 w-full h-full flex items-center justify-center">
-                                  <div className="text-center p-4">
-                                    <AlertCircle className="mx-auto h-8 w-8 text-amber-500 mb-2" />
-                                    <p className="text-sm text-gray-500">Image not available</p>
-                                  </div>
-                                </div>
-                              )}
-                            </div>
-                          </div>
-                        </div>
-
-                        {/* Hover overlay with description - only show if not flipped */}
-                        {!flippedModels[model.id] && !model.approved && (
-                          <div className="absolute inset-0 bg-black bg-opacity-70 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col justify-between p-3 text-white">
-                            <div className="flex-grow flex items-center justify-center">
-                              <p className="text-sm text-center">{model.description}</p>
-                            </div>
-                            <div className="flex justify-center gap-4 mt-2">
-                              <Button 
-                                size="icon" 
-                                variant="outline" 
-                                className="h-8 w-8 rounded-full bg-green-50 hover:bg-green-100 border-green-200"
-                                onClick={() => handleApproveModel(model)}
-                              >
-                                <Check className="h-4 w-4 text-green-600" />
-                              </Button>
-                              <Button 
-                                size="icon" 
-                                variant="outline"
-                                className="h-8 w-8 rounded-full bg-red-50 hover:bg-red-100 border-red-200"
-                                onClick={() => handleRejectModel(model)}
-                              >
-                                <X className="h-4 w-4 text-red-600" />
-                              </Button>
-                            </div>
-                          </div>
-                        )}
-                      </div>
-                    ))}
-                  </div>
-                )}
-                
-                {!isGenerating && generatedModels.filter(m => !m.approved).length === 0 && generatedModels.length > 0 && (
-                  <div className="text-center py-8">
-                    <p className="text-polaris-secondary mb-4">All models have been reviewed</p>
-                    <Button onClick={() => setShowGeneratedModelsDialog(false)}>Close</Button>
-                  </div>
-                )}
-              </div>
-            )}
-          </div>
-        </DialogContent>
-      </Dialog>
-
-      {/* Approved Models in Card View */}
       {approvedModels.length > 0 && (
-        <div className="space-y-4">
-          <div className="flex items-center gap-2">
-            <h3 className="font-medium text-lg text-polaris-text">Faces of the Brand</h3>
-            <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">
-              {approvedModels.length} {approvedModels.length === 1 ? 'model' : 'models'}
-            </Badge>
-          </div>
-          
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
-            {approvedModels.map((model) => (
-              <Card key={model.id} className="overflow-hidden flex flex-col">
-                <div className="relative aspect-square">
-                  {model.imageUrl ? (
-                    <>
-                      <img 
-                        src={model.imageUrl} 
-                        alt={model.description}
-                        className="w-full h-full object-cover" 
-                        onError={handleImageError}
-                      />
-                      {isRegeneratingImage === model.id && (
-                        <div className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center">
-                          <Loader className="animate-spin text-white w-8 h-8" />
-                        </div>
-                      )}
-                    </>
-                  ) : (
-                    <div className="bg-gray-200 w-full h-full flex items-center justify-center">
-                      <div className="text-center p-4">
-                        <AlertCircle className="mx-auto h-8 w-8 text-amber-500 mb-2" />
-                        <p className="text-sm text-gray-500">Image not available</p>
-                        <Button 
-                          onClick={() => regenerateModelImage(model)}
-                          size="sm"
-                          variant="outline"
-                          className="mt-2"
-                          disabled={isRegeneratingImage === model.id}
-                        >
-                          {isRegeneratingImage === model.id ? (
-                            <Loader className="h-4 w-4 animate-spin" />
-                          ) : (
-                            <RefreshCw className="h-4 w-4 mr-1" />
-                          )}
-                          Regenerate
-                        </Button>
-                      </div>
-                    </div>
-                  )}
-                </div>
-                <div className="p-3">
-                  {renderModelDescription(model.description)}
-                  <div className="flex justify-between mt-3">
-                    <Button 
-                      size="icon" 
-                      variant="outline" 
-                      className="h-8 w-8 rounded-full bg-neutral-50 hover:bg-neutral-100 border-neutral-200"
-                      onClick={() => regenerateModelImage(model)}
-                      disabled={isRegeneratingImage === model.id}
-                    >
-                      {isRegeneratingImage === model.id ? (
-                        <Loader className="h-4 w-4 animate-spin" />
-                      ) : (
-                        <RefreshCw className="h-4 w-4" />
-                      )}
-                    </Button>
-                    <Button 
-                      size="icon" 
-                      variant="outline"
-                      className="h-8 w-8 rounded-full bg-red-50 hover:bg-red-100 border-red-200"
-                      onClick={() => handleRemoveApprovedModel(model)}
-                    >
-                      <Trash2 className="h-4 w-4 text-red-600" />
-                    </Button>
-                  </div>
-                </div>
-              </Card>
+        <div>
+          <h3 className="text-lg font-medium mb-3">Approved Models</h3>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
+            {approvedModels.map(model => (
+              <ModelCard 
+                key={model.id} 
+                model={model} 
+                showActions={false}
+              />
             ))}
           </div>
         </div>
       )}
 
-      {generatedModels.length === 0 && approvedModels.length === 0 && !isGenerating && (
-        <div className="text-center py-8 border rounded-md bg-gray-50">
-          <p className="text-polaris-secondary mb-4">No fashion models have been generated yet</p>
-          <Button onClick={generateModels}>Generate Fashion Models</Button>
+      {unapprovedModels.length > 0 && (
+        <>
+          <h3 className="text-lg font-medium mb-3">Pending Models</h3>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {unapprovedModels.map(model => (
+              <ModelCard 
+                key={model.id} 
+                model={model} 
+                onApprove={() => approveModelMutation.mutate(model.id)}
+                onReject={() => rejectModelMutation.mutate(model.id)}
+              />
+            ))}
+          </div>
+        </>
+      )}
+
+      {!brandIdentity.brand_models?.length && (
+        <div className="bg-polaris-background rounded-lg p-6 text-center">
+          <Users className="mx-auto h-12 w-12 text-polaris-secondary mb-3" />
+          <h3 className="font-medium text-lg mb-2">No Fashion Models Yet</h3>
+          <p className="text-polaris-secondary mb-4">
+            Generate fashion models based on your brand identity to represent your products
+          </p>
         </div>
       )}
+
+      <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Review Fashion Models</DialogTitle>
+          </DialogHeader>
+          <div className="py-4">
+            <p className="mb-4">
+              We've generated fashion models based on your brand identity. Review and approve the ones that best represent your brand.
+            </p>
+            <div className="max-h-[60vh] overflow-y-auto space-y-4">
+              {brandIdentity.brand_models?.map(model => (
+                <div key={model.id} className="border rounded-md p-4">
+                  <ModelCard 
+                    model={model} 
+                    onApprove={() => approveModelMutation.mutate(model.id)}
+                    onReject={() => rejectModelMutation.mutate(model.id)}
+                  />
+                </div>
+              ))}
+            </div>
+            <div className="mt-4 flex justify-end">
+              <Button onClick={() => setIsDialogOpen(false)}>
+                Close
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
