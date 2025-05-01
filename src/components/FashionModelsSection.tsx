@@ -3,96 +3,241 @@ import React, { useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { Users, Plus, Check, X } from "lucide-react";
+import { Users, Plus, Check, X, Trash2, Wand } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { BrandIdentity, ModelDescription } from "@/types/brandTypes";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Card, CardContent } from "@/components/ui/card";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Label } from "@/components/ui/label";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 interface FashionModelsSectionProps {
   brandIdentity: BrandIdentity;
   standalone?: boolean;
 }
 
-const ModelCard = ({ model, onApprove, onReject, showActions = true }: { 
+const raceOptions = [
+  { label: "Any", value: "any" },
+  { label: "Asian", value: "Asian" },
+  { label: "Black", value: "Black" },
+  { label: "Caucasian", value: "Caucasian" },
+  { label: "Hispanic", value: "Hispanic" },
+  { label: "Middle Eastern", value: "Middle Eastern" },
+  { label: "Mixed", value: "Mixed" },
+];
+
+const ModelCard = ({ 
+  model, 
+  onApprove, 
+  onReject,
+  onDelete, 
+  onCustomize,
+  showActions = true 
+}: { 
   model: ModelDescription; 
   onApprove?: () => void; 
   onReject?: () => void;
+  onDelete?: () => void;
+  onCustomize?: () => void;
   showActions?: boolean;
 }) => {
   return (
-    <div className={`relative rounded-md overflow-hidden shadow-md ${model.approved ? 'flip-container flipped' : 'flip-container'}`}>
-      <div className="flipper">
-        <div className="flip-front bg-white">
-          {model.imageUrl ? (
-            <img src={model.imageUrl} alt="Model" className="w-full h-48 object-cover" />
-          ) : (
-            <div className="w-full h-48 bg-gray-200 flex items-center justify-center">
-              <Users className="h-12 w-12 text-gray-400" />
-              <span className="sr-only">No image available</span>
-            </div>
-          )}
-          <div className="p-4">
-            <p className="text-sm text-polaris-text">{model.description}</p>
-            {showActions && !model.approved && (
-              <div className="flex justify-end mt-3 space-x-2">
-                <Button variant="outline" size="sm" className="text-red-500" onClick={onReject}>
-                  <X className="h-4 w-4 mr-1" />
-                  Reject
-                </Button>
-                <Button variant="outline" size="sm" className="text-green-500" onClick={onApprove}>
-                  <Check className="h-4 w-4 mr-1" />
-                  Approve
-                </Button>
+    <Card className="overflow-hidden">
+      <div className={model.approved ? 'flip-container flipped' : 'flip-container'}>
+        <div className="flipper">
+          <div className="flip-front bg-white">
+            {model.imageUrl ? (
+              <div className="relative">
+                <img src={model.imageUrl} alt="Model" className="w-full h-48 object-cover" />
+                {model.approved && (
+                  <div className="absolute top-2 right-2 flex space-x-1">
+                    <TooltipProvider>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <Button 
+                            variant="default" 
+                            size="icon" 
+                            className="w-8 h-8 rounded-full bg-white/80 text-gray-700 hover:bg-white hover:text-red-500"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              if (onDelete) onDelete();
+                            }}
+                          >
+                            <Trash2 className="h-4 w-4" />
+                            <span className="sr-only">Remove model</span>
+                          </Button>
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          <p>Remove model</p>
+                        </TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
+
+                    <TooltipProvider>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <Popover>
+                            <PopoverTrigger asChild>
+                              <Button 
+                                variant="default" 
+                                size="icon" 
+                                className="w-8 h-8 rounded-full bg-white/80 text-gray-700 hover:bg-white hover:text-blue-500"
+                              >
+                                <Wand className="h-4 w-4" />
+                                <span className="sr-only">Customize model</span>
+                              </Button>
+                            </PopoverTrigger>
+                            <PopoverContent className="w-80">
+                              <div className="space-y-4">
+                                <h4 className="font-medium text-sm">Customize model prompt</h4>
+                                <textarea 
+                                  className="w-full min-h-[100px] p-2 border border-gray-300 rounded-md"
+                                  placeholder="Add specific details to customize this model..."
+                                  defaultValue={model.description}
+                                ></textarea>
+                                <div className="flex justify-end">
+                                  <Button size="sm" onClick={() => onCustomize && onCustomize()}>
+                                    Apply Changes
+                                  </Button>
+                                </div>
+                              </div>
+                            </PopoverContent>
+                          </Popover>
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          <p>Customize with prompt</p>
+                        </TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
+                  </div>
+                )}
+              </div>
+            ) : (
+              <div className="w-full h-48 bg-gray-200 flex items-center justify-center">
+                <Users className="h-12 w-12 text-gray-400" />
+                <span className="sr-only">No image available</span>
               </div>
             )}
-            {showActions && model.approved && (
-              <div className="mt-3">
-                <div className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                  <Check className="h-3 w-3 mr-1" />
-                  Approved
+            <CardContent className="p-4">
+              <p className="text-sm text-polaris-text">{model.description}</p>
+              {showActions && !model.approved && (
+                <div className="flex justify-end mt-3 space-x-2">
+                  <Button variant="outline" size="sm" className="text-red-500" onClick={onReject}>
+                    <X className="h-4 w-4 mr-1" />
+                    Reject
+                  </Button>
+                  <Button variant="outline" size="sm" className="text-green-500" onClick={onApprove}>
+                    <Check className="h-4 w-4 mr-1" />
+                    Approve
+                  </Button>
                 </div>
-              </div>
-            )}
+              )}
+              {showActions && model.approved && (
+                <div className="mt-3">
+                  <div className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                    <Check className="h-3 w-3 mr-1" />
+                    Face of the brand
+                  </div>
+                </div>
+              )}
+            </CardContent>
           </div>
-        </div>
-        <div className="flip-back bg-white">
-          {model.imageUrl ? (
-            <div className="relative">
-              <img src={model.imageUrl} alt="Model" className="w-full h-48 object-cover opacity-90" />
-              <div className="absolute inset-0 flex items-center justify-center">
-                <div className="transform rotate-45 bg-green-500 text-white font-bold py-2 px-8 text-lg opacity-90">
-                  APPROVED
+          <div className="flip-back bg-white">
+            {model.imageUrl ? (
+              <div className="relative">
+                <img src={model.imageUrl} alt="Model" className="w-full h-48 object-cover opacity-90" />
+                <div className="absolute top-2 right-2 flex space-x-1">
+                  <TooltipProvider>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <Button 
+                          variant="default" 
+                          size="icon" 
+                          className="w-8 h-8 rounded-full bg-white/80 text-gray-700 hover:bg-white hover:text-red-500"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            if (onDelete) onDelete();
+                          }}
+                        >
+                          <Trash2 className="h-4 w-4" />
+                          <span className="sr-only">Remove model</span>
+                        </Button>
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        <p>Remove model</p>
+                      </TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
+
+                  <TooltipProvider>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <Popover>
+                          <PopoverTrigger asChild>
+                            <Button 
+                              variant="default" 
+                              size="icon" 
+                              className="w-8 h-8 rounded-full bg-white/80 text-gray-700 hover:bg-white hover:text-blue-500"
+                            >
+                              <Wand className="h-4 w-4" />
+                              <span className="sr-only">Customize model</span>
+                            </Button>
+                          </PopoverTrigger>
+                          <PopoverContent className="w-80">
+                            <div className="space-y-4">
+                              <h4 className="font-medium text-sm">Customize model prompt</h4>
+                              <textarea 
+                                className="w-full min-h-[100px] p-2 border border-gray-300 rounded-md"
+                                placeholder="Add specific details to customize this model..."
+                                defaultValue={model.description}
+                              ></textarea>
+                              <div className="flex justify-end">
+                                <Button size="sm" onClick={() => onCustomize && onCustomize()}>
+                                  Apply Changes
+                                </Button>
+                              </div>
+                            </div>
+                          </PopoverContent>
+                        </Popover>
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        <p>Customize with prompt</p>
+                      </TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
                 </div>
               </div>
-              <div className="absolute inset-x-0 bottom-0 bg-green-500 text-white text-center py-1 text-sm font-bold opacity-90">
-                BRAND FACE
-              </div>
-            </div>
-          ) : (
-            <div className="w-full h-48 bg-gray-200 flex items-center justify-center">
-              <Users className="h-12 w-12 text-gray-400" />
-              <span className="sr-only">No image available</span>
-            </div>
-          )}
-          <div className="p-4">
-            <p className="text-sm text-polaris-text">{model.description}</p>
-            {showActions && (
-              <div className="mt-3">
-                <div className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                  <Check className="h-3 w-3 mr-1" />
-                  Approved Brand Face
-                </div>
+            ) : (
+              <div className="w-full h-48 bg-gray-200 flex items-center justify-center">
+                <Users className="h-12 w-12 text-gray-400" />
+                <span className="sr-only">No image available</span>
               </div>
             )}
+            <CardContent className="p-4">
+              <p className="text-sm text-polaris-text">{model.description}</p>
+              {showActions && (
+                <div className="mt-3">
+                  <div className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                    <Check className="h-3 w-3 mr-1" />
+                    Face of the brand
+                  </div>
+                </div>
+              )}
+            </CardContent>
           </div>
         </div>
       </div>
-    </div>
+    </Card>
   );
 };
 
 const FashionModelsSection = ({ brandIdentity, standalone = false }: FashionModelsSectionProps) => {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [genderFilter, setGenderFilter] = useState<string>("Female");
+  const [raceFilter, setRaceFilter] = useState<string>("any");
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -111,18 +256,24 @@ const FashionModelsSection = ({ brandIdentity, standalone = false }: FashionMode
           age_range_min: brandIdentity.age_range_min,
           age_range_max: brandIdentity.age_range_max,
           gender: brandIdentity.gender,
-          income_level: brandIdentity.income_level
+          income_level: brandIdentity.income_level,
+          modelGender: genderFilter,
+          modelRace: raceFilter !== "any" ? raceFilter : undefined
         }
       });
 
       if (error) throw error;
       console.log("Models generated:", data);
 
-      // Update the brand_identity record with the generated models
+      // Append to existing models instead of replacing
+      const existingModels = brandIdentity.brand_models || [];
+      const allModels = [...existingModels, ...data];
+
+      // Update the brand_identity record with the appended models
       const { error: updateError } = await supabase
         .from('brand_identity')
         .update({
-          brand_models: data
+          brand_models: allModels
         })
         .eq('id', brandIdentity.id);
 
@@ -182,6 +333,42 @@ const FashionModelsSection = ({ brandIdentity, standalone = false }: FashionMode
     }
   });
 
+  const deleteModelMutation = useMutation({
+    mutationFn: async (modelId: string) => {
+      // Get the current models
+      const currentModels = [...(brandIdentity.brand_models || [])];
+      
+      // Filter out the deleted model
+      const updatedModels = currentModels.filter(model => model.id !== modelId);
+
+      // Update the database
+      const { error } = await supabase
+        .from('brand_identity')
+        .update({
+          brand_models: updatedModels
+        })
+        .eq('id', brandIdentity.id);
+
+      if (error) throw error;
+      return updatedModels;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['brandIdentity'] });
+      toast({
+        title: "Success",
+        description: "Model has been removed"
+      });
+    },
+    onError: (error) => {
+      console.error('Error deleting model:', error);
+      toast({
+        title: "Error",
+        description: "Failed to delete model",
+        variant: "destructive"
+      });
+    }
+  });
+
   const rejectModelMutation = useMutation({
     mutationFn: async (modelId: string) => {
       // Get the current models
@@ -223,41 +410,82 @@ const FashionModelsSection = ({ brandIdentity, standalone = false }: FashionMode
 
   return (
     <div id="fashion-models-section">
-      <div className="flex items-center justify-between mb-4">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-4 gap-4">
         {!standalone && (
           <div className="flex items-center gap-2 text-xl font-semibold text-polaris-text">
             <Users className="h-6 w-6" />
             <h2>Fashion Models</h2>
           </div>
         )}
-        <Button
-          variant="default"
-          onClick={handleGenerateModels}
-          disabled={generateMutation.isPending}
-        >
-          {generateMutation.isPending ? (
-            <>
-              <div className="animate-spin mr-2 h-4 w-4 border-2 border-white border-t-transparent rounded-full" />
-              Generating...
-            </>
-          ) : (
-            <>
-              <Plus className="mr-2 h-4 w-4" />
-              {brandIdentity.brand_models?.length ? "Regenerate Models" : "Generate Models"}
-            </>
-          )}
-        </Button>
+
+        <div className="flex flex-wrap items-center gap-3">
+          <div className="flex items-center gap-2">
+            <div className="flex-shrink-0 text-polaris-text-subdued text-sm">Gender:</div>
+            <RadioGroup
+              defaultValue="Female"
+              value={genderFilter}
+              onValueChange={setGenderFilter}
+              className="flex items-center space-x-4"
+            >
+              <div className="flex items-center space-x-2">
+                <RadioGroupItem value="Female" id="female" />
+                <Label htmlFor="female">Female</Label>
+              </div>
+              <div className="flex items-center space-x-2">
+                <RadioGroupItem value="Male" id="male" />
+                <Label htmlFor="male">Male</Label>
+              </div>
+            </RadioGroup>
+          </div>
+
+          <div className="flex items-center gap-2">
+            <div className="flex-shrink-0 text-polaris-text-subdued text-sm">Race:</div>
+            <Select value={raceFilter} onValueChange={setRaceFilter}>
+              <SelectTrigger className="w-[140px]">
+                <SelectValue placeholder="Any race" />
+              </SelectTrigger>
+              <SelectContent>
+                {raceOptions.map(option => (
+                  <SelectItem key={option.value} value={option.value}>
+                    {option.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+
+          <Button
+            variant="primary"
+            onClick={handleGenerateModels}
+            disabled={generateMutation.isPending}
+            className="ml-auto"
+          >
+            {generateMutation.isPending ? (
+              <>
+                <div className="animate-spin mr-2 h-4 w-4 border-2 border-white border-t-transparent rounded-full" />
+                Generating...
+              </>
+            ) : (
+              <>
+                <Plus className="mr-2 h-4 w-4" />
+                Generate Models
+              </>
+            )}
+          </Button>
+        </div>
       </div>
 
       {approvedModels.length > 0 && (
-        <div>
-          <h3 className="text-lg font-medium mb-3">Approved Models</h3>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
+        <div className="mb-8">
+          <h3 className="text-lg font-medium mb-3 text-polaris-text">Faces of the brand</h3>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
             {approvedModels.map(model => (
               <ModelCard 
                 key={model.id} 
-                model={model} 
-                showActions={false}
+                model={model}
+                onDelete={() => deleteModelMutation.mutate(model.id)}
+                onCustomize={() => {}}
+                showActions={true}
               />
             ))}
           </div>
@@ -266,14 +494,15 @@ const FashionModelsSection = ({ brandIdentity, standalone = false }: FashionMode
 
       {unapprovedModels.length > 0 && (
         <>
-          <h3 className="text-lg font-medium mb-3">Pending Models</h3>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          <h3 className="text-lg font-medium mb-3 text-polaris-text">Pending Models</h3>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 mb-6">
             {unapprovedModels.map(model => (
               <ModelCard 
                 key={model.id} 
                 model={model} 
                 onApprove={() => approveModelMutation.mutate(model.id)}
                 onReject={() => rejectModelMutation.mutate(model.id)}
+                showActions={true}
               />
             ))}
           </div>
@@ -300,7 +529,7 @@ const FashionModelsSection = ({ brandIdentity, standalone = false }: FashionMode
               We've generated fashion models based on your brand identity. Review and approve the ones that best represent your brand.
             </p>
             <div className="max-h-[60vh] overflow-y-auto space-y-4">
-              {brandIdentity.brand_models?.map(model => (
+              {brandIdentity.brand_models?.filter(model => !model.approved).map(model => (
                 <div key={model.id} className="border rounded-md p-4">
                   <ModelCard 
                     model={model} 

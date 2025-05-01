@@ -3,7 +3,6 @@ import React from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useNavigate } from "react-router-dom";
-import Breadcrumbs from "@/components/Breadcrumbs";
 import { useToast } from "@/hooks/use-toast";
 import FashionModelsSection from "@/components/FashionModelsSection";
 import { BrandIdentity } from "@/types/brandTypes";
@@ -76,7 +75,6 @@ const FashionModels = () => {
   if (isLoading) {
     return (
       <div className="w-full p-6">
-        <Breadcrumbs items={breadcrumbItems} className="mb-6" />
         <div className="flex justify-center items-center py-12">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-polaris-border-highlight"></div>
         </div>
@@ -98,7 +96,7 @@ const FashionModels = () => {
         className="mb-6"
       />
       
-      <div className="p-6">
+      <div className="px-6 pb-6">
         {brandIdentity && (
           <FashionModelsSection brandIdentity={brandIdentity} standalone={true} />
         )}
