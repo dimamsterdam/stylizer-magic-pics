@@ -9,7 +9,7 @@ const Layout: React.FC = () => {
     <SidebarProvider>
       <div className="flex w-full min-h-screen bg-white">
         <GlobalSidebar />
-        <main className="flex-1 p-4">
+        <main className="flex-1">
           <div className="max-w-7xl mx-auto bg-white rounded-lg">
             <Outlet />
           </div>
