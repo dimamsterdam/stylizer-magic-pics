@@ -1,4 +1,3 @@
-
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 
 const openAIApiKey = Deno.env.get('OPENAI_API_KEY');
@@ -34,8 +33,15 @@ serve(async (req) => {
   }
 
   try {
-    const { brandIdentity, regenerate = [], count = 10 } = await req.json();
-    console.log('Generating fashion models for brand:', brandIdentity.brand_name);
+    const requestData = await req.json();
+    console.log('Received request data:', requestData);
+    
+    // Handle both direct brandIdentity object and nested structure
+    const brandIdentity = requestData.brandIdentity || requestData;
+    const regenerate = requestData.regenerate || [];
+    const count = requestData.count || 10;
+    
+    console.log('Using brand identity:', brandIdentity);
 
     if (!brandIdentity) {
       throw new Error('Brand identity is required');
@@ -101,13 +107,14 @@ serve(async (req) => {
 });
 
 function createModelGenerationPrompt(brandIdentity: BrandIdentity): string {
+  const brandName = brandIdentity.brand_name || 'our brand';
   const genderPreference = brandIdentity.gender === 'all' 
     ? 'all genders' 
     : `primarily ${brandIdentity.gender}`;
   
   const ageRange = `${brandIdentity.age_range_min}-${brandIdentity.age_range_max}`;
   
-  return `Create descriptions for fashion models that represent "${brandIdentity.brand_name || 'our brand'}".
+  return `Create descriptions for fashion models that represent "${brandName}".
 The target audience is ${genderPreference}, aged ${ageRange}, with ${brandIdentity.income_level} income level.
 Brand values: ${brandIdentity.values.join(', ')}
 Target audience characteristics: ${brandIdentity.characteristics.join(', ')}

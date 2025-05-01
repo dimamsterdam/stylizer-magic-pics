@@ -260,15 +260,23 @@ const FashionModelsSection = ({
         throw new Error("No authenticated user");
       }
 
+      console.log("Invoking generate-fashion-models with:", {
+        brandIdentity,
+        modelGender: genderFilter,
+        modelRace: raceFilter !== "any" ? raceFilter : undefined
+      });
+
       const { data, error } = await supabase.functions.invoke('generate-fashion-models', {
         body: {
-          brandName: brandIdentity.brand_name,
-          values: brandIdentity.values,
-          characteristics: brandIdentity.characteristics,
-          age_range_min: brandIdentity.age_range_min,
-          age_range_max: brandIdentity.age_range_max,
-          gender: brandIdentity.gender,
-          income_level: brandIdentity.income_level,
+          brandIdentity: {
+            brand_name: brandIdentity.brand_name,
+            values: brandIdentity.values,
+            characteristics: brandIdentity.characteristics,
+            age_range_min: brandIdentity.age_range_min,
+            age_range_max: brandIdentity.age_range_max,
+            gender: brandIdentity.gender,
+            income_level: brandIdentity.income_level
+          },
           modelGender: genderFilter,
           modelRace: raceFilter !== "any" ? raceFilter : undefined
         }
