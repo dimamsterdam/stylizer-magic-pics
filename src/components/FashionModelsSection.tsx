@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { Users, Check, X, Trash2, Wand } from "lucide-react";
+import { Users, Check, X, Trash2, Wand2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { BrandIdentity, ModelDescription } from "@/types/brandTypes";
@@ -78,7 +78,7 @@ const ModelCard: React.FC<ModelCardProps> = ({
                                 size="icon"
                                 className="w-8 h-8 rounded-full bg-white/80 text-gray-700 hover:bg-white hover:text-blue-500"
                               >
-                                <Wand className="h-4 w-4" />
+                                <Wand2 className="h-4 w-4" />
                                 <span className="sr-only">Customize model</span>
                               </Button>
                             </PopoverTrigger>
@@ -127,14 +127,6 @@ const ModelCard: React.FC<ModelCardProps> = ({
                   </Button>
                 </div>
               )}
-              {showActions && model.approved && (
-                <div className="mt-3">
-                  <div className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                    <Check className="h-3 w-3 mr-1" />
-                    Face of the brand
-                  </div>
-                </div>
-              )}
             </CardContent>
           </div>
           <div className="flip-back bg-white">
@@ -174,7 +166,7 @@ const ModelCard: React.FC<ModelCardProps> = ({
                               size="icon"
                               className="w-8 h-8 rounded-full bg-white/80 text-gray-700 hover:bg-white hover:text-blue-500"
                             >
-                              <Wand className="h-4 w-4" />
+                              <Wand2 className="h-4 w-4" />
                               <span className="sr-only">Customize model</span>
                             </Button>
                           </PopoverTrigger>
@@ -424,7 +416,7 @@ const FashionModelsSection = ({
   });
 
   const approvedModels = brandIdentity.brand_models?.filter(model => model.approved) || [];
-  const unapprovedModels = brandIdentity.brand_models?.filter(model => !model.approved) || [];
+  const pendingModels = brandIdentity.brand_models?.filter(model => !model.approved) || [];
 
   return (
     <div id="fashion-models-section">
@@ -445,11 +437,11 @@ const FashionModelsSection = ({
         </div>
       )}
 
-      {unapprovedModels.length > 0 && (
+      {pendingModels.length > 0 && (
         <>
           <h3 className="text-lg font-medium mb-3 text-polaris-text">Pending Models</h3>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 mb-6">
-            {unapprovedModels.map(model => (
+            {pendingModels.map(model => (
               <ModelCard
                 key={model.id}
                 model={model}
@@ -482,7 +474,7 @@ const FashionModelsSection = ({
               We've generated fashion models based on your brand identity. Review and approve the ones that best represent your brand.
             </p>
             <div className="max-h-[60vh] overflow-y-auto space-y-4">
-              {brandIdentity.brand_models?.filter(model => !model.approved).map(model => (
+              {pendingModels.map(model => (
                 <div key={model.id} className="border rounded-md p-4">
                   <ModelCard
                     model={model}
