@@ -4,7 +4,7 @@ import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel";
-import { Check, X, ArrowLeft, ArrowRight, View } from "lucide-react";
+import { Check, X, ArrowLeft, ArrowRight } from "lucide-react";
 
 interface ProductView {
   viewName: string;
@@ -19,7 +19,6 @@ export const ImageReviewGallery = ({ productViews }: ImageReviewGalleryProps) =>
   const [currentViewIndex, setCurrentViewIndex] = useState(0);
   const [currentVariantIndex, setCurrentVariantIndex] = useState(0);
   const [reviewedViews, setReviewedViews] = useState<Set<number>>(new Set());
-  const [isFullScreen, setIsFullScreen] = useState(false);
   const { toast } = useToast();
 
   const currentView = productViews[currentViewIndex];
@@ -49,12 +48,23 @@ export const ImageReviewGallery = ({ productViews }: ImageReviewGalleryProps) =>
   };
 
   const handleReject = () => {
-    // Show the alternative variant
-    setCurrentVariantIndex(prev => (prev === 0 ? 1 : 0));
-    
+    // Show rejection toast
     toast({
-      description: "Showing alternative photo",
+      title: "Image rejected",
+      description: "This photo has been rejected",
+      variant: "destructive"
     });
+    
+    // Move to next view if available
+    if (!isLastView) {
+      setTimeout(() => {
+        setCurrentViewIndex(prev => prev + 1);
+        setCurrentVariantIndex(0);
+      }, 1000);
+    } else {
+      // If it's the last view, just mark it as reviewed
+      setReviewedViews(prev => new Set([...prev, currentViewIndex]));
+    }
   };
 
   const moveToView = (index: number) => {
@@ -64,40 +74,48 @@ export const ImageReviewGallery = ({ productViews }: ImageReviewGalleryProps) =>
     }
   };
 
-  const toggleFullScreen = () => {
-    setIsFullScreen(prev => !prev);
-  };
-
   return (
-    <div className={`relative ${isFullScreen ? 'fixed inset-0 z-50 bg-black' : ''}`}>
-      <div className={`${isFullScreen ? 'flex flex-col h-full' : ''}`}>
+    <div className="relative">
+      <div>
         {/* Header */}
-        <div className={`flex justify-between items-center mb-4 p-4 ${isFullScreen ? 'bg-black text-white' : ''}`}>
+        <div className="flex justify-between items-center mb-4 p-4">
           <div>
-            <h2 className={`text-xl font-medium ${isFullScreen ? 'text-white' : 'text-[--p-text]'}`}>
+            <h2 className="text-xl font-medium text-[--p-text]">
               {currentView.viewName} ({currentViewIndex + 1}/{productViews.length})
             </h2>
-            <p className={`text-sm ${isFullScreen ? 'text-gray-300' : 'text-[--p-text-subdued]'}`}>
+            <p className="text-sm text-[--p-text-subdued]">
               {reviewedViews.has(currentViewIndex) ? 'Approved' : 'Pending review'}
             </p>
           </div>
+        </div>
+        
+        {/* Variant Switcher - Moved above the image */}
+        <div className="flex justify-center mb-4">
           <Button
-            variant={isFullScreen ? "outline" : "secondary"}
-            onClick={toggleFullScreen}
-            className={isFullScreen ? "bg-transparent text-white border-white" : ""}
+            variant={currentVariantIndex === 0 ? "default" : "outline"}
+            size="sm"
+            onClick={() => setCurrentVariantIndex(0)}
+            className="rounded-r-none"
           >
-            <View className="mr-2 h-4 w-4" />
-            {isFullScreen ? "Exit Full Screen" : "Full Screen"}
+            Variant 1
+          </Button>
+          <Button
+            variant={currentVariantIndex === 1 ? "default" : "outline"}
+            size="sm"
+            onClick={() => setCurrentVariantIndex(1)}
+            className="rounded-l-none"
+          >
+            Variant 2
           </Button>
         </div>
         
         {/* Main Image Display */}
-        <div className={`flex-1 ${isFullScreen ? 'flex items-center justify-center' : ''}`}>
-          <div className={`relative ${isFullScreen ? 'h-full max-h-[80vh] w-full max-w-[90vw] mx-auto' : 'aspect-square'}`}>
+        <div className="flex-1">
+          <div className="relative aspect-square">
             <img
               src={currentView.variants[currentVariantIndex]}
               alt={`${currentView.viewName} variant ${currentVariantIndex + 1}`}
-              className={`w-full h-full object-contain ${isFullScreen ? 'max-h-[80vh]' : ''}`}
+              className="w-full h-full object-contain"
               onError={(e) => {
                 e.currentTarget.src = '/placeholder.svg';
               }}
@@ -106,27 +124,7 @@ export const ImageReviewGallery = ({ productViews }: ImageReviewGalleryProps) =>
         </div>
         
         {/* Controls */}
-        <div className={`flex flex-col gap-4 mt-4 ${isFullScreen ? 'p-4 bg-black' : ''}`}>
-          {/* Variant Switcher */}
-          <div className="flex justify-center mb-2">
-            <Button
-              variant={currentVariantIndex === 0 ? "default" : "outline"}
-              size="sm"
-              onClick={() => setCurrentVariantIndex(0)}
-              className="rounded-r-none"
-            >
-              Variant 1
-            </Button>
-            <Button
-              variant={currentVariantIndex === 1 ? "default" : "outline"}
-              size="sm"
-              onClick={() => setCurrentVariantIndex(1)}
-              className="rounded-l-none"
-            >
-              Variant 2
-            </Button>
-          </div>
-          
+        <div className="flex flex-col gap-4 mt-4">
           {/* Navigation */}
           <div className="grid grid-cols-3 gap-4">
             <Button
@@ -168,11 +166,11 @@ export const ImageReviewGallery = ({ productViews }: ImageReviewGalleryProps) =>
                 </Button>
               ) : (
                 <Button
-                  variant="outline"
+                  variant="destructive"
                   onClick={handleReject}
                 >
                   <X className="mr-2 h-4 w-4" />
-                  Try Alternative
+                  Reject
                 </Button>
               )}
             </div>
@@ -180,7 +178,7 @@ export const ImageReviewGallery = ({ productViews }: ImageReviewGalleryProps) =>
         </div>
         
         {/* Thumbnails/Progress */}
-        <div className={`mt-6 ${isFullScreen ? 'p-4 bg-black' : ''}`}>
+        <div className="mt-6">
           <div className="flex justify-center gap-2">
             {productViews.map((view, index) => (
               <button
