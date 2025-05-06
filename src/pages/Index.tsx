@@ -1,96 +1,147 @@
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Image, Tv, Workflow } from "lucide-react";
+import { Image, Tv, Workflow, Layout, Users, ArrowRight } from "lucide-react";
+import { AspectRatio } from "@/components/ui/aspect-ratio";
+import { supabase } from "@/integrations/supabase/client";
+import { RecentProjects } from "@/components/home/RecentProjects";
 
 export default function Index() {
   const navigate = useNavigate();
+  const [isReturningUser, setIsReturningUser] = useState(false);
 
   useEffect(() => {
-    // Auto-redirect to dashboard if needed
-    // navigate('/dashboard');
-  }, [navigate]);
+    // Check if user has created content before
+    const checkUserHistory = async () => {
+      try {
+        const { data: session } = await supabase.auth.getSession();
+        if (session?.session) {
+          const { data: projects } = await supabase
+            .from('user_projects')
+            .select('*')
+            .limit(1);
+          
+          setIsReturningUser(projects && projects.length > 0);
+        }
+      } catch (error) {
+        console.error("Error checking user history:", error);
+      }
+    };
+
+    checkUserHistory();
+  }, []);
+
+  const productTools = [
+    {
+      title: "Product Spotlight",
+      icon: Image,
+      description: "Create beautiful hero images for your product pages",
+      details: "Generate AI-driven hero images featuring your products with customizable themes and settings.",
+      route: "/expose",
+      buttonText: "Create Spotlight",
+      bgColor: "bg-gradient-to-br from-blue-50 to-indigo-100",
+      accentColor: "text-indigo-600",
+    },
+    {
+      title: "Product Photo Shoot",
+      icon: Image,
+      description: "Generate professional product photos for your store",
+      details: "Create multiple product views with variants and easily select the best ones for your Shopify store.",
+      route: "/product-photo-shoot",
+      buttonText: "Start Photo Shoot",
+      bgColor: "bg-gradient-to-br from-amber-50 to-orange-100",
+      accentColor: "text-orange-600",
+    },
+    {
+      title: "Video Creator",
+      icon: Tv,
+      description: "Create promotional videos for your products",
+      details: "Generate product videos with customizable themes, transitions, and music.",
+      route: "/videographer",
+      buttonText: "Create Video",
+      bgColor: "bg-gradient-to-br from-emerald-50 to-teal-100",
+      accentColor: "text-teal-600",
+    },
+    {
+      title: "Image Editor",
+      icon: Workflow,
+      description: "Edit and enhance product images",
+      details: "Use AI-powered tools to edit backgrounds, adjust lighting, and enhance product photos.",
+      route: "/stylizer",
+      buttonText: "Edit Images",
+      bgColor: "bg-gradient-to-br from-purple-50 to-fuchsia-100",
+      accentColor: "text-fuchsia-600",
+    },
+    {
+      title: "Fashion Models",
+      icon: Users,
+      description: "Create virtual fashion models for your brand",
+      details: "Generate diverse models that represent your brand's identity and style.",
+      route: "/fashion-models",
+      buttonText: "Create Models",
+      bgColor: "bg-gradient-to-br from-rose-50 to-pink-100",
+      accentColor: "text-rose-600",
+    },
+    {
+      title: "Brand Dashboard",
+      icon: Layout,
+      description: "Manage your brand assets and statistics",
+      details: "View insights, track performance, and manage all your brand assets in one place.",
+      route: "/dashboard",
+      buttonText: "Go to Dashboard",
+      bgColor: "bg-gradient-to-br from-sky-50 to-cyan-100",
+      accentColor: "text-cyan-600",
+    }
+  ];
 
   return (
     <div className="container mx-auto py-8 px-4">
-      <h1 className="text-3xl font-bold mb-6">Welcome to ProductAI</h1>
-      <p className="text-lg mb-8">Choose what you want to create today:</p>
-
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center">
-              <Image className="mr-2 h-5 w-5" />
-              Product Spotlight
-            </CardTitle>
-            <CardDescription>Create beautiful hero images for your product pages</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <p>Generate AI-driven hero images featuring your products with customizable themes and settings.</p>
-          </CardContent>
-          <CardFooter>
-            <Button asChild variant="primary">
-              <Link to="/expose">Create Spotlight</Link>
-            </Button>
-          </CardFooter>
-        </Card>
-
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center">
-              <Image className="mr-2 h-5 w-5" />
-              Product Photo Shoot
-            </CardTitle>
-            <CardDescription>Generate professional product photos for your store</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <p>Create multiple product views with variants and easily select the best ones for your Shopify store.</p>
-          </CardContent>
-          <CardFooter>
-            <Button asChild variant="primary">
-              <Link to="/product-photo-shoot">Start Photo Shoot</Link>
-            </Button>
-          </CardFooter>
-        </Card>
-
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center">
-              <Tv className="mr-2 h-5 w-5" />
-              Video Creator
-            </CardTitle>
-            <CardDescription>Create promotional videos for your products</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <p>Generate product videos with customizable themes, transitions, and music.</p>
-          </CardContent>
-          <CardFooter>
-            <Button asChild variant="primary">
-              <Link to="/videographer">Create Video</Link>
-            </Button>
-          </CardFooter>
-        </Card>
-
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center">
-              <Workflow className="mr-2 h-5 w-5" />
-              Image Editor
-            </CardTitle>
-            <CardDescription>Edit and enhance product images</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <p>Use AI-powered tools to edit backgrounds, adjust lighting, and enhance product photos.</p>
-          </CardContent>
-          <CardFooter>
-            <Button asChild variant="primary">
-              <Link to="/stylizer">Edit Images</Link>
-            </Button>
-          </CardFooter>
-        </Card>
+      {/* Breadcrumbs */}
+      <div className="flex mb-6 items-center text-sm">
+        <span className="text-[--p-text]">Home</span>
       </div>
+      
+      {isReturningUser ? (
+        <RecentProjects tools={productTools} />
+      ) : (
+        <div>
+          <h1 className="text-display-xl font-bold mb-3 text-[--p-text]">Welcome to ProductAI</h1>
+          <p className="text-lg mb-8 text-[--p-text-subdued]">Choose what you want to create today:</p>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {productTools.map((tool) => (
+              <Card key={tool.title} className="group overflow-hidden border-[--p-border-subdued] hover:shadow-lg transition-all duration-300 h-full flex flex-col">
+                <AspectRatio ratio={3/1} className={`${tool.bgColor} w-full`}>
+                  <div className="flex items-center justify-center h-full p-6">
+                    <tool.icon className={`h-12 w-12 ${tool.accentColor}`} />
+                  </div>
+                </AspectRatio>
+                <CardHeader className="pb-2">
+                  <CardTitle className="flex items-center text-display-md text-[--p-text]">
+                    {tool.title}
+                  </CardTitle>
+                  <CardDescription className="text-body-md text-[--p-text-subdued]">
+                    {tool.description}
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="flex-grow">
+                  <p className="text-[--p-text-subdued]">{tool.details}</p>
+                </CardContent>
+                <CardFooter className="pt-0">
+                  <Button asChild variant="primary" className="w-full group-hover:bg-[#1b5bab] transition-colors">
+                    <Link to={tool.route} className="flex items-center justify-center">
+                      {tool.buttonText}
+                      <ArrowRight className="ml-2 h-4 w-4 opacity-0 transition-opacity group-hover:opacity-100" />
+                    </Link>
+                  </Button>
+                </CardFooter>
+              </Card>
+            ))}
+          </div>
+        </div>
+      )}
     </div>
   );
 }
