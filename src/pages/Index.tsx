@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Image, Tv, Workflow, Layout, Users, ArrowRight } from "lucide-react";
+import { Image, Tv, Workflow, Layout, Users, ArrowRight, Camera } from "lucide-react";
 import { AspectRatio } from "@/components/ui/aspect-ratio";
 import { supabase } from "@/integrations/supabase/client";
 import { RecentProjects } from "@/components/home/RecentProjects";
@@ -18,12 +18,14 @@ export default function Index() {
       try {
         const { data: session } = await supabase.auth.getSession();
         if (session?.session) {
-          const { data: projects } = await supabase
-            .from('user_projects')
-            .select('*')
-            .limit(1);
+          // In a real app, query the database
+          // Since we don't have a user_projects table yet, we'll simulate this
+          // by checking localStorage
+          const hasProjects = localStorage.getItem('hasCreatedContent') === 'true';
+          setIsReturningUser(hasProjects);
           
-          setIsReturningUser(projects && projects.length > 0);
+          // For demo purposes, set this to true after the first visit
+          localStorage.setItem('hasCreatedContent', 'true');
         }
       } catch (error) {
         console.error("Error checking user history:", error);
@@ -46,7 +48,7 @@ export default function Index() {
     },
     {
       title: "Product Photo Shoot",
-      icon: Image,
+      icon: Camera,
       description: "Generate professional product photos for your store",
       details: "Create multiple product views with variants and easily select the best ones for your Shopify store.",
       route: "/product-photo-shoot",

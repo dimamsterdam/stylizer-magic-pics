@@ -1,8 +1,71 @@
 
 import React from "react";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
+import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from "@/components/ui/breadcrumb";
+import { ChevronRight } from "lucide-react";
 
 const NavBar = () => {
+  const location = useLocation();
+  
+  const getBreadcrumbs = () => {
+    const path = location.pathname;
+    const pathSegments = path.split('/').filter(segment => segment);
+    
+    if (pathSegments.length === 0) return null;
+    
+    // Map paths to user-friendly names
+    const pathMap: Record<string, string> = {
+      'dashboard': 'Dashboard',
+      'stylizer': 'Stylizer',
+      'expose': 'Product Spotlight',
+      'videographer': 'Product Video',
+      'fashion-models': 'Fashion Models',
+      'product-photo-shoot': 'Photo Shoot',
+      'settings': 'Settings',
+      'library': 'Library',
+      'images': 'Images',
+      'videos': 'Videos'
+    };
+    
+    return (
+      <Breadcrumb className="ml-4">
+        <BreadcrumbList>
+          <BreadcrumbItem>
+            <BreadcrumbLink asChild>
+              <Link to="/" className="text-sm text-[--p-text-subdued] hover:text-[--p-text]">Home</Link>
+            </BreadcrumbLink>
+          </BreadcrumbItem>
+          <BreadcrumbSeparator>
+            <ChevronRight className="h-4 w-4 text-[--p-text-subdued]" />
+          </BreadcrumbSeparator>
+          
+          {pathSegments.map((segment, index) => {
+            const isLast = index === pathSegments.length - 1;
+            const segmentPath = `/${pathSegments.slice(0, index + 1).join('/')}`;
+            const displayName = pathMap[segment] || segment.charAt(0).toUpperCase() + segment.slice(1);
+            
+            return isLast ? (
+              <BreadcrumbItem key={segment}>
+                <BreadcrumbPage className="text-sm font-medium text-[--p-text]">{displayName}</BreadcrumbPage>
+              </BreadcrumbItem>
+            ) : (
+              <React.Fragment key={segment}>
+                <BreadcrumbItem>
+                  <BreadcrumbLink asChild>
+                    <Link to={segmentPath} className="text-sm text-[--p-text-subdued] hover:text-[--p-text]">{displayName}</Link>
+                  </BreadcrumbLink>
+                </BreadcrumbItem>
+                <BreadcrumbSeparator>
+                  <ChevronRight className="h-4 w-4 text-[--p-text-subdued]" />
+                </BreadcrumbSeparator>
+              </React.Fragment>
+            );
+          })}
+        </BreadcrumbList>
+      </Breadcrumb>
+    );
+  };
+
   return (
     <nav className="bg-white border-b border-polaris-border w-full fixed top-0 left-0 right-0 h-16 z-50">
       <div className="h-full px-4 sm:px-6 lg:px-8">
@@ -28,6 +91,7 @@ const NavBar = () => {
                 </span>
               </span>
             </Link>
+            {getBreadcrumbs()}
           </div>
         </div>
       </div>

@@ -1,5 +1,5 @@
 
-import { ChevronDown, ChevronRight, Image, Video, Palette, Settings, ChevronLeft, Library, LayoutDashboard, Users } from "lucide-react";
+import { ChevronDown, ChevronRight, Image, Video, Palette, Settings, ChevronLeft, Library, LayoutDashboard, Users, Camera } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
 import { Sidebar, SidebarContent, SidebarGroup, SidebarGroupContent, SidebarGroupLabel, SidebarMenu, SidebarMenuButton, SidebarMenuItem, SidebarTrigger } from "@/components/ui/sidebar";
 import { useState, useEffect } from "react";
@@ -20,6 +20,10 @@ const mainNavItems = [{
   title: "Fashion Models",
   icon: Users,
   url: "/fashion-models"
+}, {
+  title: "Photo Shoot",
+  icon: Camera,
+  url: "/product-photo-shoot"
 }];
 
 const libraryItems = [{
