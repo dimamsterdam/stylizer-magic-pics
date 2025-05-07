@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent } from "@/components/ui/card";
@@ -13,7 +12,10 @@ import { useNavigate } from "react-router-dom";
 import { PhotoShootHeader } from "@/components/photoshoot/PhotoShootHeader";
 import { PromptBuilder } from "@/components/expose/PromptBuilder";
 import { ImageReviewGallery } from "@/components/photoshoot/ImageReviewGallery";
-import { PromptSuggestions } from "@/components/photoshoot/PromptSuggestions";
+import { ShotSuggestions } from "@/components/photoshoot/PromptSuggestions";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Form, FormControl, FormField, FormItem, FormLabel } from "@/components/ui/form";
+import { useForm } from "react-hook-form";
 
 interface Product {
   id: string;
@@ -23,6 +25,7 @@ interface Product {
 }
 
 type Step = 'products' | 'theme-content' | 'prompt-suggestions' | 'review';
+type ShootType = 'standard' | 'ai-suggestions';
 const PLACEHOLDER_IMAGE = '/placeholder.svg';
 
 // Mock images for the photo shoot
@@ -66,9 +69,16 @@ const ProductPhotoShoot = () => {
   const [photoShootId, setPhotoShootId] = useState<string | null>(null);
   const [isGeneratingContent, setIsGeneratingContent] = useState(false);
   const [selectedPrompts, setSelectedPrompts] = useState<string[]>([]);
+  const [shootType, setShootType] = useState<ShootType>('standard');
   
   const { toast } = useToast();
   const navigate = useNavigate();
+
+  const form = useForm({
+    defaultValues: {
+      shootType: 'standard'
+    }
+  });
 
   useEffect(() => {
     const checkAuth = async () => {
@@ -150,7 +160,26 @@ const ProductPhotoShoot = () => {
         });
       }
     } else if (currentStep === 'theme-content') {
-      setCurrentStep('prompt-suggestions');
+      const formShootType = form.getValues('shootType');
+      setShootType(formShootType as ShootType);
+      
+      if (formShootType === 'standard') {
+        // Skip to review with standard shots
+        setIsGenerating(true);
+        
+        // Simulate API call delay
+        setTimeout(() => {
+          setIsGenerating(false);
+          setCurrentStep('review');
+          toast({
+            title: "Images generated",
+            description: "Your standard product photos have been generated successfully!",
+          });
+        }, 2000);
+      } else {
+        // Go to shot suggestions
+        setCurrentStep('prompt-suggestions');
+      }
     }
   };
 
@@ -262,6 +291,34 @@ const ProductPhotoShoot = () => {
             />
           </div>
 
+          <div className="space-y-6 mt-6 pt-6 border-t border-[#E3E5E7]">
+            <div>
+              <h3 className="text-heading text-[--p-text] mb-3">Setup your shoot</h3>
+              
+              <form onSubmit={form.handleSubmit(() => {})}>
+                <div className="space-y-4">
+                  <RadioGroup 
+                    defaultValue="standard"
+                    onValueChange={(value) => form.setValue('shootType', value)}
+                  >
+                    <div className="flex items-center space-x-2 p-3 rounded-md hover:bg-[#F6F6F7] cursor-pointer">
+                      <RadioGroupItem value="standard" id="standard" />
+                      <Label htmlFor="standard" className="font-medium cursor-pointer">
+                        Standard product shoot (back, sides & front shots)
+                      </Label>
+                    </div>
+                    <div className="flex items-center space-x-2 p-3 rounded-md hover:bg-[#F6F6F7] cursor-pointer">
+                      <RadioGroupItem value="ai-suggestions" id="ai-suggestions" />
+                      <Label htmlFor="ai-suggestions" className="font-medium cursor-pointer">
+                        Let the AI photographer suggest shots
+                      </Label>
+                    </div>
+                  </RadioGroup>
+                </div>
+              </form>
+            </div>
+          </div>
+
           <div className="flex justify-end pt-4">
             <Button 
               type="button" 
@@ -281,7 +338,7 @@ const ProductPhotoShoot = () => {
     const productName = selectedProducts.length > 0 ? selectedProducts[0].title : 'product';
     
     return (
-      <PromptSuggestions
+      <ShotSuggestions
         productName={productName}
         designBrief={finalPrompt}
         onContinue={handlePromptsSelected}
@@ -315,7 +372,20 @@ const ProductPhotoShoot = () => {
       <PhotoShootHeader currentStep={currentStep} onStepClick={handleStepClick} />
       <div className="bg-[--p-background] min-h-[calc(100vh-129px)]">
         <div className="p-5">
-          {renderMainContent()}
+          {isGenerating ? (
+            <Card className="bg-[--p-surface] shadow-sm border border-[#E3E5E7] rounded-md">
+              <CardContent className="p-12 flex flex-col items-center justify-center">
+                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#2C6ECB] mb-4"></div>
+                <h2 className="text-xl font-medium text-[--p-text] mb-2">Generating your photos</h2>
+                <p className="text-[--p-text-subdued] text-center max-w-lg">
+                  Our AI is creating professional product photos based on your specifications. 
+                  This may take a moment...
+                </p>
+              </CardContent>
+            </Card>
+          ) : (
+            renderMainContent()
+          )}
         </div>
       </div>
     </div>

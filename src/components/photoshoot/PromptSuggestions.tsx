@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -12,17 +11,17 @@ interface PromptSuggestion {
   selected: boolean;
 }
 
-interface PromptSuggestionsProps {
+interface ShotSuggestionsProps {
   productName: string;
   designBrief: string;
   onContinue: (selectedPrompts: string[]) => void;
 }
 
-export const PromptSuggestions = ({ 
+export const ShotSuggestions = ({ 
   productName, 
   designBrief,
   onContinue 
-}: PromptSuggestionsProps) => {
+}: ShotSuggestionsProps) => {
   const [suggestions, setSuggestions] = useState<PromptSuggestion[]>([]);
   const [customPrompt, setCustomPrompt] = useState('');
   const [loading, setLoading] = useState(true);
@@ -95,7 +94,7 @@ export const PromptSuggestions = ({
     <Card className="bg-[--p-surface] shadow-sm border border-[#E3E5E7] rounded-md">
       <CardContent className="p-6 space-y-6">
         <div>
-          <h2 className="text-display-sm text-[--p-text] mb-1">Prompt Suggestions</h2>
+          <h2 className="text-display-sm text-[--p-text] mb-1">Shot Suggestions</h2>
           <p className="text-body text-[--p-text-subdued]">
             Select the photo shots you'd like to include in your shoot
           </p>

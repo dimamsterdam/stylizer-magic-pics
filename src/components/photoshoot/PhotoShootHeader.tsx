@@ -33,7 +33,7 @@ export const PhotoShootHeader = ({
         steps={[
           { id: 'products', label: 'Product Selection' },
           { id: 'theme-content', label: 'Design Brief' },
-          { id: 'prompt-suggestions', label: 'Prompt Suggestions' },
+          { id: 'prompt-suggestions', label: 'Shot Suggestions' },
           { id: 'review', label: 'Photo Review' }
         ]}
         currentStep={currentStep} 
