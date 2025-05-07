@@ -5,8 +5,8 @@ import Breadcrumbs from "@/components/Breadcrumbs";
 import StepProgress from "@/components/StepProgress";
 
 interface PhotoShootHeaderProps {
-  currentStep: 'products' | 'theme-content' | 'review';
-  onStepClick?: (step: 'products' | 'theme-content' | 'review') => void;
+  currentStep: 'products' | 'theme-content' | 'prompt-suggestions' | 'review';
+  onStepClick?: (step: 'products' | 'theme-content' | 'prompt-suggestions' | 'review') => void;
 }
 
 export const PhotoShootHeader = ({
@@ -33,6 +33,7 @@ export const PhotoShootHeader = ({
         steps={[
           { id: 'products', label: 'Product Selection' },
           { id: 'theme-content', label: 'Design Brief' },
+          { id: 'prompt-suggestions', label: 'Prompt Suggestions' },
           { id: 'review', label: 'Photo Review' }
         ]}
         currentStep={currentStep} 

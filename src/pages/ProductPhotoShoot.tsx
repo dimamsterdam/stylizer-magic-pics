@@ -13,6 +13,7 @@ import { useNavigate } from "react-router-dom";
 import { PhotoShootHeader } from "@/components/photoshoot/PhotoShootHeader";
 import { PromptBuilder } from "@/components/expose/PromptBuilder";
 import { ImageReviewGallery } from "@/components/photoshoot/ImageReviewGallery";
+import { PromptSuggestions } from "@/components/photoshoot/PromptSuggestions";
 
 interface Product {
   id: string;
@@ -21,7 +22,7 @@ interface Product {
   image: string;
 }
 
-type Step = 'products' | 'theme-content' | 'review';
+type Step = 'products' | 'theme-content' | 'prompt-suggestions' | 'review';
 const PLACEHOLDER_IMAGE = '/placeholder.svg';
 
 // Mock images for the photo shoot
@@ -64,6 +65,7 @@ const ProductPhotoShoot = () => {
   const [isGenerating, setIsGenerating] = useState(false);
   const [photoShootId, setPhotoShootId] = useState<string | null>(null);
   const [isGeneratingContent, setIsGeneratingContent] = useState(false);
+  const [selectedPrompts, setSelectedPrompts] = useState<string[]>([]);
   
   const { toast } = useToast();
   const navigate = useNavigate();
@@ -148,33 +150,30 @@ const ProductPhotoShoot = () => {
         });
       }
     } else if (currentStep === 'theme-content') {
-      try {
-        // Simulate image generation
-        setIsGenerating(true);
-        
-        // Simulate API call delay
-        setTimeout(() => {
-          setIsGenerating(false);
-          setCurrentStep('review');
-          toast({
-            title: "Images generated",
-            description: "Your product photos have been generated successfully!",
-          });
-        }, 2000);
-      } catch (error) {
-        console.error('Error generating images:', error);
-        toast({
-          title: "Error",
-          description: "Failed to generate images. Please try again.",
-          variant: "destructive"
-        });
-        setIsGenerating(false);
-      }
+      setCurrentStep('prompt-suggestions');
     }
+  };
+
+  const handlePromptsSelected = (selectedPrompts: string[]) => {
+    setSelectedPrompts(selectedPrompts);
+    
+    // Simulate image generation
+    setIsGenerating(true);
+    
+    // Simulate API call delay
+    setTimeout(() => {
+      setIsGenerating(false);
+      setCurrentStep('review');
+      toast({
+        title: "Images generated",
+        description: "Your product photos have been generated successfully!",
+      });
+    }, 2000);
   };
 
   const handleStepClick = (step: Step) => {
     if (step === 'review' && currentStep !== 'review') return; // Only allow going to review if we've generated images
+    if (step === 'prompt-suggestions' && currentStep === 'products') return; // Don't skip the theme-content step
     setCurrentStep(step);
   };
 
@@ -267,19 +266,26 @@ const ProductPhotoShoot = () => {
             <Button 
               type="button" 
               onClick={handleContinue} 
-              disabled={isGenerating || !finalPrompt.trim()} 
+              disabled={!finalPrompt.trim()} 
               variant="primary"
             >
-              {isGenerating ? (
-                <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Generating...
-                </>
-              ) : 'Generate Photos'}
+              Continue
             </Button>
           </div>
         </CardContent>
       </Card>
+    );
+  };
+
+  const renderPromptSuggestionsStep = () => {
+    const productName = selectedProducts.length > 0 ? selectedProducts[0].title : 'product';
+    
+    return (
+      <PromptSuggestions
+        productName={productName}
+        designBrief={finalPrompt}
+        onContinue={handlePromptsSelected}
+      />
     );
   };
 
@@ -295,6 +301,8 @@ const ProductPhotoShoot = () => {
         return renderProductsStep();
       case 'theme-content':
         return renderThemeContentStep();
+      case 'prompt-suggestions':
+        return renderPromptSuggestionsStep();
       case 'review':
         return renderReviewStep();
       default:
