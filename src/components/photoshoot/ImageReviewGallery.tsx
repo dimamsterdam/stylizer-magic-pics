@@ -6,6 +6,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel";
 import { Check, X, ArrowLeft, ArrowRight } from "lucide-react";
 import { cn } from "@/lib/utils";
+import "../styles/flip-animation.css";
 
 interface ProductView {
   viewName: string;
@@ -106,7 +107,7 @@ export const ImageReviewGallery = ({ productViews }: ImageReviewGalleryProps) =>
   return (
     <div className="relative">
       <div>
-        {/* Header */}
+        {/* Header with Shot Description */}
         <div className="flex justify-between items-center mb-4 p-4">
           <div>
             <h2 className="text-xl font-medium text-[--p-text]">
@@ -138,7 +139,7 @@ export const ImageReviewGallery = ({ productViews }: ImageReviewGalleryProps) =>
           </Button>
         </div>
         
-        {/* Main Image Display */}
+        {/* Main Image Display with Animation */}
         <div className="flex-1">
           <div className="relative aspect-square overflow-hidden">
             <img
@@ -151,6 +152,13 @@ export const ImageReviewGallery = ({ productViews }: ImageReviewGalleryProps) =>
               )}
               onError={(e) => {
                 e.currentTarget.src = '/placeholder.svg';
+              }}
+              style={{
+                animation: animationDirection === 'from-right' 
+                  ? 'slide-in-right 0.5s ease-out forwards' 
+                  : animationDirection === 'from-left'
+                  ? 'slide-in-left 0.5s ease-out forwards'
+                  : 'none'
               }}
             />
           </div>
@@ -177,7 +185,7 @@ export const ImageReviewGallery = ({ productViews }: ImageReviewGalleryProps) =>
               </Button>
             ) : isCurrentViewReviewed ? (
               <div className="flex items-center justify-between">
-                <Button variant="success" className="flex-1">
+                <Button variant="success" className="flex-1 bg-green-500 hover:bg-green-600 text-white">
                   <Check className="mr-2 h-4 w-4" />
                   Already Approved
                 </Button>

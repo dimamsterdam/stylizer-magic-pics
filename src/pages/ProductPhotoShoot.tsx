@@ -28,8 +28,39 @@ type Step = 'products' | 'theme-content' | 'prompt-suggestions' | 'review';
 type ShootType = 'standard' | 'ai-suggestions';
 const PLACEHOLDER_IMAGE = '/placeholder.svg';
 
-// Mock images for the photo shoot
+// Mock images for the photo shoot with descriptive shot names
 const mockProductViews = [
+  {
+    viewName: "Professional studio shot with neutral background highlighting product texture",
+    variants: [
+      "/lovable-uploads/products/cream-sweater/.gitkeep", 
+      "/lovable-uploads/047c9307-af3c-47c6-b2e6-ea9d51a0c8cc.png"
+    ]
+  },
+  {
+    viewName: "Lifestyle shot showing product in natural daylight setting", 
+    variants: [
+      "/lovable-uploads/products/cream-button-up/.gitkeep", 
+      "/lovable-uploads/0f0a212c-5edc-4c90-a258-6b43222bac06.png"
+    ]
+  },
+  {
+    viewName: "Close-up detail shot highlighting stitching and fabric quality", 
+    variants: [
+      "/lovable-uploads/12022501-6211-4169-ad19-4d93700c8c9f.png", 
+      "/lovable-uploads/61d9b435-6552-49b0-a269-25c905ba18c9.png"
+    ]
+  },
+  {
+    viewName: "Model wearing product in urban environment for context", 
+    variants: [
+      "/lovable-uploads/85ad1b88-47a8-4226-bc2e-63fa2dcf049a.png", 
+      "/lovable-uploads/9bac9fd0-2115-4bae-8108-0b973f83db37.png"
+    ]
+  }
+];
+
+const standardProductViews = [
   {
     viewName: "Front View",
     variants: [
@@ -347,8 +378,11 @@ const ProductPhotoShoot = () => {
   };
 
   const renderReviewStep = () => {
+    // Use different product views based on shoot type
+    const productViewsToShow = shootType === 'standard' ? standardProductViews : mockProductViews;
+    
     return (
-      <ImageReviewGallery productViews={mockProductViews} />
+      <ImageReviewGallery productViews={productViewsToShow} />
     );
   };
 
