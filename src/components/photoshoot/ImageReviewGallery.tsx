@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
@@ -6,7 +5,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel";
 import { Check, X, ArrowLeft, ArrowRight } from "lucide-react";
 import { cn } from "@/lib/utils";
-import "../styles/flip-animation.css";
+import "../../styles/flip-animation.css";
 
 interface ProductView {
   viewName: string;
