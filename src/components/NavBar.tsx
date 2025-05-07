@@ -1,6 +1,7 @@
+
 import React from "react";
 import { Link, useLocation } from "react-router-dom";
-import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbSeparator } from "@/components/ui/breadcrumb";
+import { Breadcrumb, BreadcrumbItem, BreadcrumbLink } from "@/components/ui/breadcrumb";
 import { ChevronRight } from "lucide-react";
 
 const NavBar = () => {
@@ -33,10 +34,7 @@ const NavBar = () => {
             <span className="text-sm text-[--p-text-subdued] hover:text-[--p-text]">Home</span>
           </BreadcrumbLink>
         </BreadcrumbItem>
-        <BreadcrumbSeparator>
-          <ChevronRight className="h-4 w-4 text-[--p-text-subdued]" />
-        </BreadcrumbSeparator>
-          
+        
         {pathSegments.map((segment, index) => {
           const isLast = index === pathSegments.length - 1;
           const segmentPath = `/${pathSegments.slice(0, index + 1).join('/')}`;
@@ -53,9 +51,7 @@ const NavBar = () => {
                   <span className="text-sm text-[--p-text-subdued] hover:text-[--p-text]">{displayName}</span>
                 </BreadcrumbLink>
               </BreadcrumbItem>
-              <BreadcrumbSeparator>
-                <ChevronRight className="h-4 w-4 text-[--p-text-subdued]" />
-              </BreadcrumbSeparator>
+              <ChevronRight className="h-4 w-4 text-[--p-text-subdued]" />
             </React.Fragment>
           );
         })}

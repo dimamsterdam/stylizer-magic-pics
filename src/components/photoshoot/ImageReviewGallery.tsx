@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel";
 import { Check, X, ArrowLeft, ArrowRight } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 interface ProductView {
   viewName: string;
@@ -19,11 +20,13 @@ export const ImageReviewGallery = ({ productViews }: ImageReviewGalleryProps) =>
   const [currentViewIndex, setCurrentViewIndex] = useState(0);
   const [currentVariantIndex, setCurrentVariantIndex] = useState(0);
   const [reviewedViews, setReviewedViews] = useState<Set<number>>(new Set());
+  const [animationDirection, setAnimationDirection] = useState<'from-right' | 'from-left' | null>(null);
   const { toast } = useToast();
 
   const currentView = productViews[currentViewIndex];
   const isLastView = currentViewIndex === productViews.length - 1;
   const allReviewed = reviewedViews.size === productViews.length;
+  const isCurrentViewReviewed = reviewedViews.has(currentViewIndex);
 
   const toggleVariant = () => {
     setCurrentVariantIndex(prev => (prev === 0 ? 1 : 0));
@@ -41,10 +44,23 @@ export const ImageReviewGallery = ({ productViews }: ImageReviewGalleryProps) =>
     // Move to next view if available
     if (!isLastView) {
       setTimeout(() => {
+        setAnimationDirection('from-right');
         setCurrentViewIndex(prev => prev + 1);
         setCurrentVariantIndex(0);
       }, 1000);
     }
+  };
+
+  const handleUnapprove = () => {
+    // Remove from reviewed
+    const newReviewed = new Set(reviewedViews);
+    newReviewed.delete(currentViewIndex);
+    setReviewedViews(newReviewed);
+    
+    toast({
+      title: "Approval removed",
+      description: "The photo is now pending review again",
+    });
   };
 
   const handleReject = () => {
@@ -58,6 +74,7 @@ export const ImageReviewGallery = ({ productViews }: ImageReviewGalleryProps) =>
     // Move to next view if available
     if (!isLastView) {
       setTimeout(() => {
+        setAnimationDirection('from-right');
         setCurrentViewIndex(prev => prev + 1);
         setCurrentVariantIndex(0);
       }, 1000);
@@ -69,10 +86,22 @@ export const ImageReviewGallery = ({ productViews }: ImageReviewGalleryProps) =>
 
   const moveToView = (index: number) => {
     if (index >= 0 && index < productViews.length) {
+      // Set animation direction
+      setAnimationDirection(index > currentViewIndex ? 'from-right' : 'from-left');
       setCurrentViewIndex(index);
       setCurrentVariantIndex(0);
     }
   };
+
+  // Reset animation after it completes
+  useEffect(() => {
+    if (animationDirection) {
+      const timer = setTimeout(() => {
+        setAnimationDirection(null);
+      }, 500); // Duration should match the CSS animation duration
+      return () => clearTimeout(timer);
+    }
+  }, [animationDirection]);
 
   return (
     <div className="relative">
@@ -111,11 +140,15 @@ export const ImageReviewGallery = ({ productViews }: ImageReviewGalleryProps) =>
         
         {/* Main Image Display */}
         <div className="flex-1">
-          <div className="relative aspect-square">
+          <div className="relative aspect-square overflow-hidden">
             <img
               src={currentView.variants[currentVariantIndex]}
               alt={`${currentView.viewName} variant ${currentVariantIndex + 1}`}
-              className="w-full h-full object-contain"
+              className={cn(
+                "w-full h-full object-contain transition-transform duration-500",
+                animationDirection === 'from-right' && "animate-slide-in-right",
+                animationDirection === 'from-left' && "animate-slide-in-left"
+              )}
               onError={(e) => {
                 e.currentTarget.src = '/placeholder.svg';
               }}
@@ -131,23 +164,35 @@ export const ImageReviewGallery = ({ productViews }: ImageReviewGalleryProps) =>
               variant="outline"
               disabled={currentViewIndex === 0}
               onClick={() => moveToView(currentViewIndex - 1)}
+              className="w-full"
             >
               <ArrowLeft className="mr-2 h-4 w-4" />
               Previous
             </Button>
             
             {allReviewed ? (
-              <Button variant="success">
+              <Button variant="success" className="w-full">
+                <Check className="mr-2 h-4 w-4" />
                 All Photos Reviewed
               </Button>
-            ) : reviewedViews.has(currentViewIndex) ? (
-              <Button variant="outline" disabled>
-                Already Approved
-              </Button>
+            ) : isCurrentViewReviewed ? (
+              <div className="flex items-center justify-between">
+                <Button variant="success" className="flex-1">
+                  <Check className="mr-2 h-4 w-4" />
+                  Already Approved
+                </Button>
+                <button 
+                  onClick={handleUnapprove}
+                  className="ml-2 text-sm text-[--p-text-subdued] hover:text-[--p-text] underline"
+                >
+                  Unapprove
+                </button>
+              </div>
             ) : (
               <Button
                 variant="primary"
                 onClick={handleApprove}
+                className="w-full"
               >
                 <Check className="mr-2 h-4 w-4" />
                 Approve
@@ -155,11 +200,12 @@ export const ImageReviewGallery = ({ productViews }: ImageReviewGalleryProps) =>
             )}
             
             <div className="flex justify-end">
-              {reviewedViews.has(currentViewIndex) || isLastView ? (
+              {isCurrentViewReviewed || isLastView ? (
                 <Button
                   variant="outline"
-                  disabled={isLastView && reviewedViews.has(currentViewIndex)}
+                  disabled={isLastView && isCurrentViewReviewed}
                   onClick={() => moveToView(currentViewIndex + 1)}
+                  className="w-full"
                 >
                   {isLastView ? 'Finish' : 'Next'}
                   <ArrowRight className="ml-2 h-4 w-4" />
@@ -168,6 +214,7 @@ export const ImageReviewGallery = ({ productViews }: ImageReviewGalleryProps) =>
                 <Button
                   variant="destructive"
                   onClick={handleReject}
+                  className="w-full"
                 >
                   <X className="mr-2 h-4 w-4" />
                   Reject
