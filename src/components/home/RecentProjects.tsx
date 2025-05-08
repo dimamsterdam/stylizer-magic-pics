@@ -18,6 +18,7 @@ interface ToolCard {
   accentColor: string;
   featured?: boolean;
   imageSrc?: string;
+  badgeText?: string;
 }
 
 interface RecentProject {
@@ -139,6 +140,16 @@ export function RecentProjects({ tools }: { tools: ToolCard[] }) {
     }
   };
 
+  const getBadgeTextForType = (type: string) => {
+    switch (type) {
+      case 'expose': return 'Interactive';
+      case 'videographer': return 'Video';
+      case 'fashion-models': return 'Coming Soon';
+      case 'product-photo-shoot': return 'New';
+      default: return 'AI-powered';
+    }
+  };
+
   const getRecentProjectsForType = (type: string) => {
     return recentProjects.filter(project => project.type === type);
   };
@@ -147,6 +158,7 @@ export function RecentProjects({ tools }: { tools: ToolCard[] }) {
     const Icon = getIconForType(project.type);
     const bgColor = getBgColorForType(project.type);
     const accentColor = getAccentColorForType(project.type);
+    const badgeText = getBadgeTextForType(project.type);
     
     return (
       <div className="relative rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-all duration-300">
@@ -171,7 +183,7 @@ export function RecentProjects({ tools }: { tools: ToolCard[] }) {
         <div className="p-4 bg-white border-t border-[#E3E5E7]">
           <div className="flex justify-between items-start mb-1">
             <h3 className="text-[20px] font-semibold text-[#1A1F2C]">{project.title}</h3>
-            <span className="text-[#6D7175] bg-[#F6F6F7] px-2 py-1 rounded text-xs">AI-powered</span>
+            <span className="text-[#6D7175] bg-[#F6F6F7] px-2 py-1 rounded text-xs">{badgeText}</span>
           </div>
           <p className="text-[#6D7175] text-sm mb-4 flex items-center">
             <Icon className="h-4 w-4 mr-1" />
@@ -277,7 +289,7 @@ export function RecentProjects({ tools }: { tools: ToolCard[] }) {
                     className="w-full h-full object-cover"
                   />
                 ) : (
-                  <div className={`${tool.bgColor} h-full w-full p-4 flex items-center justify-center`}>
+                  <div className={`${tool.bgColor} h-full w-full p-0 flex items-center justify-center overflow-hidden`}>
                     <tool.icon className={`h-36 w-36 ${tool.accentColor}`} />
                   </div>
                 )}
@@ -285,7 +297,10 @@ export function RecentProjects({ tools }: { tools: ToolCard[] }) {
               <div className="p-4 bg-white border-t border-[#E3E5E7]">
                 <div className="flex justify-between items-start mb-1">
                   <h3 className="text-[20px] font-semibold text-[#1A1F2C]">{tool.title}</h3>
-                  <span className="text-[#6D7175] bg-[#F6F6F7] px-2 py-1 rounded text-xs">AI-powered</span>
+                  <span className="text-[#6D7175] bg-[#F6F6F7] px-2 py-1 rounded text-xs">{tool.badgeText || getBadgeTextForType(tool.title.toLowerCase().includes('spotlight') ? 'expose' : 
+                        tool.title.toLowerCase().includes('short') ? 'videographer' : 
+                        tool.title.toLowerCase().includes('photo') ? 'product-photo-shoot' : 
+                        tool.title.toLowerCase().includes('model') ? 'fashion-models' : '')}</span>
                 </div>
                 <p className="text-[#6D7175] text-sm mb-4">{tool.description}</p>
                 <div className="flex items-center justify-between">

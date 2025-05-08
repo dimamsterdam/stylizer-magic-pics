@@ -7,6 +7,7 @@ import { Image, Tv, Workflow, Layout, Users, ArrowRight, Camera } from "lucide-r
 import { AspectRatio } from "@/components/ui/aspect-ratio";
 import { supabase } from "@/integrations/supabase/client";
 import { RecentProjects } from "@/components/home/RecentProjects";
+import { Badge } from "@/components/ui/badge";
 
 export default function Index() {
   const navigate = useNavigate();
@@ -46,7 +47,8 @@ export default function Index() {
     bgColor: "bg-gradient-to-br from-blue-50 to-indigo-100",
     accentColor: "text-indigo-600",
     featured: true,
-    imageSrc: "/lovable-uploads/61d9b435-6552-49b0-a269-25c905ba18c9.png"
+    imageSrc: "/lovable-uploads/61d9b435-6552-49b0-a269-25c905ba18c9.png",
+    badgeText: "Interactive"
   }, {
     title: "Photo Shoot",
     icon: Camera,
@@ -57,7 +59,8 @@ export default function Index() {
     bgColor: "bg-gradient-to-br from-amber-50 to-orange-100",
     accentColor: "text-orange-600",
     featured: false,
-    imageSrc: "/lovable-uploads/047c9307-af3c-47c6-b2e6-ea9d51a0c8cc.png"
+    imageSrc: "/lovable-uploads/047c9307-af3c-47c6-b2e6-ea9d51a0c8cc.png",
+    badgeText: "New"
   }, {
     title: "Product Shorts",
     icon: Tv,
@@ -68,7 +71,8 @@ export default function Index() {
     bgColor: "bg-gradient-to-br from-emerald-50 to-teal-100",
     accentColor: "text-teal-600",
     featured: true,
-    imageSrc: "/lovable-uploads/85ad1b88-47a8-4226-bc2e-63fa2dcf049a.png"
+    imageSrc: "/lovable-uploads/85ad1b88-47a8-4226-bc2e-63fa2dcf049a.png",
+    badgeText: "Video"
   }, {
     title: "Fashion Models",
     icon: Users,
@@ -79,7 +83,8 @@ export default function Index() {
     bgColor: "bg-gradient-to-br from-rose-50 to-pink-100",
     accentColor: "text-rose-600",
     featured: false,
-    imageSrc: "/lovable-uploads/01c51803-441a-4b90-ad49-fc25ca184153.png"
+    imageSrc: "/lovable-uploads/01c51803-441a-4b90-ad49-fc25ca184153.png",
+    badgeText: "Coming Soon"
   }];
   
   return <div className="container mx-auto py-8 px-4">
@@ -113,7 +118,7 @@ export default function Index() {
                 <div className="p-4 bg-white border-t border-[#E3E5E7]">
                   <div className="flex justify-between items-start mb-1">
                     <h3 className="text-[20px] font-semibold text-[#1A1F2C]">{tool.title}</h3>
-                    <span className="text-[#6D7175] bg-[#F6F6F7] px-2 py-1 rounded text-xs">AI-powered</span>
+                    <span className="text-[#6D7175] bg-[#F6F6F7] px-2 py-1 rounded text-xs">{tool.badgeText}</span>
                   </div>
                   <p className="text-[#6D7175] text-sm mb-4">{tool.description}</p>
                   <div className="flex items-center justify-between">
