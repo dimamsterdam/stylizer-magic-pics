@@ -179,7 +179,7 @@ const Videographer = () => {
   return (
     <div className="space-y-6">
       <PageHeader
-        title="Videographer"
+        title="Product Shorts"
         description="Transform product images into engaging video animations"
       >
         <Breadcrumb>
@@ -187,7 +187,7 @@ const Videographer = () => {
             <BreadcrumbLink href="/dashboard">Home</BreadcrumbLink>
           </BreadcrumbItem>
           <BreadcrumbItem>
-            <BreadcrumbLink href="/videographer" isCurrentPage>Videographer</BreadcrumbLink>
+            <BreadcrumbLink href="/videographer" isCurrentPage>Product Shorts</BreadcrumbLink>
           </BreadcrumbItem>
         </Breadcrumb>
       </PageHeader>

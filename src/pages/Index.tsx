@@ -1,3 +1,4 @@
+
 import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
@@ -45,7 +46,7 @@ export default function Index() {
     bgColor: "bg-gradient-to-br from-blue-50 to-indigo-100",
     accentColor: "text-indigo-600"
   }, {
-    title: "Product Photo Shoot",
+    title: "Photo Shoot",
     icon: Camera,
     description: "Generate professional product photos for your store",
     details: "", // Added this to fix the TypeScript error
@@ -54,7 +55,7 @@ export default function Index() {
     bgColor: "bg-gradient-to-br from-amber-50 to-orange-100",
     accentColor: "text-orange-600"
   }, {
-    title: "Video Creator",
+    title: "Product Shorts",
     icon: Tv,
     description: "Create promotional videos for your products",
     details: "", // Added this to fix the TypeScript error
@@ -62,15 +63,6 @@ export default function Index() {
     buttonText: "Create Video",
     bgColor: "bg-gradient-to-br from-emerald-50 to-teal-100",
     accentColor: "text-teal-600"
-  }, {
-    title: "Image Editor",
-    icon: Workflow,
-    description: "Edit and enhance product images",
-    details: "", // Added this to fix the TypeScript error
-    route: "/stylizer",
-    buttonText: "Edit Images",
-    bgColor: "bg-gradient-to-br from-purple-50 to-fuchsia-100",
-    accentColor: "text-fuchsia-600"
   }, {
     title: "Fashion Models",
     icon: Users,
@@ -80,15 +72,6 @@ export default function Index() {
     buttonText: "Create Models",
     bgColor: "bg-gradient-to-br from-rose-50 to-pink-100",
     accentColor: "text-rose-600"
-  }, {
-    title: "Brand Dashboard",
-    icon: Layout,
-    description: "Manage your brand assets and statistics",
-    details: "", // Added this to fix the TypeScript error
-    route: "/dashboard",
-    buttonText: "Go to Dashboard",
-    bgColor: "bg-gradient-to-br from-sky-50 to-cyan-100",
-    accentColor: "text-cyan-600"
   }];
   
   return <div className="container mx-auto py-8 px-4">

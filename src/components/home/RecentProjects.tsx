@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -52,8 +53,8 @@ export function RecentProjects({ tools }: { tools: ToolCard[] }) {
           { 
             id: '2', 
             title: 'Fall Fashion', 
-            type: 'stylizer', 
-            route: '/stylizer',
+            type: 'expose', 
+            route: '/expose',
             imageUrl: '/lovable-uploads/61d9b435-6552-49b0-a269-25c905ba18c9.png',
             createdAt: new Date(Date.now() - 1000 * 60 * 60 * 24).toISOString() 
           },
@@ -94,7 +95,6 @@ export function RecentProjects({ tools }: { tools: ToolCard[] }) {
 
   const getIconForType = (type: string) => {
     switch (type) {
-      case 'stylizer': return Workflow;
       case 'expose': return Image;
       case 'videographer': return Tv;
       case 'fashion-models': return Users;
@@ -105,9 +105,8 @@ export function RecentProjects({ tools }: { tools: ToolCard[] }) {
 
   const getTitleForType = (type: string) => {
     switch (type) {
-      case 'stylizer': return 'Stylizer';
       case 'expose': return 'Product Spotlight';
-      case 'videographer': return 'Product Video';
+      case 'videographer': return 'Product Shorts';
       case 'fashion-models': return 'Fashion Models';
       case 'product-photo-shoot': return 'Photo Shoot';
       default: return type.charAt(0).toUpperCase() + type.slice(1);
@@ -129,9 +128,8 @@ export function RecentProjects({ tools }: { tools: ToolCard[] }) {
         <Tabs defaultValue="all" className="w-full mb-4">
           <TabsList>
             <TabsTrigger value="all">All</TabsTrigger>
-            <TabsTrigger value="stylizer">Stylizer</TabsTrigger>
             <TabsTrigger value="expose">Product Spotlight</TabsTrigger>
-            <TabsTrigger value="videographer">Video</TabsTrigger>
+            <TabsTrigger value="videographer">Product Shorts</TabsTrigger>
             <TabsTrigger value="product-photo-shoot">Photo Shoot</TabsTrigger>
           </TabsList>
           
@@ -178,7 +176,7 @@ export function RecentProjects({ tools }: { tools: ToolCard[] }) {
           </TabsContent>
           
           {/* Tab content for other types */}
-          {['stylizer', 'expose', 'videographer', 'product-photo-shoot'].map((type) => (
+          {['expose', 'videographer', 'product-photo-shoot'].map((type) => (
             <TabsContent key={type} value={type} className="mt-4">
               <Carousel className="w-full">
                 <CarouselContent>
