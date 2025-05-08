@@ -109,21 +109,19 @@ export default function Index() {
         <RecentProjects tools={productTools} />
       ) : (
         <div>
-          <h1 className="text-display-xl font-bold mb-3 text-[--p-text]">Welcome to ProductAI</h1>
+          <h1 className="text-display-xl font-bold mb-3 text-[--p-text] text-[30px]">Welcome to ProductAI</h1>
           <p className="text-lg mb-8 text-[--p-text-subdued]">Choose what you want to create today:</p>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {productTools.map((tool) => (
-              <Card key={tool.title} className="group overflow-hidden border-[--p-border-subdued] hover:shadow-lg transition-all duration-300 h-full flex flex-col">
-                <AspectRatio ratio={3/1} className={`${tool.bgColor} w-full`}>
-                  <div className="flex items-center justify-center h-full p-6">
-                    <tool.icon className={`h-12 w-12 ${tool.accentColor}`} />
+              <Card key={tool.title} className="group overflow-hidden border-none shadow-sm hover:shadow-md transition-all duration-300 h-full flex flex-col">
+                <AspectRatio ratio={6/1} className={`${tool.bgColor} w-full`}>
+                  <div className="flex items-center h-full p-2">
+                    <tool.icon className={`h-6 w-6 mr-2 ${tool.accentColor}`} />
+                    <h3 className="font-medium">{tool.title}</h3>
                   </div>
                 </AspectRatio>
                 <CardHeader className="pb-2">
-                  <CardTitle className="flex items-center text-display-md text-[--p-text]">
-                    {tool.title}
-                  </CardTitle>
                   <CardDescription className="text-body-md text-[--p-text-subdued]">
                     {tool.description}
                   </CardDescription>

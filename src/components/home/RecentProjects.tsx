@@ -121,58 +121,15 @@ export function RecentProjects({ tools }: { tools: ToolCard[] }) {
 
   return (
     <div>
-      <h1 className="text-display-xl font-bold mb-3 text-[--p-text]">Welcome back</h1>
+      <h1 className="text-display-xl font-bold mb-3 text-[--p-text] text-[30px]">Welcome back</h1>
       <p className="text-lg mb-8 text-[--p-text-subdued]">Continue working on your projects:</p>
       
-      {/* Recent Items Carousel */}
+      {/* Recently Created with Filter Tabs */}
       <div className="mb-10">
-        <h2 className="text-display-md font-semibold mb-4 text-[--p-text]">Recently created</h2>
-        <Carousel className="w-full">
-          <CarouselContent>
-            {recentProjects.slice(0, 5).map((project) => {
-              const Icon = getIconForType(project.type);
-              return (
-                <CarouselItem key={project.id} className="md:basis-1/2 lg:basis-1/3 pl-1">
-                  <Link to={project.route}>
-                    <Card className="h-full group overflow-hidden border-[--p-border-subdued] hover:shadow-lg transition-all duration-300">
-                      <AspectRatio ratio={16/9} className="bg-gray-50 w-full">
-                        <div className="flex items-center justify-center h-full">
-                          {project.imageUrl ? (
-                            <img 
-                              src={project.imageUrl} 
-                              alt={project.title} 
-                              className="w-full h-full object-cover"
-                            />
-                          ) : (
-                            <Icon className="h-12 w-12 text-gray-400" />
-                          )}
-                        </div>
-                      </AspectRatio>
-                      <CardHeader className="pb-2">
-                        <CardTitle className="text-display-sm text-[--p-text]">{project.title}</CardTitle>
-                        <CardDescription className="flex items-center text-[--p-text-subdued]">
-                          <Icon className="h-4 w-4 mr-1" />
-                          {getTitleForType(project.type)}
-                        </CardDescription>
-                      </CardHeader>
-                    </Card>
-                  </Link>
-                </CarouselItem>
-              );
-            })}
-          </CarouselContent>
-          <div className="flex justify-end gap-2 mt-4">
-            <CarouselPrevious className="static transform-none mr-2" />
-            <CarouselNext className="static transform-none" />
-          </div>
-        </Carousel>
-      </div>
-
-      {/* Continue Working Section */}
-      <div className="mb-10">
-        <h2 className="text-display-md font-semibold mb-4 text-[--p-text]">Continue working</h2>
-        <Tabs defaultValue="all" className="w-full">
-          <TabsList className="mb-6">
+        <h2 className="text-display-md font-semibold mb-4 text-[--p-text] text-[19.5px]">Recently created</h2>
+        
+        <Tabs defaultValue="all" className="w-full mb-4">
+          <TabsList>
             <TabsTrigger value="all">All</TabsTrigger>
             <TabsTrigger value="stylizer">Stylizer</TabsTrigger>
             <TabsTrigger value="expose">Product Spotlight</TabsTrigger>
@@ -180,47 +137,98 @@ export function RecentProjects({ tools }: { tools: ToolCard[] }) {
             <TabsTrigger value="product-photo-shoot">Photo Shoot</TabsTrigger>
           </TabsList>
           
-          <TabsContent value="all" className="mt-0">
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {recentProjects.slice(0, 6).map((project) => {
-                const Icon = getIconForType(project.type);
-                return (
-                  <ProjectCard 
-                    key={project.id}
-                    title={project.title}
-                    type={getTitleForType(project.type)}
-                    Icon={Icon}
-                    url={project.route}
-                    imageUrl={project.imageUrl}
-                  />
-                );
-              })}
-            </div>
+          <TabsContent value="all" className="mt-4">
+            <Carousel className="w-full">
+              <CarouselContent>
+                {recentProjects.slice(0, 5).map((project) => {
+                  const Icon = getIconForType(project.type);
+                  return (
+                    <CarouselItem key={project.id} className="md:basis-1/2 lg:basis-1/3 pl-1">
+                      <Link to={project.route}>
+                        <Card className="h-full group overflow-hidden border-none shadow-sm hover:shadow-md transition-all duration-300">
+                          <AspectRatio ratio={16/9} className="bg-gray-50 w-full">
+                            <div className="flex items-center justify-center h-full">
+                              {project.imageUrl ? (
+                                <img 
+                                  src={project.imageUrl} 
+                                  alt={project.title} 
+                                  className="w-full h-full object-cover"
+                                />
+                              ) : (
+                                <Icon className="h-12 w-12 text-gray-400" />
+                              )}
+                            </div>
+                          </AspectRatio>
+                          <CardHeader className="pb-2">
+                            <CardTitle className="text-display-sm text-[--p-text]">{project.title}</CardTitle>
+                            <CardDescription className="flex items-center text-[--p-text-subdued]">
+                              <Icon className="h-4 w-4 mr-1" />
+                              {getTitleForType(project.type)}
+                            </CardDescription>
+                          </CardHeader>
+                        </Card>
+                      </Link>
+                    </CarouselItem>
+                  );
+                })}
+              </CarouselContent>
+              <div className="flex justify-end gap-2 mt-4">
+                <CarouselPrevious className="static transform-none mr-2" />
+                <CarouselNext className="static transform-none" />
+              </div>
+            </Carousel>
           </TabsContent>
           
+          {/* Tab content for other types */}
           {['stylizer', 'expose', 'videographer', 'product-photo-shoot'].map((type) => (
-            <TabsContent key={type} value={type} className="mt-0">
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {getRecentProjectsForType(type).length > 0 ? (
-                  getRecentProjectsForType(type).map((project) => {
-                    const Icon = getIconForType(project.type);
-                    return (
-                      <ProjectCard 
-                        key={project.id}
-                        title={project.title}
-                        type={getTitleForType(project.type)}
-                        Icon={Icon}
-                        url={project.route}
-                        imageUrl={project.imageUrl}
-                      />
-                    );
-                  })
-                ) : (
-                  <div className="col-span-3 text-center py-10">
-                    <p className="text-[--p-text-subdued]">No recent {getTitleForType(type)} projects found.</p>
-                  </div>
-                )}
-              </div>
+            <TabsContent key={type} value={type} className="mt-4">
+              <Carousel className="w-full">
+                <CarouselContent>
+                  {getRecentProjectsForType(type).length > 0 ? (
+                    getRecentProjectsForType(type).map((project) => {
+                      const Icon = getIconForType(project.type);
+                      return (
+                        <CarouselItem key={project.id} className="md:basis-1/2 lg:basis-1/3 pl-1">
+                          <Link to={project.route}>
+                            <Card className="h-full group overflow-hidden border-none shadow-sm hover:shadow-md transition-all duration-300">
+                              <AspectRatio ratio={16/9} className="bg-gray-50 w-full">
+                                <div className="flex items-center justify-center h-full">
+                                  {project.imageUrl ? (
+                                    <img 
+                                      src={project.imageUrl} 
+                                      alt={project.title} 
+                                      className="w-full h-full object-cover"
+                                    />
+                                  ) : (
+                                    <Icon className="h-12 w-12 text-gray-400" />
+                                  )}
+                                </div>
+                              </AspectRatio>
+                              <CardHeader className="pb-2">
+                                <CardTitle className="text-display-sm text-[--p-text]">{project.title}</CardTitle>
+                                <CardDescription className="flex items-center text-[--p-text-subdued]">
+                                  <Icon className="h-4 w-4 mr-1" />
+                                  {getTitleForType(project.type)}
+                                </CardDescription>
+                              </CardHeader>
+                            </Card>
+                          </Link>
+                        </CarouselItem>
+                      );
+                    })
+                  ) : (
+                    <CarouselItem className="basis-full pl-1">
+                      <div className="text-center py-10">
+                        <p className="text-[--p-text-subdued]">No recent {getTitleForType(type)} projects found.</p>
+                      </div>
+                    </CarouselItem>
+                  )}
+                </CarouselContent>
+                <div className="flex justify-end gap-2 mt-4">
+                  <CarouselPrevious className="static transform-none mr-2" />
+                  <CarouselNext className="static transform-none" />
+                </div>
+              </Carousel>
             </TabsContent>
           ))}
         </Tabs>
@@ -228,19 +236,17 @@ export function RecentProjects({ tools }: { tools: ToolCard[] }) {
 
       {/* Create New Section */}
       <div>
-        <h2 className="text-display-md font-semibold mb-4 text-[--p-text]">Create new</h2>
+        <h2 className="text-display-md font-semibold mb-4 text-[--p-text] text-[19.5px]">Create new</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {tools.map((tool) => (
-            <Card key={tool.title} className="group overflow-hidden border-[--p-border-subdued] hover:shadow-lg transition-all duration-300 h-full flex flex-col">
-              <AspectRatio ratio={3/1} className={`${tool.bgColor} w-full`}>
-                <div className="flex items-center justify-center h-full p-6">
-                  <tool.icon className={`h-12 w-12 ${tool.accentColor}`} />
+            <Card key={tool.title} className="group overflow-hidden border-none shadow-sm hover:shadow-md transition-all duration-300 h-full flex flex-col">
+              <AspectRatio ratio={6/1} className={`${tool.bgColor} w-full`}>
+                <div className="flex items-center h-full p-2">
+                  <tool.icon className={`h-6 w-6 mr-2 ${tool.accentColor}`} />
+                  <h3 className="font-medium">{tool.title}</h3>
                 </div>
               </AspectRatio>
               <CardHeader className="pb-2">
-                <CardTitle className="flex items-center text-display-md text-[--p-text]">
-                  {tool.title}
-                </CardTitle>
                 <CardDescription className="text-body-md text-[--p-text-subdued]">
                   {tool.description}
                 </CardDescription>
@@ -264,44 +270,4 @@ export function RecentProjects({ tools }: { tools: ToolCard[] }) {
   );
 }
 
-// Project card component to avoid repetition
-function ProjectCard({ 
-  title, 
-  type, 
-  Icon, 
-  url, 
-  imageUrl 
-}: { 
-  title: string; 
-  type: string; 
-  Icon: React.ComponentType<any>;
-  url: string;
-  imageUrl?: string;
-}) {
-  return (
-    <Link to={url}>
-      <Card className="h-full group overflow-hidden border-[--p-border-subdued] hover:shadow-lg transition-all duration-300">
-        <AspectRatio ratio={16/9} className="bg-gray-50 w-full">
-          <div className="flex items-center justify-center h-full">
-            {imageUrl ? (
-              <img 
-                src={imageUrl} 
-                alt={title} 
-                className="w-full h-full object-cover"
-              />
-            ) : (
-              <Icon className="h-12 w-12 text-gray-400" />
-            )}
-          </div>
-        </AspectRatio>
-        <CardHeader>
-          <CardTitle className="text-display-sm text-[--p-text]">{title}</CardTitle>
-          <CardDescription className="flex items-center text-[--p-text-subdued]">
-            <Icon className="h-4 w-4 mr-1" />
-            {type}
-          </CardDescription>
-        </CardHeader>
-      </Card>
-    </Link>
-  );
-}
+// Project card component to avoid repetition - removed as it's no longer needed since we've updated to use Card directly
