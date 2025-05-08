@@ -44,7 +44,8 @@ export default function Index() {
     route: "/expose",
     buttonText: "Create Spotlight",
     bgColor: "bg-gradient-to-br from-blue-50 to-indigo-100",
-    accentColor: "text-indigo-600"
+    accentColor: "text-indigo-600",
+    featured: true
   }, {
     title: "Photo Shoot",
     icon: Camera,
@@ -53,7 +54,8 @@ export default function Index() {
     route: "/product-photo-shoot",
     buttonText: "Start Photo Shoot",
     bgColor: "bg-gradient-to-br from-amber-50 to-orange-100",
-    accentColor: "text-orange-600"
+    accentColor: "text-orange-600",
+    featured: false
   }, {
     title: "Product Shorts",
     icon: Tv,
@@ -62,7 +64,8 @@ export default function Index() {
     route: "/videographer",
     buttonText: "Create Video",
     bgColor: "bg-gradient-to-br from-emerald-50 to-teal-100",
-    accentColor: "text-teal-600"
+    accentColor: "text-teal-600",
+    featured: true
   }, {
     title: "Fashion Models",
     icon: Users,
@@ -71,7 +74,8 @@ export default function Index() {
     route: "/fashion-models",
     buttonText: "Create Models",
     bgColor: "bg-gradient-to-br from-rose-50 to-pink-100",
-    accentColor: "text-rose-600"
+    accentColor: "text-rose-600",
+    featured: false
   }];
   
   return <div className="container mx-auto py-8 px-4">
@@ -81,29 +85,45 @@ export default function Index() {
           <h1 className="text-display-xl font-bold mb-3 text-[--p-text] text-[22.5px]">Brandmachine</h1>
           <p className="text-lg mb-8 text-[--p-text-subdued]">What do you want to create today:</p>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {productTools.map(tool => <Card key={tool.title} className="group overflow-hidden border-none shadow-sm hover:shadow-md transition-all duration-300 h-full flex flex-col">
-                <AspectRatio ratio={6 / 1} className={`${tool.bgColor} w-full`}>
-                  <div className="flex items-center h-full p-2">
-                    <tool.icon className={`h-6 w-6 mr-2 ${tool.accentColor}`} />
-                    <h3 className="font-medium">{tool.title}</h3>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-6">
+            {productTools.map(tool => (
+              <div key={tool.title} className="relative rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-all duration-300">
+                {tool.featured && (
+                  <div className="absolute top-3 left-3 bg-[#D82C0D] text-white text-xs font-semibold px-2 py-1 rounded-sm z-10">
+                    Featured
+                  </div>
+                )}
+                <AspectRatio ratio={1/1} className="bg-white">
+                  <div className={`${tool.bgColor} h-full w-full p-4 flex items-center justify-center`}>
+                    <tool.icon className={`h-36 w-36 ${tool.accentColor}`} />
                   </div>
                 </AspectRatio>
-                <CardHeader className="pb-2">
-                  <CardDescription className="text-body-md text-[--p-text-subdued]">
-                    {tool.description}
-                  </CardDescription>
-                </CardHeader>
-                <CardFooter className="pt-0 flex justify-end">
-                  <Link 
-                    to={tool.route} 
-                    className="text-body-sm font-semibold text-[#888888] hover:text-[#1A1F2C] flex items-center"
-                  >
-                    {tool.buttonText}
-                    <ArrowRight className="ml-2 h-4 w-4" />
-                  </Link>
-                </CardFooter>
-              </Card>)}
+                <div className="p-4 bg-white border-t border-[#E3E5E7]">
+                  <div className="flex justify-between items-start mb-1">
+                    <h3 className="text-[20px] font-semibold text-[#1A1F2C]">{tool.title}</h3>
+                    <span className="text-[#6D7175] bg-[#F6F6F7] px-2 py-1 rounded text-xs">AI-powered</span>
+                  </div>
+                  <p className="text-[#6D7175] text-sm mb-4">{tool.description}</p>
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center">
+                      <tool.icon className={`h-4 w-4 mr-1 ${tool.accentColor}`} />
+                      <span className="text-xs text-[#6D7175]">9 left</span>
+                    </div>
+                    <Link 
+                      to={tool.route}
+                      className="w-full mt-2"
+                    >
+                      <Button 
+                        variant="primary" 
+                        className="w-full"
+                      >
+                        {tool.buttonText}
+                      </Button>
+                    </Link>
+                  </div>
+                </div>
+              </div>
+            ))}
           </div>
         </div>}
     </div>;
