@@ -75,13 +75,10 @@ export default function Index() {
   }];
   
   return <div className="container mx-auto py-8 px-4">
-      {/* Breadcrumbs */}
-      <div className="flex mb-6 items-center text-sm">
-        <span className="text-[--p-text]">Home</span>
-      </div>
+      {/* Removed Home breadcrumb */}
       
       {isReturningUser ? <RecentProjects tools={productTools} /> : <div>
-          <h1 className="text-display-xl font-bold mb-3 text-[--p-text] text-[22.5px]">Welcome to Brandmachine</h1>
+          <h1 className="text-display-xl font-bold mb-3 text-[--p-text] text-[22.5px]">Brandmachine</h1>
           <p className="text-lg mb-8 text-[--p-text-subdued]">What do you want to create today:</p>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">

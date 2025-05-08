@@ -9,6 +9,10 @@ const NavBar = () => {
   
   const getBreadcrumbs = () => {
     const path = location.pathname;
+    
+    // Don't show breadcrumbs on home page
+    if (path === '/') return null;
+    
     const pathSegments = path.split('/').filter(segment => segment);
     
     if (pathSegments.length === 0) return null;
@@ -18,7 +22,7 @@ const NavBar = () => {
       'dashboard': 'Dashboard',
       'stylizer': 'Stylizer',
       'expose': 'Product Spotlight',
-      'videographer': 'Product Video',
+      'videographer': 'Product Shorts',
       'fashion-models': 'Fashion Models',
       'product-photo-shoot': 'Photo Shoot',
       'settings': 'Settings',

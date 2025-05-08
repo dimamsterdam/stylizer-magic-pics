@@ -119,7 +119,7 @@ export function RecentProjects({ tools }: { tools: ToolCard[] }) {
 
   return (
     <div>
-      <h1 className="text-display-xl font-bold mb-3 text-[--p-text] text-[22.5px]">Welcome back</h1>
+      <h1 className="text-display-xl font-bold mb-3 text-[--p-text] text-[22.5px]">Brandmachine</h1>
       
       {/* Recently Created with Filter Tabs */}
       <div className="mb-10">
