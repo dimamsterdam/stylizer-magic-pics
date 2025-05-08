@@ -1,3 +1,4 @@
+
 import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
@@ -36,7 +37,6 @@ export default function Index() {
     title: "Product Spotlight",
     icon: Image,
     description: "Create beautiful hero images for your product pages",
-    details: "Generate AI-driven hero images featuring your products with customizable themes and settings.",
     route: "/expose",
     buttonText: "Create Spotlight",
     bgColor: "bg-gradient-to-br from-blue-50 to-indigo-100",
@@ -45,7 +45,6 @@ export default function Index() {
     title: "Product Photo Shoot",
     icon: Camera,
     description: "Generate professional product photos for your store",
-    details: "Create multiple product views with variants and easily select the best ones for your Shopify store.",
     route: "/product-photo-shoot",
     buttonText: "Start Photo Shoot",
     bgColor: "bg-gradient-to-br from-amber-50 to-orange-100",
@@ -54,7 +53,6 @@ export default function Index() {
     title: "Video Creator",
     icon: Tv,
     description: "Create promotional videos for your products",
-    details: "Generate product videos with customizable themes, transitions, and music.",
     route: "/videographer",
     buttonText: "Create Video",
     bgColor: "bg-gradient-to-br from-emerald-50 to-teal-100",
@@ -63,7 +61,6 @@ export default function Index() {
     title: "Image Editor",
     icon: Workflow,
     description: "Edit and enhance product images",
-    details: "Use AI-powered tools to edit backgrounds, adjust lighting, and enhance product photos.",
     route: "/stylizer",
     buttonText: "Edit Images",
     bgColor: "bg-gradient-to-br from-purple-50 to-fuchsia-100",
@@ -72,7 +69,6 @@ export default function Index() {
     title: "Fashion Models",
     icon: Users,
     description: "Create virtual fashion models for your brand",
-    details: "Generate diverse models that represent your brand's identity and style.",
     route: "/fashion-models",
     buttonText: "Create Models",
     bgColor: "bg-gradient-to-br from-rose-50 to-pink-100",
@@ -81,7 +77,6 @@ export default function Index() {
     title: "Brand Dashboard",
     icon: Layout,
     description: "Manage your brand assets and statistics",
-    details: "View insights, track performance, and manage all your brand assets in one place.",
     route: "/dashboard",
     buttonText: "Go to Dashboard",
     bgColor: "bg-gradient-to-br from-sky-50 to-cyan-100",
@@ -110,14 +105,11 @@ export default function Index() {
                     {tool.description}
                   </CardDescription>
                 </CardHeader>
-                <CardContent className="flex-grow">
-                  <p className="text-[--p-text-subdued]">{tool.details}</p>
-                </CardContent>
                 <CardFooter className="pt-0">
-                  <Button asChild variant="primary" className="w-full group-hover:bg-[#1b5bab] transition-colors">
-                    <Link to={tool.route} className="flex items-center justify-center">
+                  <Button asChild variant="monochrome" className="w-full justify-start group-hover:bg-[#333333] transition-colors">
+                    <Link to={tool.route} className="flex items-center">
                       {tool.buttonText}
-                      <ArrowRight className="ml-2 h-4 w-4 opacity-0 transition-opacity group-hover:opacity-100" />
+                      <ArrowRight className="ml-auto h-4 w-4 opacity-0 transition-opacity group-hover:opacity-100" />
                     </Link>
                   </Button>
                 </CardFooter>

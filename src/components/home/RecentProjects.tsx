@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -122,7 +121,6 @@ export function RecentProjects({ tools }: { tools: ToolCard[] }) {
   return (
     <div>
       <h1 className="text-display-xl font-bold mb-3 text-[--p-text] text-[30px]">Welcome back</h1>
-      <p className="text-lg mb-8 text-[--p-text-subdued]">Continue working on your projects:</p>
       
       {/* Recently Created with Filter Tabs */}
       <div className="mb-10">
@@ -251,14 +249,11 @@ export function RecentProjects({ tools }: { tools: ToolCard[] }) {
                   {tool.description}
                 </CardDescription>
               </CardHeader>
-              <CardContent className="flex-grow">
-                <p className="text-[--p-text-subdued]">{tool.details}</p>
-              </CardContent>
               <CardFooter className="pt-0">
-                <Button asChild variant="primary" className="w-full group-hover:bg-[#1b5bab] transition-colors">
-                  <Link to={tool.route} className="flex items-center justify-center">
+                <Button asChild variant="monochrome" className="w-full justify-start group-hover:bg-[#333333] transition-colors">
+                  <Link to={tool.route} className="flex items-center">
                     {tool.buttonText}
-                    <ArrowRight className="ml-2 h-4 w-4 opacity-0 transition-opacity group-hover:opacity-100" />
+                    <ArrowRight className="ml-auto h-4 w-4 opacity-0 transition-opacity group-hover:opacity-100" />
                   </Link>
                 </Button>
               </CardFooter>
@@ -269,5 +264,3 @@ export function RecentProjects({ tools }: { tools: ToolCard[] }) {
     </div>
   );
 }
-
-// Project card component to avoid repetition - removed as it's no longer needed since we've updated to use Card directly
