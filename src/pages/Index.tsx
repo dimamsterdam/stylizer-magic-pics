@@ -117,7 +117,7 @@ export default function Index() {
                 <CardFooter className="pt-0 flex justify-end">
                   <Link 
                     to={tool.route} 
-                    className="text-body-sm font-bold text-[#888888] hover:text-[#1A1F2C] flex items-center"
+                    className="text-body-sm font-semibold text-[#888888] hover:text-[#1A1F2C] flex items-center"
                   >
                     {tool.buttonText}
                     <ArrowRight className="ml-2 h-4 w-4" />
