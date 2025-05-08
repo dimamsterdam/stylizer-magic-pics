@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -253,7 +252,7 @@ export function RecentProjects({ tools }: { tools: ToolCard[] }) {
               <CardFooter className="pt-0 flex justify-end">
                 <Link 
                   to={tool.route}
-                  className="text-body-md font-bold text-[#888888] hover:text-[#1A1F2C] flex items-center"
+                  className="text-body-sm font-bold text-[#888888] hover:text-[#1A1F2C] flex items-center"
                 >
                   {tool.buttonText}
                   <ArrowRight className="ml-2 h-4 w-4" />
