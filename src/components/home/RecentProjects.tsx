@@ -13,11 +13,12 @@ interface ToolCard {
   title: string;
   icon: React.ComponentType<any>;
   description: string;
-  details: string;
+  details?: string;
   route: string;
   buttonText: string;
   bgColor: string;
   accentColor: string;
+  imageSrc?: string;
 }
 
 interface RecentProject {
@@ -121,12 +122,11 @@ export function RecentProjects({ tools }: { tools: ToolCard[] }) {
 
   return (
     <div>
-      <h1 className="text-display-xl font-bold mb-3 text-[--p-text] text-[30px]">Welcome back</h1>
-      <p className="text-lg mb-8 text-[--p-text-subdued]">Continue working on your projects:</p>
+      <h1 className="text-display-xl font-bold mb-3 text-[--p-text] text-[22.5px]">Welcome back</h1>
       
       {/* Recently Created with Filter Tabs */}
       <div className="mb-10">
-        <h2 className="text-display-md font-semibold mb-4 text-[--p-text] text-[19.5px]">Recently created</h2>
+        <h2 className="text-display-md font-semibold mb-4 text-[--p-text] text-[14.5px]">Recently created</h2>
         
         <Tabs defaultValue="all" className="w-full mb-4">
           <TabsList>
@@ -145,7 +145,7 @@ export function RecentProjects({ tools }: { tools: ToolCard[] }) {
                   return (
                     <CarouselItem key={project.id} className="md:basis-1/2 lg:basis-1/3 pl-1">
                       <Link to={project.route}>
-                        <Card className="h-full group overflow-hidden border-none shadow-sm hover:shadow-md transition-all duration-300">
+                        <Card className="h-full group overflow-hidden border-0 shadow-sm hover:shadow-md transition-all duration-300">
                           <AspectRatio ratio={16/9} className="bg-gray-50 w-full">
                             <div className="flex items-center justify-center h-full">
                               {project.imageUrl ? (
@@ -190,7 +190,7 @@ export function RecentProjects({ tools }: { tools: ToolCard[] }) {
                       return (
                         <CarouselItem key={project.id} className="md:basis-1/2 lg:basis-1/3 pl-1">
                           <Link to={project.route}>
-                            <Card className="h-full group overflow-hidden border-none shadow-sm hover:shadow-md transition-all duration-300">
+                            <Card className="h-full group overflow-hidden border-0 shadow-sm hover:shadow-md transition-all duration-300">
                               <AspectRatio ratio={16/9} className="bg-gray-50 w-full">
                                 <div className="flex items-center justify-center h-full">
                                   {project.imageUrl ? (
@@ -236,26 +236,30 @@ export function RecentProjects({ tools }: { tools: ToolCard[] }) {
 
       {/* Create New Section */}
       <div>
-        <h2 className="text-display-md font-semibold mb-4 text-[--p-text] text-[19.5px]">Create new</h2>
+        <h2 className="text-display-md font-semibold mb-4 text-[--p-text] text-[14.5px]">Create new</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {tools.map((tool) => (
-            <Card key={tool.title} className="group overflow-hidden border-none shadow-sm hover:shadow-md transition-all duration-300 h-full flex flex-col">
-              <AspectRatio ratio={6/1} className={`${tool.bgColor} w-full`}>
+            <Card key={tool.title} className="group overflow-hidden border-0 shadow-sm hover:shadow-md transition-all duration-300 h-full flex flex-col">
+              <AspectRatio ratio={16/9} className="w-full">
+                <img 
+                  src={tool.imageSrc || "https://images.unsplash.com/photo-1649972904349-6e44c42644a7"} 
+                  alt={tool.title} 
+                  className="w-full h-full object-cover"
+                />
+              </AspectRatio>
+              <AspectRatio ratio={12/1} className={`w-full`}>
                 <div className="flex items-center h-full p-2">
-                  <tool.icon className={`h-6 w-6 mr-2 ${tool.accentColor}`} />
+                  <tool.icon className={`h-5 w-5 mr-2 ${tool.accentColor}`} />
                   <h3 className="font-medium">{tool.title}</h3>
                 </div>
               </AspectRatio>
-              <CardHeader className="pb-2">
-                <CardDescription className="text-body-md text-[--p-text-subdued]">
+              <CardHeader className="pb-0 pt-2">
+                <CardDescription className="text-body-md text-[--p-text-subdued] text-left">
                   {tool.description}
                 </CardDescription>
               </CardHeader>
-              <CardContent className="flex-grow">
-                <p className="text-[--p-text-subdued]">{tool.details}</p>
-              </CardContent>
-              <CardFooter className="pt-0">
-                <Button asChild variant="primary" className="w-full group-hover:bg-[#1b5bab] transition-colors">
+              <CardFooter className="mt-auto pt-2 pb-4">
+                <Button asChild variant="monochrome" className="w-full group-hover:bg-[#333333] transition-colors">
                   <Link to={tool.route} className="flex items-center justify-center">
                     {tool.buttonText}
                     <ArrowRight className="ml-2 h-4 w-4 opacity-0 transition-opacity group-hover:opacity-100" />
@@ -269,5 +273,3 @@ export function RecentProjects({ tools }: { tools: ToolCard[] }) {
     </div>
   );
 }
-
-// Project card component to avoid repetition - removed as it's no longer needed since we've updated to use Card directly
