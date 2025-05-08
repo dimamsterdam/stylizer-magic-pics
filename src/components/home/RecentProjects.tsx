@@ -120,11 +120,11 @@ export function RecentProjects({ tools }: { tools: ToolCard[] }) {
 
   return (
     <div>
-      <h1 className="text-display-xl font-bold mb-3 text-[--p-text] text-[30px]">Welcome back</h1>
+      <h1 className="text-display-xl font-bold mb-3 text-[--p-text] text-[22.5px]">Welcome back</h1>
       
       {/* Recently Created with Filter Tabs */}
       <div className="mb-10">
-        <h2 className="text-display-md font-semibold mb-4 text-[--p-text] text-[19.5px]">Recently created</h2>
+        <h2 className="text-display-md font-semibold mb-4 text-[--p-text] text-[14.5px]">Recently created</h2>
         
         <Tabs defaultValue="all" className="w-full mb-4">
           <TabsList>
@@ -234,7 +234,7 @@ export function RecentProjects({ tools }: { tools: ToolCard[] }) {
 
       {/* Create New Section */}
       <div>
-        <h2 className="text-display-md font-semibold mb-4 text-[--p-text] text-[19.5px]">Create new</h2>
+        <h2 className="text-display-md font-semibold mb-4 text-[--p-text] text-[14.5px]">Create new</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {tools.map((tool) => (
             <Card key={tool.title} className="group overflow-hidden border-none shadow-sm hover:shadow-md transition-all duration-300 h-full flex flex-col">
@@ -249,13 +249,14 @@ export function RecentProjects({ tools }: { tools: ToolCard[] }) {
                   {tool.description}
                 </CardDescription>
               </CardHeader>
-              <CardFooter className="pt-0">
-                <Button asChild variant="monochrome" className="w-full justify-start group-hover:bg-[#333333] transition-colors">
-                  <Link to={tool.route} className="flex items-center">
-                    {tool.buttonText}
-                    <ArrowRight className="ml-auto h-4 w-4 opacity-0 transition-opacity group-hover:opacity-100" />
-                  </Link>
-                </Button>
+              <CardFooter className="pt-0 flex justify-end">
+                <Link 
+                  to={tool.route}
+                  className="font-bold text-[#2A2C2E] hover:underline flex items-center"
+                >
+                  {tool.buttonText}
+                  <ArrowRight className="ml-2 h-4 w-4" />
+                </Link>
               </CardFooter>
             </Card>
           ))}

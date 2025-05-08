@@ -7,9 +7,11 @@ import { Image, Tv, Workflow, Layout, Users, ArrowRight, Camera } from "lucide-r
 import { AspectRatio } from "@/components/ui/aspect-ratio";
 import { supabase } from "@/integrations/supabase/client";
 import { RecentProjects } from "@/components/home/RecentProjects";
+
 export default function Index() {
   const navigate = useNavigate();
   const [isReturningUser, setIsReturningUser] = useState(false);
+  
   useEffect(() => {
     // Check if user has created content before
     const checkUserHistory = async () => {
@@ -33,10 +35,12 @@ export default function Index() {
     };
     checkUserHistory();
   }, []);
+  
   const productTools = [{
     title: "Product Spotlight",
     icon: Image,
     description: "Create beautiful hero images for your product pages",
+    details: "", // Added this to fix the TypeScript error
     route: "/expose",
     buttonText: "Create Spotlight",
     bgColor: "bg-gradient-to-br from-blue-50 to-indigo-100",
@@ -45,6 +49,7 @@ export default function Index() {
     title: "Product Photo Shoot",
     icon: Camera,
     description: "Generate professional product photos for your store",
+    details: "", // Added this to fix the TypeScript error
     route: "/product-photo-shoot",
     buttonText: "Start Photo Shoot",
     bgColor: "bg-gradient-to-br from-amber-50 to-orange-100",
@@ -53,6 +58,7 @@ export default function Index() {
     title: "Video Creator",
     icon: Tv,
     description: "Create promotional videos for your products",
+    details: "", // Added this to fix the TypeScript error
     route: "/videographer",
     buttonText: "Create Video",
     bgColor: "bg-gradient-to-br from-emerald-50 to-teal-100",
@@ -61,6 +67,7 @@ export default function Index() {
     title: "Image Editor",
     icon: Workflow,
     description: "Edit and enhance product images",
+    details: "", // Added this to fix the TypeScript error
     route: "/stylizer",
     buttonText: "Edit Images",
     bgColor: "bg-gradient-to-br from-purple-50 to-fuchsia-100",
@@ -69,6 +76,7 @@ export default function Index() {
     title: "Fashion Models",
     icon: Users,
     description: "Create virtual fashion models for your brand",
+    details: "", // Added this to fix the TypeScript error
     route: "/fashion-models",
     buttonText: "Create Models",
     bgColor: "bg-gradient-to-br from-rose-50 to-pink-100",
@@ -77,11 +85,13 @@ export default function Index() {
     title: "Brand Dashboard",
     icon: Layout,
     description: "Manage your brand assets and statistics",
+    details: "", // Added this to fix the TypeScript error
     route: "/dashboard",
     buttonText: "Go to Dashboard",
     bgColor: "bg-gradient-to-br from-sky-50 to-cyan-100",
     accentColor: "text-cyan-600"
   }];
+  
   return <div className="container mx-auto py-8 px-4">
       {/* Breadcrumbs */}
       <div className="flex mb-6 items-center text-sm">
@@ -89,7 +99,7 @@ export default function Index() {
       </div>
       
       {isReturningUser ? <RecentProjects tools={productTools} /> : <div>
-          <h1 className="text-display-xl font-bold mb-3 text-[--p-text] text-[30px]">Welcome to Brandmachine</h1>
+          <h1 className="text-display-xl font-bold mb-3 text-[--p-text] text-[22.5px]">Welcome to Brandmachine</h1>
           <p className="text-lg mb-8 text-[--p-text-subdued]">What do you want to create today:</p>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -105,13 +115,14 @@ export default function Index() {
                     {tool.description}
                   </CardDescription>
                 </CardHeader>
-                <CardFooter className="pt-0">
-                  <Button asChild variant="monochrome" className="w-full justify-start group-hover:bg-[#333333] transition-colors">
-                    <Link to={tool.route} className="flex items-center">
-                      {tool.buttonText}
-                      <ArrowRight className="ml-auto h-4 w-4 opacity-0 transition-opacity group-hover:opacity-100" />
-                    </Link>
-                  </Button>
+                <CardFooter className="pt-0 flex justify-end">
+                  <Link 
+                    to={tool.route} 
+                    className="font-bold text-[#2A2C2E] hover:underline flex items-center"
+                  >
+                    {tool.buttonText}
+                    <ArrowRight className="ml-2 h-4 w-4" />
+                  </Link>
                 </CardFooter>
               </Card>)}
           </div>
