@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
@@ -18,6 +17,7 @@ interface ToolCard {
   bgColor: string;
   accentColor: string;
   featured?: boolean;
+  imageSrc?: string;
 }
 
 interface RecentProject {
@@ -163,7 +163,7 @@ export function RecentProjects({ tools }: { tools: ToolCard[] }) {
               className="w-full h-full object-cover"
             />
           ) : (
-            <div className={`${bgColor} h-full w-full p-4 flex items-center justify-center`}>
+            <div className={`${bgColor} h-full w-full p-0 flex items-center justify-center overflow-hidden`}>
               <Icon className={`h-36 w-36 ${accentColor}`} />
             </div>
           )}
@@ -270,9 +270,17 @@ export function RecentProjects({ tools }: { tools: ToolCard[] }) {
                 </div>
               )}
               <AspectRatio ratio={1/1} className="bg-white">
-                <div className={`${tool.bgColor} h-full w-full p-4 flex items-center justify-center`}>
-                  <tool.icon className={`h-36 w-36 ${tool.accentColor}`} />
-                </div>
+                {tool.imageSrc ? (
+                  <img 
+                    src={tool.imageSrc} 
+                    alt={tool.title}
+                    className="w-full h-full object-cover"
+                  />
+                ) : (
+                  <div className={`${tool.bgColor} h-full w-full p-4 flex items-center justify-center`}>
+                    <tool.icon className={`h-36 w-36 ${tool.accentColor}`} />
+                  </div>
+                )}
               </AspectRatio>
               <div className="p-4 bg-white border-t border-[#E3E5E7]">
                 <div className="flex justify-between items-start mb-1">

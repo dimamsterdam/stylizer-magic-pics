@@ -40,42 +40,46 @@ export default function Index() {
     title: "Product Spotlight",
     icon: Image,
     description: "Create beautiful hero images for your product pages",
-    details: "", // Added this to fix the TypeScript error
+    details: "",
     route: "/expose",
     buttonText: "Create Spotlight",
     bgColor: "bg-gradient-to-br from-blue-50 to-indigo-100",
     accentColor: "text-indigo-600",
-    featured: true
+    featured: true,
+    imageSrc: "/lovable-uploads/61d9b435-6552-49b0-a269-25c905ba18c9.png"
   }, {
     title: "Photo Shoot",
     icon: Camera,
     description: "Generate professional product photos for your store",
-    details: "", // Added this to fix the TypeScript error
+    details: "",
     route: "/product-photo-shoot",
     buttonText: "Start Photo Shoot",
     bgColor: "bg-gradient-to-br from-amber-50 to-orange-100",
     accentColor: "text-orange-600",
-    featured: false
+    featured: false,
+    imageSrc: "/lovable-uploads/047c9307-af3c-47c6-b2e6-ea9d51a0c8cc.png"
   }, {
     title: "Product Shorts",
     icon: Tv,
     description: "Create promotional videos for your products",
-    details: "", // Added this to fix the TypeScript error
+    details: "",
     route: "/videographer",
     buttonText: "Create Video",
     bgColor: "bg-gradient-to-br from-emerald-50 to-teal-100",
     accentColor: "text-teal-600",
-    featured: true
+    featured: true,
+    imageSrc: "/lovable-uploads/85ad1b88-47a8-4226-bc2e-63fa2dcf049a.png"
   }, {
     title: "Fashion Models",
     icon: Users,
     description: "Create virtual fashion models for your brand",
-    details: "", // Added this to fix the TypeScript error
+    details: "",
     route: "/fashion-models",
     buttonText: "Create Models",
     bgColor: "bg-gradient-to-br from-rose-50 to-pink-100",
     accentColor: "text-rose-600",
-    featured: false
+    featured: false,
+    imageSrc: "/lovable-uploads/01c51803-441a-4b90-ad49-fc25ca184153.png"
   }];
   
   return <div className="container mx-auto py-8 px-4">
@@ -94,8 +98,16 @@ export default function Index() {
                   </div>
                 )}
                 <AspectRatio ratio={1/1} className="bg-white">
-                  <div className={`${tool.bgColor} h-full w-full p-4 flex items-center justify-center`}>
-                    <tool.icon className={`h-36 w-36 ${tool.accentColor}`} />
+                  <div className={`${tool.bgColor} h-full w-full p-0 flex items-center justify-center overflow-hidden`}>
+                    {tool.imageSrc ? (
+                      <img 
+                        src={tool.imageSrc} 
+                        alt={tool.title}
+                        className="w-full h-full object-cover"
+                      />
+                    ) : (
+                      <tool.icon className={`h-36 w-36 ${tool.accentColor}`} />
+                    )}
                   </div>
                 </AspectRatio>
                 <div className="p-4 bg-white border-t border-[#E3E5E7]">
