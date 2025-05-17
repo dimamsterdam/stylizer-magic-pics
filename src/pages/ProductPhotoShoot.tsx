@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -116,21 +116,6 @@ const ProductPhotoShoot = () => {
       shootType: 'standard'
     }
   });
-
-  useEffect(() => {
-    const checkAuth = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session?.user) {
-        toast({
-          title: "Authentication required",
-          description: "Please log in to create photo shoots",
-          variant: "destructive"
-        });
-        navigate('/auth', { state: { returnUrl: '/product-photo-shoot' } });
-      }
-    };
-    checkAuth();
-  }, [navigate, toast]);
 
   const { data: searchResults = [], isLoading, error } = useQuery({
     queryKey: ['products', searchTerm],

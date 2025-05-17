@@ -9,6 +9,7 @@ import "./App.css";
 import Layout from "./Layout";
 import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
+import ProtectedRoute from "./components/ProtectedRoute";
 
 const Auth = lazy(() => import("./pages/Auth"));
 const Dashboard = lazy(() => import("./pages/Dashboard"));
@@ -41,16 +42,21 @@ function App() {
             <Route element={<Layout />}>
               <Route path="/" element={<Index />} />
               <Route path="/auth" element={<Auth />} />
-              <Route path="/dashboard" element={<Dashboard />} />
-              <Route path="/brand" element={<Brand />} />
-              <Route path="/library" element={<Library />} />
-              <Route path="/settings" element={<Settings />} />
-              <Route path="/stylizer" element={<Stylizer />} />
-              <Route path="/expose" element={<Expose />} />
-              <Route path="/publish" element={<Publish />} />
-              <Route path="/videographer" element={<Videographer />} />
-              <Route path="/product-photo-shoot" element={<ProductPhotoShoot />} />
-              <Route path="/fashion-models" element={<FashionModels />} />
+              
+              {/* Protected Routes - require authentication */}
+              <Route element={<ProtectedRoute />}>
+                <Route path="/dashboard" element={<Dashboard />} />
+                <Route path="/brand" element={<Brand />} />
+                <Route path="/library" element={<Library />} />
+                <Route path="/settings" element={<Settings />} />
+                <Route path="/stylizer" element={<Stylizer />} />
+                <Route path="/expose" element={<Expose />} />
+                <Route path="/publish" element={<Publish />} />
+                <Route path="/videographer" element={<Videographer />} />
+                <Route path="/product-photo-shoot" element={<ProductPhotoShoot />} />
+                <Route path="/fashion-models" element={<FashionModels />} />
+              </Route>
+              
               <Route path="*" element={<NotFound />} />
             </Route>
           </Routes>
