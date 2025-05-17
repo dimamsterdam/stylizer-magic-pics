@@ -24,6 +24,11 @@ interface Product {
   image: string;
 }
 
+interface ProductView {
+  viewName: string;
+  variants: string[];
+}
+
 type Step = 'products' | 'theme-content' | 'prompt-suggestions' | 'review';
 type ShootType = 'standard' | 'ai-suggestions';
 const PLACEHOLDER_IMAGE = '/placeholder.svg';
@@ -101,6 +106,7 @@ const ProductPhotoShoot = () => {
   const [isGeneratingContent, setIsGeneratingContent] = useState(false);
   const [selectedPrompts, setSelectedPrompts] = useState<string[]>([]);
   const [shootType, setShootType] = useState<ShootType>('standard');
+  const [generatedProductViews, setGeneratedProductViews] = useState<ProductView[]>([]);
   
   const { toast } = useToast();
   const navigate = useNavigate();
@@ -197,6 +203,7 @@ const ProductPhotoShoot = () => {
       if (formShootType === 'standard') {
         // Skip to review with standard shots
         setIsGenerating(true);
+        setGeneratedProductViews(standardProductViews);
         
         // Simulate API call delay
         setTimeout(() => {
@@ -216,6 +223,19 @@ const ProductPhotoShoot = () => {
 
   const handlePromptsSelected = (selectedPrompts: string[]) => {
     setSelectedPrompts(selectedPrompts);
+    
+    // Generate product views based on selected prompts
+    const newProductViews = selectedPrompts.map((prompt, index) => {
+      // Get a random pair of mock images for visualization purposes
+      // In a real application, these would be generated based on the prompt
+      const mockIndex = index % mockProductViews.length;
+      return {
+        viewName: prompt,
+        variants: mockProductViews[mockIndex].variants
+      };
+    });
+    
+    setGeneratedProductViews(newProductViews);
     
     // Simulate image generation
     setIsGenerating(true);
@@ -378,11 +398,8 @@ const ProductPhotoShoot = () => {
   };
 
   const renderReviewStep = () => {
-    // Use different product views based on shoot type
-    const productViewsToShow = shootType === 'standard' ? standardProductViews : mockProductViews;
-    
     return (
-      <ImageReviewGallery productViews={productViewsToShow} />
+      <ImageReviewGallery productViews={generatedProductViews} />
     );
   };
 

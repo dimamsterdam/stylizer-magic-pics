@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
@@ -71,16 +72,21 @@ export const ImageReviewGallery = ({ productViews }: ImageReviewGalleryProps) =>
       variant: "destructive"
     });
     
-    // Move to next view if available
-    if (!isLastView) {
-      setTimeout(() => {
-        setAnimationDirection('from-right');
-        setCurrentViewIndex(prev => prev + 1);
-        setCurrentVariantIndex(0);
-      }, 1000);
+    // Switch to the second variant instead of moving to the next shot
+    if (currentVariantIndex === 0) {
+      setCurrentVariantIndex(1);
     } else {
-      // If it's the last view, just mark it as reviewed
-      setReviewedViews(prev => new Set([...prev, currentViewIndex]));
+      // If already on the second variant, move to the next view
+      if (!isLastView) {
+        setTimeout(() => {
+          setAnimationDirection('from-right');
+          setCurrentViewIndex(prev => prev + 1);
+          setCurrentVariantIndex(0);
+        }, 1000);
+      } else {
+        // If it's the last view, just mark it as reviewed
+        setReviewedViews(prev => new Set([...prev, currentViewIndex]));
+      }
     }
   };
 
@@ -105,7 +111,7 @@ export const ImageReviewGallery = ({ productViews }: ImageReviewGalleryProps) =>
 
   return (
     <div className="relative">
-      <div>
+      <div className="max-w-4xl mx-auto">
         {/* Header with Shot Description */}
         <div className="flex justify-between items-center mb-4 p-4">
           <div>
@@ -138,9 +144,9 @@ export const ImageReviewGallery = ({ productViews }: ImageReviewGalleryProps) =>
           </Button>
         </div>
         
-        {/* Main Image Display with Animation */}
+        {/* Main Image Display with Animation - Adjusted height to fit in viewport */}
         <div className="flex-1">
-          <div className="relative aspect-square overflow-hidden">
+          <div className="relative h-[400px] overflow-hidden">
             <img
               src={currentView.variants[currentVariantIndex]}
               alt={`${currentView.viewName} variant ${currentVariantIndex + 1}`}
