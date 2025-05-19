@@ -187,15 +187,19 @@ export type Database = {
           hero_image_url: string | null
           id: string
           image_variations: Json[] | null
+          is_multi_slide: boolean | null
           occasion: string | null
           selected_product_ids: string[]
           selected_variation_index: number | null
+          slide_order: number[] | null
+          slides: Json[] | null
           start_date: string | null
           status: Database["public"]["Enums"]["expose_status"]
           theme: string | null
           theme_description: string | null
           updated_at: string
           user_id: string
+          video_slides: number[] | null
         }
         Insert: {
           body_copy?: string | null
@@ -211,15 +215,19 @@ export type Database = {
           hero_image_url?: string | null
           id?: string
           image_variations?: Json[] | null
+          is_multi_slide?: boolean | null
           occasion?: string | null
           selected_product_ids?: string[]
           selected_variation_index?: number | null
+          slide_order?: number[] | null
+          slides?: Json[] | null
           start_date?: string | null
           status?: Database["public"]["Enums"]["expose_status"]
           theme?: string | null
           theme_description?: string | null
           updated_at?: string
           user_id: string
+          video_slides?: number[] | null
         }
         Update: {
           body_copy?: string | null
@@ -235,15 +243,19 @@ export type Database = {
           hero_image_url?: string | null
           id?: string
           image_variations?: Json[] | null
+          is_multi_slide?: boolean | null
           occasion?: string | null
           selected_product_ids?: string[]
           selected_variation_index?: number | null
+          slide_order?: number[] | null
+          slides?: Json[] | null
           start_date?: string | null
           status?: Database["public"]["Enums"]["expose_status"]
           theme?: string | null
           theme_description?: string | null
           updated_at?: string
           user_id?: string
+          video_slides?: number[] | null
         }
         Relationships: []
       }

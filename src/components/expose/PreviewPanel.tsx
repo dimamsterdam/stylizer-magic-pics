@@ -1,226 +1,193 @@
 
-import React, { useState, useEffect, useRef } from 'react';
-import { Button } from '@/components/ui/button';
-import { ChevronRight, ChevronLeft, LayoutGrid, MoreVertical, Save, RotateCw, ExternalLink, AlertTriangle } from 'lucide-react';
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import GeneratedImagePreview, { ExposeLayout } from '@/components/GeneratedImagePreview';
-import { Skeleton } from '@/components/ui/skeleton';
+import React, { useState, useEffect } from 'react';
+import { Button } from "@/components/ui/button";
+import { ChevronDown, ChevronUp, X, CheckCircle, ArrowUpFromLine, RotateCcw } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 interface PreviewPanelProps {
-  imageUrl: string;
+  previewContent?: React.ReactNode;  // New flexible content prop
+  imageUrl?: string;  // Keep for backward compatibility
   headline: string;
   bodyCopy: string;
   isExpanded: boolean;
-  isLoading?: boolean;
-  hasError?: boolean;
+  isLoading: boolean;
+  hasError: boolean;
   onToggleExpand: () => void;
-  onPanelStateChange?: (state: 'minimized' | 'preview' | 'expanded' | number) => void;
+  onPanelStateChange: (state: 'minimized' | 'preview' | 'expanded' | number) => void;
   onAddToLibrary?: () => void;
   onRegenerate?: () => void;
   showActions?: boolean;
+  isMultiSlide?: boolean;
 }
 
 export const PreviewPanel = ({
-  imageUrl = '/placeholder.svg',
+  previewContent,
+  imageUrl,
   headline,
   bodyCopy,
   isExpanded,
-  isLoading = false,
-  hasError = false,
+  isLoading,
+  hasError,
   onToggleExpand,
   onPanelStateChange,
   onAddToLibrary,
   onRegenerate,
-  showActions = false
+  showActions = false,
+  isMultiSlide = false
 }: PreviewPanelProps) => {
-  const [currentLayout, setCurrentLayout] = useState<ExposeLayout>('reversed');
-  const [shouldShowPreview, setShouldShowPreview] = useState(false);
-  const [imageLoadError, setImageLoadError] = useState(false);
-  const panelRef = useRef<HTMLDivElement>(null);
-  const prevHeadlineRef = useRef<string>('');
+  const [isMinimized, setIsMinimized] = useState(false);
   
-  // Reset image load error when imageUrl changes
   useEffect(() => {
-    setImageLoadError(false);
-  }, [imageUrl]);
-  
-  // Effect to check if content is available and show preview
-  useEffect(() => {
-    // Show preview when content is available
-    if ((headline && headline.trim() !== '') || (bodyCopy && bodyCopy.trim() !== '')) {
-      setShouldShowPreview(true);
-    }
-  }, [headline, bodyCopy]);
-  
-  // Effect to notify parent of panel state changes
-  useEffect(() => {
-    if (onPanelStateChange) {
-      if (isExpanded) {
-        onPanelStateChange('expanded');
-      } else if (shouldShowPreview) {
-        onPanelStateChange('preview');
-      } else {
-        onPanelStateChange('minimized');
+    const handleResize = () => {
+      if (window.innerWidth < 768) {
+        setIsMinimized(true);
       }
-    }
-  }, [isExpanded, shouldShowPreview, onPanelStateChange]);
-
-  // Effect to auto-expand panel when headline is newly generated
-  useEffect(() => {
-    // Only trigger if we have a headline and it's different from the previous one
-    if (headline && headline.trim() !== '' && headline !== prevHeadlineRef.current && !isExpanded) {
-      // Only auto-expand if there was no headline before or if the headline significantly changed
-      if (prevHeadlineRef.current === '' || headline.length > prevHeadlineRef.current.length + 5) {
-        onToggleExpand();
-      }
-    }
+    };
     
-    // Update the ref with current headline for next comparison
-    prevHeadlineRef.current = headline || '';
-  }, [headline, isExpanded, onToggleExpand]);
-
-  const handleToggleExpand = () => {
-    onToggleExpand();
-  };
-
-  const handleImageError = () => {
-    console.log("Image failed to load:", imageUrl);
-    setImageLoadError(true);
-  };
-
-  // Updated layout options
-  const layouts: { label: string; value: ExposeLayout }[] = [
-    { label: 'Top', value: 'reversed' },
-    { label: 'Bottom', value: 'default' },
-    { label: 'Editorial', value: 'editorial' },
-  ];
+    handleResize();
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
   
-  // Set panel width based on expansion state
-  const width = isExpanded ? '320px' : '40px';
+  const handleToggleMinimize = () => {
+    const newState = !isMinimized;
+    setIsMinimized(newState);
+    onPanelStateChange(newState ? 'minimized' : 'preview');
+  };
   
   return (
     <div 
-      ref={panelRef}
-      className="fixed right-0 top-[129px] bottom-0 bg-white border-l border-[#E3E5E7] shadow-xl z-40 transition-all duration-300 ease-in-out"
-      style={{ 
-        width,
-        boxShadow: '-4px 0px 20px rgba(0, 0, 0, 0.05)',
-      }}
+      className={cn(
+        "fixed right-0 bottom-0 z-10 bg-[--p-surface] border-l border-t border-[#E3E5E7] shadow-lg transition-all duration-300 ease-in-out",
+        isMinimized 
+          ? "w-40 h-12 flex items-center justify-between px-4" 
+          : isExpanded 
+            ? "w-[500px] max-w-full h-[calc(100vh-130px)]" 
+            : "w-[320px] max-w-full h-[calc(100vh-130px)]"
+      )}
     >
-      <div className="flex h-full">
-        {/* Side tab for collapse/expand */}
-        <div 
-          className="w-10 border-r border-[#E3E5E7] bg-[--p-surface] flex flex-col items-center pt-4"
-        >
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={handleToggleExpand}
-            title={isExpanded ? "Collapse preview" : "Expand preview"}
-            className="text-[--p-icon] h-8 w-8 p-0 mb-4"
-          >
-            {isExpanded ? <ChevronRight className="h-4 w-4" /> : <ChevronLeft className="h-4 w-4" />}
+      {isMinimized ? (
+        <>
+          <span className="text-sm font-medium truncate">Preview</span>
+          <Button variant="ghost" size="sm" className="p-1 h-6 w-6" onClick={handleToggleMinimize}>
+            <ChevronUp className="h-4 w-4" />
+            <span className="sr-only">Expand</span>
           </Button>
-          
-          {isExpanded && (
-            <a 
-              href="#" 
-              target="_blank" 
-              rel="noopener noreferrer" 
-              title="View in desktop"
-              className="text-[--p-icon] h-8 w-8 p-0 flex items-center justify-center hover:bg-[--p-surface-hovered] rounded-md"
-            >
-              <ExternalLink className="h-4 w-4" />
-            </a>
-          )}
-        </div>
-        
-        {/* Main content area - only shown when expanded */}
-        {isExpanded && (
-          <div className="flex-1 flex flex-col overflow-hidden">
-            {/* Top bar with controls */}
-            <div 
-              className="flex items-center justify-between px-3 py-2 bg-[--p-surface] border-b border-[#E3E5E7]"
-            >
-              <h3 className="font-medium text-[--p-text] text-sm">Mobile Preview</h3>
-              <div className="flex items-center gap-1">
-                {/* Layout options */}
-                <div className="flex gap-1 items-center mr-2">
-                  <LayoutGrid className="h-3 w-3 text-[--p-text-subdued]" />
-                  {layouts.map((layout) => (
-                    <Button
-                      key={layout.value}
-                      variant={currentLayout === layout.value ? "default" : "ghost"}
-                      size="sm"
-                      onClick={() => setCurrentLayout(layout.value)}
-                      className={`text-xs py-0.5 px-2 h-6 ${currentLayout === layout.value ? "bg-[--p-action-primary] text-white" : "text-[--p-text]"}`}
-                    >
-                      {layout.label}
-                    </Button>
-                  ))}
-                </div>
-                
-                {/* Actions menu */}
-                {showActions && onAddToLibrary && onRegenerate && (
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <Button variant="ghost" size="sm" className="h-6 w-6 p-0 mr-1">
-                        <MoreVertical className="h-3 w-3 text-[--p-text-subdued]" />
-                      </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end" className="w-[180px]">
-                      <DropdownMenuItem onClick={onAddToLibrary}>
-                        <Save className="mr-2 h-4 w-4" />
-                        <span>Add to Library</span>
-                      </DropdownMenuItem>
-                      <DropdownMenuItem onClick={onRegenerate}>
-                        <RotateCw className="mr-2 h-4 w-4" />
-                        <span>Regenerate</span>
-                      </DropdownMenuItem>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
-                )}
-              </div>
+        </>
+      ) : (
+        <div className="flex flex-col h-full">
+          {/* Header */}
+          <div className="flex items-center justify-between border-b border-[#E3E5E7] p-3">
+            <div className="flex items-center gap-2">
+              <h3 className="font-medium text-[--p-text]">
+                {isMultiSlide ? 'Slide Preview' : 'Preview'}
+              </h3>
+              {showActions && !hasError && (
+                <span className="bg-green-100 text-green-700 text-xs px-2 py-0.5 rounded flex items-center gap-1">
+                  <CheckCircle className="h-3 w-3" />
+                  Generated
+                </span>
+              )}
+              {hasError && (
+                <span className="bg-red-100 text-red-700 text-xs px-2 py-0.5 rounded">
+                  Error
+                </span>
+              )}
             </div>
-            
-            {/* Mobile device frame with content */}
-            <div className="flex-1 overflow-auto p-4 bg-[--p-background] flex items-center justify-center">
-              <div className="mobile-device-frame">
-                <div className="mobile-device-notch"></div>
-                <div className="mobile-content overflow-auto">
-                  {isLoading ? (
-                    <div className="bg-white rounded-lg overflow-hidden">
-                      <div className="grid grid-cols-1 min-h-[480px]">
-                        <Skeleton className="w-full h-full" />
-                      </div>
-                    </div>
-                  ) : hasError || imageLoadError ? (
-                    <div className="bg-white rounded-lg overflow-hidden p-6 text-center min-h-[480px] flex flex-col items-center justify-center">
-                      <AlertTriangle className="h-12 w-12 text-orange-500 mb-4" />
-                      <h3 className="text-lg font-semibold text-gray-800 mb-2">Image Generation Failed</h3>
-                      <p className="text-gray-600 mb-4">There was a problem generating the image. Please try again.</p>
-                      {onRegenerate && (
-                        <Button onClick={onRegenerate} variant="secondary">
-                          <RotateCw className="mr-2 h-4 w-4" />
-                          Try Again
-                        </Button>
-                      )}
-                    </div>
-                  ) : (
-                    <GeneratedImagePreview
-                      imageUrl={imageUrl}
-                      headline={headline || "Your headline will appear here"}
-                      bodyCopy={bodyCopy || "Your body copy will appear here. As you type or generate content, you'll see it update in this preview."}
-                      layout={currentLayout}
-                      onImageLoadError={handleImageError}
-                    />
-                  )}
-                </div>
-              </div>
+            <div className="flex items-center">
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                className="p-1 h-6 w-6 mr-1"
+                onClick={onToggleExpand}
+              >
+                {isExpanded ? <ChevronDown className="h-4 w-4" /> : <ArrowUpFromLine className="h-4 w-4" />}
+                <span className="sr-only">{isExpanded ? 'Collapse' : 'Expand'}</span>
+              </Button>
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                className="p-1 h-6 w-6"
+                onClick={handleToggleMinimize}
+              >
+                <X className="h-4 w-4" />
+                <span className="sr-only">Minimize</span>
+              </Button>
             </div>
           </div>
-        )}
-      </div>
+          
+          {/* Preview Content */}
+          <div className="flex-grow overflow-auto p-4">
+            {isLoading ? (
+              <div className="flex flex-col items-center justify-center h-full">
+                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#2C6ECB]"></div>
+                <p className="mt-4 text-[--p-text-subdued]">Generating {isMultiSlide ? 'slides' : 'hero image'}...</p>
+              </div>
+            ) : hasError ? (
+              <div className="flex flex-col items-center justify-center h-full text-center">
+                <div className="rounded-full bg-red-100 p-3 mb-4">
+                  <X className="h-6 w-6 text-red-500" />
+                </div>
+                <h4 className="font-medium mb-2">Generation Failed</h4>
+                <p className="text-[--p-text-subdued] text-sm mb-4">There was an error generating your {isMultiSlide ? 'slides' : 'hero image'}.</p>
+                {onRegenerate && (
+                  <Button onClick={onRegenerate} variant="outline" size="sm">
+                    <RotateCcw className="h-4 w-4 mr-2" />
+                    Try Again
+                  </Button>
+                )}
+              </div>
+            ) : (
+              <div className="space-y-4">
+                {/* Use either previewContent or fallback to imageUrl rendering */}
+                {previewContent || (
+                  imageUrl && (
+                    <div className="relative">
+                      <img 
+                        src={imageUrl} 
+                        alt="Generated hero"
+                        className="w-full h-auto rounded-md"
+                        onError={(e) => { e.currentTarget.src = '/placeholder.svg'; }}
+                      />
+                    </div>
+                  )
+                )}
+                
+                {headline && (
+                  <div className="mt-4">
+                    <h4 className="font-medium text-sm text-[--p-text-subdued] mb-1">Headline</h4>
+                    <p className="text-[--p-text] font-semibold">{headline}</p>
+                  </div>
+                )}
+                
+                {bodyCopy && (
+                  <div className="mt-3">
+                    <h4 className="font-medium text-sm text-[--p-text-subdued] mb-1">Body Copy</h4>
+                    <p className="text-[--p-text]">{bodyCopy}</p>
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+          
+          {/* Footer Actions */}
+          {showActions && !isLoading && !hasError && (
+            <div className="border-t border-[#E3E5E7] p-3 flex justify-between">
+              {onRegenerate && (
+                <Button onClick={onRegenerate} variant="outline" size="sm">
+                  <RotateCcw className="h-4 w-4 mr-2" />
+                  Regenerate
+                </Button>
+              )}
+              {onAddToLibrary && (
+                <Button onClick={onAddToLibrary} variant="primary" size="sm">
+                  Add to Library
+                </Button>
+              )}
+            </div>
+          )}
+        </div>
+      )}
     </div>
   );
 };
