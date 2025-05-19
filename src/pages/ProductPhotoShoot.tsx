@@ -372,12 +372,14 @@ const ProductPhotoShoot = () => {
 
   const renderPromptSuggestionsStep = () => {
     const productName = selectedProducts.length > 0 ? selectedProducts[0].title : 'product';
+    const productImage = selectedProducts.length > 0 ? selectedProducts[0].image : '/placeholder.svg';
     
     return (
       <ShotSuggestions
         productName={productName}
         designBrief={finalPrompt}
         onContinue={handlePromptsSelected}
+        productImage={productImage}
       />
     );
   };
