@@ -359,6 +359,7 @@ const Expose = () => {
         throw new Error('Failed to generate slide prompts');
       }
       
+      // Fix: Cast the slides array to the proper type
       const formattedSlides: SlidePrompt[] = slides.map((slide: any, index: number) => ({
         id: `story-slide-${Date.now()}-${index}`,
         text: slide.prompt || `Slide ${index + 1} featuring the product`,
@@ -476,8 +477,19 @@ const Expose = () => {
             refetchExpose();
 
             // Update local slide prompts if multi-slide and we have generated slides
-            if (isMultiSlide && exposeData?.slides?.length > 0) {
-              setSlidePrompts(exposeData.slides);
+            if (isMultiSlide && exposeData?.slides && Array.isArray(exposeData.slides)) {
+              // Fix: Cast the slides from JSON to SlidePrompt
+              const typedSlides: SlidePrompt[] = (exposeData.slides as any[]).map((slide: any) => ({
+                id: slide.id || `slide-${Date.now()}`,
+                text: slide.text || "",
+                imageUrl: slide.imageUrl || "",
+                variations: slide.variations || [],
+                selectedVariation: slide.selectedVariation || 0,
+                status: (slide.status as 'pending' | 'generating' | 'completed' | 'error') || 'completed',
+                isVideo: slide.isVideo || false
+              }));
+              
+              setSlidePrompts(typedSlides);
             }
 
             // Expand the preview panel to show the generated image
@@ -836,8 +848,8 @@ const Expose = () => {
           imageUrl: slide.imageUrl || slide.variations?.[slide.selectedVariation || 0] || PLACEHOLDER_IMAGE,
           variations: slide.variations || [],
           selectedVariation: slide.selectedVariation || 0,
-          isVideo: slide.isVideo || false,
-          status: (slide.status as 'pending' | 'generating' | 'completed' | 'error') || 'completed'
+          status: (slide.status as 'pending' | 'generating' | 'completed' | 'error') || 'completed',
+          isVideo: slide.isVideo || false
         };
       });
       

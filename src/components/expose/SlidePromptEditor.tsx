@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -14,6 +13,7 @@ export interface SlidePrompt {
   variations?: string[];
   selectedVariation?: number;
   status?: 'pending' | 'generating' | 'completed' | 'error';
+  isVideo?: boolean;
 }
 
 interface SlidePromptEditorProps {
@@ -51,7 +51,8 @@ export const SlidePromptEditor = ({
     const newSlide: SlidePrompt = {
       id: `slide-${Date.now()}`,
       text: "",
-      status: 'pending'
+      status: 'pending',
+      isVideo: false
     };
     onSlideUpdate([...slides, newSlide]);
   };
