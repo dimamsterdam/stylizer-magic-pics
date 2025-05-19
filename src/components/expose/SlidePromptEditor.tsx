@@ -79,7 +79,7 @@ export const SlidePromptEditor = ({
     
     // For now, we'll just mark it as pending
     const updatedSlides = slides.map(slide => 
-      slide.id === id ? { ...slide, status: 'pending' } : slide
+      slide.id === id ? { ...slide, status: 'pending' as const } : slide
     );
     onSlideUpdate(updatedSlides);
   };

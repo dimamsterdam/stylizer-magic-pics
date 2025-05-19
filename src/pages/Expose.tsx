@@ -15,7 +15,7 @@ import { ThemeGenerator } from "@/components/ThemeGenerator";
 import { PreviewPanel } from "@/components/expose/PreviewPanel";
 import { PromptBuilder } from "@/components/expose/PromptBuilder";
 import { ModelAttributes } from "@/types/modelTypes";
-import { SlidePrompt } from "@/components/expose/SlidePromptEditor";
+import { SlidePrompt, SlidePromptEditor } from "@/components/expose/SlidePromptEditor";
 import { SlideGallery } from "@/components/expose/SlideGallery";
 import { SpotlightTypeSelector } from "@/components/expose/SpotlightTypeSelector";
 
@@ -26,14 +26,8 @@ interface Product {
   image: string;
 }
 
-interface Slide {
-  id: string;
-  text: string;
-  imageUrl?: string;
-  variations?: string[];
-  selectedVariation?: number;
+interface Slide extends SlidePrompt {
   isVideo?: boolean;
-  status?: 'pending' | 'generating' | 'completed' | 'error';
 }
 
 type Step = 'products' | 'theme-content';
@@ -365,10 +359,10 @@ const Expose = () => {
         throw new Error('Failed to generate slide prompts');
       }
       
-      const formattedSlides: SlidePrompt[] = slides.map((slide, index) => ({
+      const formattedSlides: SlidePrompt[] = slides.map((slide: any, index: number) => ({
         id: `story-slide-${Date.now()}-${index}`,
         text: slide.prompt || `Slide ${index + 1} featuring the product`,
-        status: 'completed'
+        status: 'completed' as const
       }));
       
       setSlidePrompts(formattedSlides);
@@ -390,7 +384,7 @@ const Expose = () => {
           {
             id: `slide-${Date.now()}-1`,
             text: "",
-            status: 'pending'
+            status: 'pending' as const
           }
         ]);
       }
@@ -606,6 +600,24 @@ const Expose = () => {
     }
   };
   
+  const handleSelectVariation = (slideId: string, variationIndex: number) => {
+    console.log(`Selected variation ${variationIndex} for slide ${slideId}`);
+    // In a real implementation, this would update the database
+    toast({
+      title: "Variation selected",
+      description: `Selected variation ${variationIndex + 1} for this slide`
+    });
+  };
+  
+  const handleToggleVideo = (slideId: string) => {
+    console.log(`Toggled video for slide ${slideId}`);
+    // In a real implementation, this would update the database
+    toast({
+      title: "Video toggled",
+      description: "This feature is coming soon"
+    });
+  };
+  
   const togglePreviewExpansion = () => {
     setIsPreviewExpanded(!isPreviewExpanded);
   };
@@ -816,10 +828,22 @@ const Expose = () => {
     if (!exposeData) return null;
     
     if (exposeData.is_multi_slide && Array.isArray(exposeData.slides) && exposeData.slides.length > 0) {
-      // Multi-slide preview
+      // Multi-slide preview - transform database slides to proper type
+      const typedSlides = (exposeData.slides as any[]).map((slide: any): (SlidePrompt & { imageUrl: string }) => {
+        return {
+          id: slide.id || `slide-${Date.now()}`,
+          text: slide.text || "",
+          imageUrl: slide.imageUrl || slide.variations?.[slide.selectedVariation || 0] || PLACEHOLDER_IMAGE,
+          variations: slide.variations || [],
+          selectedVariation: slide.selectedVariation || 0,
+          isVideo: slide.isVideo || false,
+          status: (slide.status as 'pending' | 'generating' | 'completed' | 'error') || 'completed'
+        };
+      });
+      
       return (
         <SlideGallery
-          slides={exposeData.slides as Slide[]}
+          slides={typedSlides}
           headline={headline}
           bodyCopy={bodyCopy}
           onSelectVariation={handleSelectVariation}
@@ -834,7 +858,7 @@ const Expose = () => {
                       (exposeData.image_variations && 
                        Array.isArray(exposeData.image_variations) && 
                        exposeData.selected_variation_index !== undefined ? 
-                        exposeData.image_variations[exposeData.selected_variation_index] : 
+                        exposeData.image_variations[exposeData.selected_variation_index] as string : 
                         PLACEHOLDER_IMAGE);
       
       return (

@@ -4,16 +4,10 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { ChevronLeft, ChevronRight, Film, CheckCircle2 } from "lucide-react";
 import GeneratedImagePreview, { ExposeLayout } from '@/components/GeneratedImagePreview';
+import { SlidePrompt } from './SlidePromptEditor';
 
 interface SlideGalleryProps {
-  slides: {
-    id: string;
-    prompt?: string;
-    imageUrl: string;
-    variations?: string[];
-    selectedVariation?: number;
-    isVideo?: boolean;
-  }[];
+  slides: (SlidePrompt & { imageUrl: string })[];
   headline: string;
   bodyCopy: string;
   layout?: ExposeLayout;
