@@ -1,9 +1,10 @@
+
 import React, { useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { Check, X, ArrowLeft, ArrowRight, ChevronLeft, ChevronRight } from "lucide-react";
+import { Check, X, ChevronLeft, ChevronRight } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import { cn } from "@/lib/utils";
+import { ShotSuggestions } from "./PromptSuggestions";
 
 interface ProductView {
   viewName: string;
@@ -27,6 +28,10 @@ interface PhotoReviewPanelProps {
   onApprovePhoto?: (photoId: string) => void;
   onRejectPhoto?: (photoId: string) => void;
   onUnapprovePhoto?: (photoId: string) => void;
+  showShotSuggestions?: boolean;
+  productName?: string;
+  designBrief?: string;
+  onPromptsSelected?: (selectedPrompts: string[]) => void;
 }
 
 export const PhotoReviewPanel = ({ 
@@ -36,7 +41,11 @@ export const PhotoReviewPanel = ({
   hasGeneratedPhotos,
   onApprovePhoto,
   onRejectPhoto,
-  onUnapprovePhoto
+  onUnapprovePhoto,
+  showShotSuggestions = false,
+  productName = '',
+  designBrief = '',
+  onPromptsSelected
 }: PhotoReviewPanelProps) => {
   const [currentViewIndex, setCurrentViewIndex] = useState(0);
   const [currentVariantIndex, setCurrentVariantIndex] = useState(0);
@@ -109,6 +118,18 @@ export const PhotoReviewPanel = ({
   };
 
   const renderContent = () => {
+    if (showShotSuggestions && productName && onPromptsSelected) {
+      return (
+        <div className="p-4">
+          <ShotSuggestions
+            productName={productName}
+            designBrief={designBrief}
+            onContinue={onPromptsSelected}
+          />
+        </div>
+      );
+    }
+
     if (isGenerating) {
       return (
         <div className="flex flex-col items-center justify-center h-full p-8">

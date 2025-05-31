@@ -101,7 +101,6 @@ const ProductPhotoShoot = () => {
   const [finalPrompt, setFinalPrompt] = useState('');
   const [isGenerating, setIsGenerating] = useState(false);
   const [selectedPrompts, setSelectedPrompts] = useState<string[]>([]);
-  const [shootType, setShootType] = useState<ShootType>('standard');
   const [showShotSuggestions, setShowShotSuggestions] = useState(false);
   const [hasGeneratedPhotos, setHasGeneratedPhotos] = useState(false);
   
@@ -142,7 +141,6 @@ const ProductPhotoShoot = () => {
       }
       
       setFinalPrompt(currentSession.design_brief || '');
-      setShootType((currentSession.shoot_type as ShootType) || 'standard');
       
       if (currentSession.status === 'reviewing' || currentSession.status === 'completed') {
         setHasGeneratedPhotos(true);
@@ -251,7 +249,6 @@ const ProductPhotoShoot = () => {
       createSession({
         product_id: selectedProducts[0].id,
         design_brief: finalPrompt,
-        shoot_type: form.getValues('shootType') as ShootType,
         status: 'draft'
       });
     } else {
@@ -265,66 +262,7 @@ const ProductPhotoShoot = () => {
   };
 
   const handleGeneratePhotos = async () => {
-    const formShootType = form.getValues('shootType') as ShootType;
-    setShootType(formShootType);
-    
-    let sessionId = currentSessionId;
-    if (!sessionId && selectedProducts.length > 0) {
-      createSession({
-        product_id: selectedProducts[0].id,
-        design_brief: finalPrompt,
-        shoot_type: formShootType,
-        status: 'generating'
-      });
-      return;
-    }
-    
-    if (sessionId) {
-      updateSession({
-        sessionId,
-        updates: {
-          shoot_type: formShootType,
-          status: 'generating'
-        }
-      });
-    }
-    
-    if (formShootType === 'standard') {
-      setIsGenerating(true);
-      
-      setTimeout(async () => {
-        setIsGenerating(false);
-        setHasGeneratedPhotos(true);
-        
-        if (sessionId) {
-          const photosToSave = standardProductViews.flatMap(view => 
-            view.variants.map((url, index) => ({
-              view_name: view.viewName,
-              variant_index: index,
-              image_url: url,
-              approval_status: 'pending' as const
-            }))
-          );
-          
-          saveGeneratedPhotos({
-            sessionId,
-            photos: photosToSave
-          });
-          
-          updateSession({
-            sessionId,
-            updates: { status: 'reviewing' }
-          });
-        }
-        
-        toast({
-          title: "Images generated",
-          description: "Your standard product photos have been generated successfully!",
-        });
-      }, 2000);
-    } else {
-      setShowShotSuggestions(true);
-    }
+    setShowShotSuggestions(true);
   };
 
   const handlePromptsSelected = async (selectedPrompts: string[]) => {
@@ -479,30 +417,6 @@ const ProductPhotoShoot = () => {
                   onFinalize={handlePromptFinalize} 
                 />
 
-                <div className="space-y-6 mt-6 pt-6 border-t border-[#E3E5E7]">
-                  <div>
-                    <h3 className="text-heading text-[--p-text] mb-3">Setup your shoot</h3>
-                    
-                    <RadioGroup 
-                      defaultValue="standard"
-                      onValueChange={(value) => form.setValue('shootType', value as ShootType)}
-                    >
-                      <div className="flex items-center space-x-2 p-3 rounded-md hover:bg-[#F6F6F7] cursor-pointer">
-                        <RadioGroupItem value="standard" id="standard" />
-                        <Label htmlFor="standard" className="font-medium cursor-pointer">
-                          Standard product shoot (back, sides & front shots)
-                        </Label>
-                      </div>
-                      <div className="flex items-center space-x-2 p-3 rounded-md hover:bg-[#F6F6F7] cursor-pointer">
-                        <RadioGroupItem value="ai-suggestions" id="ai-suggestions" />
-                        <Label htmlFor="ai-suggestions" className="font-medium cursor-pointer">
-                          Let the AI photographer suggest shots
-                        </Label>
-                      </div>
-                    </RadioGroup>
-                  </div>
-                </div>
-
                 <div className="flex justify-end pt-4">
                   <Button 
                     onClick={handleGeneratePhotos} 
@@ -525,15 +439,6 @@ const ProductPhotoShoot = () => {
               </CardContent>
             </Card>
           )}
-
-          {showShotSuggestions && selectedProducts.length > 0 && (
-            <ShotSuggestions
-              productName={selectedProducts[0].title}
-              designBrief={finalPrompt}
-              onContinue={handlePromptsSelected}
-              productImage={selectedProducts[0].image}
-            />
-          )}
         </div>
 
         <PhotoReviewPanel 
@@ -544,6 +449,10 @@ const ProductPhotoShoot = () => {
           onApprovePhoto={handleApprovePhoto}
           onRejectPhoto={handleRejectPhoto}
           onUnapprovePhoto={handleUnapprovePhoto}
+          showShotSuggestions={showShotSuggestions}
+          productName={selectedProducts[0]?.title}
+          designBrief={finalPrompt}
+          onPromptsSelected={handlePromptsSelected}
         />
       </div>
     </div>
