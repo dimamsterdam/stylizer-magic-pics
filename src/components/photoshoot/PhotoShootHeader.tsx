@@ -1,18 +1,8 @@
 
 import React from 'react';
-import { Button } from "@/components/ui/button";
 import Breadcrumbs from "@/components/Breadcrumbs";
-import StepProgress from "@/components/StepProgress";
 
-interface PhotoShootHeaderProps {
-  currentStep: 'products' | 'theme-content' | 'prompt-suggestions' | 'review';
-  onStepClick?: (step: 'products' | 'theme-content' | 'prompt-suggestions' | 'review') => void;
-}
-
-export const PhotoShootHeader = ({
-  currentStep,
-  onStepClick
-}: PhotoShootHeaderProps) => {
+export const PhotoShootHeader = () => {
   return (
     <div className="border-b border-[--p-border-subdued] bg-[--p-surface]">
       <div className="px-5 py-4">
@@ -29,16 +19,6 @@ export const PhotoShootHeader = ({
           </div>
         </div>
       </div>
-      <StepProgress 
-        steps={[
-          { id: 'products', label: 'Product Selection' },
-          { id: 'theme-content', label: 'Design Brief' },
-          { id: 'prompt-suggestions', label: 'Shot Suggestions' },
-          { id: 'review', label: 'Photo Review' }
-        ]}
-        currentStep={currentStep} 
-        onStepClick={onStepClick} 
-      />
     </div>
   );
 };

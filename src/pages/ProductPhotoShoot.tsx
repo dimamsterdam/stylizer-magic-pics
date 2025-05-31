@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent } from "@/components/ui/card";
@@ -11,10 +12,9 @@ import { Textarea } from "@/components/ui/textarea";
 import { useNavigate } from "react-router-dom";
 import { PhotoShootHeader } from "@/components/photoshoot/PhotoShootHeader";
 import { PromptBuilder } from "@/components/expose/PromptBuilder";
-import { ImageReviewGallery } from "@/components/photoshoot/ImageReviewGallery";
 import { ShotSuggestions } from "@/components/photoshoot/PromptSuggestions";
+import { PhotoReviewPanel } from "@/components/photoshoot/PhotoReviewPanel";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { Form, FormControl, FormField, FormItem, FormLabel } from "@/components/ui/form";
 import { useForm } from "react-hook-form";
 
 interface Product {
@@ -29,9 +29,7 @@ interface ProductView {
   variants: string[];
 }
 
-type Step = 'products' | 'theme-content' | 'prompt-suggestions' | 'review';
 type ShootType = 'standard' | 'ai-suggestions';
-const PLACEHOLDER_IMAGE = '/placeholder.svg';
 
 // Mock images for the photo shoot with descriptive shot names
 const mockProductViews = [
@@ -97,16 +95,15 @@ const standardProductViews = [
 ];
 
 const ProductPhotoShoot = () => {
-  const [currentStep, setCurrentStep] = useState<Step>('products');
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedProducts, setSelectedProducts] = useState<Product[]>([]);
   const [finalPrompt, setFinalPrompt] = useState('');
   const [isGenerating, setIsGenerating] = useState(false);
-  const [photoShootId, setPhotoShootId] = useState<string | null>(null);
-  const [isGeneratingContent, setIsGeneratingContent] = useState(false);
   const [selectedPrompts, setSelectedPrompts] = useState<string[]>([]);
   const [shootType, setShootType] = useState<ShootType>('standard');
   const [generatedProductViews, setGeneratedProductViews] = useState<ProductView[]>([]);
+  const [showShotSuggestions, setShowShotSuggestions] = useState(false);
+  const [hasGeneratedPhotos, setHasGeneratedPhotos] = useState(false);
   
   const { toast } = useToast();
   const navigate = useNavigate();
@@ -139,7 +136,7 @@ const ProductPhotoShoot = () => {
 
   const handleProductSelect = (product: Product) => {
     if (selectedProducts.length < 1) {
-      setSelectedProducts(prev => [...prev, product]);
+      setSelectedProducts([product]);
     } else {
       toast({
         title: "Product limit reached",
@@ -164,55 +161,34 @@ const ProductPhotoShoot = () => {
   const handlePromptFinalize = (prompt: string) => {
     setFinalPrompt(prompt);
   };
-  
-  const handleContinue = async () => {
-    if (currentStep === 'products' && selectedProducts.length === 0) return;
-    if (currentStep === 'theme-content' && !finalPrompt.trim()) return;
+
+  const handleGeneratePhotos = () => {
+    const formShootType = form.getValues('shootType');
+    setShootType(formShootType as ShootType);
     
-    if (currentStep === 'products') {
-      try {
-        // In a real implementation, we would save the photo shoot to the database
-        setCurrentStep('theme-content');
-      } catch (error) {
-        console.error('Error creating photo shoot:', error);
-        toast({
-          title: "Error",
-          description: "Failed to create photo shoot. Please try again.",
-          variant: "destructive"
-        });
-      }
-    } else if (currentStep === 'theme-content') {
-      const formShootType = form.getValues('shootType');
-      setShootType(formShootType as ShootType);
+    if (formShootType === 'standard') {
+      // Generate standard shots
+      setIsGenerating(true);
+      setGeneratedProductViews(standardProductViews);
       
-      if (formShootType === 'standard') {
-        // Skip to review with standard shots
-        setIsGenerating(true);
-        setGeneratedProductViews(standardProductViews);
-        
-        // Simulate API call delay
-        setTimeout(() => {
-          setIsGenerating(false);
-          setCurrentStep('review');
-          toast({
-            title: "Images generated",
-            description: "Your standard product photos have been generated successfully!",
-          });
-        }, 2000);
-      } else {
-        // Go to shot suggestions
-        setCurrentStep('prompt-suggestions');
-      }
+      setTimeout(() => {
+        setIsGenerating(false);
+        setHasGeneratedPhotos(true);
+        toast({
+          title: "Images generated",
+          description: "Your standard product photos have been generated successfully!",
+        });
+      }, 2000);
+    } else {
+      // Show shot suggestions
+      setShowShotSuggestions(true);
     }
   };
 
   const handlePromptsSelected = (selectedPrompts: string[]) => {
     setSelectedPrompts(selectedPrompts);
     
-    // Generate product views based on selected prompts
     const newProductViews = selectedPrompts.map((prompt, index) => {
-      // Get a random pair of mock images for visualization purposes
-      // In a real application, these would be generated based on the prompt
       const mockIndex = index % mockProductViews.length;
       return {
         viewName: prompt,
@@ -221,14 +197,12 @@ const ProductPhotoShoot = () => {
     });
     
     setGeneratedProductViews(newProductViews);
-    
-    // Simulate image generation
     setIsGenerating(true);
     
-    // Simulate API call delay
     setTimeout(() => {
       setIsGenerating(false);
-      setCurrentStep('review');
+      setHasGeneratedPhotos(true);
+      setShowShotSuggestions(false);
       toast({
         title: "Images generated",
         description: "Your product photos have been generated successfully!",
@@ -236,195 +210,152 @@ const ProductPhotoShoot = () => {
     }, 2000);
   };
 
-  const handleStepClick = (step: Step) => {
-    if (step === 'review' && currentStep !== 'review') return; // Only allow going to review if we've generated images
-    if (step === 'prompt-suggestions' && currentStep === 'products') return; // Don't skip the theme-content step
-    setCurrentStep(step);
-  };
-
-  const renderProductsStep = () => {
-    return (
-      <Card className="bg-[--p-surface] shadow-sm border border-[#E3E5E7] rounded-md">
-        <CardContent className="p-6 space-y-6">
-          <div className="mt-4">
-            <h2 className="text-display-sm text-[--p-text] mb-1">Select Product</h2>
-            <p className="text-body text-[--p-text-subdued]">
-              Choose a product for your photo shoot
-            </p>
-          </div>
-
-          <ProductPicker 
-            onSelect={handleProductSelect} 
-            selectedProducts={selectedProducts} 
-            searchResults={searchResults} 
-            isLoading={isLoading} 
-            error={error ? 'Error loading products' : null} 
-            searchTerm={searchTerm} 
-            onSearch={handleSearchChange} 
-          />
-
-          {selectedProducts.length > 0 && (
-            <div className="mt-8">
-              <h3 className="text-heading text-[--p-text] mb-3">
-                Selected Product
-              </h3>
-              <div className="space-y-3">
-                {selectedProducts.map(product => (
-                  <div key={product.id} className="flex items-center p-4 border rounded-lg border-[#E3E5E7] bg-[--p-surface]">
-                    <img 
-                      src={product.image} 
-                      alt={product.title} 
-                      className="w-12 h-12 object-cover rounded" 
-                      onError={(e) => { e.currentTarget.src = '/placeholder.svg'; }} 
-                    />
-                    <div className="ml-3 flex-1 min-w-0">
-                      <h4 className="text-heading text-[--p-text] truncate">
-                        {product.title}
-                      </h4>
-                      <p className="text-caption text-[--p-text-subdued]">SKU: {product.sku}</p>
-                    </div>
-                    <Button 
-                      onClick={() => handleProductRemove(product.id)} 
-                      variant="ghost" 
-                      className="text-[--p-text-subdued] hover:text-[--p-text] hover:bg-[--p-surface-hovered]"
-                    >
-                      Remove
-                    </Button>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-
-          <div className="flex justify-end pt-4">
-            <Button 
-              onClick={handleContinue} 
-              disabled={selectedProducts.length === 0} 
-              variant="primary"
-            >
-              Continue
-            </Button>
-          </div>
-        </CardContent>
-      </Card>
-    );
-  };
-
-  const renderThemeContentStep = () => {
-    return (
-      <Card className="bg-[--p-surface] shadow-sm border border-[#E3E5E7] rounded-md">
-        <CardContent className="p-6 space-y-6">
-          <div>
-            <h2 className="text-display-sm text-[--p-text] mb-1">Design brief</h2>
-            <p className="text-body text-[--p-text-subdued]">Describe how you want your product to be photographed</p>
-          </div>
-
-          <div className="space-y-5">
-            <PromptBuilder 
-              value={finalPrompt} 
-              onChange={handlePromptChange} 
-              onFinalize={handlePromptFinalize} 
-            />
-          </div>
-
-          <div className="space-y-6 mt-6 pt-6 border-t border-[#E3E5E7]">
-            <div>
-              <h3 className="text-heading text-[--p-text] mb-3">Setup your shoot</h3>
-              
-              <form onSubmit={form.handleSubmit(() => {})}>
-                <div className="space-y-4">
-                  <RadioGroup 
-                    defaultValue="standard"
-                    onValueChange={(value) => form.setValue('shootType', value)}
-                  >
-                    <div className="flex items-center space-x-2 p-3 rounded-md hover:bg-[#F6F6F7] cursor-pointer">
-                      <RadioGroupItem value="standard" id="standard" />
-                      <Label htmlFor="standard" className="font-medium cursor-pointer">
-                        Standard product shoot (back, sides & front shots)
-                      </Label>
-                    </div>
-                    <div className="flex items-center space-x-2 p-3 rounded-md hover:bg-[#F6F6F7] cursor-pointer">
-                      <RadioGroupItem value="ai-suggestions" id="ai-suggestions" />
-                      <Label htmlFor="ai-suggestions" className="font-medium cursor-pointer">
-                        Let the AI photographer suggest shots
-                      </Label>
-                    </div>
-                  </RadioGroup>
-                </div>
-              </form>
-            </div>
-          </div>
-
-          <div className="flex justify-end pt-4">
-            <Button 
-              type="button" 
-              onClick={handleContinue} 
-              disabled={!finalPrompt.trim()} 
-              variant="primary"
-            >
-              Continue
-            </Button>
-          </div>
-        </CardContent>
-      </Card>
-    );
-  };
-
-  const renderPromptSuggestionsStep = () => {
-    const productName = selectedProducts.length > 0 ? selectedProducts[0].title : 'product';
-    const productImage = selectedProducts.length > 0 ? selectedProducts[0].image : '/placeholder.svg';
-    
-    return (
-      <ShotSuggestions
-        productName={productName}
-        designBrief={finalPrompt}
-        onContinue={handlePromptsSelected}
-        productImage={productImage}
-      />
-    );
-  };
-
-  const renderReviewStep = () => {
-    return (
-      <ImageReviewGallery productViews={generatedProductViews} />
-    );
-  };
-
-  const renderMainContent = () => {
-    switch (currentStep) {
-      case 'products':
-        return renderProductsStep();
-      case 'theme-content':
-        return renderThemeContentStep();
-      case 'prompt-suggestions':
-        return renderPromptSuggestionsStep();
-      case 'review':
-        return renderReviewStep();
-      default:
-        return null;
-    }
-  };
+  const canGeneratePhotos = selectedProducts.length > 0 && finalPrompt.trim();
 
   return (
     <div className="max-w-[99.8rem] mx-auto">
-      <PhotoShootHeader currentStep={currentStep} onStepClick={handleStepClick} />
-      <div className="bg-[--p-background] min-h-[calc(100vh-129px)]">
-        <div className="p-5">
-          {isGenerating ? (
-            <Card className="bg-[--p-surface] shadow-sm border border-[#E3E5E7] rounded-md">
-              <CardContent className="p-12 flex flex-col items-center justify-center">
-                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#2C6ECB] mb-4"></div>
-                <h2 className="text-xl font-medium text-[--p-text] mb-2">Generating your photos</h2>
-                <p className="text-[--p-text-subdued] text-center max-w-lg">
-                  Our AI is creating professional product photos based on your specifications. 
-                  This may take a moment...
+      <PhotoShootHeader />
+      
+      {/* Main Layout */}
+      <div className="bg-[--p-background] min-h-[calc(100vh-129px)] flex">
+        {/* Left Content Panel */}
+        <div className="flex-1 mr-[400px] p-5 space-y-6">
+          
+          {/* Product Selection Section */}
+          <Card className="bg-[--p-surface] shadow-sm border border-[#E3E5E7] rounded-md">
+            <CardContent className="p-6 space-y-6">
+              <div>
+                <h2 className="text-display-sm text-[--p-text] mb-1">Select Product</h2>
+                <p className="text-body text-[--p-text-subdued]">
+                  Choose a product for your photo shoot
                 </p>
+              </div>
+
+              <ProductPicker 
+                onSelect={handleProductSelect} 
+                selectedProducts={selectedProducts} 
+                searchResults={searchResults} 
+                isLoading={isLoading} 
+                error={error ? 'Error loading products' : null} 
+                searchTerm={searchTerm} 
+                onSearch={handleSearchChange} 
+              />
+
+              {selectedProducts.length > 0 && (
+                <div className="mt-6">
+                  <h3 className="text-heading text-[--p-text] mb-3">
+                    Selected Product
+                  </h3>
+                  <div className="space-y-3">
+                    {selectedProducts.map(product => (
+                      <div key={product.id} className="flex items-center p-4 border rounded-lg border-[#E3E5E7] bg-[--p-surface]">
+                        <img 
+                          src={product.image} 
+                          alt={product.title} 
+                          className="w-12 h-12 object-cover rounded" 
+                          onError={(e) => { e.currentTarget.src = '/placeholder.svg'; }} 
+                        />
+                        <div className="ml-3 flex-1 min-w-0">
+                          <h4 className="text-heading text-[--p-text] truncate">
+                            {product.title}
+                          </h4>
+                          <p className="text-caption text-[--p-text-subdued]">SKU: {product.sku}</p>
+                        </div>
+                        <Button 
+                          onClick={() => handleProductRemove(product.id)} 
+                          variant="ghost" 
+                          className="text-[--p-text-subdued] hover:text-[--p-text] hover:bg-[--p-surface-hovered]"
+                        >
+                          Remove
+                        </Button>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+
+          {/* Design Brief Section */}
+          {selectedProducts.length > 0 && (
+            <Card className="bg-[--p-surface] shadow-sm border border-[#E3E5E7] rounded-md">
+              <CardContent className="p-6 space-y-6">
+                <div>
+                  <h2 className="text-display-sm text-[--p-text] mb-1">Design brief</h2>
+                  <p className="text-body text-[--p-text-subdued]">Describe how you want your product to be photographed</p>
+                </div>
+
+                <PromptBuilder 
+                  value={finalPrompt} 
+                  onChange={handlePromptChange} 
+                  onFinalize={handlePromptFinalize} 
+                />
+
+                <div className="space-y-6 mt-6 pt-6 border-t border-[#E3E5E7]">
+                  <div>
+                    <h3 className="text-heading text-[--p-text] mb-3">Setup your shoot</h3>
+                    
+                    <RadioGroup 
+                      defaultValue="standard"
+                      onValueChange={(value) => form.setValue('shootType', value)}
+                    >
+                      <div className="flex items-center space-x-2 p-3 rounded-md hover:bg-[#F6F6F7] cursor-pointer">
+                        <RadioGroupItem value="standard" id="standard" />
+                        <Label htmlFor="standard" className="font-medium cursor-pointer">
+                          Standard product shoot (back, sides & front shots)
+                        </Label>
+                      </div>
+                      <div className="flex items-center space-x-2 p-3 rounded-md hover:bg-[#F6F6F7] cursor-pointer">
+                        <RadioGroupItem value="ai-suggestions" id="ai-suggestions" />
+                        <Label htmlFor="ai-suggestions" className="font-medium cursor-pointer">
+                          Let the AI photographer suggest shots
+                        </Label>
+                      </div>
+                    </RadioGroup>
+                  </div>
+                </div>
+
+                <div className="flex justify-end pt-4">
+                  <Button 
+                    onClick={handleGeneratePhotos} 
+                    disabled={!canGeneratePhotos || isGenerating} 
+                    variant="primary"
+                  >
+                    {isGenerating ? (
+                      <>
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        Generating...
+                      </>
+                    ) : (
+                      <>
+                        <WandSparkles className="mr-2 h-4 w-4" />
+                        Generate Photos
+                      </>
+                    )}
+                  </Button>
+                </div>
               </CardContent>
             </Card>
-          ) : (
-            renderMainContent()
+          )}
+
+          {/* Shot Suggestions Section */}
+          {showShotSuggestions && selectedProducts.length > 0 && (
+            <ShotSuggestions
+              productName={selectedProducts[0].title}
+              designBrief={finalPrompt}
+              onContinue={handlePromptsSelected}
+              productImage={selectedProducts[0].image}
+            />
           )}
         </div>
+
+        {/* Right Preview Panel */}
+        <PhotoReviewPanel 
+          selectedProduct={selectedProducts[0]}
+          productViews={generatedProductViews}
+          isGenerating={isGenerating}
+          hasGeneratedPhotos={hasGeneratedPhotos}
+        />
       </div>
     </div>
   );
