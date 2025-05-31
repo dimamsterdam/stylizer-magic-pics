@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent } from "@/components/ui/card";
@@ -111,7 +110,7 @@ const ProductPhotoShoot = () => {
 
   const form = useForm({
     defaultValues: {
-      shootType: 'standard'
+      shootType: 'standard' as ShootType
     }
   });
 
@@ -199,7 +198,6 @@ const ProductPhotoShoot = () => {
     if (selectedProducts.length < 1) {
       setSelectedProducts([product]);
       
-      // Auto-save product selection
       if (currentSessionId) {
         autoSave({ product_id: product.id });
       }
@@ -215,7 +213,6 @@ const ProductPhotoShoot = () => {
   const handleProductRemove = (productId: string) => {
     setSelectedProducts(prev => prev.filter(p => p.id !== productId));
     
-    // Auto-save product removal
     if (currentSessionId) {
       autoSave({ product_id: null });
     }
@@ -228,7 +225,6 @@ const ProductPhotoShoot = () => {
   const handlePromptChange = (prompt: string) => {
     setFinalPrompt(prompt);
     
-    // Auto-save design brief
     if (currentSessionId) {
       autoSave({ design_brief: prompt });
     }
@@ -237,7 +233,6 @@ const ProductPhotoShoot = () => {
   const handlePromptFinalize = (prompt: string) => {
     setFinalPrompt(prompt);
     
-    // Auto-save design brief
     if (currentSessionId) {
       autoSave({ design_brief: prompt });
     }
@@ -253,15 +248,13 @@ const ProductPhotoShoot = () => {
 
   const handleStartNewSession = () => {
     if (!currentSessionId && selectedProducts.length > 0) {
-      // Create new session
       createSession({
         product_id: selectedProducts[0].id,
         design_brief: finalPrompt,
-        shoot_type: form.getValues('shootType'),
+        shoot_type: form.getValues('shootType') as ShootType,
         status: 'draft'
       });
     } else {
-      // Reset current state for new session
       setSelectedProducts([]);
       setFinalPrompt('');
       setCurrentSessionId(null);
@@ -272,10 +265,9 @@ const ProductPhotoShoot = () => {
   };
 
   const handleGeneratePhotos = async () => {
-    const formShootType = form.getValues('shootType');
-    setShootType(formShootType as ShootType);
+    const formShootType = form.getValues('shootType') as ShootType;
+    setShootType(formShootType);
     
-    // Create session if none exists
     let sessionId = currentSessionId;
     if (!sessionId && selectedProducts.length > 0) {
       createSession({
@@ -284,10 +276,9 @@ const ProductPhotoShoot = () => {
         shoot_type: formShootType,
         status: 'generating'
       });
-      return; // Will continue once session is created
+      return;
     }
     
-    // Update session status
     if (sessionId) {
       updateSession({
         sessionId,
@@ -299,7 +290,6 @@ const ProductPhotoShoot = () => {
     }
     
     if (formShootType === 'standard') {
-      // Generate standard shots
       setIsGenerating(true);
       
       setTimeout(async () => {
@@ -307,7 +297,6 @@ const ProductPhotoShoot = () => {
         setHasGeneratedPhotos(true);
         
         if (sessionId) {
-          // Save generated photos to database
           const photosToSave = standardProductViews.flatMap(view => 
             view.variants.map((url, index) => ({
               view_name: view.viewName,
@@ -322,7 +311,6 @@ const ProductPhotoShoot = () => {
             photos: photosToSave
           });
           
-          // Update session status
           updateSession({
             sessionId,
             updates: { status: 'reviewing' }
@@ -335,7 +323,6 @@ const ProductPhotoShoot = () => {
         });
       }, 2000);
     } else {
-      // Show shot suggestions
       setShowShotSuggestions(true);
     }
   };
@@ -344,7 +331,6 @@ const ProductPhotoShoot = () => {
     setSelectedPrompts(selectedPrompts);
     
     if (currentSessionId) {
-      // Update session with selected prompts
       updateSession({
         sessionId: currentSessionId,
         updates: {
@@ -370,7 +356,6 @@ const ProductPhotoShoot = () => {
       setShowShotSuggestions(false);
       
       if (currentSessionId) {
-        // Save generated photos to database
         const photosToSave = newProductViews.flatMap(view => 
           view.variants.map((url, index) => ({
             view_name: view.viewName,
@@ -385,7 +370,6 @@ const ProductPhotoShoot = () => {
           photos: photosToSave
         });
         
-        // Update session status
         updateSession({
           sessionId: currentSessionId,
           updates: { status: 'reviewing' }
@@ -417,12 +401,9 @@ const ProductPhotoShoot = () => {
     <div className="max-w-[99.8rem] mx-auto">
       <PhotoShootHeader />
       
-      {/* Main Layout */}
       <div className="bg-[--p-background] min-h-[calc(100vh-129px)] flex">
-        {/* Left Content Panel */}
         <div className="flex-1 mr-[400px] p-5 space-y-6">
           
-          {/* Session Recovery */}
           <SessionRecovery
             sessions={sessions}
             onContinueSession={handleContinueSession}
@@ -430,7 +411,6 @@ const ProductPhotoShoot = () => {
             isLoading={sessionsLoading}
           />
           
-          {/* Product Selection Section */}
           <Card className="bg-[--p-surface] shadow-sm border border-[#E3E5E7] rounded-md">
             <CardContent className="p-6 space-y-6">
               <div>
@@ -485,7 +465,6 @@ const ProductPhotoShoot = () => {
             </CardContent>
           </Card>
 
-          {/* Design Brief Section */}
           {selectedProducts.length > 0 && (
             <Card className="bg-[--p-surface] shadow-sm border border-[#E3E5E7] rounded-md">
               <CardContent className="p-6 space-y-6">
@@ -506,7 +485,7 @@ const ProductPhotoShoot = () => {
                     
                     <RadioGroup 
                       defaultValue="standard"
-                      onValueChange={(value) => form.setValue('shootType', value)}
+                      onValueChange={(value) => form.setValue('shootType', value as ShootType)}
                     >
                       <div className="flex items-center space-x-2 p-3 rounded-md hover:bg-[#F6F6F7] cursor-pointer">
                         <RadioGroupItem value="standard" id="standard" />
@@ -547,7 +526,6 @@ const ProductPhotoShoot = () => {
             </Card>
           )}
 
-          {/* Shot Suggestions Section */}
           {showShotSuggestions && selectedProducts.length > 0 && (
             <ShotSuggestions
               productName={selectedProducts[0].title}
@@ -558,7 +536,6 @@ const ProductPhotoShoot = () => {
           )}
         </div>
 
-        {/* Right Preview Panel */}
         <PhotoReviewPanel 
           selectedProduct={selectedProducts[0]}
           productViews={productViews}

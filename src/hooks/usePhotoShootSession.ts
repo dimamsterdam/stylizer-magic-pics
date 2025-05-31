@@ -158,7 +158,7 @@ export const usePhotoShootSession = () => {
 
   // Update photo approval status
   const updatePhotoApprovalMutation = useMutation({
-    mutationFn: async ({ photoId, status }: { photoId: string; status: 'approved' | 'rejected' }) => {
+    mutationFn: async ({ photoId, status }: { photoId: string; status: 'pending' | 'approved' | 'rejected' }) => {
       const { data, error } = await supabase
         .from('generated_photos')
         .update({ approval_status: status })
