@@ -191,15 +191,19 @@ export const usePhotoShootSession = () => {
     
     generatedPhotos.forEach(photo => {
       if (!viewMap.has(photo.view_name)) {
-        viewMap.set(photo.view_name, ['', '']);
+        viewMap.set(photo.view_name, []);
       }
       const variants = viewMap.get(photo.view_name)!;
+      // Ensure the array has enough space for the variant index
+      while (variants.length <= photo.variant_index) {
+        variants.push('');
+      }
       variants[photo.variant_index] = photo.image_url;
     });
 
     return Array.from(viewMap.entries()).map(([viewName, variants]) => ({
       viewName,
-      variants
+      variants: variants.filter(url => url) // Remove empty strings
     }));
   };
 

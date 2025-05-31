@@ -51,6 +51,14 @@ export const PhotoReviewPanel = ({
   const [currentVariantIndex, setCurrentVariantIndex] = useState(0);
   const { toast } = useToast();
 
+  // Reset view index when productViews changes
+  React.useEffect(() => {
+    if (productViews.length > 0 && currentViewIndex >= productViews.length) {
+      setCurrentViewIndex(0);
+      setCurrentVariantIndex(0);
+    }
+  }, [productViews, currentViewIndex]);
+
   const currentView = productViews[currentViewIndex];
   
   // Get the photo object for current view and variant
@@ -142,7 +150,7 @@ export const PhotoReviewPanel = ({
       );
     }
 
-    if (!hasGeneratedPhotos) {
+    if (!hasGeneratedPhotos || productViews.length === 0) {
       return (
         <div className="flex flex-col items-center justify-center h-full p-8 text-center">
           <div className="w-32 h-32 bg-gray-200 rounded-lg mb-4 flex items-center justify-center">
@@ -156,7 +164,9 @@ export const PhotoReviewPanel = ({
       );
     }
 
-    if (hasGeneratedPhotos && currentView) {
+    if (hasGeneratedPhotos && currentView && productViews.length > 0) {
+      const currentImageUrl = currentView.variants[currentVariantIndex] || '/placeholder.svg';
+      
       return (
         <div className="flex flex-col h-full">
           {/* Header */}
@@ -169,33 +179,30 @@ export const PhotoReviewPanel = ({
             </p>
           </div>
 
-          {/* Variant Switcher */}
-          <div className="p-4 border-b border-[#E3E5E7]">
-            <div className="flex justify-center">
-              <Button
-                variant={currentVariantIndex === 0 ? "default" : "outline"}
-                size="sm"
-                onClick={() => setCurrentVariantIndex(0)}
-                className="rounded-r-none"
-              >
-                Variant 1
-              </Button>
-              <Button
-                variant={currentVariantIndex === 1 ? "default" : "outline"}
-                size="sm"
-                onClick={() => setCurrentVariantIndex(1)}
-                className="rounded-l-none"
-              >
-                Variant 2
-              </Button>
+          {/* Variant Switcher - only show if there are multiple variants */}
+          {currentView.variants.length > 1 && (
+            <div className="p-4 border-b border-[#E3E5E7]">
+              <div className="flex justify-center">
+                {currentView.variants.map((_, index) => (
+                  <Button
+                    key={index}
+                    variant={currentVariantIndex === index ? "default" : "outline"}
+                    size="sm"
+                    onClick={() => setCurrentVariantIndex(index)}
+                    className={`${index === 0 ? '' : 'rounded-l-none'} ${index === currentView.variants.length - 1 ? '' : 'rounded-r-none'}`}
+                  >
+                    Variant {index + 1}
+                  </Button>
+                ))}
+              </div>
             </div>
-          </div>
+          )}
 
           {/* Image Display */}
           <div className="flex-1 p-4">
             <div className="relative">
               <img
-                src={currentView.variants[currentVariantIndex]}
+                src={currentImageUrl}
                 alt={`${currentView.viewName} variant ${currentVariantIndex + 1}`}
                 className="w-full h-auto rounded-lg"
                 onError={(e) => {
