@@ -537,7 +537,6 @@ const ProductPhotoShoot = () => {
         </div>
 
         <PhotoReviewPanel 
-          selectedProduct={selectedProducts[0]}
           productViews={productViews}
           generatedPhotos={generatedPhotos}
           isGenerating={isGenerating}

@@ -1,17 +1,9 @@
-
 import React, { useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Check, X, ArrowLeft, ArrowRight, ChevronLeft, ChevronRight } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
-
-interface Product {
-  id: string;
-  title: string;
-  sku: string;
-  image: string;
-}
 
 interface ProductView {
   viewName: string;
@@ -28,7 +20,6 @@ interface GeneratedPhoto {
 }
 
 interface PhotoReviewPanelProps {
-  selectedProduct?: Product;
   productViews: ProductView[];
   generatedPhotos: GeneratedPhoto[];
   isGenerating: boolean;
@@ -39,7 +30,6 @@ interface PhotoReviewPanelProps {
 }
 
 export const PhotoReviewPanel = ({ 
-  selectedProduct, 
   productViews, 
   generatedPhotos,
   isGenerating,
@@ -131,22 +121,16 @@ export const PhotoReviewPanel = ({
       );
     }
 
-    if (!hasGeneratedPhotos && selectedProduct) {
+    if (!hasGeneratedPhotos) {
       return (
-        <div className="p-6">
-          <h3 className="text-lg font-medium text-[--p-text] mb-4">Selected Product</h3>
-          <div className="space-y-4">
-            <img 
-              src={selectedProduct.image} 
-              alt={selectedProduct.title} 
-              className="w-full h-auto rounded-lg"
-              onError={(e) => { e.currentTarget.src = '/placeholder.svg'; }} 
-            />
-            <div>
-              <h4 className="font-medium text-[--p-text]">{selectedProduct.title}</h4>
-              <p className="text-sm text-[--p-text-subdued]">SKU: {selectedProduct.sku}</p>
-            </div>
+        <div className="flex flex-col items-center justify-center h-full p-8 text-center">
+          <div className="w-32 h-32 bg-gray-200 rounded-lg mb-4 flex items-center justify-center">
+            <div className="w-16 h-16 bg-gray-300 rounded"></div>
           </div>
+          <h3 className="text-lg font-medium text-[--p-text] mb-2">Generated content will appear here</h3>
+          <p className="text-[--p-text-subdued]">
+            Select a product and generate photos to preview them in this panel
+          </p>
         </div>
       );
     }
@@ -286,13 +270,7 @@ export const PhotoReviewPanel = ({
       );
     }
 
-    return (
-      <div className="flex items-center justify-center h-full p-8">
-        <p className="text-[--p-text-subdued] text-center">
-          Select a product and generate photos to preview them here
-        </p>
-      </div>
-    );
+    return null;
   };
 
   return (
