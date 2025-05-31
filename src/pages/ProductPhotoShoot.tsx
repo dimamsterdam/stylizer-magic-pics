@@ -132,9 +132,23 @@ const ProductPhotoShoot = () => {
     isSavingPhotos
   } = usePhotoShootSession();
 
+  // Debug logging for photo state
+  useEffect(() => {
+    console.log('ProductPhotoShoot state:', {
+      hasGeneratedPhotos,
+      isGenerating,
+      generatedPhotosLength: generatedPhotos.length,
+      productViewsLength: productViews.length,
+      currentSessionId,
+      showShotSuggestions
+    });
+  }, [hasGeneratedPhotos, isGenerating, generatedPhotos, productViews, currentSessionId, showShotSuggestions]);
+
   // Load session data when currentSession changes
   useEffect(() => {
     if (currentSession) {
+      console.log('Loading session data:', currentSession);
+      
       if (currentSession.product_id) {
         // Load product data
         loadProductData(currentSession.product_id);
@@ -143,10 +157,19 @@ const ProductPhotoShoot = () => {
       setFinalPrompt(currentSession.design_brief || '');
       
       if (currentSession.status === 'reviewing' || currentSession.status === 'completed') {
+        console.log('Setting hasGeneratedPhotos to true from session status');
         setHasGeneratedPhotos(true);
       }
     }
   }, [currentSession]);
+
+  // Also check if we have photos in the database
+  useEffect(() => {
+    if (generatedPhotos && generatedPhotos.length > 0) {
+      console.log('Found generated photos in database, setting hasGeneratedPhotos to true');
+      setHasGeneratedPhotos(true);
+    }
+  }, [generatedPhotos]);
 
   const loadProductData = async (productId: string) => {
     try {
@@ -262,10 +285,13 @@ const ProductPhotoShoot = () => {
   };
 
   const handleStandardStudioShoot = async () => {
+    console.log('Starting standard studio shoot');
+    
     // Use standard product views for studio shoot
     const standardViews = standardProductViews.map(view => view.viewName);
     
     if (currentSessionId) {
+      console.log('Updating session with standard prompts');
       updateSession({
         sessionId: currentSessionId,
         updates: {
@@ -276,8 +302,10 @@ const ProductPhotoShoot = () => {
     }
     
     setIsGenerating(true);
+    setShowShotSuggestions(false); // Make sure shot suggestions are hidden
     
     setTimeout(async () => {
+      console.log('Generation complete, saving photos');
       setIsGenerating(false);
       setHasGeneratedPhotos(true);
       
@@ -290,6 +318,8 @@ const ProductPhotoShoot = () => {
             approval_status: 'pending' as const
           }))
         );
+        
+        console.log('Photos to save:', photosToSave);
         
         saveGeneratedPhotos({
           sessionId: currentSessionId,
@@ -310,10 +340,13 @@ const ProductPhotoShoot = () => {
   };
 
   const handleSuggestShots = async () => {
+    console.log('Showing shot suggestions');
     setShowShotSuggestions(true);
+    setHasGeneratedPhotos(false); // Hide any existing photos
   };
 
   const handlePromptsSelected = async (selectedPrompts: string[]) => {
+    console.log('Prompts selected:', selectedPrompts);
     setSelectedPrompts(selectedPrompts);
     
     if (currentSessionId) {
@@ -335,11 +368,12 @@ const ProductPhotoShoot = () => {
     });
     
     setIsGenerating(true);
+    setShowShotSuggestions(false);
     
     setTimeout(async () => {
+      console.log('AI generation complete, saving photos');
       setIsGenerating(false);
       setHasGeneratedPhotos(true);
-      setShowShotSuggestions(false);
       
       if (currentSessionId) {
         const photosToSave = newProductViews.flatMap(view => 
@@ -350,6 +384,8 @@ const ProductPhotoShoot = () => {
             approval_status: 'pending' as const
           }))
         );
+        
+        console.log('AI photos to save:', photosToSave);
         
         saveGeneratedPhotos({
           sessionId: currentSessionId,

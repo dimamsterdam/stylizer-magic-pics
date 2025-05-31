@@ -79,13 +79,19 @@ export const usePhotoShootSession = () => {
     queryFn: async () => {
       if (!currentSessionId) return [];
       
+      console.log('Fetching generated photos for session:', currentSessionId);
       const { data, error } = await supabase
         .from('generated_photos')
         .select('*')
         .eq('session_id', currentSessionId)
         .order('view_name');
       
-      if (error) throw error;
+      if (error) {
+        console.error('Error fetching generated photos:', error);
+        throw error;
+      }
+      
+      console.log('Fetched generated photos:', data);
       return data as GeneratedPhoto[];
     },
     enabled: !!currentSessionId
@@ -137,6 +143,8 @@ export const usePhotoShootSession = () => {
   // Save generated photos
   const saveGeneratedPhotosMutation = useMutation({
     mutationFn: async ({ sessionId, photos }: { sessionId: string; photos: Omit<GeneratedPhoto, 'id' | 'session_id'>[] }) => {
+      console.log('Saving generated photos:', { sessionId, photos });
+      
       const photosToInsert = photos.map(photo => ({
         session_id: sessionId,
         ...photo
@@ -147,11 +155,20 @@ export const usePhotoShootSession = () => {
         .insert(photosToInsert)
         .select();
       
-      if (error) throw error;
+      if (error) {
+        console.error('Error saving photos:', error);
+        throw error;
+      }
+      
+      console.log('Successfully saved photos:', data);
       return data as GeneratedPhoto[];
     },
-    onSuccess: () => {
+    onSuccess: (data) => {
+      console.log('Photos saved successfully, invalidating queries');
       queryClient.invalidateQueries({ queryKey: ['generated-photos', currentSessionId] });
+    },
+    onError: (error) => {
+      console.error('Failed to save photos:', error);
     }
   });
 
@@ -186,7 +203,12 @@ export const usePhotoShootSession = () => {
 
   // Convert generated photos to ProductView format
   const getProductViewsFromPhotos = (): ProductView[] => {
-    console.log('Converting photos to views:', generatedPhotos);
+    console.log('Converting photos to views. Input photos:', generatedPhotos);
+    
+    if (!generatedPhotos || generatedPhotos.length === 0) {
+      console.log('No generated photos to convert');
+      return [];
+    }
     
     const viewMap = new Map<string, string[]>();
     
