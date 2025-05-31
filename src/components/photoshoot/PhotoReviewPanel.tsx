@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -50,46 +51,64 @@ export const PhotoReviewPanel = ({
   const [currentVariantIndex, setCurrentVariantIndex] = useState(0);
   const { toast } = useToast();
 
-  // Reset view index when productViews changes
+  // Create view groups from generatedPhotos directly
+  const viewGroups = React.useMemo(() => {
+    console.log('Creating view groups from generatedPhotos:', generatedPhotos);
+    
+    if (!generatedPhotos || generatedPhotos.length === 0) {
+      console.log('No generatedPhotos available');
+      return [];
+    }
+    
+    const groups = new Map<string, GeneratedPhoto[]>();
+    
+    generatedPhotos.forEach(photo => {
+      if (!groups.has(photo.view_name)) {
+        groups.set(photo.view_name, []);
+      }
+      groups.get(photo.view_name)!.push(photo);
+    });
+
+    const result = Array.from(groups.entries()).map(([viewName, photos]) => ({
+      viewName,
+      photos: photos.sort((a, b) => a.variant_index - b.variant_index)
+    }));
+    
+    console.log('Created view groups:', result);
+    return result;
+  }, [generatedPhotos]);
+
+  // Reset view index when viewGroups changes
   React.useEffect(() => {
-    if (productViews.length > 0 && currentViewIndex >= productViews.length) {
+    if (viewGroups.length > 0 && currentViewIndex >= viewGroups.length) {
       setCurrentViewIndex(0);
       setCurrentVariantIndex(0);
     }
-  }, [productViews, currentViewIndex]);
+  }, [viewGroups, currentViewIndex]);
 
   // Debug logging
   React.useEffect(() => {
-    console.log('PhotoReviewPanel props:', {
-      productViews,
+    console.log('PhotoReviewPanel render state:', {
+      viewGroups,
       generatedPhotos,
       hasGeneratedPhotos,
       isGenerating,
-      showShotSuggestions
+      showShotSuggestions,
+      currentViewIndex,
+      currentVariantIndex
     });
-  }, [productViews, generatedPhotos, hasGeneratedPhotos, isGenerating, showShotSuggestions]);
+  }, [viewGroups, generatedPhotos, hasGeneratedPhotos, isGenerating, showShotSuggestions, currentViewIndex, currentVariantIndex]);
 
-  const currentView = productViews[currentViewIndex];
-  
-  // Get the photo object for current view and variant
-  const getCurrentPhoto = () => {
-    if (!currentView || !generatedPhotos.length) return null;
-    return generatedPhotos.find(
-      photo => photo.view_name === currentView.viewName && photo.variant_index === currentVariantIndex
-    );
-  };
-
-  const currentPhoto = getCurrentPhoto();
+  const currentViewGroup = viewGroups[currentViewIndex];
+  const currentPhoto = currentViewGroup?.photos[currentVariantIndex];
   const isCurrentPhotoApproved = currentPhoto?.approval_status === 'approved';
 
   // Get approval status for view indicators
   const getViewApprovalStatus = (viewIndex: number) => {
-    const view = productViews[viewIndex];
-    if (!view) return 'pending';
+    const viewGroup = viewGroups[viewIndex];
+    if (!viewGroup) return 'pending';
     
-    const viewPhotos = generatedPhotos.filter(photo => photo.view_name === view.viewName);
-    const hasApproved = viewPhotos.some(photo => photo.approval_status === 'approved');
-    
+    const hasApproved = viewGroup.photos.some(photo => photo.approval_status === 'approved');
     return hasApproved ? 'approved' : 'pending';
   };
 
@@ -123,13 +142,14 @@ export const PhotoReviewPanel = ({
       });
     }
     
-    if (currentVariantIndex === 0) {
-      setCurrentVariantIndex(1);
+    // Try to move to next variant if available
+    if (currentViewGroup && currentVariantIndex < currentViewGroup.photos.length - 1) {
+      setCurrentVariantIndex(currentVariantIndex + 1);
     }
   };
 
   const moveToView = (index: number) => {
-    if (index >= 0 && index < productViews.length) {
+    if (index >= 0 && index < viewGroups.length) {
       setCurrentViewIndex(index);
       setCurrentVariantIndex(0);
     }
@@ -139,9 +159,9 @@ export const PhotoReviewPanel = ({
     console.log('Rendering content with conditions:', {
       showShotSuggestions,
       isGenerating,
-      hasGeneratedPhotos,
-      productViewsLength: productViews.length,
-      currentView
+      hasPhotos: generatedPhotos.length > 0,
+      viewGroupsLength: viewGroups.length,
+      currentViewGroup
     });
 
     if (showShotSuggestions && productName && onPromptsSelected) {
@@ -168,7 +188,8 @@ export const PhotoReviewPanel = ({
       );
     }
 
-    if (!hasGeneratedPhotos || productViews.length === 0) {
+    // Use generatedPhotos length directly instead of hasGeneratedPhotos state
+    if (generatedPhotos.length === 0 || viewGroups.length === 0) {
       return (
         <div className="flex flex-col items-center justify-center h-full p-8 text-center">
           <div className="w-32 h-32 bg-gray-200 rounded-lg mb-4 flex items-center justify-center">
@@ -183,32 +204,30 @@ export const PhotoReviewPanel = ({
     }
 
     // Show generated photos for review
-    if (hasGeneratedPhotos && productViews.length > 0 && currentView) {
-      const currentImageUrl = currentView.variants[currentVariantIndex] || '/placeholder.svg';
-      
+    if (viewGroups.length > 0 && currentViewGroup && currentPhoto) {
       return (
         <div className="flex flex-col h-full">
           {/* Header */}
           <div className="p-4 border-b border-[#E3E5E7]">
             <h3 className="font-medium text-[--p-text] mb-1">
-              {currentView.viewName}
+              {currentViewGroup.viewName}
             </h3>
             <p className="text-sm text-[--p-text-subdued]">
-              {currentViewIndex + 1} of {productViews.length} • {isCurrentPhotoApproved ? 'Approved' : 'Pending review'}
+              {currentViewIndex + 1} of {viewGroups.length} • {isCurrentPhotoApproved ? 'Approved' : 'Pending review'}
             </p>
           </div>
 
           {/* Variant Switcher - only show if there are multiple variants */}
-          {currentView.variants.length > 1 && (
+          {currentViewGroup.photos.length > 1 && (
             <div className="p-4 border-b border-[#E3E5E7]">
               <div className="flex justify-center">
-                {currentView.variants.map((_, index) => (
+                {currentViewGroup.photos.map((_, index) => (
                   <Button
                     key={index}
                     variant={currentVariantIndex === index ? "default" : "outline"}
                     size="sm"
                     onClick={() => setCurrentVariantIndex(index)}
-                    className={`${index === 0 ? '' : 'rounded-l-none'} ${index === currentView.variants.length - 1 ? '' : 'rounded-r-none'}`}
+                    className={`${index === 0 ? '' : 'rounded-l-none'} ${index === currentViewGroup.photos.length - 1 ? '' : 'rounded-r-none'}`}
                   >
                     Variant {index + 1}
                   </Button>
@@ -221,8 +240,8 @@ export const PhotoReviewPanel = ({
           <div className="flex-1 p-4">
             <div className="relative">
               <img
-                src={currentImageUrl}
-                alt={`${currentView.viewName} variant ${currentVariantIndex + 1}`}
+                src={currentPhoto.image_url}
+                alt={`${currentViewGroup.viewName} variant ${currentVariantIndex + 1}`}
                 className="w-full h-auto rounded-lg"
                 onError={(e) => {
                   e.currentTarget.src = '/placeholder.svg';
@@ -245,7 +264,7 @@ export const PhotoReviewPanel = ({
               </Button>
               
               <div className="flex gap-1">
-                {productViews.map((_, index) => {
+                {viewGroups.map((_, index) => {
                   const status = getViewApprovalStatus(index);
                   return (
                     <button
@@ -266,7 +285,7 @@ export const PhotoReviewPanel = ({
               <Button
                 variant="outline"
                 size="sm"
-                disabled={currentViewIndex === productViews.length - 1}
+                disabled={currentViewIndex === viewGroups.length - 1}
                 onClick={() => moveToView(currentViewIndex + 1)}
               >
                 Next

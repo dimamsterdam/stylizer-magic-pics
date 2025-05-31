@@ -102,7 +102,6 @@ const ProductPhotoShoot = () => {
   const [isGenerating, setIsGenerating] = useState(false);
   const [selectedPrompts, setSelectedPrompts] = useState<string[]>([]);
   const [showShotSuggestions, setShowShotSuggestions] = useState(false);
-  const [hasGeneratedPhotos, setHasGeneratedPhotos] = useState(false);
   
   const { toast } = useToast();
   const navigate = useNavigate();
@@ -134,15 +133,15 @@ const ProductPhotoShoot = () => {
 
   // Debug logging for photo state
   useEffect(() => {
-    console.log('ProductPhotoShoot state:', {
-      hasGeneratedPhotos,
+    console.log('ProductPhotoShoot render state:', {
       isGenerating,
       generatedPhotosLength: generatedPhotos.length,
       productViewsLength: productViews.length,
       currentSessionId,
-      showShotSuggestions
+      showShotSuggestions,
+      generatedPhotos: generatedPhotos
     });
-  }, [hasGeneratedPhotos, isGenerating, generatedPhotos, productViews, currentSessionId, showShotSuggestions]);
+  }, [isGenerating, generatedPhotos, productViews, currentSessionId, showShotSuggestions]);
 
   // Load session data when currentSession changes
   useEffect(() => {
@@ -302,12 +301,11 @@ const ProductPhotoShoot = () => {
     }
     
     setIsGenerating(true);
-    setShowShotSuggestions(false); // Make sure shot suggestions are hidden
+    setShowShotSuggestions(false);
     
     setTimeout(async () => {
       console.log('Generation complete, saving photos');
       setIsGenerating(false);
-      setHasGeneratedPhotos(true);
       
       if (currentSessionId) {
         const photosToSave = standardProductViews.flatMap(view => 
@@ -342,7 +340,6 @@ const ProductPhotoShoot = () => {
   const handleSuggestShots = async () => {
     console.log('Showing shot suggestions');
     setShowShotSuggestions(true);
-    setHasGeneratedPhotos(false); // Hide any existing photos
   };
 
   const handlePromptsSelected = async (selectedPrompts: string[]) => {
@@ -373,7 +370,6 @@ const ProductPhotoShoot = () => {
     setTimeout(async () => {
       console.log('AI generation complete, saving photos');
       setIsGenerating(false);
-      setHasGeneratedPhotos(true);
       
       if (currentSessionId) {
         const photosToSave = newProductViews.flatMap(view => 
@@ -538,7 +534,7 @@ const ProductPhotoShoot = () => {
           productViews={productViews}
           generatedPhotos={generatedPhotos}
           isGenerating={isGenerating}
-          hasGeneratedPhotos={hasGeneratedPhotos}
+          hasGeneratedPhotos={generatedPhotos.length > 0}
           onApprovePhoto={handleApprovePhoto}
           onRejectPhoto={handleRejectPhoto}
           onUnapprovePhoto={handleUnapprovePhoto}
