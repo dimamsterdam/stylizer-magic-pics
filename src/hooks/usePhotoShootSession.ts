@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
@@ -187,9 +186,12 @@ export const usePhotoShootSession = () => {
 
   // Convert generated photos to ProductView format
   const getProductViewsFromPhotos = (): ProductView[] => {
+    console.log('Converting photos to views:', generatedPhotos);
+    
     const viewMap = new Map<string, string[]>();
     
     generatedPhotos.forEach(photo => {
+      console.log('Processing photo:', photo);
       if (!viewMap.has(photo.view_name)) {
         viewMap.set(photo.view_name, []);
       }
@@ -201,10 +203,13 @@ export const usePhotoShootSession = () => {
       variants[photo.variant_index] = photo.image_url;
     });
 
-    return Array.from(viewMap.entries()).map(([viewName, variants]) => ({
+    const result = Array.from(viewMap.entries()).map(([viewName, variants]) => ({
       viewName,
-      variants: variants.filter(url => url) // Remove empty strings
+      variants: variants // Keep all variants, including empty strings
     }));
+    
+    console.log('Converted product views:', result);
+    return result;
   };
 
   return {

@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -58,6 +57,17 @@ export const PhotoReviewPanel = ({
       setCurrentVariantIndex(0);
     }
   }, [productViews, currentViewIndex]);
+
+  // Debug logging
+  React.useEffect(() => {
+    console.log('PhotoReviewPanel props:', {
+      productViews,
+      generatedPhotos,
+      hasGeneratedPhotos,
+      isGenerating,
+      showShotSuggestions
+    });
+  }, [productViews, generatedPhotos, hasGeneratedPhotos, isGenerating, showShotSuggestions]);
 
   const currentView = productViews[currentViewIndex];
   
@@ -126,6 +136,14 @@ export const PhotoReviewPanel = ({
   };
 
   const renderContent = () => {
+    console.log('Rendering content with conditions:', {
+      showShotSuggestions,
+      isGenerating,
+      hasGeneratedPhotos,
+      productViewsLength: productViews.length,
+      currentView
+    });
+
     if (showShotSuggestions && productName && onPromptsSelected) {
       return (
         <div className="p-4">
@@ -164,7 +182,8 @@ export const PhotoReviewPanel = ({
       );
     }
 
-    if (hasGeneratedPhotos && currentView && productViews.length > 0) {
+    // Show generated photos for review
+    if (hasGeneratedPhotos && productViews.length > 0 && currentView) {
       const currentImageUrl = currentView.variants[currentVariantIndex] || '/placeholder.svg';
       
       return (
