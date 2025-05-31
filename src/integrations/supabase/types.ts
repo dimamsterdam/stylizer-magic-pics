@@ -286,6 +286,91 @@ export type Database = {
         }
         Relationships: []
       }
+      generated_photos: {
+        Row: {
+          approval_status: string | null
+          created_at: string
+          id: string
+          image_url: string
+          session_id: string | null
+          updated_at: string
+          variant_index: number
+          view_name: string
+        }
+        Insert: {
+          approval_status?: string | null
+          created_at?: string
+          id?: string
+          image_url: string
+          session_id?: string | null
+          updated_at?: string
+          variant_index?: number
+          view_name: string
+        }
+        Update: {
+          approval_status?: string | null
+          created_at?: string
+          id?: string
+          image_url?: string
+          session_id?: string | null
+          updated_at?: string
+          variant_index?: number
+          view_name?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "generated_photos_session_id_fkey"
+            columns: ["session_id"]
+            isOneToOne: false
+            referencedRelation: "photo_shoot_sessions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      photo_shoot_sessions: {
+        Row: {
+          created_at: string
+          design_brief: string | null
+          id: string
+          product_id: string | null
+          selected_prompts: string[] | null
+          shoot_type: string | null
+          status: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          design_brief?: string | null
+          id?: string
+          product_id?: string | null
+          selected_prompts?: string[] | null
+          shoot_type?: string | null
+          status?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          design_brief?: string | null
+          id?: string
+          product_id?: string | null
+          selected_prompts?: string[] | null
+          shoot_type?: string | null
+          status?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "photo_shoot_sessions_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       prep_tasks: {
         Row: {
           created_at: string | null

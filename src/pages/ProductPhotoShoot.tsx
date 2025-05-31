@@ -1,5 +1,5 @@
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -14,8 +14,10 @@ import { PhotoShootHeader } from "@/components/photoshoot/PhotoShootHeader";
 import { PromptBuilder } from "@/components/expose/PromptBuilder";
 import { ShotSuggestions } from "@/components/photoshoot/PromptSuggestions";
 import { PhotoReviewPanel } from "@/components/photoshoot/PhotoReviewPanel";
+import { SessionRecovery } from "@/components/photoshoot/SessionRecovery";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { useForm } from "react-hook-form";
+import { usePhotoShootSession } from "@/hooks/usePhotoShootSession";
 
 interface Product {
   id: string;
@@ -101,7 +103,6 @@ const ProductPhotoShoot = () => {
   const [isGenerating, setIsGenerating] = useState(false);
   const [selectedPrompts, setSelectedPrompts] = useState<string[]>([]);
   const [shootType, setShootType] = useState<ShootType>('standard');
-  const [generatedProductViews, setGeneratedProductViews] = useState<ProductView[]>([]);
   const [showShotSuggestions, setShowShotSuggestions] = useState(false);
   const [hasGeneratedPhotos, setHasGeneratedPhotos] = useState(false);
   
@@ -113,6 +114,66 @@ const ProductPhotoShoot = () => {
       shootType: 'standard'
     }
   });
+
+  // Session management
+  const {
+    sessions,
+    currentSession,
+    currentSessionId,
+    sessionsLoading,
+    generatedPhotos,
+    productViews,
+    createSession,
+    updateSession,
+    saveGeneratedPhotos,
+    updatePhotoApproval,
+    setCurrentSessionId,
+    autoSave,
+    isCreating,
+    isUpdating,
+    isSavingPhotos
+  } = usePhotoShootSession();
+
+  // Load session data when currentSession changes
+  useEffect(() => {
+    if (currentSession) {
+      if (currentSession.product_id) {
+        // Load product data
+        loadProductData(currentSession.product_id);
+      }
+      
+      setFinalPrompt(currentSession.design_brief || '');
+      setShootType((currentSession.shoot_type as ShootType) || 'standard');
+      
+      if (currentSession.status === 'reviewing' || currentSession.status === 'completed') {
+        setHasGeneratedPhotos(true);
+      }
+    }
+  }, [currentSession]);
+
+  const loadProductData = async (productId: string) => {
+    try {
+      const { data, error } = await supabase
+        .from('products')
+        .select('*')
+        .eq('id', productId)
+        .single();
+      
+      if (error) throw error;
+      
+      if (data) {
+        const product = {
+          id: data.id,
+          title: data.title,
+          sku: data.sku || '',
+          image: data.image_url || '/placeholder.svg'
+        };
+        setSelectedProducts([product]);
+      }
+    } catch (error) {
+      console.error('Error loading product:', error);
+    }
+  };
 
   const { data: searchResults = [], isLoading, error } = useQuery({
     queryKey: ['products', searchTerm],
@@ -137,6 +198,11 @@ const ProductPhotoShoot = () => {
   const handleProductSelect = (product: Product) => {
     if (selectedProducts.length < 1) {
       setSelectedProducts([product]);
+      
+      // Auto-save product selection
+      if (currentSessionId) {
+        autoSave({ product_id: product.id });
+      }
     } else {
       toast({
         title: "Product limit reached",
@@ -148,6 +214,11 @@ const ProductPhotoShoot = () => {
 
   const handleProductRemove = (productId: string) => {
     setSelectedProducts(prev => prev.filter(p => p.id !== productId));
+    
+    // Auto-save product removal
+    if (currentSessionId) {
+      autoSave({ product_id: null });
+    }
   };
 
   const handleSearchChange = (term: string) => {
@@ -156,24 +227,108 @@ const ProductPhotoShoot = () => {
 
   const handlePromptChange = (prompt: string) => {
     setFinalPrompt(prompt);
+    
+    // Auto-save design brief
+    if (currentSessionId) {
+      autoSave({ design_brief: prompt });
+    }
   };
 
   const handlePromptFinalize = (prompt: string) => {
     setFinalPrompt(prompt);
+    
+    // Auto-save design brief
+    if (currentSessionId) {
+      autoSave({ design_brief: prompt });
+    }
   };
 
-  const handleGeneratePhotos = () => {
+  const handleContinueSession = (sessionId: string) => {
+    setCurrentSessionId(sessionId);
+    toast({
+      title: "Session restored",
+      description: "Your previous session has been restored",
+    });
+  };
+
+  const handleStartNewSession = () => {
+    if (!currentSessionId && selectedProducts.length > 0) {
+      // Create new session
+      createSession({
+        product_id: selectedProducts[0].id,
+        design_brief: finalPrompt,
+        shoot_type: form.getValues('shootType'),
+        status: 'draft'
+      });
+    } else {
+      // Reset current state for new session
+      setSelectedProducts([]);
+      setFinalPrompt('');
+      setCurrentSessionId(null);
+      setHasGeneratedPhotos(false);
+      setShowShotSuggestions(false);
+      form.reset();
+    }
+  };
+
+  const handleGeneratePhotos = async () => {
     const formShootType = form.getValues('shootType');
     setShootType(formShootType as ShootType);
+    
+    // Create session if none exists
+    let sessionId = currentSessionId;
+    if (!sessionId && selectedProducts.length > 0) {
+      createSession({
+        product_id: selectedProducts[0].id,
+        design_brief: finalPrompt,
+        shoot_type: formShootType,
+        status: 'generating'
+      });
+      return; // Will continue once session is created
+    }
+    
+    // Update session status
+    if (sessionId) {
+      updateSession({
+        sessionId,
+        updates: {
+          shoot_type: formShootType,
+          status: 'generating'
+        }
+      });
+    }
     
     if (formShootType === 'standard') {
       // Generate standard shots
       setIsGenerating(true);
-      setGeneratedProductViews(standardProductViews);
       
-      setTimeout(() => {
+      setTimeout(async () => {
         setIsGenerating(false);
         setHasGeneratedPhotos(true);
+        
+        if (sessionId) {
+          // Save generated photos to database
+          const photosToSave = standardProductViews.flatMap(view => 
+            view.variants.map((url, index) => ({
+              view_name: view.viewName,
+              variant_index: index,
+              image_url: url,
+              approval_status: 'pending' as const
+            }))
+          );
+          
+          saveGeneratedPhotos({
+            sessionId,
+            photos: photosToSave
+          });
+          
+          // Update session status
+          updateSession({
+            sessionId,
+            updates: { status: 'reviewing' }
+          });
+        }
+        
         toast({
           title: "Images generated",
           description: "Your standard product photos have been generated successfully!",
@@ -185,8 +340,19 @@ const ProductPhotoShoot = () => {
     }
   };
 
-  const handlePromptsSelected = (selectedPrompts: string[]) => {
+  const handlePromptsSelected = async (selectedPrompts: string[]) => {
     setSelectedPrompts(selectedPrompts);
+    
+    if (currentSessionId) {
+      // Update session with selected prompts
+      updateSession({
+        sessionId: currentSessionId,
+        updates: {
+          selected_prompts: selectedPrompts,
+          status: 'generating'
+        }
+      });
+    }
     
     const newProductViews = selectedPrompts.map((prompt, index) => {
       const mockIndex = index % mockProductViews.length;
@@ -196,18 +362,53 @@ const ProductPhotoShoot = () => {
       };
     });
     
-    setGeneratedProductViews(newProductViews);
     setIsGenerating(true);
     
-    setTimeout(() => {
+    setTimeout(async () => {
       setIsGenerating(false);
       setHasGeneratedPhotos(true);
       setShowShotSuggestions(false);
+      
+      if (currentSessionId) {
+        // Save generated photos to database
+        const photosToSave = newProductViews.flatMap(view => 
+          view.variants.map((url, index) => ({
+            view_name: view.viewName,
+            variant_index: index,
+            image_url: url,
+            approval_status: 'pending' as const
+          }))
+        );
+        
+        saveGeneratedPhotos({
+          sessionId: currentSessionId,
+          photos: photosToSave
+        });
+        
+        // Update session status
+        updateSession({
+          sessionId: currentSessionId,
+          updates: { status: 'reviewing' }
+        });
+      }
+      
       toast({
         title: "Images generated",
         description: "Your product photos have been generated successfully!",
       });
     }, 2000);
+  };
+
+  const handleApprovePhoto = (photoId: string) => {
+    updatePhotoApproval({ photoId, status: 'approved' });
+  };
+
+  const handleRejectPhoto = (photoId: string) => {
+    updatePhotoApproval({ photoId, status: 'rejected' });
+  };
+
+  const handleUnapprovePhoto = (photoId: string) => {
+    updatePhotoApproval({ photoId, status: 'pending' });
   };
 
   const canGeneratePhotos = selectedProducts.length > 0 && finalPrompt.trim();
@@ -220,6 +421,14 @@ const ProductPhotoShoot = () => {
       <div className="bg-[--p-background] min-h-[calc(100vh-129px)] flex">
         {/* Left Content Panel */}
         <div className="flex-1 mr-[400px] p-5 space-y-6">
+          
+          {/* Session Recovery */}
+          <SessionRecovery
+            sessions={sessions}
+            onContinueSession={handleContinueSession}
+            onStartNew={handleStartNewSession}
+            isLoading={sessionsLoading}
+          />
           
           {/* Product Selection Section */}
           <Card className="bg-[--p-surface] shadow-sm border border-[#E3E5E7] rounded-md">
@@ -352,9 +561,13 @@ const ProductPhotoShoot = () => {
         {/* Right Preview Panel */}
         <PhotoReviewPanel 
           selectedProduct={selectedProducts[0]}
-          productViews={generatedProductViews}
+          productViews={productViews}
+          generatedPhotos={generatedPhotos}
           isGenerating={isGenerating}
           hasGeneratedPhotos={hasGeneratedPhotos}
+          onApprovePhoto={handleApprovePhoto}
+          onRejectPhoto={handleRejectPhoto}
+          onUnapprovePhoto={handleUnapprovePhoto}
         />
       </div>
     </div>
