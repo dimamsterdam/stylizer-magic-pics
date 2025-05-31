@@ -4,7 +4,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { ProductPicker } from "@/components/ProductPicker";
 import { supabase } from "@/integrations/supabase/client";
-import { Loader2, WandSparkles } from "lucide-react";
+import { Loader2, WandSparkles, Camera } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
@@ -261,7 +261,55 @@ const ProductPhotoShoot = () => {
     }
   };
 
-  const handleGeneratePhotos = async () => {
+  const handleStandardStudioShoot = async () => {
+    // Use standard product views for studio shoot
+    const standardViews = standardProductViews.map(view => view.viewName);
+    
+    if (currentSessionId) {
+      updateSession({
+        sessionId: currentSessionId,
+        updates: {
+          selected_prompts: standardViews,
+          status: 'generating'
+        }
+      });
+    }
+    
+    setIsGenerating(true);
+    
+    setTimeout(async () => {
+      setIsGenerating(false);
+      setHasGeneratedPhotos(true);
+      
+      if (currentSessionId) {
+        const photosToSave = standardProductViews.flatMap(view => 
+          view.variants.map((url, index) => ({
+            view_name: view.viewName,
+            variant_index: index,
+            image_url: url,
+            approval_status: 'pending' as const
+          }))
+        );
+        
+        saveGeneratedPhotos({
+          sessionId: currentSessionId,
+          photos: photosToSave
+        });
+        
+        updateSession({
+          sessionId: currentSessionId,
+          updates: { status: 'reviewing' }
+        });
+      }
+      
+      toast({
+        title: "Images generated",
+        description: "Your standard studio photos have been generated successfully!",
+      });
+    }, 2000);
+  };
+
+  const handleSuggestShots = async () => {
     setShowShotSuggestions(true);
   };
 
@@ -417,9 +465,9 @@ const ProductPhotoShoot = () => {
                   onFinalize={handlePromptFinalize} 
                 />
 
-                <div className="flex justify-end pt-4">
+                <div className="flex justify-end gap-3 pt-4">
                   <Button 
-                    onClick={handleGeneratePhotos} 
+                    onClick={handleStandardStudioShoot} 
                     disabled={!canGeneratePhotos || isGenerating} 
                     variant="primary"
                   >
@@ -430,10 +478,19 @@ const ProductPhotoShoot = () => {
                       </>
                     ) : (
                       <>
-                        <WandSparkles className="mr-2 h-4 w-4" />
-                        Generate Photos
+                        <Camera className="mr-2 h-4 w-4" />
+                        Standard Studio Shoot
                       </>
                     )}
+                  </Button>
+                  
+                  <Button 
+                    onClick={handleSuggestShots} 
+                    disabled={!canGeneratePhotos || isGenerating} 
+                    variant="plain"
+                  >
+                    <WandSparkles className="mr-2 h-4 w-4" />
+                    Suggest Shots
                   </Button>
                 </div>
               </CardContent>
