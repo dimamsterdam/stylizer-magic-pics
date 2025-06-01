@@ -157,7 +157,6 @@ const ProductPhotoShoot = () => {
       
       if (currentSession.status === 'reviewing' || currentSession.status === 'completed') {
         console.log('Setting hasGeneratedPhotos to true from session status');
-        setHasGeneratedPhotos(true);
       }
     }
   }, [currentSession]);
@@ -166,7 +165,6 @@ const ProductPhotoShoot = () => {
   useEffect(() => {
     if (generatedPhotos && generatedPhotos.length > 0) {
       console.log('Found generated photos in database, setting hasGeneratedPhotos to true');
-      setHasGeneratedPhotos(true);
     }
   }, [generatedPhotos]);
 
@@ -277,7 +275,6 @@ const ProductPhotoShoot = () => {
       setSelectedProducts([]);
       setFinalPrompt('');
       setCurrentSessionId(null);
-      setHasGeneratedPhotos(false);
       setShowShotSuggestions(false);
       form.reset();
     }
