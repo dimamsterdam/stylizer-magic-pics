@@ -1,8 +1,6 @@
 
-import React, { useState } from 'react';
-import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
-import { Star, Users, ChevronLeft, ChevronRight } from "lucide-react";
+import React from 'react';
+import { Star, Users } from "lucide-react";
 
 interface Model {
   id: string;
@@ -24,34 +22,6 @@ export const FashionModelsPreviewPanel = ({
   isGenerating,
   onStarModel
 }: FashionModelsPreviewPanelProps) => {
-  const [currentModelIndex, setCurrentModelIndex] = useState(0);
-
-  const currentModel = models[currentModelIndex];
-
-  const handleNextModel = () => {
-    if (currentModelIndex < models.length - 1) {
-      setCurrentModelIndex(currentModelIndex + 1);
-    }
-  };
-
-  const handlePrevModel = () => {
-    if (currentModelIndex > 0) {
-      setCurrentModelIndex(currentModelIndex - 1);
-    }
-  };
-
-  const handleStarClick = () => {
-    if (currentModel) {
-      onStarModel(currentModel);
-      // Move to next model if available
-      if (currentModelIndex < models.length - 1) {
-        setCurrentModelIndex(currentModelIndex + 1);
-      } else if (currentModelIndex > 0) {
-        setCurrentModelIndex(currentModelIndex - 1);
-      }
-    }
-  };
-
   const renderContent = () => {
     if (isGenerating) {
       return (
@@ -79,98 +49,37 @@ export const FashionModelsPreviewPanel = ({
       );
     }
 
-    if (currentModel) {
-      return (
-        <div className="flex flex-col h-full">
-          {/* Header */}
-          <div className="p-4 border-b border-[#E3E5E7]">
-            <h3 className="font-medium text-[--p-text] mb-1">
-              {currentModel.name}
-            </h3>
-            <p className="text-sm text-[--p-text-subdued]">
-              {currentModelIndex + 1} of {models.length} • {currentModel.gender}
-            </p>
-          </div>
-
-          {/* Model Image */}
-          <div className="flex-1 p-4">
-            <div className="relative">
-              {currentModel.imageUrl ? (
+    return (
+      <div className="grid grid-cols-2 gap-4 p-4">
+        {models.map((model) => (
+          <div key={model.id} className="relative group cursor-pointer" onClick={() => onStarModel(model)}>
+            <div className="aspect-[3/4] bg-gray-200 rounded-lg overflow-hidden">
+              {model.imageUrl ? (
                 <img
-                  src={currentModel.imageUrl}
-                  alt={currentModel.name}
-                  className="w-full h-auto rounded-lg max-h-96 object-cover mx-auto"
+                  src={model.imageUrl}
+                  alt={model.name}
+                  className="w-full h-full object-cover"
                   onError={(e) => {
                     e.currentTarget.src = '/placeholder.svg';
                   }}
                 />
               ) : (
-                <div className="w-full h-64 bg-gray-200 rounded-lg flex items-center justify-center">
+                <div className="w-full h-full flex items-center justify-center">
                   <Users className="h-16 w-16 text-gray-400" />
                 </div>
               )}
             </div>
             
-            {/* Description */}
-            <div className="mt-4">
-              <p className="text-sm text-[--p-text]">{currentModel.description}</p>
-            </div>
-          </div>
-
-          {/* Navigation */}
-          <div className="p-4 border-t border-[#E3E5E7]">
-            <div className="flex justify-between items-center mb-4">
-              <Button
-                variant="outline"
-                size="sm"
-                disabled={currentModelIndex === 0}
-                onClick={handlePrevModel}
-              >
-                <ChevronLeft className="h-4 w-4 mr-1" />
-                Previous
-              </Button>
-              
-              <div className="flex gap-1">
-                {models.map((_, index) => (
-                  <button
-                    key={index}
-                    className={`w-2 h-2 rounded-full ${
-                      currentModelIndex === index
-                        ? 'bg-[#2C6ECB]'
-                        : 'bg-gray-300'
-                    }`}
-                    onClick={() => setCurrentModelIndex(index)}
-                  />
-                ))}
+            {/* Star overlay */}
+            <div className="absolute top-2 right-2">
+              <div className="bg-white/80 backdrop-blur-sm rounded-full p-1.5 hover:bg-white/90 transition-colors">
+                <Star className="h-5 w-5 text-gray-400 hover:text-yellow-500 transition-colors" />
               </div>
-
-              <Button
-                variant="outline"
-                size="sm"
-                disabled={currentModelIndex === models.length - 1}
-                onClick={handleNextModel}
-              >
-                Next
-                <ChevronRight className="h-4 w-4 ml-1" />
-              </Button>
             </div>
-
-            {/* Star Button */}
-            <Button
-              variant="primary"
-              size="lg"
-              onClick={handleStarClick}
-              className="w-full bg-yellow-500 hover:bg-yellow-600 text-white"
-            >
-              <Star className="mr-2 h-5 w-5" />
-              Star Model
-            </Button>
           </div>
-        </div>
-      );
-    }
-
-    return null;
+        ))}
+      </div>
+    );
   };
 
   return (
