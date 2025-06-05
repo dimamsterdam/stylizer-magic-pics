@@ -1,34 +1,26 @@
+
 import React, { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
-import FashionModelsSection from "@/components/FashionModelsSection";
-import { BrandIdentity } from "@/types/brandTypes";
 import { PageHeader } from "@/components/ui/page-header";
-import { Users, Plus, UserCircle2, Globe } from "lucide-react";
+import { Users, UserCircle2 } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
-
-const raceOptions = [
-  { label: "Any", value: "any" },
-  { label: "Asian", value: "Asian" },
-  { label: "Black", value: "Black" },
-  { label: "Caucasian", value: "Caucasian" },
-  { label: "Hispanic", value: "Hispanic" },
-  { label: "Middle Eastern", value: "Middle Eastern" },
-  { label: "Mixed", value: "Mixed" },
-];
+import { FashionModelsPreviewPanel } from "@/components/fashion/FashionModelsPreviewPanel";
+import { StarredModelsTable } from "@/components/fashion/StarredModelsTable";
+import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from "@/components/ui/resizable";
 
 const FashionModels = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
-  const [genderFilter, setGenderFilter] = useState<string>("Female");
-  const [raceFilter, setRaceFilter] = useState<string>("any");
+  const [selectedGender, setSelectedGender] = useState<string>("");
   const [isGenerating, setIsGenerating] = useState(false);
+  const [generatedModels, setGeneratedModels] = useState<any[]>([]);
+  const [starredModels, setStarredModels] = useState<any[]>([]);
 
   const { data: brandIdentity, isLoading } = useQuery({
     queryKey: ['brandIdentity'],
@@ -57,13 +49,7 @@ const FashionModels = () => {
         throw new Error("No brand identity found");
       }
       
-      // Cast JSON data to our type
-      const typedData = {
-        ...data,
-        brand_models: data.brand_models ? data.brand_models.map((model: any) => model as any) : []
-      } as BrandIdentity;
-      
-      return typedData;
+      return data;
     },
     meta: {
       onError: (error: Error) => {
@@ -73,7 +59,7 @@ const FashionModels = () => {
         } else if (error.message !== "No brand identity found") {
           toast({
             title: "Error",
-            description: "Failed to load brand models",
+            description: "Failed to load brand identity",
             variant: "destructive"
           });
         }
@@ -92,9 +78,91 @@ const FashionModels = () => {
     }
   ];
 
-  const handleGenerateClick = () => {
+  const handleGenerateModels = async () => {
+    if (!selectedGender || !brandIdentity) return;
+    
     setIsGenerating(true);
-    // This will be handled by the FashionModelsSection component's generate logic
+    
+    try {
+      const { data, error } = await supabase.functions.invoke('generate-fashion-models', {
+        body: {
+          brandIdentity: {
+            brand_name: brandIdentity.brand_name,
+            values: brandIdentity.values || [],
+            characteristics: brandIdentity.characteristics || [],
+            age_range_min: brandIdentity.age_range_min || 18,
+            age_range_max: brandIdentity.age_range_max || 65,
+            gender: brandIdentity.gender || 'all',
+            income_level: brandIdentity.income_level || 'medium'
+          },
+          modelGender: selectedGender,
+          count: 10
+        }
+      });
+
+      if (error) throw error;
+      
+      // Add generated names and process the models
+      const modelsWithNames = data.map((model: any) => ({
+        ...model,
+        name: generateRandomName(selectedGender),
+        gender: selectedGender,
+        starred: false
+      }));
+      
+      setGeneratedModels(modelsWithNames);
+      
+      toast({
+        title: "Success",
+        description: "Fashion models have been generated"
+      });
+    } catch (error) {
+      console.error('Error generating fashion models:', error);
+      toast({
+        title: "Error",
+        description: "Failed to generate fashion models",
+        variant: "destructive"
+      });
+    } finally {
+      setIsGenerating(false);
+    }
+  };
+
+  const generateRandomName = (gender: string) => {
+    const femaleNames = ['Emma', 'Olivia', 'Ava', 'Isabella', 'Sophia', 'Mia', 'Charlotte', 'Amelia', 'Harper', 'Evelyn'];
+    const maleNames = ['Liam', 'Noah', 'Oliver', 'Elijah', 'William', 'James', 'Benjamin', 'Lucas', 'Henry', 'Alexander'];
+    
+    const names = gender.toLowerCase() === 'female' ? femaleNames : maleNames;
+    return names[Math.floor(Math.random() * names.length)];
+  };
+
+  const handleStarModel = (model: any) => {
+    // Remove from generated models
+    setGeneratedModels(prev => prev.filter(m => m.id !== model.id));
+    
+    // Add to starred models
+    setStarredModels(prev => [...prev, { ...model, starred: true }]);
+    
+    toast({
+      title: "Model starred",
+      description: `${model.name} has been added to your starred models`
+    });
+  };
+
+  const handleUnstarModel = (modelId: string) => {
+    const modelToUnstar = starredModels.find(m => m.id === modelId);
+    if (modelToUnstar) {
+      // Remove from starred models
+      setStarredModels(prev => prev.filter(m => m.id !== modelId));
+      
+      // Add back to generated models
+      setGeneratedModels(prev => [...prev, { ...modelToUnstar, starred: false }]);
+      
+      toast({
+        title: "Model unstarred",
+        description: `${modelToUnstar.name} has been removed from your starred models`
+      });
+    }
   };
 
   if (isLoading) {
@@ -114,11 +182,11 @@ const FashionModels = () => {
   }
 
   if (!brandIdentity) {
-    return null; // Navigation will occur due to the query
+    return null;
   }
 
   return (
-    <div className="w-full">
+    <div className="w-full h-screen flex flex-col">
       <PageHeader
         title="Fashion Models"
         description="Create and manage fashion models that represent your brand identity"
@@ -126,75 +194,66 @@ const FashionModels = () => {
         breadcrumbs={breadcrumbItems}
       />
       
-      <div className="px-6 pb-6">
-        <Card className="mb-6 border-polaris-border shadow-sm">
-          <CardContent className="pt-6">
-            <div className="flex flex-col md:flex-row gap-6 items-start md:items-end">
-              <div className="space-y-4 flex-grow">
-                <div>
-                  <div className="flex items-center gap-2 mb-2">
-                    <UserCircle2 className="h-5 w-5 text-polaris-text-subdued" />
-                    <h3 className="text-polaris-text font-medium">Gender</h3>
-                  </div>
-                  <RadioGroup
-                    value={genderFilter}
-                    onValueChange={setGenderFilter}
-                    className="flex items-center space-x-4"
-                  >
-                    <div className="flex items-center space-x-2">
-                      <RadioGroupItem value="Female" id="female" />
-                      <Label htmlFor="female">Female</Label>
+      <div className="flex-1 overflow-hidden">
+        <ResizablePanelGroup direction="horizontal" className="h-full">
+          <ResizablePanel defaultSize={60} minSize={40}>
+            <div className="h-full overflow-auto p-6 space-y-6">
+              <Card className="border-polaris-border shadow-sm">
+                <CardContent className="pt-6">
+                  <div className="space-y-4">
+                    <div>
+                      <div className="flex items-center gap-2 mb-3">
+                        <UserCircle2 className="h-5 w-5 text-polaris-text-subdued" />
+                        <h3 className="text-polaris-text font-medium">Select Gender</h3>
+                      </div>
+                      <RadioGroup
+                        value={selectedGender}
+                        onValueChange={setSelectedGender}
+                        className="flex items-center space-x-6"
+                      >
+                        <div className="flex items-center space-x-2">
+                          <RadioGroupItem value="Female" id="female" />
+                          <Label htmlFor="female">Female</Label>
+                        </div>
+                        <div className="flex items-center space-x-2">
+                          <RadioGroupItem value="Male" id="male" />
+                          <Label htmlFor="male">Male</Label>
+                        </div>
+                      </RadioGroup>
                     </div>
-                    <div className="flex items-center space-x-2">
-                      <RadioGroupItem value="Male" id="male" />
-                      <Label htmlFor="male">Male</Label>
-                    </div>
-                  </RadioGroup>
-                </div>
-                
-                <div>
-                  <div className="flex items-center gap-2 mb-2">
-                    <Globe className="h-5 w-5 text-polaris-text-subdued" />
-                    <h3 className="text-polaris-text font-medium">Ethnicity</h3>
+                    
+                    <Button
+                      variant="primary"
+                      size="lg"
+                      onClick={handleGenerateModels}
+                      disabled={!selectedGender || isGenerating}
+                      className="w-full"
+                    >
+                      {isGenerating ? "Generating Models..." : "Generate Models"}
+                    </Button>
                   </div>
-                  <Select value={raceFilter} onValueChange={setRaceFilter}>
-                    <SelectTrigger className="w-[160px]">
-                      <SelectValue placeholder="Any ethnicity" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {raceOptions.map(option => (
-                        <SelectItem key={option.value} value={option.value}>
-                          {option.label}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-              </div>
-              
-              <Button
-                variant="primary"
-                size="lg"
-                onClick={handleGenerateClick}
-                className="w-full md:w-auto"
-              >
-                <Plus className="h-5 w-5" />
-                Generate Models
-              </Button>
+                </CardContent>
+              </Card>
+
+              {starredModels.length > 0 && (
+                <StarredModelsTable 
+                  models={starredModels}
+                  onUnstar={handleUnstarModel}
+                />
+              )}
             </div>
-          </CardContent>
-        </Card>
-        
-        {brandIdentity && (
-          <FashionModelsSection 
-            brandIdentity={brandIdentity} 
-            standalone={true} 
-            initialGenderFilter={genderFilter}
-            initialRaceFilter={raceFilter}
-            isGenerateTriggered={isGenerating}
-            onGenerateComplete={() => setIsGenerating(false)}
-          />
-        )}
+          </ResizablePanel>
+          
+          <ResizableHandle withHandle />
+          
+          <ResizablePanel defaultSize={40} minSize={30}>
+            <FashionModelsPreviewPanel
+              models={generatedModels}
+              isGenerating={isGenerating}
+              onStarModel={handleStarModel}
+            />
+          </ResizablePanel>
+        </ResizablePanelGroup>
       </div>
     </div>
   );
