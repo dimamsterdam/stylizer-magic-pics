@@ -2,8 +2,9 @@
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Switch } from "@/components/ui/switch";
-import { Star, Users } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Star, Users, Trash } from "lucide-react";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 
 interface Model {
   id: string;
@@ -17,14 +18,18 @@ interface Model {
 
 interface StarredModelsTableProps {
   models: Model[];
-  onToggleStatus: (modelId: string, archived: boolean) => void;
+  onDeleteModel: (modelId: string) => void;
   onImageClick: (model: Model) => void;
+  showPlanLimitWarning: boolean;
+  onUpgrade: () => void;
 }
 
 export const StarredModelsTable = ({
   models,
-  onToggleStatus,
-  onImageClick
+  onDeleteModel,
+  onImageClick,
+  showPlanLimitWarning,
+  onUpgrade
 }: StarredModelsTableProps) => {
   if (models.length === 0) {
     return null;
@@ -37,6 +42,20 @@ export const StarredModelsTable = ({
           <Star className="h-5 w-5 text-yellow-500" />
           Your Star Models ({models.length})
         </CardTitle>
+        {showPlanLimitWarning && (
+          <Alert className="bg-yellow-50 border-yellow-200">
+            <AlertDescription className="text-yellow-800">
+              You have reached the maximum number of models of your plan. Please{' '}
+              <button 
+                onClick={onUpgrade}
+                className="underline hover:no-underline text-yellow-800 font-medium"
+              >
+                upgrade
+              </button>
+              {' '}to add more.
+            </AlertDescription>
+          </Alert>
+        )}
       </CardHeader>
       <CardContent>
         <Table>
@@ -45,7 +64,7 @@ export const StarredModelsTable = ({
               <TableHead className="w-16">Image</TableHead>
               <TableHead>Name</TableHead>
               <TableHead>Gender</TableHead>
-              <TableHead className="w-24">Status</TableHead>
+              <TableHead className="w-16">Delete</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -73,15 +92,14 @@ export const StarredModelsTable = ({
                 <TableCell className="font-medium">{model.name}</TableCell>
                 <TableCell className="text-polaris-text-subdued capitalize">{model.gender}</TableCell>
                 <TableCell>
-                  <div className="flex items-center space-x-2">
-                    <Switch
-                      checked={!model.archived}
-                      onCheckedChange={(checked) => onToggleStatus(model.id, !checked)}
-                    />
-                    <span className={`text-sm ${!model.archived ? 'text-green-600' : 'text-gray-500'}`}>
-                      {!model.archived ? 'Active' : 'Archived'}
-                    </span>
-                  </div>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => onDeleteModel(model.id)}
+                    className="h-8 w-8 text-gray-500 hover:text-red-500 hover:bg-red-50"
+                  >
+                    <Trash className="h-4 w-4" />
+                  </Button>
                 </TableCell>
               </TableRow>
             ))}

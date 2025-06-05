@@ -12,7 +12,6 @@ import { Button } from "@/components/ui/button";
 import { FashionModelsPreviewPanel } from "@/components/fashion/FashionModelsPreviewPanel";
 import { StarredModelsTable } from "@/components/fashion/StarredModelsTable";
 import { ModelImageModal } from "@/components/fashion/ModelImageModal";
-import { PlanLimitModal } from "@/components/fashion/PlanLimitModal";
 import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from "@/components/ui/resizable";
 
 const FashionModels = () => {
@@ -24,7 +23,6 @@ const FashionModels = () => {
   const [starredModels, setStarredModels] = useState<any[]>([]);
   const [selectedModel, setSelectedModel] = useState<any>(null);
   const [isImageModalOpen, setIsImageModalOpen] = useState(false);
-  const [isPlanLimitModalOpen, setIsPlanLimitModalOpen] = useState(false);
 
   const { data: brandIdentity, isLoading } = useQuery({
     queryKey: ['brandIdentity'],
@@ -144,7 +142,7 @@ const FashionModels = () => {
     // Check if adding this model would exceed the limit
     const activeStarredModels = starredModels.filter(m => !m.archived);
     if (activeStarredModels.length >= 3) {
-      setIsPlanLimitModalOpen(true);
+      // Don't add the model, the warning will be shown in the table
       return;
     }
 
@@ -157,18 +155,14 @@ const FashionModels = () => {
     });
   };
 
-  const handleToggleModelStatus = (modelId: string, archived: boolean) => {
-    setStarredModels(prev => 
-      prev.map(model => 
-        model.id === modelId ? { ...model, archived } : model
-      )
-    );
-    
+  const handleDeleteModel = (modelId: string) => {
     const model = starredModels.find(m => m.id === modelId);
+    setStarredModels(prev => prev.filter(m => m.id !== modelId));
+    
     if (model) {
       toast({
-        title: archived ? "Model archived" : "Model activated",
-        description: `${model.name} has been ${archived ? 'archived' : 'activated'}`
+        title: "Model deleted",
+        description: `${model.name} has been removed from your starred models`
       });
     }
   };
@@ -179,7 +173,6 @@ const FashionModels = () => {
   };
 
   const handleUpgrade = () => {
-    setIsPlanLimitModalOpen(false);
     // Navigate to upgrade page or show upgrade options
     toast({
       title: "Upgrade feature",
@@ -206,6 +199,9 @@ const FashionModels = () => {
   if (!brandIdentity) {
     return null;
   }
+
+  const activeStarredModels = starredModels.filter(m => !m.archived);
+  const showPlanLimitWarning = activeStarredModels.length >= 3;
 
   return (
     <div className="w-full h-screen flex flex-col">
@@ -260,8 +256,10 @@ const FashionModels = () => {
               {starredModels.length > 0 && (
                 <StarredModelsTable 
                   models={starredModels}
-                  onToggleStatus={handleToggleModelStatus}
+                  onDeleteModel={handleDeleteModel}
                   onImageClick={handleImageClick}
+                  showPlanLimitWarning={showPlanLimitWarning}
+                  onUpgrade={handleUpgrade}
                 />
               )}
             </div>
@@ -284,12 +282,6 @@ const FashionModels = () => {
         model={selectedModel}
         isOpen={isImageModalOpen}
         onClose={() => setIsImageModalOpen(false)}
-      />
-
-      <PlanLimitModal
-        isOpen={isPlanLimitModalOpen}
-        onClose={() => setIsPlanLimitModalOpen(false)}
-        onUpgrade={handleUpgrade}
       />
     </div>
   );
