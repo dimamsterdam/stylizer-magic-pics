@@ -1,9 +1,9 @@
 
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Star, Archive, Users } from "lucide-react";
+import { Switch } from "@/components/ui/switch";
+import { Star, Users } from "lucide-react";
 
 interface Model {
   id: string;
@@ -12,16 +12,19 @@ interface Model {
   imageUrl: string | null;
   gender: string;
   starred: boolean;
+  archived?: boolean;
 }
 
 interface StarredModelsTableProps {
   models: Model[];
-  onUnstar: (modelId: string) => void;
+  onToggleStatus: (modelId: string, archived: boolean) => void;
+  onImageClick: (model: Model) => void;
 }
 
 export const StarredModelsTable = ({
   models,
-  onUnstar
+  onToggleStatus,
+  onImageClick
 }: StarredModelsTableProps) => {
   if (models.length === 0) {
     return null;
@@ -42,14 +45,17 @@ export const StarredModelsTable = ({
               <TableHead className="w-16">Image</TableHead>
               <TableHead>Name</TableHead>
               <TableHead>Gender</TableHead>
-              <TableHead className="w-24">Actions</TableHead>
+              <TableHead className="w-24">Status</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {models.map((model) => (
               <TableRow key={model.id}>
                 <TableCell>
-                  <div className="w-12 h-12 rounded-lg overflow-hidden bg-gray-200 flex items-center justify-center">
+                  <div 
+                    className="w-12 h-12 rounded-lg overflow-hidden bg-gray-200 flex items-center justify-center cursor-pointer hover:opacity-75 transition-opacity"
+                    onClick={() => onImageClick(model)}
+                  >
                     {model.imageUrl ? (
                       <img
                         src={model.imageUrl}
@@ -65,16 +71,17 @@ export const StarredModelsTable = ({
                   </div>
                 </TableCell>
                 <TableCell className="font-medium">{model.name}</TableCell>
-                <TableCell className="text-polaris-text-subdued">{model.gender}</TableCell>
+                <TableCell className="text-polaris-text-subdued capitalize">{model.gender}</TableCell>
                 <TableCell>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => onUnstar(model.id)}
-                    className="h-8 w-8 p-0"
-                  >
-                    <Star className="h-4 w-4 text-yellow-500 fill-yellow-500" />
-                  </Button>
+                  <div className="flex items-center space-x-2">
+                    <Switch
+                      checked={!model.archived}
+                      onCheckedChange={(checked) => onToggleStatus(model.id, !checked)}
+                    />
+                    <span className={`text-sm ${!model.archived ? 'text-green-600' : 'text-gray-500'}`}>
+                      {!model.archived ? 'Active' : 'Archived'}
+                    </span>
+                  </div>
                 </TableCell>
               </TableRow>
             ))}

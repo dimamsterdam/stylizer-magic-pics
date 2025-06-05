@@ -15,12 +15,14 @@ interface FashionModelsPreviewPanelProps {
   models: Model[];
   isGenerating: boolean;
   onStarModel: (model: Model) => void;
+  onImageClick: (model: Model) => void;
 }
 
 export const FashionModelsPreviewPanel = ({
   models,
   isGenerating,
-  onStarModel
+  onStarModel,
+  onImageClick
 }: FashionModelsPreviewPanelProps) => {
   const renderContent = () => {
     if (isGenerating) {
@@ -52,13 +54,16 @@ export const FashionModelsPreviewPanel = ({
     return (
       <div className="grid grid-cols-2 gap-4 p-4">
         {models.map((model) => (
-          <div key={model.id} className="relative group cursor-pointer" onClick={() => onStarModel(model)}>
-            <div className="aspect-[3/4] bg-gray-200 rounded-lg overflow-hidden">
+          <div key={model.id} className="relative group">
+            <div 
+              className="aspect-[3/4] bg-gray-200 rounded-lg overflow-hidden cursor-pointer"
+              onClick={() => onImageClick(model)}
+            >
               {model.imageUrl ? (
                 <img
                   src={model.imageUrl}
                   alt={model.name}
-                  className="w-full h-full object-cover"
+                  className="w-full h-full object-cover hover:scale-105 transition-transform duration-200"
                   onError={(e) => {
                     e.currentTarget.src = '/placeholder.svg';
                   }}
@@ -72,7 +77,13 @@ export const FashionModelsPreviewPanel = ({
             
             {/* Star overlay */}
             <div className="absolute top-2 right-2">
-              <div className="bg-white/80 backdrop-blur-sm rounded-full p-1.5 hover:bg-white/90 transition-colors">
+              <div 
+                className="bg-white/80 backdrop-blur-sm rounded-full p-1.5 hover:bg-white/90 transition-colors cursor-pointer"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onStarModel(model);
+                }}
+              >
                 <Star className="h-5 w-5 text-gray-400 hover:text-yellow-500 transition-colors" />
               </div>
             </div>

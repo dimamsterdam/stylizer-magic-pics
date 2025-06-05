@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -12,6 +11,8 @@ import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { FashionModelsPreviewPanel } from "@/components/fashion/FashionModelsPreviewPanel";
 import { StarredModelsTable } from "@/components/fashion/StarredModelsTable";
+import { ModelImageModal } from "@/components/fashion/ModelImageModal";
+import { PlanLimitModal } from "@/components/fashion/PlanLimitModal";
 import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from "@/components/ui/resizable";
 
 const FashionModels = () => {
@@ -21,6 +22,9 @@ const FashionModels = () => {
   const [isGenerating, setIsGenerating] = useState(false);
   const [generatedModels, setGeneratedModels] = useState<any[]>([]);
   const [starredModels, setStarredModels] = useState<any[]>([]);
+  const [selectedModel, setSelectedModel] = useState<any>(null);
+  const [isImageModalOpen, setIsImageModalOpen] = useState(false);
+  const [isPlanLimitModalOpen, setIsPlanLimitModalOpen] = useState(false);
 
   const { data: brandIdentity, isLoading } = useQuery({
     queryKey: ['brandIdentity'],
@@ -102,12 +106,12 @@ const FashionModels = () => {
 
       if (error) throw error;
       
-      // Add generated names and process the models
       const modelsWithNames = data.map((model: any) => ({
         ...model,
         name: generateRandomName(selectedGender),
         gender: selectedGender,
-        starred: false
+        starred: false,
+        archived: false
       }));
       
       setGeneratedModels(modelsWithNames);
@@ -137,11 +141,15 @@ const FashionModels = () => {
   };
 
   const handleStarModel = (model: any) => {
-    // Remove from generated models
+    // Check if adding this model would exceed the limit
+    const activeStarredModels = starredModels.filter(m => !m.archived);
+    if (activeStarredModels.length >= 3) {
+      setIsPlanLimitModalOpen(true);
+      return;
+    }
+
     setGeneratedModels(prev => prev.filter(m => m.id !== model.id));
-    
-    // Add to starred models
-    setStarredModels(prev => [...prev, { ...model, starred: true }]);
+    setStarredModels(prev => [...prev, { ...model, starred: true, archived: false }]);
     
     toast({
       title: "Model starred",
@@ -149,20 +157,34 @@ const FashionModels = () => {
     });
   };
 
-  const handleUnstarModel = (modelId: string) => {
-    const modelToUnstar = starredModels.find(m => m.id === modelId);
-    if (modelToUnstar) {
-      // Remove from starred models
-      setStarredModels(prev => prev.filter(m => m.id !== modelId));
-      
-      // Add back to generated models
-      setGeneratedModels(prev => [...prev, { ...modelToUnstar, starred: false }]);
-      
+  const handleToggleModelStatus = (modelId: string, archived: boolean) => {
+    setStarredModels(prev => 
+      prev.map(model => 
+        model.id === modelId ? { ...model, archived } : model
+      )
+    );
+    
+    const model = starredModels.find(m => m.id === modelId);
+    if (model) {
       toast({
-        title: "Model unstarred",
-        description: `${modelToUnstar.name} has been removed from your starred models`
+        title: archived ? "Model archived" : "Model activated",
+        description: `${model.name} has been ${archived ? 'archived' : 'activated'}`
       });
     }
+  };
+
+  const handleImageClick = (model: any) => {
+    setSelectedModel(model);
+    setIsImageModalOpen(true);
+  };
+
+  const handleUpgrade = () => {
+    setIsPlanLimitModalOpen(false);
+    // Navigate to upgrade page or show upgrade options
+    toast({
+      title: "Upgrade feature",
+      description: "Upgrade functionality would be implemented here"
+    });
   };
 
   if (isLoading) {
@@ -238,7 +260,8 @@ const FashionModels = () => {
               {starredModels.length > 0 && (
                 <StarredModelsTable 
                   models={starredModels}
-                  onUnstar={handleUnstarModel}
+                  onToggleStatus={handleToggleModelStatus}
+                  onImageClick={handleImageClick}
                 />
               )}
             </div>
@@ -251,10 +274,23 @@ const FashionModels = () => {
               models={generatedModels}
               isGenerating={isGenerating}
               onStarModel={handleStarModel}
+              onImageClick={handleImageClick}
             />
           </ResizablePanel>
         </ResizablePanelGroup>
       </div>
+
+      <ModelImageModal
+        model={selectedModel}
+        isOpen={isImageModalOpen}
+        onClose={() => setIsImageModalOpen(false)}
+      />
+
+      <PlanLimitModal
+        isOpen={isPlanLimitModalOpen}
+        onClose={() => setIsPlanLimitModalOpen(false)}
+        onUpgrade={handleUpgrade}
+      />
     </div>
   );
 };
